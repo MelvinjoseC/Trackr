@@ -1,0 +1,290 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Attendance</title>-->
+<!--    {% load static %}-->
+<!--    <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">-->
+<!--    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">-->
+<!--</head>-->
+<!--<style>-->
+<!--body {-->
+<!--  background-image: url('https://wallpaperaccess.com/full/851203.jpg');-->
+<!--  background-repeat: no-repeat;-->
+<!--  background-attachment: fixed;-->
+<!--  background-size: cover;-->
+<!--}-->
+<!--</style>-->
+<!--<style>-->
+<!--    .custom-form-container {-->
+<!--        max-width: 500px; /* Adjust this value as needed */-->
+<!--    }-->
+<!--</style>-->
+<!--<body>-->
+<!--    <br><br>-->
+<!--    <a class="btn btn-success" href="{% url 'calendar' %}">Back</a>-->
+<!--    <div align="center" style="background-color: #98d3ee; max-width: 600px; border-radius: 8px;" class="container mt-5">-->
+<!--        <h1 class="text-center"><strong>ATTENDANCE</strong></h1>-->
+<!--        <form align="center" style="max-width: 500px; border-radius: 8px; background-color: rgb(255, 255, 255);" method="post" class="mt-4">-->
+<!--            {% csrf_token %}-->
+<!--            <br><br>-->
+<!--            <div class="form-group" style="background-color:#d9a5db; max-width: 400px; margin:auto; border-radius: 8px;">-->
+<!--                <label for="date">Date:</label>-->
+<!--                <input type="date" id="id_date" name="date" class="form-control" value="{{ form.date.value }}"><br>-->
+<!--            </div><br>-->
+<!--            <div class="form-group" style="background-color:#d9a5db; max-width: 400px; margin:auto; border-radius: 8px;">-->
+<!--                <label for="punchIn">Punch In:</label>-->
+<!--                <input type="time" id="id_punch_in" name="punch_in" class="form-control" value="{{ form.punch_in.value }}"><br>-->
+<!--            </div><br>-->
+<!--            <div class="form-group" style="background-color:#d9a5db; max-width: 400px; margin:auto; border-radius: 8px;">-->
+<!--                <label for="punchOut">Punch Out:</label>-->
+<!--                <input type="time" id="id_punch_out" name="punch_out" class="form-control" value="{{ form.punch_out.value }}"><br>-->
+<!--            </div><br>-->
+<!--            <div class="form-group" style="background-color:#d9a5db; max-width: 400px; margin:auto; border-radius: 8px;">-->
+<!--                <label for="breakTime">Break Time:</label>-->
+<!--                <input type="time" id="id_break_time" name="break_time" class="form-control" value="{{ form.break_time.value }}"><br>-->
+<!--            </div>-->
+<!--            <br>-->
+<!--            <div align="center" class="form-group" style="background-color:#d9a5db; max-width: 400px; margin:auto; border-radius: 8px;">-->
+<!--                <label for="worktime">Total Work Time (Hours):</label>-->
+<!--                <input style="max-width: 220px;" type="text" id="worktime" name="worktime" class="form-control" readonly><br>-->
+<!--            </div>-->
+<!--            <br>-->
+<!--            <div class="mt-2">-->
+<!--                <button style="max-width: 400px;" type="cancel" class="btn btn-secondary">CANCEL</button>-->
+<!--                <button style="max-width: 500px;" type="submit" class="btn btn-primary">Submit</button>-->
+<!--            </div>-->
+<!--            <br>-->
+<!--        </form>-->
+<!--&lt;!&ndash;        <h2 class="mt-5"><strong>ATTENDANCE RECORDS</strong></h2>&ndash;&gt;-->
+<!--&lt;!&ndash;        <ul class="list-group mt-3" style="max-width: 500px; border-radius: 8px;">&ndash;&gt;-->
+<!--&lt;!&ndash;            {% for attendance in attendances %}&ndash;&gt;-->
+<!--&lt;!&ndash;                <li class="list-group-item">&ndash;&gt;-->
+<!--&lt;!&ndash;                    {{ attendance.date }}: {{ attendance.worktime }} hours&ndash;&gt;-->
+<!--&lt;!&ndash;                    <div class="mt-2">&ndash;&gt;-->
+<!--&lt;!&ndash;                        <a href="{% url 'edit_attendance' attendance.pk %}" class="btn btn-warning btn-sm">Edit</a>&nbsp;&nbsp;&nbsp;&nbsp;&ndash;&gt;-->
+<!--&lt;!&ndash;                        <button onclick="confirmDelete('{% url 'delete_attendance' attendance.pk %}')" class="btn btn-danger btn-sm">Delete</button>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </div>&ndash;&gt;-->
+<!--&lt;!&ndash;                </li>&ndash;&gt;-->
+<!--&lt;!&ndash;            {% empty %}&ndash;&gt;-->
+<!--&lt;!&ndash;                <li class="list-group-item">No attendance records found.</li>&ndash;&gt;-->
+<!--&lt;!&ndash;            {% endfor %}&ndash;&gt;-->
+<!--&lt;!&ndash;        </ul>&ndash;&gt;-->
+<!--        <br>-->
+<!--    </div>-->
+<!--    <br>-->
+<!--    <script>-->
+<!--        document.addEventListener('DOMContentLoaded', function() {-->
+<!--            const punchInInput = document.getElementById('id_punch_in');-->
+<!--            const punchOutInput = document.getElementById('id_punch_out');-->
+<!--            const breakTimeInput = document.getElementById('id_break_time');-->
+<!--            const worktimeInput = document.getElementById('worktime');-->
+<!--            const dateInput = document.getElementById('id_date');-->
+
+<!--            // Set default date to today's date-->
+<!--            const today = new Date().toISOString().split('T')[0];-->
+<!--            dateInput.value = today;-->
+
+<!--            function calculateWorkTime() {-->
+<!--                const punchInTime = punchInInput.value;-->
+<!--                const punchOutTime = punchOutInput.value;-->
+<!--                const breakTime = breakTimeInput.value;-->
+
+<!--                if (punchInTime && punchOutTime && breakTime) {-->
+<!--                    const punchIn = new Date(`1970-01-01T${punchInTime}`);-->
+<!--                    const punchOut = new Date(`1970-01-01T${punchOutTime}`);-->
+
+<!--                    const [breakHours, breakMinutes] = breakTime.split(':').map(Number);-->
+<!--                    const breakDuration = (breakHours * 60 + breakMinutes) * 60 * 1000; // Convert break time to milliseconds-->
+
+<!--                    const workTime = (punchOut - punchIn - breakDuration) / (1000 * 60 * 60); // Calculate hours-->
+<!--                    if (workTime >= 0) {-->
+<!--                        worktimeInput.value = workTime.toFixed(2);-->
+<!--                    } else {-->
+<!--                        worktimeInput.value = '';-->
+<!--                    }-->
+<!--                }-->
+<!--            }-->
+
+<!--            punchInInput.addEventListener('change', calculateWorkTime);-->
+<!--            punchOutInput.addEventListener('change', calculateWorkTime);-->
+<!--            breakTimeInput.addEventListener('change', calculateWorkTime);-->
+
+<!--            calculateWorkTime(); // Calculate work time on page load-->
+<!--        });-->
+
+<!--        function confirmDelete(deleteUrl) {-->
+<!--            if (confirm('Are you sure you want to delete this record?')) {-->
+<!--                window.location.href = deleteUrl;-->
+<!--            }-->
+<!--        }-->
+<!--    </script>-->
+<!--    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>-->
+<!--    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance</title>
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a1a2e;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            background-color: #0f3460;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+        }
+
+        .form-control {
+
+            border: none;
+        }
+        .form-control::placeholder {
+            color: #ccc;
+        }
+        .form-control:focus {
+            background-color: #d13452;
+            color: black;
+            border: none;
+            box-shadow: none;
+        }
+        .btn-success:hover {
+            background-color: #162447;
+            border-color: #162447;
+        }
+        .text-center h1 {
+            color: #fff;
+        }
+    </style>
+</head>
+
+<br>
+<br>
+<br>
+<br>
+<body>
+    <div class="container">
+        <div class="text-center mb-4">
+            <a class="btn-back" href="{% url 'calendar' %}">
+                <img src="{% static 'images/BACK.png' %}" alt="Back" style="width:40px;height:40px;">
+            </a>
+            <h1>Attendance</h1>
+        </div>
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            {% if form.errors %}
+                <div class="error">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <p style="color:red;">{{ field.label }}: {{ error }}</p>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div class="form-group">
+                <label for="date">Date:</label>
+                <input type="date" id="id_date" name="date" class="form-control" value="{{ form.date.value }}">
+            </div>
+            <div class="form-group">
+                <label for="punchIn">Punch In:</label>
+                <input type="time" id="id_punch_in" name="punch_in" class="form-control" value="{{ form.punch_in.value }}">
+            </div>
+            <div class="form-group">
+                <label for="punchOut">Punch Out:</label>
+                <input type="time" id="id_punch_out" name="punch_out" class="form-control" value="{{ form.punch_out.value }}">
+            </div>
+            <div class="form-group">
+                <label for="breakTime">Break Time:</label>
+<!--                <input type="time" id="id_break_time" name="break_time" class="form-control" value="{{ form.break_time.value }}">-->
+                <input type="text" id="id_break_time" name="break_time" class="form-control" placeholder="HH:MM:SS" pattern="\d{2}:\d{2}:\d{2}" title="Format must be HH:MM:SS" required>
+
+            </div>
+            <div class="form-group">
+                <label for="worktime">Total Work Time (Hours):</label>
+                <input type="text" id="worktime" name="worktime" class="form-control" readonly>
+            </div>
+            <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-success">Submit</button>
+            </div>
+        </form>
+    </div>
+   <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const punchInInput = document.getElementById('id_punch_in');
+        const punchOutInput = document.getElementById('id_punch_out');
+        const breakTimeInput = document.getElementById('id_break_time');
+        const worktimeInput = document.getElementById('worktime');
+
+        function calculateWorkTime() {
+            const punchInTime = punchInInput.value;
+            const punchOutTime = punchOutInput.value;
+            const breakTime = breakTimeInput.value;
+
+            if (punchInTime && punchOutTime && breakTime) {
+                const punchIn = new Date(`1970-01-01T${punchInTime}`);
+                const punchOut = new Date(`1970-01-01T${punchOutTime}`);
+
+                // Handle H:M:S format
+                const breakTimeParts = breakTime.split(':');
+                let breakHours = 0, breakMinutes = 0, breakSeconds = 0;
+
+                if (breakTimeParts.length === 3) {
+                    breakHours = parseInt(breakTimeParts[0], 10);
+                    breakMinutes = parseInt(breakTimeParts[1], 10);
+                    breakSeconds = parseInt(breakTimeParts[2], 10);
+                } else if (breakTimeParts.length === 2) {
+                    breakMinutes = parseInt(breakTimeParts[0], 10);
+                    breakSeconds = parseInt(breakTimeParts[1], 10);
+                } else if (breakTimeParts.length === 1) {
+                    breakSeconds = parseInt(breakTimeParts[0], 10);
+                }
+
+                // Calculate break duration in milliseconds
+                const breakDuration = ((breakHours * 60 * 60) + (breakMinutes * 60) + breakSeconds) * 1000;
+
+                // Calculate total work time in hours, subtract break duration
+                const workTime = (punchOut - punchIn - breakDuration) / (1000 * 60 * 60); // Work time in hours
+
+                if (workTime >= 0) {
+                    const workHours = Math.floor(workTime);
+                    const workMinutes = Math.round((workTime % 1) * 60);
+                    worktimeInput.value = `${workHours} hr ${workMinutes} min`;
+                } else {
+                    worktimeInput.value = 'Invalid Time';
+                }
+            } else {
+                worktimeInput.value = '';
+            }
+        }
+
+        punchInInput.addEventListener('change', calculateWorkTime);
+        punchOutInput.addEventListener('change', calculateWorkTime);
+        breakTimeInput.addEventListener('change', calculateWorkTime);
+
+        calculateWorkTime(); // Calculate work time on page load
+    });
+</script>
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

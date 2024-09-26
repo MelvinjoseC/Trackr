@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Tracker</title>
+    {% load static %}
+<link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <br>
+    <br>
+    {% load static %}
+<a class="btn btn-default" href="{% url 'home' %}">
+    <img src="{% static 'images/HOME.png' %}" style="width:40px;height:40px;border-radius: 8px;">
+</a>
+    <div class="container mt-5">
+        <h1 class="text-center">Task Tracker</h1>
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="id_date">Date</label>
+                    <input type="date" id="id_date" name="date" class="form-control" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="id_description">Description</label>
+                    <textarea id="id_description" name="description" class="form-control" rows="3" required></textarea>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Submit</button>
+        </form>
+        <h2 class="mt-5 text-center">Tasks</h2>
+        <ul class="list-group mt-3">
+            {% for task in tasks %}
+                <li class="list-group-item">
+                    <strong>{{ task.date }}</strong> <br>
+                   <strong> Reason:</strong> {{ task.description }}
+                    <div class="mt-2">
+                        <a href="{% url 'edit_task' task.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="#" class="btn btn-danger btn-sm">Delete</a>
+                    </div>
+                </li>
+            {% empty %}
+                <li class="list-group-item text-center">No tasks found.</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

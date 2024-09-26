@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redeem Page</title>
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"> <!-- Font Awesome CSS -->
+    <style>
+        body {
+            background-color: #0d0c1d;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin-top:5%;
+            padding: 0;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sidebar {
+            background-color: #162447;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.1);
+            margin-right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 400px;
+        }
+
+        .sidebar a {
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+            display: block;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+            text-align: center;
+        }
+
+        .sidebar a:hover {
+            background-color: #1f4068;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 20px;
+        }
+
+        .container {
+            background-color: #0f3460;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.1);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 1700px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .form-group label {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .form-control {
+            background-color: #1f4068;
+            color: #fff;
+            border: none;
+        }
+
+        .form-control::placeholder {
+            color: #ccc;
+        }
+
+        .form-control:focus {
+            background-color: #1f4068;
+            color: #fff;
+            border: none;
+            box-shadow: none;
+        }
+
+        .btn-primary {
+            background-color: #e94560;
+            border-color: #e94560;
+        }
+
+        .btn-primary:hover {
+            background-color: #d13452;
+            border-color: #d13452;
+        }
+
+        .btn-secondary {
+            background-color: #162447;
+            border-color: #162447;
+        }
+
+        .btn-secondary:hover {
+            background-color: #1b3a57;
+            border-color: #1b3a57;
+        }
+
+        .details-box {
+            background-color: #1f4068;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .details-box h3 {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        .details-box p {
+            margin: 0;
+            font-size: 1.5rem;
+            height:20px;
+        }
+
+        .rectangle {
+            width: 150px;
+            height: 110px;
+            border-radius: 12px;
+            background-color: #1100ff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            margin: 20px;
+        }
+
+
+        .badge-pill {
+            color: black;
+            padding: 10px 20px;
+            border-radius: 50px;
+            margin: 5px 0;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .apply-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 50px;
+            background-color: #8e03ff;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .apply-btn:hover {
+            background-color: #d13452;
+        }
+
+        @media (max-width: 768px) {
+            .d-flex {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                margin-right: 0;
+                margin-bottom: 20px;
+                background: #380cff;
+            }
+        }
+        .h1 {
+            width: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="d-flex">
+        <div class="sidebar">
+            <a href="{% url 'main_leave_page' %}"><i class="fas fa-home"></i>  Main Page</a>
+            <h1 style="font-size: 2rem;">COMP LEAVE DETAILS</h1>
+            <div class="mt-3">
+                <div class="text-center">
+                    <div class="rectangle">
+                        <h2 id="fullDaysCount">{{ full_days }}</h2>
+                        <p>FULL DAYS</p>
+                    </div>
+                    <div class="rectangle">
+                        <h2 id="halfDaysCount">{{ half_days }}</h2>
+                        <p>HALF DAYS</p>
+                    </div>
+                    <div class="rectangle">
+                        <h2 id="totalCompCount">{{ total_comp }}</h2>
+                        <p>TOTAL COMP</p>
+                    </div>
+                </div>
+            </div>
+            <a href="{% url 'leave_application' %}"><i class="fas fa-sign-out-alt"></i> Leave</a>
+            <a href="{% url 'leave_applications' %}"><i class="fas fa-history"></i> History</a>
+            <a href="{% url 'holidays' %}"><i class="fas fa-calendar-alt"></i> Holidays</a>
+            <a href="{% url 'comp_leave_details' %}"><i class="fas fa-receipt"></i> Redeem</a>
+        </div>
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="btn-group">
+                    <button class="btn btn-dark" onclick="showUnredeemed()">View Unredeemed</button>
+                    <button class="btn btn-light" onclick="showRedeemed()">View Redeemed</button>
+                </div>
+            </div>
+
+            <div class="text-center mt-4 unredeemed-leaves-container">
+    <h3>Unredeemed Leaves</h3>
+    {% for leave in unredeemed_leaves %}
+        {% if not leave.is_redeemed %}
+            <div class="details-box" id="leave-{{ leave.id }}">
+                <h3>{{ leave.date }}</h3>
+                <p>{{ leave.worktime }} hours</p>
+                <p>{{ leave.full_day_or_half_day }}</p>
+                <button class="btn btn-primary" onclick="addToTotalCompensationLeave('{{ leave.id }}')">Add to Total Compensation Leave</button>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+<div class="text-center mt-4 redeemed-leaves-container" style="display: none;">
+    <h3>Redeemed Leaves</h3>
+    {% for leave in redeemed_leaves %}
+        <div class="details-box" id="redeemed-leave-{{ leave.id }}">
+            <h3>{{ leave.date }}</h3>
+            <p>{{ leave.worktime }} hours</p>
+            <p>{{ leave.full_day_or_half_day }}</p>
+            <p>REDEEMED</p>
+        </div>
+    {% endfor %}
+</div>
+
+        </div>
+    </div>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script> <!-- Font Awesome JS -->
+    <script>
+        function addToTotalCompensationLeave(leaveId) {
+            $.ajax({
+                url: "{% url 'add_to_total_compensation_leave' %}",  // Define this URL in your Django urls.py
+                method: "POST",
+                data: {
+                    'leave_id': leaveId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'  // Ensure CSRF token is included
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        // Update counts
+                        $('#fullDaysCount').text(response.full_days);
+                        $('#halfDaysCount').text(response.half_days);
+                        $('#totalCompCount').text(response.total_comp);
+
+                        // Move the redeemed leave to the Redeemed section
+                        const leaveBox = $('#leave-' + leaveId);
+                        leaveBox.find('.btn-primary').remove();
+                        leaveBox.append('<p>REDEEMED</p>');
+
+                        // Append the leaveBox to the Redeemed section
+                        $('.redeemed-leaves-container').append(leaveBox);
+                    } else {
+                        alert('Failed to add leave to total compensation');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('An error occurred while adding leave to total compensation');
+                }
+            });
+        }
+
+        function showUnredeemed() {
+            $('.unredeemed-leaves-container').show();
+            $('.redeemed-leaves-container').hide();
+        }
+
+        function showRedeemed() {
+            $('.redeemed-leaves-container').show();
+            $('.unredeemed-leaves-container').hide();
+        }
+    </script>
+</body>
+
+</html>

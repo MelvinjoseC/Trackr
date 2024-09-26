@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Task</title>
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .card {
+            border-radius: 10px;
+        }
+        .card-header {
+            background-color: #343a40;
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .form-control {
+            margin-bottom: 10px;
+        }
+        .back-btn img {
+            width: 50px;
+            height: 50px;
+            border-radius: 16px;
+        }
+    </style>
+</head>
+<body>
+<a class="btn back-btn" href="{% url 'task_dashboard' %}">
+    <img src="{% static 'images/BACK.png' %}"></a>
+<!-- <a href="{% url 'task' %}" class="btn btn-outline-dark btn-lg mx-3">ADD TASK DATA</a>-->
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2>Create Task</h2>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_project">Project</label>
+                        {{ form.project }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_scope">Scope</label>
+                        {{ form.scope }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_priority">Priority</label>
+                        {{ form.priority }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_assigned_to">Assigned To</label>
+                        {{ form.assigned_to }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_checker">Checker</label>
+                        {{ form.checker }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_qc_3_checker">QC-3 Checker</label>
+                        {{ form.qc_3_checker }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_group">Group</label>
+                        {{ form.group }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_category">Category</label>
+                        {{ form.category }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_start_date">Start Date</label>
+                        {{ form.start_date }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_end_date">End Date</label>
+                        {{ form.end_date }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_verification_status">Verification Status</label>
+                        {{ form.verification_status }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_task_status">Task Status</label>
+                        {{ form.task_status }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Task</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

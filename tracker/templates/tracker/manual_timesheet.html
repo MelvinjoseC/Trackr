@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Timesheet</title>
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 80px;
+            background-color: #343a40;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            z-index: 1000;
+        }
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        .sidebar img {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+        }
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 80px;
+            width: calc(100% - 80px);
+            background-color: #343a40;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+        .top-bar h1 {
+            margin: 0;
+        }
+        .top-bar .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .top-bar .user-info img {
+            width: 30px;
+            height: 35px;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+        .container {
+            margin-top: 70px;
+            margin-left: 100px;
+            max-width: calc(100% - 100px);
+        }
+        .form-header {
+            background-color: #343a40;
+            color: white;
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+        }
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            flex: 1;
+            font-weight: bold;
+            color: red;
+        }
+        .form-group .form-control {
+            flex: 3;
+        }
+        .form-control {
+            margin-bottom: 10px;
+        }
+        .form-group .select-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .form-group .select-wrapper .select-icon {
+            position: absolute;
+            right: 10px;
+            pointer-events: none;
+        }
+        .btn-copy {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-copy:hover {
+            background-color: #0056b3;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 80px;
+            width: calc(100% - 80px);
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="{% url 'home' %}">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <a href="javascript:location.reload();">
+            <i class="fas fa-sync-alt"></i>
+        </a>
+        <img src="{% static 'images/icon.png' %}" alt="Logo">
+    </div>
+    <div class="top-bar">
+        <h1>Manual Timesheet</h1>
+        <div class="user-info">
+            <span>{{ user.username }}</span>
+            <img src="{% static 'images/user.png' %}" alt="User">
+        </div>
+    </div>
+    <div class="container">
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_select_date">* Select Date:</label>
+                <input type="date" class="form-control" id="id_select_date" name="select_date" required>
+            </div>
+            <div class="form-group">
+                <label for="id_select_list">* Select List:</label>
+                <div class="select-wrapper">
+                    <select class="form-control" id="id_select_list" name="select_list" required>
+                        <option value="DEVELOPERS">Developers</option>
+                        <!-- Add more options as needed -->
+                    </select>
+                    <span class="select-icon"><i class="fas fa-chevron-down"></i></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="id_project">* Project:</label>
+                <div class="select-wrapper">
+                    <select class="form-control" id="id_project" name="project" required>
+                        <option value="">Select Project</option>
+                        <!-- Add more options as needed -->
+                    </select>
+                    <span class="select-icon"><i class="fas fa-search"></i></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="id_scope">* Scope:</label>
+                <input type="text" class="form-control" id="id_scope" name="scope" required>
+            </div>
+            <div class="form-group">
+                <label for="id_task">* Task:</label>
+                <input type="text" class="form-control" id="id_task" name="task" required>
+            </div>
+            <div class="form-group">
+                <label for="id_phase">* Phase:</label>
+                <div class="select-wrapper">
+                    <select class="form-control" id="id_phase" name="phase" required>
+                        <option value="FRONT END">Front End</option>
+                        <!-- Add more options as needed -->
+                    </select>
+                    <span class="select-icon"><i class="fas fa-chevron-down"></i></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="id_phase_status">* Phase Status:</label>
+                <div class="select-wrapper">
+                    <select class="form-control" id="id_phase_status" name="phase_status" required>
+                        <option value="PAUSED">Paused</option>
+                        <!-- Add more options as needed -->
+                    </select>
+                    <span class="select-icon"><i class="fas fa-chevron-down"></i></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="id_hours">* Hours:</label>
+                <input type="number" class="form-control" id="id_hours" name="hours" required>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+    <div class="footer">
+        &copy; 2024 Company Name. All Rights Reserved.
+    </div>
+    <button class="btn-copy">Copy and Create</button>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+</body>
+</html>

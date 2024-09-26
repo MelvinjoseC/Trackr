@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Leave Page</title>
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"> <!-- Font Awesome CSS -->
+    <style>
+        body {
+            background-color: #0d0c1d;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sidebar {
+            background-color: #162447;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.1);
+            margin-right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 250px;
+        }
+
+        .sidebar a {
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+            display: block;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+            text-align: center;
+
+        }
+
+        .sidebar a:hover {
+            background-color: #1f4068;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 20px;
+        }
+        .sidebar h1 {
+            width: 100px;
+        }
+
+        .container {
+            background-color: #0f3460;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.1);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 1700px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .form-group label {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .form-control {
+            background-color: #1f4068;
+            color: #fff;
+            border: none;
+        }
+
+        .form-control::placeholder {
+            color: #ccc;
+        }
+
+        .form-control:focus {
+            background-color: #1f4068;
+            color: #fff;
+            border: none;
+            box-shadow: none;
+        }
+
+        .btn-primary {
+            background-color: #e94560;
+            border-color: #e94560;
+        }
+
+        .btn-primary:hover {
+            background-color: #d13452;
+            border-color: #d13452;
+        }
+
+        .btn-secondary {
+            background-color: #162447;
+            border-color: #162447;
+        }
+
+        .btn-secondary:hover {
+            background-color: #1b3a57;
+            border-color: #1b3a57;
+        }
+
+        .details-box {
+            background-color: #1f4068;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .details-box h3 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .details-box p {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        .rectangle {
+            width: 150px;
+            height: 150px;
+            border-radius: 12px;
+            background-color: #1100ff;
+            color: white;
+            display: flex;
+            align-items: right;
+            justify-content: center;
+            flex-direction: column;
+            margin: auto;
+        }
+
+        .circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: #1f4068;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            margin: auto;
+        }
+
+        .badge-pill {
+            color: black;
+            padding: 10px 20px;
+            border-radius: 50px;
+            margin: 5px 0;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .apply-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 50px;
+            background-color: #8e03ff;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+
+        }
+
+        .apply-btn:hover {
+            background-color: #1f4068;
+            text-decoration: none;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .d-flex {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                margin-right: 0;
+                margin-bottom: 20px;
+                background: #380cff;
+            }
+        }
+
+        #leaveChart {
+            max-width: 63%;
+            max-height: 63%;
+            margin-left: 25%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="d-flex">
+        <div class="sidebar">
+            <a href="{% url 'home' %}"><i class="fas fa-home"></i> Home</a>
+            <h1>Leave Details</h1>
+
+            <div class="mt-3">
+                <div class="details-box">
+                    <h3>Full Days</h3>
+                    <p>{{ full_day_leaves }}</p>
+                </div>
+                <div class="details-box">
+                    <h3>Half Days</h3>
+                    <p>{{ half_day_leaves }}</p>
+                </div>
+                <div class="details-box">
+                    <h3>WFH</h3>
+                    <p>{{ wfh_leaves }}</p>
+                </div>
+            </div>
+
+            <a href="{% url 'leave_application' %}"><i class="fas fa-sign-out-alt"></i> Leave</a>
+            <a href="{% url 'leave_applications' %}"><i class="fas fa-history"></i> History</a>
+            <a href="{% url 'holidays' %}"><i class="fas fa-calendar-alt"></i> Holidays</a>
+            <a href="{% url 'comp_leave_details' %}"><i class="fas fa-receipt"></i> Redeem</a>
+        </div>
+        <div class="container">
+            <div class="d-flex justify-content-between">
+<!--                <div class="text-center">-->
+<!--                    <div class="rectangle">-->
+<!--                        <h2>{{ compensation_leaves }}</h2>-->
+<!--                        <p>COMPENSATION LEAVE</p>-->
+<!--                    </div>-->
+<!--                </div>-->
+                <div class="text-center">
+                    <div class="rectangle">
+<!--                        <h2>{{ balance_leave }}</h2> -->
+                         <h2>{{ total_leave }}</h2><!-- Display the calculated balance leave -->
+                        <p>BALANCE LEAVE</p>
+                    </div>
+                </div>
+            </div>
+            <canvas id="leaveChart"></canvas>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'leave_application' %}" class="apply-btn"><i class="fas fa-calendar-alt"></i> APPLY COMP LEAVE</a>
+            </div>
+        </div>
+    </div>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script> <!-- Font Awesome JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('leaveChart').getContext('2d');
+        const leaveChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Full Days', 'Half Days', 'WFH', 'Balance Leave', 'Compensation Leave'],
+                datasets: [{
+                    data: [{{ full_day_leaves }}, {{ half_day_leaves }}, {{ wfh_leaves }}, {{ balance_leave }}, {{ compensation_leaves }}],
+                    backgroundColor: ['violet', 'blue', 'brown', 'rgb(82, 255, 246)', 'yellow'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: 'white', // Set the label color to white
+                            font: {
+
+                                size: 17// Adjust the font size
+                            }
+
+
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                return `${label}: ${value}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

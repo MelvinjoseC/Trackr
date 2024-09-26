@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home-Task Tracker</title>
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #time {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            font-family: Arial, sans-serif;
+        }
+
+        #date {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Container for the swiping buttons */
+        .swipe-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 50px;
+            position: relative;
+        }
+
+        /* Button styling */
+        .button-swipe {
+            background-color: black;
+            color: white;
+            border: none;
+            padding: 10px 40px;
+            font-size: 16px;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 170px;
+            height: 70px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight:bold;
+        }
+
+        .button-swipe:hover {
+            text-decoration: none; /* Also ensure underline doesn't appear on hover */
+            }
+
+
+        /* Arrow styling */
+        .arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+
+
+            border-radius: 8px;
+        }
+
+
+        .arrow-left {
+            left: 452px;
+            background: white;
+        }
+
+        .arrow-right {
+            right: 452px;
+            background: white;
+        }
+
+        /* Hidden class to toggle visibility */
+        .hidden {
+            display: none;
+        }
+
+        .d-grid {
+            margin-top: 50px;
+
+        }
+
+        .d-grid:hover {
+            color:blue;
+        }
+        .btn{
+            background: black;
+            color:white;
+
+        }
+        .modal-body{
+            color:red;
+            font-weight:bold;
+        }
+        .modal fade{
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="{% url 'home' %}">TASK TRACKER</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logouts' %}">LOGOUT</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">LOGIN</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <br><br><br><br>
+
+    <div class="container text-center mt-5">
+        <img src="{% static 'images/Fusie Engineers Logo - white -cropped (1).jpg' %}" alt="Responsive image" class="img-fluid">
+        <br><br><br>
+        <h2 id="time"></h2>
+        <h3 id="date"></h3>
+        <br><br>
+
+        <!-- Button swipe container -->
+        <div class="swipe-container">
+            <a href="{% url 'main_leave_page' %}" class="button-swipe">LEAVE APPLICATION</a>
+            <!-- Left Arrow -->
+            <span class="arrow arrow-left" onclick="swipeLeft()">&lt;</span>
+
+            <!-- Button 1: Task Tracker -->
+            <a href="{% url 'task_tracker_selection' %}" class="button-swipe" id="button1">TASK TRACKER</a>
+
+            <!-- Button 2: Admin (hidden by default) -->
+            <span><a href="{% url 'create_task' %}" class="button-swipe hidden" id="button2" data-toggle="modal" data-target="#adminModal">ADMIN VIEW</a></span>
+
+            <!-- Right Arrow -->
+            <span class="arrow arrow-right" onclick="swipeRight()">&gt;</span>
+             <a href="{% url 'calendar' %}" class="button-swipe">ADD ATTENDANCE</a>
+        </div>
+
+        <!-- Other buttons -->
+<!--        <div class="d-grid gap-4 text-uppercase">-->
+<!--            <a href="{% url 'main_leave_page' %}" class="btn btn-lg mx-3">Leave Application</a>-->
+<!--            <a href="{% url 'calendar' %}" class="btn btn-lg mx-3">Attendance</a>-->
+<!--        </div>-->
+
+        <!--admin-->
+        <div class="modal fade" id="adminModal" tabindex="-1" role="dialog" aria-labelledby="adminModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+<!--                    <div class="modal-header">-->
+<!--                        <h5 class="modal-title" id="adminModalLabel">Alert!!</h5>-->
+<!--                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
+<!--                            <span aria-hidden="true">&times;</span>-->
+<!--                        </button>-->
+<!--                    </div>-->
+                    <div class="modal-body">
+                        Sorry dude only admin can view this page!
+                        </br>
+                        </br>
+                        <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+                    </div>
+<!--                    <div class="modal-footer">-->
+<!--                        -->
+<!--&lt;!&ndash;                        <button type="button" class="btn btn-primary">Save changes</button>&ndash;&gt;-->
+<!--                    </div>-->
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Update time and date
+        function updateTime() {
+            const now = new Date();
+
+            // Format time in HH:MM:SS AM/PM
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+            let ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            hours = hours < 10 ? '0' + hours : hours; // Pad hours if less than 10
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+            const timeString = `${hours}:${minutes}:${seconds} ${ampm}`;
+
+            // Format date as FULL DAY MONTH DATE YEAR
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateString = now.toLocaleDateString('en-US', options).toUpperCase();
+
+            // Update time and date elements
+            document.getElementById('time').textContent = timeString;
+            document.getElementById('date').textContent = dateString;
+        }
+
+        setInterval(updateTime, 1000); // Update every second
+        updateTime(); // Initial call to display time immediately
+
+        // Button swipe functionality
+        function swipeLeft() {
+            document.getElementById("button1").classList.remove("hidden");
+            document.getElementById("button2").classList.add("hidden");
+        }
+
+        function swipeRight() {
+            document.getElementById("button1").classList.add("hidden");
+            document.getElementById("button2").classList.remove("hidden");
+        }
+    </script>
+</body>
+</html>

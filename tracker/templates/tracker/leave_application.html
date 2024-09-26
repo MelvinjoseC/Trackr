@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Application</title>
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a1a2e;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #0f3460;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.1);
+            width: 80%;
+        }
+        .sidebar {
+            background-color: #162447;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.1);
+            margin-right: 20px;
+            flex: 1;
+        }
+        .sidebar h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            background-color: black;
+            border-radius: 10px;
+        }
+        .sidebar a {
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+            display: block;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+            text-align: center;
+            background-color: #1f4068;
+            width: 300px;
+        }
+        .sidebar a:hover {
+            background-color: #4e4e50;
+        }
+        .form-container {
+            background-color: #0f3460;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.1);
+            flex: 2;
+            width: 600px;
+        }
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: black;
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 20px;
+        }
+        .form-header h1 {
+            margin: 0;
+        }
+        .form-group label {
+            color: #fff;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        .form-control {
+            background-color: #1f4068;
+            color: #fff;
+            border: none;
+        }
+        .form-control::placeholder {
+            color: #ccc;
+        }
+        .form-control:focus {
+            background-color: #1f4068;
+            color: #fff;
+            border: none;
+            box-shadow: none;
+        }
+        .btn-primary {
+            background-color: #e94560;
+            border-color: #e94560;
+        }
+        .btn-primary:hover {
+            background-color: #d13452;
+            border-color: #d13452;
+        }
+        .btn-secondary {
+            background-color: #162447;
+            border-color: #162447;
+        }
+        .btn-secondary:hover {
+            background-color: #1b3a57;
+            border-color: #1b3a57;
+        }
+        .details-box {
+            background-color: #1f4068;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .details-box h3 {
+            margin: 0;
+            font-size: 2rem;
+        }
+        .details-box p {
+            margin: 0;
+            font-size: 1rem;
+        }
+        .error-message {
+            color: red;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .total-days {
+            font-weight: bold;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <div class="sidebar">
+            <h2>LEAVE DETAILS</h2>
+            <div class="details-box">
+                <h3>Full Days</h3>
+                <p id="full-days">{{ full_day_leaves }}</p>
+            </div>
+            <div class="details-box">
+                <h3>Half Days</h3>
+                <p id="half-days">{{ half_day_leaves }}</p>
+            </div>
+            <div class="details-box">
+                <h3>WFH</h3>
+                <p id="wfh-leaves">{{ wfh_leaves }}</p>
+            </div>
+            <div class="details-box">
+                <h3>Compensation Leaves</h3>
+                <p id="compensation-leaves">{{ compensation_leaves }}</p>
+            </div>
+            <a href="{% url 'leave_application' %}"><i class="fas fa-sign-out-alt"></i> Leave</a>
+            <a href="{% url 'leave_applications' %}"><i class="fas fa-history"></i> History</a>
+            <a href="{% url 'holidays' %}"><i class="fas fa-calendar-alt"></i> Holidays</a>
+            <a href="{% url 'comp_leave_details' %}"><i class="fas fa-receipt"></i> Redeem</a>
+        </div>
+        <div class="form-container">
+            <div class="form-header">
+                <a class="btn btn-secondary" href="{% url 'main_leave_page' %}">
+                    <img src="{% static 'images/BACK.png' %}" style="width:40px;height:40px;border-radius: 8px;">
+                </a>
+                <h1>LEAVE APPLICATION FORM</h1>
+            </div>
+            {% if form.non_field_errors %}
+                <div class="error-message">{{ form.non_field_errors }}</div>
+            {% endif %}
+            {% if error_message %}
+                <div class="error-message">{{ error_message }}</div>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="id_leave_type">Leave Type</label>
+                        {{ form.leave_type }}
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="id_approver">Approver</label>
+                        {{ form.approver }}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="id_start_date">Start Date</label>
+                        {{ form.start_date }}
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="id_end_date">End Date</label>
+                        {{ form.end_date }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_leave_option">Leave Option</label>
+                    {{ form.leave_option }}
+                </div>
+                <div class="form-group">
+                    <label for="id_reason">Reason</label>
+                    {{ form.reason }}
+                </div>
+                <div class="total-days">Total Days: {{ leave_days }}</div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <button type="button" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            function updateTotalDays() {
+                var startDate = new Date($("#id_start_date").val());
+                var endDate = new Date($("#id_end_date").val());
+                if (startDate && endDate) {
+                    var totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+                    $(".total-days").text("Total Days: " + totalDays);
+                }
+            }
+
+            $("#id_start_date, #id_end_date").change(updateTotalDays);
+            updateTotalDays();
+        });
+    </script>
+</body>
+</html>
