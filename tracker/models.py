@@ -194,8 +194,8 @@ class Tasks(models.Model):
     qc_3_checker = models.CharField(max_length=100)
     group = models.CharField(max_length=100)
     category = models.CharField(max_length=100, choices=CATEGORY_TYPES)
-    start_date = models.DateField()
-    end_date = models.DateField()
+    start_date = models.DateField(default='2025-01-01')
+    end_date = models.DateField(default='2025-01-01')
     verification_status = models.CharField(max_length=50, choices=STATUS_TYPES)
     task_status = models.CharField(max_length=50, choices=TASK_TYPES)
 
@@ -203,3 +203,91 @@ class Tasks(models.Model):
         return self.project
 
 
+from django.db import models
+
+class Project(models.Model):
+    title = models.CharField(max_length=255)  # Title of the project
+    d_no = models.CharField(max_length=50,blank=True, null=True)  # Document or identifier number
+    mail_no = models.CharField(max_length=50, blank=True, null=True)  # Document or identifier number
+    ref_no = models.CharField(max_length=50, blank=True, null=True)  # Document or identifier number
+    scope = models.CharField(max_length=100,blank=True, null=True)  # Scope of the project
+    projects = models.CharField(max_length=100,blank=True, null=True)  # Projects (multiple or description)
+    rev = models.CharField(max_length=50, blank=True, null=True)  # Revision number
+    category = models.CharField(max_length=100, blank=True, null=True)  # Project category
+    start = models.DateField(blank=True, null=True)
+    end = models.DateField(blank=True, null=True)
+    list = models.CharField(max_length=100, blank=True, null=True)  # Scope of the project
+    assigned = models.CharField(max_length=255, blank=True, null=True)  # Assigned to (person or team)
+    group = models.CharField(max_length=255, blank=True, null=True)  # Group or team
+    checker = models.CharField(max_length=255, blank=True, null=True)  # Checker name
+    qc3_checker = models.CharField(max_length=255, blank=True, null=True)  # QC-3 Checker
+    priority = models.CharField(
+        max_length=50,
+        choices=[
+            ('Low', 'Low'),
+            ('Medium', 'Medium'),
+            ('High', 'High'),
+            ('Critical', 'Critical'),
+        ],
+        blank=True,
+        null=True,
+    )  # Priority level
+    task_status = models.CharField(
+        max_length=50,
+        choices=[
+            ('Not Started', 'Not Started'),
+            ('In Progress', 'In Progress'),
+            ('Completed', 'Completed'),
+            ('On Hold', 'On Hold'),
+        ],
+        blank=True,
+        null=True,
+    )  # Task status
+    review_3d = models.BooleanField(default=False)  # 3D Review status (True/False)
+    qc1 = models.BooleanField(default=False)  # QC-1 status
+    qc2 = models.BooleanField(default=False)  # QC-2 status
+    qc3 = models.BooleanField(default=False)  # QC-3 status
+    verification_status = models.CharField(
+        max_length=50,
+        choices=[
+            ('Pending', 'Pending'),
+            ('Verified', 'Verified'),
+            ('Rejected', 'Rejected'),
+        ],
+        blank=True,
+        null=True,
+    )  # Verification status
+    phase_1_benchmark = models.FloatField(blank=True, null=True)  # Phase 1 Benchmark score
+    phase_2_benchmark = models.FloatField(blank=True, null=True)  # Phase 2 Benchmark score
+    phase_3_benchmark = models.FloatField(blank=True, null=True)  # Phase 3 Benchmark score
+    phase_4_benchmark = models.FloatField(blank=True, null=True)  # Phase 4 Benchmark score
+    phase_5_benchmark = models.FloatField(blank=True, null=True)  # Phase 5 Benchmark score
+    phase_6_benchmark = models.FloatField(blank=True, null=True)  # Phase 6 Benchmark score
+    phase_7_benchmark = models.FloatField(blank=True, null=True)  # Phase 7 Benchmark score
+    phase_8_benchmark = models.FloatField(blank=True, null=True)  # Phase 8 Benchmark score
+    phase_9_benchmark = models.FloatField(blank=True, null=True)  # Phase 9 Benchmark score
+    phase_10_benchmark = models.FloatField(blank=True, null=True)  # Phase 10 Benchmark score
+    task_benchmarK = models.FloatField(blank=True, null=True)  # Task_Benchmark score
+    def __str__(self):
+        return self.title  # Customize to show meaningful project info in admin panel
+
+class MonthlyCalendar(models.Model):
+    title = models.CharField(max_length=255)  # Mandatory
+    scope = models.TextField(null=True, blank=True)
+    date = models.DateField(null=True, blank=True)
+    time = models.CharField(max_length=50, null=True, blank=True)
+    assigned = models.CharField(max_length=255, null=True, blank=True)
+    category = models.CharField(max_length=100, null=True, blank=True)
+    project = models.TextField(null=True, blank=True)
+    list = models.CharField(max_length=50, null=True, blank=True)
+    rev_no = models.CharField(max_length=50, null=True, blank=True)
+    comments = models.CharField(max_length=755, null=True, blank=True)
+    benchmark = models.FloatField(null=True, blank=True)
+    d_no = models.CharField(max_length=50,null=True, blank=True)  # Mandatory and unique
+    mail_no = models.CharField(max_length=50,null=True, blank=True)  # Mandatory and unique
+    ref_no = models.CharField(max_length=50,null=True, blank=True)  # Mandatory and unique
+    created = models.DateTimeField(auto_now_add=True)  # Timestamp when the record was created
+    updated = models.DateTimeField(auto_now=True)  # Timestamp when the record was last modified
+
+    def __str__(self):
+        return self.title

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly calender Page</title>
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"> <!-- Font Awesome css -->
+    <style>
+        body {
+    text-transform: uppercase;
+}
+    table {
+         width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-size: 16px;
+        text-align: center;
+    }
+    td {
+        padding: 12px;
+        border: 1px solid #ddd;
+    }
+    th {
+        background-color: #008000; /* Green background for header */
+        color: white;
+        font-weight: bold;
+        padding: 10px;
+        text-transform: uppercase;
+    }
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    tr:nth-child(odd) {
+        background-color: #ffffff;
+    }
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+    .actions button.edit {
+        color: #0080ff; /* Blue for edit */
+    }
+
+    .actions button.delete {
+        color: #ff0000; /* Red for delete */
+    }
+</style>
+
+<body>
+    <h1 align="center">Monthly Calendar Management</h1>
+
+    <!-- Add Record Form -->
+    <h2 align="center">Add Record</h2>
+    <form id="add-form" method="POST">
+        {% csrf_token %}
+        <label>Title: <input type="text" name="title" required></label>
+        <label>Scope: <input type="text" name="scope"></label>
+        <label>Date: <input type="date" name="date"></label>
+        <label>Time: <input type="text" name="time"></label>
+        <label>Category: <input type="text" name="category"></label>
+        <label>Project: <input type="text" name="project"></label>
+        <label>List: <input type="text" name="list"></label>
+        <label>Revision No: <input type="text" name="rev_no"></label>
+        <label>Comments: <input type="text" name="comments"></label>
+        <label>Benchmark: <input type="number" name="benchmark" step="0.01"></label>
+        <label>D No: <input type="text" name="d_no" required></label>
+        <label>Mail No: <input type="text" name="mail_no" required></label>
+        <label>Ref No: <input type="text" name="ref_no" required></label>
+        <button type="submit">Add Record</button>
+    </form>
+
+    <h2>Records</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Project</th>
+            <th>Title</th>
+            <th>Scope</th>
+            <th>Category</th>
+            <th>Date</th>
+            <th>Assigned</th>
+            <th>Total Time</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for group in grouped_records %}
+            <tr>
+                <td>{{ group.project }}</td>
+                <td>{{ group.title }}</td>
+                <td>{{ group.scope }}</td>
+                <td>{{ group.category }}</td>
+                <td>{{ group.date_range }}</td>
+                <td>
+                    {% for assignment in group.assigned_details %}
+                        {{ assignment.name }} , TIME : {{ assignment.time }}<br>
+                    {% endfor %}
+                </td>
+                <td>{{ group.total_time }}</td>
+                <td class="actions">
+                    <button class="edit" onclick="editRecord('{{ group.id }}', '{{ group.project }}', '{{ group.title }}', '{{ group.scope }}', '{{ group.category }}')">✏️ Edit</button>
+                    <button class="delete" onclick="deleteRecord('{{ group.id }}')">🗑️ Delete</button>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+    <script>
+        // Get CSRF token from the page
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Add record functionality
+        document.getElementById("add-form").addEventListener("submit", function(e) {
+            e.preventDefault();
+            fetch("{% url 'monthly_calendar1' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfToken
+                },
+                body: new FormData(this),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                    location.reload();
+                } else if (data.errors) {
+                    alert("Error: " + JSON.stringify(data.errors));
+                }
+            })
+            .catch(error => {
+                console.error("Error adding record:", error);
+                alert("An error occurred.");
+            });
+        });
+
+        // Edit record functionality
+        function editRecord(id, project, title, scope, category) {
+            const updatedTitle = prompt("Update Title:", title);
+            const updatedScope = prompt("Update Scope:", scope);
+            const updatedProject = prompt("Update Project:", project);
+            const updatedCategory = prompt("Update Category:", category);
+
+            if (updatedTitle && updatedScope) {
+                fetch("{% url 'monthly_calendar1' %}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        action: "edit",
+                        id: id,
+                        project: project,
+                        title: updatedTitle,
+                        scope: updatedScope,
+                        category: category
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        alert(data.message);
+                        location.reload();
+                    } else if (data.errors) {
+                        alert("Error: " + JSON.stringify(data.errors));
+                    }
+                })
+                .catch(error => {
+                    console.error("Error editing record:", error);
+                    alert("An error occurred.");
+                });
+            }
+        }
+
+        // Delete record functionality
+        function deleteRecord(id) {
+            if (confirm("Are you sure you want to delete this record?")) {
+                fetch("{% url 'monthly_calendar1' %}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        action: "delete",
+                        id: id
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        alert(data.message);
+                        location.reload();
+                    } else if (data.errors) {
+                        alert("Error: " + JSON.stringify(data.errors));
+                    }
+                })
+                .catch(error => {
+                    console.error("Error deleting record:", error);
+                    alert("An error occurred.");
+                });
+            }
+        }
+    </script>
+</body>
+</html>

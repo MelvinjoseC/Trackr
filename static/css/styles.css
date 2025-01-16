@@ -1,0 +1,535 @@
+body {
+    background-color: #d6d6d6;
+    color: #343a40;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+    text-transform: uppercase;
+}
+
+
+.header {
+    background-color: #162447;
+    color: black;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.header h1 {
+    margin: 0;
+    color: white;
+}
+
+.header h4 {
+    color: white;
+}
+
+.header img {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+}
+
+.container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: auto;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+
+
+}
+
+.calendar-header {
+    background-color: #DAE6FB;
+    color: black;
+    padding: 6px;
+    border-radius: 4px;
+    text-align: center;
+    margin-bottom: 10px;
+    flex: 1 1 auto;
+    font-weight: bold;
+    background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+}
+
+/* Responsive adjustments for smaller screens (Tablets and smaller devices) */
+@media (max-width: 768px) {
+    .calendar-header {
+        font-size: 0.9rem; /* Slightly reduce font size for tablets */
+        padding: 4px; /* Adjust padding */
+    }
+}
+
+/* Responsive adjustments for mobile screens */
+@media (max-width: 480px) {
+    .calendar-header {
+        font-size: 0.5rem; /* Further reduce font size for mobile */
+        padding: 5px; /* Adjust padding to fit smaller screen */
+    }
+}
+
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(80px, 1fr)); /* Minimum size of 80px, adjusts based on screen width */
+    gap: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.calendar-day.work-office {
+    background-color: #C8E6C9; /* Green for office work */
+    color: black;
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.calendar-day.work-home {
+    background-color: #FFCDD2; /* Red for WFH */
+    color: black;
+}
+
+.calendar-day.leave-day {
+    background-color: #FFF9C4; /* Yellow for Leave */
+    color: black;
+}
+
+.calendar-day.no-data {
+    background-color: #EEEEEE;; /* Gray for no data */
+    color: #9E9E9E;
+}
+
+.calendar-day.weekend{
+   background-color: #EEEEEE;; /* Gray for no data */
+    color: #9E9E9E;
+}
+
+.calendar-day.today {
+    border: 8px solid black; /* Highlight today's date */
+}
+
+.calendar-day {
+    background-color: white;
+    padding: 10px;
+    border-radius: 6px;
+    transition: background-color 0.3s;
+    text-align: left;
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    overflow: hidden;
+    word-wrap: break-word;
+    color: black;
+}
+
+/* Only apply hover effect to days with dates */
+.calendar-day.has-date:hover {
+    transform: scale(1.2);
+    transition: transform 0.2s;
+    background-color: white;
+}
+
+/* Remove hover effect from other .calendar-day elements */
+.calendar-day:hover {
+    transform: none;
+    transition: none;
+    background-color: initial;
+}
+
+
+/* Mobile adjustments for calendar */
+@media (max-width: 768px) {
+    .calendar {
+        grid-template-columns: repeat(3, 1fr); /* Adjust the number of columns on smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar {
+        grid-template-columns: repeat(2, 1fr); /* Further reduce columns on very small screens */
+    }
+
+    /* Improve text wrapping */
+    .calendar-day {
+        font-size: 0.85rem;
+    }
+}
+
+.month-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    color: black;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.month-nav button {
+    border-radius: 10px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: white;
+    margin: 0 5px;
+    background-color: rgb(63, 63, 63);
+    transition: background-color 0.4s;
+    flex-shrink: 1;
+}
+
+.total-worktime {
+    font-size: 1.2rem;
+    text-align: center;
+    margin-top: 80px;
+    margin-bottom: 20px;
+    color: black;
+}
+
+.btn-custom {
+    background-color: #343a40;
+    border: none;
+    color: #fff;
+    transition: background-color 0.3s;
+}
+
+.btn-custom:hover {
+    background-color: #495057;
+}
+
+.daily-time,
+.daily-times {
+    font-size: 0.9rem;
+    font-family: Arial;
+    text-align: center;
+}
+
+/* Top bar container */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f5f5f5;
+    font-family: Arial, sans-serif;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .layout {
+        flex-direction: column;
+        margin-left: 110px;
+    margin-right: 110px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .main-content {
+        max-width: calc(100% - 400px);
+        margin-left: 210px;
+        margin-right: 210px;
+    }
+}
+
+@media (max-width: 992px) {
+    .main-content {
+        max-width: calc(100% - 300px);
+
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        max-width: calc(100% - 200px);
+
+        padding: 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .sidebar-left, .sidebar-right {
+        display: none;
+    }
+
+    .main-content {
+        max-width: 100%;
+        margin: 0;
+    }
+}
+
+/* Clock section */
+.clock-section {
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    flex-wrap: wrap;
+    height: 137px;
+}
+
+.clock-section .time {
+    font-size: 2rem;
+    color: #1a1a2e;
+}
+
+.clock-section .date {
+    font-size: 1rem;
+    color: #1a1a2e;
+}
+
+/* Timing section */
+.timing-section {
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    flex-wrap: wrap;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.timing-section h4 {
+    margin-bottom: 5px;
+}
+
+.days-of-week {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.day,
+.day1 {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8rem;
+    color: white;
+    font-weight: bold;
+}
+
+.day {
+    background-color: #333DAE;
+}
+
+.day1 {
+    background-color: grey;
+}
+
+.day.active {
+    background-color: white;
+    border: 2px solid #002870;
+    color: black;
+}
+
+.shift-details {
+    text-align: left;
+    padding-left: 10px;
+}
+
+.shift-details span {
+    font-weight: bold;
+}
+
+/* Right-side stats section */
+.stats-section {
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.stats-sections {
+    background-color: #EEEEEE;
+    padding: 6px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    width: 100px;
+    flex-wrap: wrap;
+}
+
+.stats-section .stat {
+    font-size: 1.5rem;
+    color: #0d47a1;
+}
+
+.stats-section .label {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* Shift bar container */
+.shift-bar-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* The full bar representing the working hours */
+.shift-bar {
+    position: relative;
+    width: 100%;
+    height: 20px;
+    background-color: #333DAE;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+/* The break bar representing the break time in the middle */
+.break-bar {
+    position: absolute;
+    left: 55%;
+    width: 10%;
+    height: 100%;
+    background-color: white;
+    opacity: 80%;
+}
+
+/* Labels for the start and end times */
+.time-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
+.time-labels span {
+    color: #333;
+}
+
+/* Sidebar */
+.sidebar {
+    background: #0F1A60;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.1);
+    margin-right: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 8%;
+    padding: 15px;
+}
+
+.sidebar a {
+    color: white;
+    padding: 13px;
+    text-decoration: none;
+    display: block;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    transition: background-color 0.3s;
+    text-align: center;
+    align-items: left;
+}
+
+.sidebar a:hover {
+    background-color: #1f4068;
+}
+
+/* Hide the titles by default */
+.sidebar-link .sidebar-title {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #1f4068;
+    color: white;
+    padding: 5px;
+    white-space: nowrap;
+    border-radius: 5px;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 1000;
+}
+
+/* Show the titles when hovering over the button */
+.sidebar-link:hover .sidebar-title {
+    display: inline-block;
+    opacity: 1;
+    transform: translateY(-50%) translateX(10px);
+}
+
+.sidebar-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    text-decoration: none;
+    color: white;
+    transition: background-color 0.3s;
+}
+
+.sidebar-link:hover {
+    background-color: #1f4068;
+}
+
+.layout {
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+/* Main Content */
+.main-content {
+    margin: 0 auto;
+    padding: 20px;
+    flex-grow: 1;
+    max-width: calc(100% - 500px);
+    margin-right: 330px;
+    background-color: #f5f5f5;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-left: 220px;
+    margin-right: 270px;
+}
+
+/* Right Sidebar */
+.right-sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    border-radius: 10px;
+    background: #EAEAEA;
+    padding: 20px;
+    bottom: 0;
+    box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    width: 12%;
+    padding: 15px;
+}
+
+.right-sidebar h4 {
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    color: black;
+}
+
+#monthlyWorktimeChart,
+#weeklyWorktimeChart {
+    max-width: 200px;
+    margin: auto;
+}
+
+.sidebar .sign-out {
+    margin-top: auto;
+}
+
+

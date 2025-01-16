@@ -1,0 +1,36 @@
+<!-- user_info_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Info List</title>
+</head>
+<body>
+    <h1>User Information</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Role</th>
+                <th>Email</th>
+                <th>List</th>
+                <th>Image</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in user_info %}
+                <tr>
+                    <td>{{ row.0 }}</td> <!-- ID -->
+                    <td>{{ row.1 }}</td> <!-- Title -->
+                    <td>{{ row.2 }}</td> <!-- Role -->
+                    <td>{{ row.3 }}</td> <!-- Email -->
+                    <td>{{ row.4 }}</td> <!-- List -->
+                    <td>{{ row.5 }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

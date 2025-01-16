@@ -1,0 +1,620 @@
+   /* General Reset */
+   body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f9;
+    text-transform: uppercase;
+}
+
+/* Main Container */
+.main-container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    background-color: #0F1A60;
+    color: white;
+    width: 250px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 8%;
+}
+
+.sidebar a {
+    color: white;
+    padding: 13px;
+    text-decoration: none;
+    display: block;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    transition: background-color 0.3s;
+    text-align: center;
+    align-items: left;
+}
+
+.sidebar a:hover {
+    background-color: #1f4068;
+}
+
+.sidebar a i {
+    margin-right: 10px;
+}
+
+.sidebar .sign-out {
+    margin-top: auto;
+}
+/* Content */
+.content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.header .date-time {
+    font-size: 20px;
+}
+
+.header .events {
+    background-color: #E9F3FE;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Task Tracker */
+.task-tracker {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.task-tracker .task-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.task-tracker .tasks {
+    display: flex;
+    gap: 20px;
+}
+
+.task-card {
+    background-color: #F9F9F9;
+    padding: 15px;
+    border-radius: 5px;
+    width: 300px;
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.task-card .details {
+    margin: 10px 0;
+}
+
+.task-card .actions button {
+    background-color: #003F80;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: background-color 0.3s;
+}
+.task-card2 {
+    background-color: #F9F9F9;
+    padding: 15px;
+    border-radius: 5px;
+    width: 400px;
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.task-card2 .details {
+    margin: 10px 0;
+}
+
+.task-card2 .actions button {
+    background-color: #003F80;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: background-color 0.3s;
+}
+
+.task-card1 .actions button:hover {
+    background-color: #0059B3;
+}
+.task-card1 {
+    background-color: #F9F9F9;
+    padding: 15px;
+    border-radius: 5px;
+    width: 925px;
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
+    margin-left: 10px; /* Move the card 350px to the right */
+}
+
+.task-card1 .details {
+    margin: 10px 0;
+}
+
+.task-card1 .actions button {
+    background-color: #003F80;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: background-color 0.3s;
+}
+
+.task-card1 .actions button:hover {
+    background-color: #0059B3;
+}
+
+    /* Timesheet Section */
+.timesheet {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.timesheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.timesheet-header h3 {
+    margin: 0;
+    font-size: 20px;
+    color: #333;
+}
+
+.timesheet-header .date-picker {
+    font-size: 14px;
+    color: #666;
+    display: flex;
+    align-items: center;
+}
+
+.timesheet-header .date-picker i {
+    margin-right: 5px;
+    color: #003f80;
+}
+
+.timesheet-rows {
+    border-top: 1px solid #e0e0e0;
+    padding-top: 10px;
+}
+
+.timesheet-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.timesheet-row:last-child {
+    border-bottom: none;
+}
+
+.task-info {
+    flex: 2;
+}
+
+.task-info h4 {
+    margin: 0 0 5px;
+    font-size: 16px;
+    color: #003f80;
+    text-transform: uppercase;
+}
+
+.task-info p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.task-time {
+    flex: 1;
+    text-align: right;
+}
+
+.task-time p {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+    font-weight: bold;
+}
+
+.task-time span {
+    font-size: 12px;
+    color: #666;
+}
+
+.task-actions {
+    flex: 0.5;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    font-size: 18px;
+}
+
+.task-actions i {
+    color: #666;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.task-actions i:hover
+
+    .team-list {
+    display: flex; /* Display items in a row */
+    justify-content: center; /* Center the items horizontally */
+    align-items: center; /* Center items vertically */
+    gap: 20px; /* Add space between each member */
+
+}
+
+.member {
+
+    flex-direction: column; /* Stack image and name vertically */
+    align-items: center; /* Center-align image and name */
+    text-align: center;
+
+}
+
+.member img {
+    width: 40px; /* Set width for the profile image */
+    height: 40px; /* Set height for the profile image */
+    border-radius: 10%; /* Make the image circular */
+    object-fit: cover; /* Ensure the image fills the container */
+}
+
+.member p {
+    margin-top: 8px; /* Add spacing between the image and name */
+    font-size: 14px; /* Set font size for names */
+    color: #333; /* Set a neutral color for the text */
+    font-weight: bold; /* Make names stand out */
+}
+
+    /* Right Sidebar */
+.right-sidebar {
+    width: 300px;
+    background-color: white;
+    padding: 20px;
+    border-left: 1px solid #ddd;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Team Performance Section */
+.team-performance {
+    text-align: center;
+}
+
+.team-performance h3 {
+    font-size: 18px;
+    margin: 10px 0;
+    text-transform: uppercase;
+    color: #333;
+}
+
+.team-performance p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.team-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.team-stats .stat {
+    text-align: center;
+}
+
+.team-stats .stat p {
+    margin: 0;
+    font-size: 12px;
+    color: #666;
+}
+
+.team-stats .stat h4 {
+    margin: 5px 0 0;
+    font-size: 16px;
+    color: #003f80;
+}
+
+.team-members {
+
+    justify-content: space-around;
+    align-items: center;
+}
+
+.team-members .member {
+    text-align: center;
+}
+
+.team-members .member img {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin-bottom: 5px;
+}
+
+.team-members .member p {
+    font-size: 12px;
+    color: #333;
+}
+
+/* Task Details Section */
+.task-details {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    text-align: center;
+}
+
+.task-details h3 {
+    margin: 0 0 10px;
+    font-size: 16px;
+    text-transform: uppercase;
+    color: #333;
+}
+
+.task-placeholder {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+}
+
+.task-placeholder i {
+    color: #003f80;
+    margin-right: 5px;
+}
+
+/* Team Projects Section */
+.team-projects {
+    text-align: center;
+}
+
+.team-projects h3 {
+    font-size: 16px;
+    margin: 0 0 10px;
+    text-transform: uppercase;
+    color: #333;
+}
+
+.team-projects p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.project-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.project-tabs .tab {
+    padding: 5px 10px;
+    font-size: 12px;
+    color: #333;
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.project-tabs .tab.active {
+    background-color: #003f80;
+    color: white;
+    border-color: #003f80;
+}
+
+.project-list {
+    text-align: left;
+    margin-top: 10px;
+}
+
+.project-item {
+    font-size: 14px;
+    color: #333;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+}
+
+.project-item:last-child {
+    border-bottom: none;
+}
+
+ .task-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Space between rows */
+    margin: 20px; /* Margin around the container */
+}
+
+.task-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f9f9f9; /* Light background */
+    padding: 15px 20px; /* Padding for spacing */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.task-button:hover {
+    background-color: #f0f0f0; /* Slightly darker background on hover */
+}
+
+.task-button i {
+    font-size: 16px;
+    color: #003f80; /* Blue icons */
+}
+
+.task-button span {
+    flex: 1; /* Allow the text to take up remaining space */
+    margin: 0 10px; /* Space between icon and text */
+    font-size: 16px;
+    font-weight: bold;
+    color: #333; /* Neutral text color */
+}
+
+a{
+ text-decoration: none;
+ color: black;
+}
+
+.timesheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.date-picker {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Add space between the calendar icon, input, and text */
+}
+
+#date-input {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+#selected-date {
+    font-size: 16px;
+    color: #333;
+    font-weight: bold;
+}
+
+/* Container Styling */
+.date-time-container {
+    display: flex;
+    align-items: center;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-size: cover;
+    background-position: center;
+}
+
+/* Date and Time Section */
+.date-time {
+    width: 20%;
+    text-align: center;
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    margin-right: 20px;
+}
+
+.date-time .date {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.date-time .time {
+    font-size: 24px;
+    font-weight: bold;
+    color: #003f80;
+}
+
+/* Events Section */
+.events-section {
+    flex: 1;
+    background-color: rgba(255, 255, 255, 0.9); /* Transparent white background */
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.events-header h4 {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+}
+
+.events-header p {
+    font-size: 14px;
+    color: #666;
+    margin: 5px 0 15px;
+}
+
+/* Events List */
+.events-list {
+    display: flex;
+    justify-content: space-between;
+}
+
+.event-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 30%;
+    text-align: center;
+    padding: 10px;
+    background-color: #f4f9ff;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+}
+
+.event-time {
+    font-size: 16px;
+    font-weight: bold;
+    color: #003f80;
+    margin-bottom: 10px;
+}
+
+.event-details strong {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.event-details p {
+    font-size: 12px;
+    color: #666;
+    margin: 0;
+}
+

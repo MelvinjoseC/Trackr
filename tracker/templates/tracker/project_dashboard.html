@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Project Dashboard</title>
+    <!-- Include Bootstrap CSS for styling -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<style>
+    body {
+    text-transform: uppercase;
+}
+    .form-label {
+        font-weight: bold;
+    }
+    .form-control {
+        border-radius: 8px;
+    }
+    .card-header {
+        border-bottom: 2px solid #dee2e6;
+    }
+    .btn-success {
+        width: 100%;
+        font-size: 16px;
+        font-weight: bold;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 8px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+    th {
+        background-color: black;
+        color: white;
+
+    }
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    .btn {
+        padding: 5px 10px;
+        text-decoration: none;
+        color: white;
+        border-radius: 4px;
+    }
+    .btn-primary {
+        background-color: #007bff;
+    }
+    .btn-danger {
+        background-color: #dc3545;
+    }
+</style>
+
+<body>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Project Dashboard</h1>
+
+    <!-- Form for Adding/Editing Projects -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">{{ form.instance.pk|default:"Add New Project" }}</h2>
+        </div>
+        <div class="card-body">
+    <form method="post">
+        {% csrf_token %}
+        {% if form.instance.pk %}
+            <!-- Include project ID for editing -->
+            <input type="hidden" name="project_id" value="{{ form.instance.pk }}">
+        {% endif %}
+        <div class="row">
+            {% for field in form %}
+                <div class="col-md-6 mb-3">
+                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="text-danger small">{{ field.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        <button type="submit" name="{% if form.instance.pk %}save_edit{% else %}create{% endif %}" class="btn btn-success w-100">
+            {% if form.instance.pk %}Update{% else %}Save{% endif %}
+        </button>
+    </form>
+</div>
+    </div>
+</div>
+
+    <!-- List of Projects -->
+    <h2 align="center">All Projects</h2>
+    <table id="projectsTable" class="table table-bordered">
+        <thead>
+            <tr>
+            <th>Title</th>
+            <th>Document No</th>
+            <th>Mail No</th>
+            <th>Ref No</th>
+            <th>Scope</th>
+            <th>Projects</th>
+            <th>Revision</th>
+            <th>Category</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>List</th>
+            <th>Assigned</th>
+            <th>Group</th>
+            <th>Checker</th>
+            <th>QC3 Checker</th>
+            <th>Priority</th>
+            <th>Task Status</th>
+            <th>3D Review</th>
+            <th>QC1</th>
+            <th>QC2</th>
+            <th>QC3</th>
+            <th>Verification Status</th>
+            <th>Phase 1 Benchmark</th>
+            <th>Phase 2 Benchmark</th>
+            <th>Phase 3 Benchmark</th>
+            <th>Phase 4 Benchmark</th>
+            <th>Phase 5 Benchmark</th>
+            <th>Phase 6 Benchmark</th>
+            <th>Phase 7 Benchmark</th>
+            <th>Phase 8 Benchmark</th>
+            <th>Phase 9 Benchmark</th>
+            <th>Phase 10 Benchmark</th>
+            <th>Task Benchmark</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for project in projects %}
+                <tr>
+                    <td>{{ project.title }}</td>
+                <td>{{ project.d_no|default:"" }}</td>
+                <td>{{ project.mail_no|default:"" }}</td>
+                <td>{{ project.ref_no|default:"" }}</td>
+                <td>{{ project.scope|default:"" }}</td>
+                <td>{{ project.projects|default:"" }}</td>
+                <td>{{ project.rev|default:"" }}</td>
+                <td>{{ project.category|default:"" }}</td>
+                <td>{{ project.start|date:"Y-m-d" }}</td>
+                <td>{{ project.end|date:"Y-m-d" }}</td>
+                <td>{{ project.list|default:"" }}</td>
+                <td>{{ project.assigned|default:"" }}</td>
+                <td>{{ project.group|default:"" }}</td>
+                <td>{{ project.checker|default:"" }}</td>
+                <td>{{ project.qc3_checker|default:"" }}</td>
+                <td>{{ project.priority|default:"" }}</td>
+                <td>{{ project.task_status|default:"" }}</td>
+                <td>{{ project.review_3d|yesno:"Yes,No" }}</td>
+                <td>{{ project.qc1|yesno:"Yes,No" }}</td>
+                <td>{{ project.qc2|yesno:"Yes,No" }}</td>
+                <td>{{ project.qc3|yesno:"Yes,No" }}</td>
+                <td>{{ project.verification_status|default:"" }}</td>
+                <td>{{ project.phase_1_benchmark|default:"" }}</td>
+                <td>{{ project.phase_2_benchmark|default:"" }}</td>
+                <td>{{ project.phase_3_benchmark|default:"" }}</td>
+                <td>{{ project.phase_4_benchmark|default:"" }}</td>
+                <td>{{ project.phase_5_benchmark|default:"" }}</td>
+                <td>{{ project.phase_6_benchmark|default:"" }}</td>
+                <td>{{ project.phase_7_benchmark|default:"" }}</td>
+                <td>{{ project.phase_8_benchmark|default:"" }}</td>
+                <td>{{ project.phase_9_benchmark|default:"" }}</td>
+                <td>{{ project.phase_10_benchmark|default:"" }}</td>
+                <td>{{ project.task_benchmarK|default:"" }}</td>
+                <td>
+                        <!-- Edit Button -->
+                        <form method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="project_id" value="{{ project.id }}">
+                            <button type="submit" name="edit" class="btn btn-warning btn-sm">Edit</button>
+                        </form>
+                        <!-- Delete Button -->
+                        <form method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="project_id" value="{{ project.id }}">
+                            <button type="submit" name="delete" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Include Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
+
+<!-- jQuery and DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function() {
+    $('#projectsTable').DataTable({
+        paging: false,         // Disables pagination
+        searching: true,       // Enables searching
+        ordering: true,        // Enables column-based sorting
+        language: {
+            search: "Filter:",
+            lengthMenu: "Show _MENU_ entries",
+            info: "Showing _START_ to _END_ of _TOTAL_ entries",
+            paginate: {
+                previous: "Previous",
+                next: "Next"
+            }
+        }
+    });
+});
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,270 @@
+body {
+    background-color: white;
+    color: #000;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.sidebar {
+    background: #0F1A60;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.1);
+    margin-right: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 20;
+    height: 100%;
+    width: 8%;
+    padding: 15px;
+}
+
+.sidebar a {
+    color: white;
+    padding: 13px;
+    text-decoration: none;
+    display: block;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    transition: background-color 0.3s;
+    text-align: center;
+    align-items: left;
+}
+
+.sidebar a:hover {
+    background-color: #1f4068;
+}
+
+.sidebar a i {
+    margin-right: 10px;
+}
+
+.sidebar .sign-out {
+    margin-top: auto;
+}
+
+.container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    flex-grow: 5;
+    display: flex;
+    flex-direction: column;
+    margin: 10px auto;
+    width: 95%; /* Adjust width for responsiveness */
+    max-width: 1200px; /* Limit maximum width for large screens */
+
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header h1 {
+    font-size: 24px;
+    margin: 0;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.user-info img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.statistics-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 40px;
+    width: 120%;
+
+}
+
+.statistics-item,
+.holiday-list {
+    background-color:  #e0e0e0;
+    padding: 20px;
+    border-radius: 10px;
+    flex: 1 1 calc(33.33% - 10px); /* Flex for 3 columns */
+    min-width: 250px;
+    text-align: center;
+}
+
+.calendar {
+    background-color:  #e0e0e0;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    flex: 1 1 calc(33.33% - 10px); /* Flex for 3 columns */
+    min-width: 300px;
+}
+
+.leave-history {
+    margin-top: 20px;
+}
+
+.leave-history table {
+    width: 120%;
+    border-collapse: collapse;
+    margin: 20px auto;
+    font-size: 16px;
+}
+
+.leave-history th,
+.leave-history td {
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    text-align: center;
+}
+
+.leave-history th {
+    background-color: #f9f9f9;
+}
+
+.leave-history td i {
+    cursor: pointer;
+}
+
+.leave-history td i:hover {
+    color: #1f4068;
+}
+
+.apply-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 50px;
+    background-color: #c1fff7ee;
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
+    text-align: center;
+    margin: 20px auto;
+    transition: background-color 0.3s;
+}
+
+.apply-btn:hover {
+    background-color: #00274D;
+}
+
+.calendar-container {
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    margin: 20px auto;
+    width: 100%;
+    max-width: 600px; /* Limit width */
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-header h4 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.calendar-header button {
+    background: none;
+    border: none;
+    color: #007bff;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-bottom: 20px;
+}
+
+.calendar-days div {
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.calendar-days div:hover {
+    background-color: #e0e0e0;
+}
+
+.calendar-days div.active {
+    background-color: #1f4068;
+    color: white;
+}
+
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px auto;
+    font-size: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px;
+    border: 1px solid #dddddd;
+}
+
+.styled-table thead tr {
+    background-color: #009879;
+    color: black;
+}
+
+.styled-table tbody tr:nth-child(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 1900px) {
+    .statistics-container {
+        flex-direction: column;
+    }
+
+    .statistics-item,
+    .holiday-list,
+    .calendar {
+        flex: 1 1 200%;
+        margin-bottom: 15px;
+    }
+
+    .sidebar {
+        width: 100px;
+    }
+
+    .container {
+        padding: 10px;
+    }
+
+    .leave-history table {
+        font-size: 14px;
+    }
+}

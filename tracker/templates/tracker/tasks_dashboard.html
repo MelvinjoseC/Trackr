@@ -3,296 +3,405 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Dashboard</title>
-   {% load static %}
-    <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"> <!-- Font Awesome CSS -->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-
-        /* Sidebar Styling */
-        .sidebar {
-            position: fixed;
-            height: 100%;
-            width: 80px;
-            background-color: black;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .sidebar a {
-            margin: 20px 0;
-            text-align: center;
-            font-size: 0.75rem;
-            text-decoration: none;
-            font-weight:bold;
-        }
-
-        .sidebar a img {
-            width: 40px;
-            height: 40px;
-        }
-
-        /* Main Content */
-        .content {
-            margin-left: 100px;
-            padding: 20px;
-        }
-
-        .toggle {
-            display: flex;
-            align-items: center;
-          }
-
-          .toggle input[type="checkbox"] {
-            display: none;
-          }
-
-          .toggle label {
-            padding: 8px 12px;
-            border-radius: 20px;
-            background-color: lightgray;
-            cursor: pointer;
-            display: inline-block;
-          }
-
-          .toggle span {
-            font-size: 1.5rem;
-            margin-right: 10px;
-          }
-
-          /* Styling for checked state */
-          .toggle input[type="checkbox"]:checked + label:nth-of-type(1) {
-            background-color: lightblue;
-            color: black;
-          }
-
-          .toggle input[type="checkbox"]:checked + label:nth-of-type(2) {
-            background-color: lightcoral;
-            color: black;
-          }
-
-          /* Styling for unchecked state */
-          .toggle label:nth-of-type(2) {
-            display: none;
-          }
-
-          .toggle input[type="checkbox"]:checked ~ label:nth-of-type(2) {
-            display: inline-block;
-          }
-
-          .toggle input[type="checkbox"]:checked ~ label:nth-of-type(1) {
-            display: none;
-          }
-        .dropdown {
-            margin-left: 20px;
-        }
-
-        /* Task details card */
-        .task-details {
-            display: flex;
-            flex-direction: column;
-
-            margin-top: 20px;
-            margin-right: 50px;
-        }
-
-        .task-details .card {
-            width: 100%;  /* Full width of container */
-            height: 25%;
-            padding: 70px;
-            margin-bottom: 20px; /* Space between cards */
-            border-radius: 10px;
-            box-shadow: 0px 0px 5px rgba(0,0,0,0.1);
-        }
-
-        .left-container {
-            width: 65%;
-            height: 700px;
-            padding: 15px;
-            margin-right: 20px;
-            margin-left: 50px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 5px rgba(0,0,0,0.1);
-        }
-
-        .img-fluid{
-            width: 170px;
-            height: 45px;
-            object-fit: fill;
-            margin-bottom: 10px;
-        }
-
-        /* Time and project details */
-        .time-details {
-            text-align: right;
-        }
-
-        /* Search bar styling */
-        .search-bar {
-            display: flex;
-            align-items: center;
-            margin-left: auto;
-        }
-
-        .search-bar input {
-            width: 600px;
-            padding: 6px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
-        /* Time and Date Styling */
-        #current-time {
-            font-size: 1.2rem;
-            margin-right: 25px;
-            font-weight: bold;
-        }
-
-        #current-date {
-            font-size: 1rem;
-            color: black;
-            margin-right: 8px;
-            font-weight: bold;
-
-        }
-
-        .content-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-    </style>
+    <title>Task Tracker</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
+<style>
+
+
+</style>
 <body>
+    <div class="main-container">
+        <!-- Sidebar -->
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <a href="{% url 'home' %}"><img src="{% static 'images/img_4.png' %}" alt="Home">HOME</a>
-        <br><br><br>
-        <a href="{% url 'create_task' %}"><img src="{% static 'images/img.png' %}" alt="Tasks">CREATE TASK</a>
-        <a href="{% url 'task_dashboard' %}"><img src="{% static 'images/img_1.png' %}">REFRESH</a>
-        <a href="{% url 'daily_timesheet' %}"><img src="{% static 'images/img_2.png' %}" alt="Calendar">DAILY OVERVIEW</a>
-        <a href="#"><img src="{% static 'images/img_3.png' %}" alt="Calendar">MANUAL TIMESHEET</a>
+        <div class="sidebar">
+          </br>
+             <img src="{% static 'images/img_19.png' %}" alt="Responsive image" width="150" height="40">
+            </br></br>
+            {% if user.is_authenticated %}
+            <h4 style="color: white; text-transform: uppercase;" align="center"><img  src="{% static 'images/R.png' %}" alt="User" style="width: 45px; height: 50px; border-radius: 16px;"></br>{{ user.username }} </h4>
+            <p>SENIOR DESIGNER</p>
+        {% else %}
+            <h4>Welcome, Guest!</h4>
+        {% endif %}
+
+</br></br></br>
+        <a href="{% url 'calendar' %}" class="sidebar-link"><img src="{% static 'images/img_14.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title">Attendance</span></a>
+         <a href="{% url 'main_leave_page' %}" class="sidebar-link"><img src="{% static 'images/img_10.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> LeavePage</span></a>
+        <a href="{% url 'task' %}" class="sidebar-link"><img src="{% static 'images/img_11.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> ViewTasks</span></a>
+        <a href="{% url 'logouts' %}" class="sign-out sidebar-link"><img src="{% static 'images/img_12.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> SignOut</span></a>
     </div>
 
-    <!-- Main content area -->
-    <div class="content">
-        <div class="content-header">
-                <h2>TASKS:</h2>
-        </div>
-        <div align="right">
-        <img src="{% static 'images/Fusie Engineers Logo - white -cropped (1).jpg' %}"  class="img-fluid">
-            <br>
-                <div id="current-time"></div>
-                <div id="current-date"></div>
-        </div>
-        <br>
-        <br>
+        <!-- Main Content -->
+        <div class="content">
+    <!-- Clock section -->
+    <div class="date-time-container">
+        <!-- Date and Time -->
+        <div class="date-time">
+                     <div class="date" id="current-date"></div>
+                    <div class="time" id="current-time"></div>
+                </div>
+ <!-- Events Section -->
+ <div class="events-section">
+    <div class="events-header">
+        {% if user.is_authenticated %}
+        <h4>Good Morning, {{ user.username }}!</h4>
+        <p>You have 3 events for today:</p>
+        {% else %}
+        <h4>Welcome, Guest!</h4>
+        {% endif %}
+    </div>
 
-        <!-- Task Toggle & Dropdowns -->
-        <div class="d-flex justify-content-start align-items-center">
-            <div class="toggle">
-              <input type="checkbox" id="task-toggle" class="mr-2">
-              <span></span>
-              <label for="task-toggle" class="ml-2">ALL TASK</label>
-              <label for="task-toggle" class="ml-2">UNUPDATED TASK</label>
-            </div>
-            <div class="search-bar">
-                <input type="text" placeholder="Search...">
-            </div>
-            <div class="dropdown ml-3">
-                <select class="form-control">
-                    <option>ASSIGNED TASK</option>
-                    <option>GROUP TASK</option>
-                    <option>QC-2 CHECKING TASK</option>
-                    <option>QC-3 CHECKING TASK</option>
-                </select>
-            </div>
-
-            <div class="dropdown ml-3">
-                <select class="form-control">
-                    <option>PIPING</option>
-                    <option>STRUCTURAL</option>
-                    <option>CALCULATION</option>
-                    <option>LIFTING & RIGGING</option>
-                    <option>MARINE ENGINEERING</option>
-                    <option>ANIMATION</option>
-                    <option>ADMIN & IT</option>
-                    <option>DEVELOPERS</option>
-                    <option>ACCOUNTS</option>
-                    <option>EPLAN</option>
-                </select>
+    <div class="events-list">
+        <div class="event-item">
+            <div class="event-time">09:30 AM</div>
+            <div class="event-details">
+                <strong>Design Team Meeting</strong>
+                <p>Weekly Review</p>
             </div>
         </div>
-
-        <br><br>
-
-        <!-- Left Container and Task Details on Right -->
-        <div class="d-flex">
-            <!-- Left Container -->
-            <div class="left-container bg-light">
-<!--                <h4>Project Overview</h4>-->
-<!--                <p>Add project-related information here</p>-->
+        <div class="event-item">
+            <div class="event-time">01:30 PM</div>
+            <div class="event-details">
+                <strong>Conference Discussion</strong>
+                <p>New Project Discussion</p>
             </div>
-
-            <!-- Task Details -->
-            <div class="task-details">
-                <h1>TASK DETAILS</h1>
-                <div class="card">
-                    <h4>Total Task Time</h4>
-                    <p align="center">hr</p>
-                </div>
-                <div class="card">
-                    <h4>Total Week Time</h4>
-                    <p align="center">hr</p>
-                </div>
-                <div class="card">
-                    <h4>Total Month Time</h4>
-                    <p align="center">hr</p>
-                </div>
+        </div>
+        <div class="event-item">
+            <div class="event-time">04:30 PM</div>
+            <div class="event-details">
+                <strong>Stakeholder Meeting</strong>
+                <p>Practical Review</p>
             </div>
         </div>
     </div>
+</div>
+</div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+            <!-- Task Tracker -->
+            <section class="task-tracker">
+                <div class="task-header">
+                    <div class="filters">
+                        <select>
+                            <option>All Tasks</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div class="filters">
+                        <select>
+                            <option>Marine Engineering</option>
+                            <option>Other</option>
+                        </select>
+                        <input type="text" placeholder="Search Tasks">
+                    </div>
+                    <div class="filters">
+                        <select>
+                            <option>Assigned Tasks</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                </div>
 
-    <!-- Script for Current Time and Date -->
-    <script>
-        function updateTimeAndDate() {
-            const now = new Date();
+                <div class="tasks">
+                    <!-- Task Cards -->
+                    <div class="task-card2">
+                        <h4>Q3 Asia Barge Concept Design</h4>
+                        <p>Internal Project | FE/ME-1687/REV: 2</p>
+                        <div class="details">
+                            <p>Discussion: <span>4 hrs</span></p>
+                            <p>Designing: <span>18 hrs</span></p>
+                            <p>Calculating: <span>14 hrs</span></p>
+                            <p>Modelling: <span>20 hrs</span></p>
+                            <p>Checking: <span>10 hrs</span></p>
+                        </div>
+                        <div class="actions">
+                            <button>Info</button>
+                            <button>Edit Task</button>
+                            <button>Manual Time Sheet</button>
+                        </div>
+                    </div>
+                    <div class="task-card2">
+                        <h4>Q3 Asia Barge Concept Design</h4>
+                        <p>Internal Project | FE/ME-1687/REV: 2</p>
+                        <div class="details">
+                            <p>Discussion: <span>4 hrs</span></p>
+                            <p>Designing: <span>18 hrs</span></p>
+                            <p>Calculating: <span>14 hrs</span></p>
+                            <p>Modelling: <span>20 hrs</span></p>
+                            <p>Checking: <span>10 hrs</span></p>
+                        </div>
+                        <div class="actions">
+                            <button>Info</button>
+                            <button>Edit Task</button>
+                            <button>Manual Time Sheet</button>
+                        </div>
+                    </div>
+                    <div class="task-card2">
+                        <h4>Q3 Asia Barge Concept Design</h4>
+                        <p>Internal Project | FE/ME-1687/REV: 2</p>
+                        <div class="details">
+                            <p>Discussion: <span>4 hrs</span></p>
+                            <p>Designing: <span>18 hrs</span></p>
+                            <p>Calculating: <span>14 hrs</span></p>
+                            <p>Modelling: <span>20 hrs</span></p>
+                            <p>Checking: <span>10 hrs</span></p>
+                        </div>
+                        <div class="actions">
+                            <button>Info</button>
+                            <button>Edit Task</button>
+                            <button>Manual Time Sheet</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-            // Format time in HH:MM:SS AM/PM
-            let hours = now.getHours();
-            let minutes = now.getMinutes();
-            let seconds = now.getSeconds();
-            let ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12; // the hour '0' should be '12'
-            minutes = minutes < 10 ? '0' + minutes : minutes;
-            seconds = seconds < 10 ? '0' + seconds : seconds;
-            const timeString = `${hours}:${minutes}:${seconds} ${ampm}`;
+            <div class="task-buttons">
+    <div class="task-button">
+        <i class="fas fa-plus"></i>
+        <span><a href="{% url 'create_task' %}" >CREATE NEW TASK</a></span>
+        <i class="fas fa-chevron-right"></i>
+    </div>
+    <div class="task-button">
+        <i class="fas fa-edit"></i>
+        <span><a href="{% url 'monthly_calendar1' %}" >EDIT ALL TASKS</a> </span>
+        <i class="fas fa-chevron-right"></i>
+    </div>
+    <div class="task-button">
+        <i class="fas fa-calendar-alt"></i>
+        <span><a href="{% url 'monthly_calendar1' %}" >MANUAL TIMESHEET</a></span>
+        <i class="fas fa-chevron-right"></i>
+    </div>
+</div>
+            <section class="timesheet">
+    <div class="timesheet-header">
+    <h3>My Daily Timesheet</h3>
+    <div class="date-picker">
+        <input type="date" id="date-input" />
+        <span id="selected-date"></span>
+    </div>
+</div>
 
-            // Format date as FULL DAY MONTH DATE YEAR
-            const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
-            const dateString = now.toLocaleDateString('en-US', options).toUpperCase();
+    <div class="timesheet-rows">
+        <!-- Row 1 -->
+        <div class="timesheet-row">
+            <div class="task-info">
+                <h4 class="task-type">DISCUSSION</h4>
+                <p class="task-name">JB-119 BOATLANDING</p>
+                <p class="task-meta">FE | ME-1674 | REV NO: 3</p>
+            </div>
+            <div class="task-time">
+                <p>1 HOUR 30 MINUTES</p>
+                <span>INTERNAL PROJECTS</span>
+            </div>
+            <div class="task-actions">
+                <i class="fas fa-comment-alt"></i>
+                <i class="fas fa-trash"></i>
+            </div>
+        </div>
 
-            // Update time and date elements
-            document.getElementById('current-time').textContent = timeString;
-            document.getElementById('current-date').textContent = dateString;
+        <!-- Row 2 -->
+        <div class="timesheet-row">
+            <div class="task-info">
+                <h4 class="task-type">DESIGNING</h4>
+                <p class="task-name">JB-119 BOATLANDING</p>
+                <p class="task-meta">FE | ME-1674 | REV NO: 3</p>
+            </div>
+            <div class="task-time">
+                <p>3 HOURS 20 MINUTES</p>
+                <span>INTERNAL PROJECTS</span>
+            </div>
+            <div class="task-actions">
+                <i class="fas fa-comment-alt"></i>
+                <i class="fas fa-trash"></i>
+            </div>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="timesheet-row">
+            <div class="task-info">
+                <h4 class="task-type">MODELLING</h4>
+                <p class="task-name">JB-119 BOATLANDING</p>
+                <p class="task-meta">FE | ME-1674 | REV NO: 3</p>
+            </div>
+            <div class="task-time">
+                <p>3 HOURS 15 MINUTES</p>
+                <span>INTERNAL PROJECTS</span>
+            </div>
+            <div class="task-actions">
+                <i class="fas fa-comment-alt"></i>
+                <i class="fas fa-trash"></i>
+            </div>
+        </div>
+
+        <!-- Row 4 -->
+        <div class="timesheet-row">
+            <div class="task-info">
+                <h4 class="task-type">CHECKING</h4>
+                <p class="task-name">JB-119 BOATLANDING</p>
+                <p class="task-meta">FE | ME-1674 | REV NO: 3</p>
+            </div>
+            <div class="task-time">
+                <p>1 HOUR 15 MINUTES</p>
+                <span>INTERNAL PROJECTS</span>
+            </div>
+            <div class="task-actions">
+                <i class="fas fa-comment-alt"></i>
+                <i class="fas fa-trash"></i>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+        </div>
+                <div class="right-sidebar">
+    <!-- My Team Section -->
+    <section class="team-performance">
+        <h3>MY TEAM - MARINE ENGINEERING</h3>
+        <p>Team Performance for October, 2024</p>
+        <div class="team-stats">
+            <div class="stat">
+                <p>Total Tasks</p>
+                <h4>42</h4>
+                </div>
+            <div class="stat">
+                <p>Assigned</p>
+                <h4>30</h4>
+                </div>
+            <div class="stat">
+                <p>Pending</p>
+                <h4>18</h4>
+                </div>
+            <div class="stat">
+                <p>Completed</p>
+                <h4>12</h4>
+            </div>
+        </div>
+               
+    </section>
+    <section class="team-members">
+        <h3>Team Members</h3>
+        <div class="team-stats">
+            <div class="member">
+                <img src="{% static 'images/R.png' %}" alt="Me" >
+                <span>Me</span>
+            </div>
+            <div class="member">
+                <img src="{% static 'images/R.png' %}" alt="Priya Ganesh">
+                <span>Priya Ganesh</span>
+            </div>
+            <div class="member">
+                <img src="{% static 'images/R.png' %}" alt="Afzal K">
+                <span>Afzal K</span>
+            </div>
+            <div class="member">
+                <img src="{% static 'images/R.png' %}" alt="Ajith Kumar">
+                <span>Ajith Kumar</span>
+            </div>
+            <div class="member">
+                <img src="{% static 'images/R.png' %}" alt="Liya Paul">
+                <span>Liya Paul</span>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Task Details Section -->
+    <section class="task-card">
+        <h3>TASK DETAILS</h3>
+        <div class="task-placeholder">
+            <p>
+                <i class="fas fa-info-circle"></i> Click on the info button of a particular task to view corresponding task details.
+            </p>
+        </div>
+    </section>
+
+    <!-- Status of Team Projects Section -->
+    <section class="team-projects">
+        <h3>STATUS OF TEAM PROJECTS</h3>
+        <p>Project Status for October, 2024</p>
+        <div class="project-tabs">
+            <button class="tab active">Running</button>
+            <button class="tab">Revisions</button>
+            <button class="tab">Upcoming</button>
+        </div>
+        <div class="project-list">
+            <div class="project-item">RORO Bridge <span>DEME</span></div>
+            <div class="project-item">PANAMA Chock Support <span>Value Maritime</span></div>
+            <div class="project-item">JB-119 Boatlanding <span>CADELER</span></div>
+        </div>
+    </section>
+</div>
+
+    </div>
+<script>
+    function updateClock() {
+        const now = new Date();
+        const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const date = now.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+
+        document.getElementById('current-time').textContent = time;
+        document.getElementById('current-date').textContent = date;
+
+        // Highlight the current day
+        const dayIndex = now.getDay(); // 0 = Sunday, 6 = Saturday
+        const days = document.querySelectorAll('.day');
+        days.forEach((day, index) => {
+            if (index === dayIndex - 1) { // Adjust for Monday start
+                day.classList.add('active');
+            } else {
+                day.classList.remove('active');
+            }
+        });
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function () {
+        document.querySelector('.tab.active').classList.remove('active');
+        this.classList.add('active');
+
+        // Handle the content switching logic here
+        const content = document.querySelector('.project-list');
+        if (this.textContent === 'Running') {
+            content.innerHTML = `
+                <div class="project-item">RORO Bridge <span>DEME</span></div>
+                <div class="project-item">PANAMA Chock Support <span>Value Maritime</span></div>
+                <div class="project-item">JB-119 Boatlanding <span>CADELER</span></div>`;
+        } else if (this.textContent === 'Revisions') {
+            content.innerHTML = `<div class="project-item">Project X <span>Review</span></div>`;
+        } else {
+            content.innerHTML = `<div class="project-item">Project Y <span>Upcoming</span></div>`;
         }
+    });
+});
 
-        setInterval(updateTimeAndDate, 1000); // Update every second
-        updateTimeAndDate(); // Initial call to display time immediately
-    </script>
+    // Get the input and display elements
+const dateInput = document.getElementById("date-input");
+const selectedDate = document.getElementById("selected-date");
 
+// Function to format the date
+function formatDate(dateString) {
+    const options = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", options);
+}
+
+// Set the initial value of the date input to today's date
+const today = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
+dateInput.value = today;
+selectedDate.textContent = formatDate(today);
+
+// Update the displayed date when the user changes the date
+dateInput.addEventListener("change", (event) => {
+    selectedDate.textContent = formatDate(event.target.value);
+});
+
+</script>
 </body>
 </html>

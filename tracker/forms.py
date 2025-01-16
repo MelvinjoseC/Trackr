@@ -1,4 +1,5 @@
 # tracker/forms.py
+from django.contrib.auth.models import User
 
 from .models import Attendance, Task
 from django import forms
@@ -74,6 +75,7 @@ class LeaveApplicationForm(forms.ModelForm):
     )
 
     leave_option = forms.ChoiceField(choices=LEAVE_CHOICES, required=True)
+
     class Meta:
         model = LeaveApplication
         fields = ['start_date', 'end_date', 'reason', 'leave_type', 'approver', 'leave_option']
@@ -85,6 +87,11 @@ class LeaveApplicationForm(forms.ModelForm):
             'reason': forms.Textarea(attrs={'rows': 3}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Dynamically populate the approver field
+        self.fields['approver'].queryset = User.objects.filter(is_staff=True)  # Adjust filter as necessary
+        self.fields['approver'].empty_label = "Select an Approver"
 
 # # forms.py
 # from django import forms
@@ -104,3 +111,32 @@ class LeaveApplicationForm(forms.ModelForm):
 #         if commit:
 #             user.save()
 #         return user
+
+from django import forms
+from .models import Project
+
+class ProjectForm(forms.ModelForm):
+    class Meta:
+        model = Project
+        fields = '__all__'
+        widgets = {
+            'start': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control',
+                'placeholder': 'yyyy-mm-dd'
+            }),
+            'end': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control',
+                'placeholder': 'yyyy-mm-dd'
+            }),
+        }
+
+from django import forms
+from .models import MonthlyCalendar
+
+class MonthlyCalendarForm(forms.ModelForm):
+    class Meta:
+        model = MonthlyCalendar
+        exclude = ['assigned']  # Exclude 'assigned' since it's set automatically
+

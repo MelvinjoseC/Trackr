@@ -7,7 +7,7 @@
     {% load static %}
     <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"> <!-- Font Awesome CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"> <!-- Font Awesome css -->
     <style>
         body {
             background-color: #f4f4f4;
@@ -137,7 +137,7 @@
             <h3>USE TASK TRACKER VERSION 1 FOR RUNNING PROJECTS</h3>
             <a href="{% url 'task_dashboard' %}" class="btn btn-task">TASK TRACKER 1</a>
             <h3>USE TASK TRACKER VERSION 2 FOR NEW PROJECTS</h3>
-            <a href="{% url 'task' %}" class="btn btn-task">TASK TRACKER 2</a>
+            <a href="{% url 'project_dashboard' %}" class="btn btn-task">TASK TRACKER 2</a>
             <p class="note">DEPARTMENTS - ANIMATION, AUDIT, ACCOUNTS, EPLAN, DEVELOPERS CAN USE TASK TRACKER VERSION 2</p>
         </div>
     </div>

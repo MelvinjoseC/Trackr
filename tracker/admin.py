@@ -1,7 +1,7 @@
 # tracker/admin.py
 
 from django.contrib import admin
-from .models import Attendance, Task, LeaveApplication
+from .models import Attendance, Task, LeaveApplication, Project, MonthlyCalendar
 from .models import Holiday
 
 admin.site.register(Holiday)
@@ -10,6 +10,8 @@ admin.site.register(Holiday)
 admin.site.register(Attendance)
 admin.site.register(Task)
 admin.site.register(LeaveApplication)
+admin.site.register(Project)
+admin.site.register(MonthlyCalendar)
 # # admin.py
 # from django.contrib import admin
 # from django.contrib.auth.admin import UserAdmin
