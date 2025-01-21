@@ -1,23 +1,37 @@
 from django.db import connection
-from django.contrib.auth.decorators import login_required
+
 from django.shortcuts import render
 from datetime import datetime
 
 
-@login_required
-def task_dashboard(request):
-    # Fetch the logged-in user's designation
+
+from django.shortcuts import render
+from django.db import connection
+from datetime import datetime
+
+
+def fetch_task_dashboard_data(user_id, selected_date_str):
+    """
+    Fetch the data required for the task dashboard.
+
+    Args:
+        user_id (int): The ID of the logged-in user.
+        selected_date_str (str): The selected date as a string.
+
+    Returns:
+        dict: A dictionary containing designation, selected_date, and monthly_calendar_data.
+    """
+    # Fetch the user's designation
     designation = None
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT designation FROM auth_user WHERE id = %s", [request.user.id])
+            cursor.execute("SELECT designation FROM auth_user WHERE id = %s", [user_id])
             result = cursor.fetchone()
             designation = result[0] if result else None
     except Exception as e:
         print(f"Error fetching designation: {e}")
 
-    # Get the selected date from the request or use the current date
-    selected_date_str = request.GET.get('date', None)
+    # Parse the selected date or use the current date
     try:
         selected_date = datetime.strptime(selected_date_str,
                                           '%Y-%m-%d').date() if selected_date_str else datetime.now().date()
@@ -62,12 +76,28 @@ def task_dashboard(request):
     except Exception as e:
         print(f"Error fetching monthly calendar data: {e}")
 
-    # Prepare the context for the template
-    task_data = {
-        'designation': designation,  # Add user designation to context
-        'monthly_calendar_data': monthly_calendar_data,  # Include fetched calendar data
-        'selected_date': selected_date,  # Pass the selected or current date
+    return {
+        'designation': designation,
+        'selected_date': selected_date,
+        'monthly_calendar_data': monthly_calendar_data,
     }
 
-    # Render the task dashboard template
+
+def task_dashboard(request):
+    """
+    Render the task dashboard page.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        HttpResponse: The rendered task dashboard page.
+    """
+    # Get the selected date from the request
+    selected_date_str = request.GET.get('date', None)
+
+    # Fetch the data using the helper function
+    task_data = fetch_task_dashboard_data(request.user.id, selected_date_str)
+
+    # Render the template with the data
     return render(request, 'tasks_dashboard.html', task_data)

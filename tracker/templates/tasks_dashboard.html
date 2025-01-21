@@ -1,6 +1,8 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Tracker</title>
@@ -8,9 +10,17 @@
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+
+
+
 </head>
+
 <body>
+    <script src="{% static 'js/attendence.js' %}"></script>
+    <script src="{% static 'js/task_dashbord.js' %}"></script>
+    <script src="{% static 'js/leavepage.js' %}"></script>
     <div class="main-container">
         <!-- Sidebar -->
 
@@ -26,8 +36,20 @@
 
 </br></br></br>
 <!--             <a class="sidebar-link"><img src="{% static 'images/img_8.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title">Dashboard</span></a>-->
-        <a  class="sidebar-link"><img src="{% static 'images/img_14.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title">Attendance</span></a>
-         <a  class="sidebar-link"><img src="{% static 'images/img_10.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> LeavePage</span></a>
+<div id="attendance-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <h2>Attendance</h2>
+        <p>Here is the attendance functionality or details.</p>
+        <button id="close-modal" class="modal-close">Close</button>
+    </div>
+</div>
+
+<!-- Attendance Button -->
+<a class="sidebar-link" id="attendance-button">
+    <img src="{% static 'images/img_14.png' %}" width="40" height="40">
+    &nbsp;&nbsp;<span class="sidebar-title">Attendance</span>
+</a>
+         <a  class="sidebar-link" id="leave-button"><img src="{% static 'images/img_10.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> LeavePage</span></a>
         <a  class="sidebar-link"><img src="{% static 'images/img_21.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> ViewTasks</span></a>
         <a  class="sign-out sidebar-link"><img src="{% static 'images/img_12.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> SignOut</span></a>
     </div>
@@ -298,83 +320,7 @@
 </div>
 
     </div>
-<script>
-    function updateClock() {
-        const now = new Date();
-        const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const date = now.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 
-        document.getElementById('current-time').textContent = time;
-        document.getElementById('current-date').textContent = date;
 
-        // Highlight the current day
-        const dayIndex = now.getDay(); // 0 = Sunday, 6 = Saturday
-        const days = document.querySelectorAll('.day');
-        days.forEach((day, index) => {
-            if (index === dayIndex - 1) { // Adjust for Monday start
-                day.classList.add('active');
-            } else {
-                day.classList.remove('active');
-            }
-        });
-    }
-
-    setInterval(updateClock, 1000);
-    updateClock();
-
-    document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', function () {
-        document.querySelector('.tab.active').classList.remove('active');
-        this.classList.add('active');
-
-        // Handle the content switching logic here
-        const content = document.querySelector('.project-list');
-        if (this.textContent === 'Running') {
-            content.innerHTML = `
-                <div class="project-item">RORO Bridge <span>DEME</span></div>
-                <div class="project-item">PANAMA Chock Support <span>Value Maritime</span></div>
-                <div class="project-item">JB-119 Boatlanding <span>CADELER</span></div>`;
-        } else if (this.textContent === 'Revisions') {
-            content.innerHTML = `<div class="project-item">Project X <span>Review</span></div>`;
-        } else {
-            content.innerHTML = `<div class="project-item">Project Y <span>Upcoming</span></div>`;
-        }
-    });
-});
-
-    // Get the input and display elements
-const dateInput = document.getElementById("date-input");
-const selectedDate = document.getElementById("selected-date");
-
-// Function to format the date
-function formatDate(dateString) {
-    const options = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", options);
-}
-
-// Set the initial value of the date input to today's date
-const today = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
-dateInput.value = today;
-selectedDate.textContent = formatDate(today);
-
-// Update the displayed date when the user changes the date
-dateInput.addEventListener("change", (event) => {
-    selectedDate.textContent = formatDate(event.target.value);
-});
- document.addEventListener("DOMContentLoaded", () => {
-        const timeElements = document.querySelectorAll(".time-display");
-        timeElements.forEach((element) => {
-            const decimalTime = parseFloat(element.dataset.time);
-            if (!isNaN(decimalTime)) {
-                const hours = Math.floor(decimalTime);
-                const minutes = Math.round((decimalTime - hours) * 60);
-                element.textContent = `${hours}hr ${minutes}min`;
-            } else {
-                element.textContent = "Not Available";
-            }
-        });
-    });
-</script>
 </body>
 </html>

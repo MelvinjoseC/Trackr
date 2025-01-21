@@ -90,7 +90,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tasktracker',  # Name of your MySQL database
         'USER': 'root',  # Your MySQL username
-        'PASSWORD': 'varshith123',  # Your MySQL password
+        'PASSWORD': 'Melvin@123',  # Your MySQL password
         'HOST': 'localhost',  # Set to 'localhost' or your MySQL server's IP address
         'PORT': '3306',  # Default MySQL port
     }
@@ -132,7 +132,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # Assuming 'static' folder is in the root of your project
+]
+
 # For production
 STATIC_ROOT = BASE_DIR / "staticfiles"
 # Default primary key field type
