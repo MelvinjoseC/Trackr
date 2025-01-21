@@ -19,13 +19,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
-from tracker.views import home_view
+from tracker.views import task_dashboard
+
+# from tracker.views import home_view
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', home_view, name='home'),  # Map the home view to the root URL
-    path('tracker/', include('tracker.urls')),
-    path('accounts/', include('django.contrib.auth.urls')),  # For authentication
+    # path('admin/', admin.site.urls),
+    path('',task_dashboard, name='dashboard'),  # Map the home view to the root URL
+    #  path('tracker/', include('tracker.urls')),
+    # path('accounts/', include('django.contrib.auth.urls')),  # For authentication
 ]
 
 

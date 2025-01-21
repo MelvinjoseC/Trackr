@@ -10,11 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
-<style>
-
-
-
-</style>
 <body>
     <div class="main-container">
         <!-- Sidebar -->
@@ -30,11 +25,11 @@
         {% endif %}
 
 </br></br></br>
-<!--             <a href="{% url 'task_dashboard' %}" class="sidebar-link"><img src="{% static 'images/img_8.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title">Dashboard</span></a>-->
-        <a href="{% url 'calendar' %}" class="sidebar-link"><img src="{% static 'images/img_14.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title">Attendance</span></a>
-         <a href="{% url 'main_leave_page' %}" class="sidebar-link"><img src="{% static 'images/img_10.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> LeavePage</span></a>
-        <a href="{% url 'task_dashboard' %}" class="sidebar-link"><img src="{% static 'images/img_21.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> ViewTasks</span></a>
-        <a href="{% url 'logouts' %}" class="sign-out sidebar-link"><img src="{% static 'images/img_12.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> SignOut</span></a>
+<!--             <a class="sidebar-link"><img src="{% static 'images/img_8.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title">Dashboard</span></a>-->
+        <a  class="sidebar-link"><img src="{% static 'images/img_14.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title">Attendance</span></a>
+         <a  class="sidebar-link"><img src="{% static 'images/img_10.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> LeavePage</span></a>
+        <a  class="sidebar-link"><img src="{% static 'images/img_21.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> ViewTasks</span></a>
+        <a  class="sign-out sidebar-link"><img src="{% static 'images/img_12.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> SignOut</span></a>
     </div>
 
         <!-- Main Content -->
@@ -163,16 +158,16 @@
             <div class="task-buttons">
     <div class="task-button">
         <i class="fas fa-plus"></i>
-        <span><a href="{% url 'create_task' %}" >CREATE NEW TASK</a></span>
+        <span><a >CREATE NEW TASK</a></span>
         <i class="fas fa-chevron-right"></i>
     </div>
     <div class="task-button">
         <i class="fas fa-edit"></i>
-        <span><a href="{% url 'monthly_calendar1' %}" >EDIT ALL TASKS</a> </span>
+        <span><a >EDIT ALL TASKS</a> </span>
         <i class="fas fa-chevron-right"></i>
     </div>
     <div class="task-button">
-        <a href="{% url 'monthly_calendar1' %}" >
+        <a >
         <i class="fas fa-calendar-alt"></i>
         <span>MANUAL TIMESHEET</span></a>
         <i class="fas fa-chevron-right"></i>
