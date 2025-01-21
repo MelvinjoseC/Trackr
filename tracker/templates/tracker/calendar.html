@@ -12,6 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <style>
+
 /* Container styling */
         #indicator-container {
             display: flex;
@@ -48,6 +49,8 @@
     background-color: #FFF9C4; /* Gray for no data */
     color: black;
 }
+
+
 </style>
 <body>
 <!--    <div class="header d-flex justify-content-between align-items-center">-->
@@ -68,15 +71,15 @@
              <img src="{% static 'images/img_19.png' %}" alt="Responsive image" width="150" height="40">
             </br></br>
             {% if user.is_authenticated %}
-            <h4 style="color: white; text-transform: uppercase;" align="center"><img  src="{% static 'images/R.png' %}" alt="User" style="width: 45px; height: 50px; border-radius: 16px;"></br>{{ user.username }} </h4>
+            <h4 style="color: white; text-transform: uppercase;" align="center"><img  src="{% static 'images/R.png' %}" alt="User" style="width: 45px; height: 50px; border-radius: 16px;"></br>{{ user.username }} </h4><h6 align="center">{{ designation }}</h6>
         {% else %}
             <h4>Welcome, Guest!</h4>
         {% endif %}
 </br></br></br>
-        <a href="{% url 'leave_application' %}" class="sidebar-link"><img src="{% static 'images/img_8.png' %}" width="40" height="40"><span class="sidebar-title">Dashboard</span></a>
+<!--        <a href="{% url 'task_dashboard' %}" class="sidebar-link"><img src="{% static 'images/img_8.png' %}" width="40" height="40"><span class="sidebar-title">Dashboard</span></a>-->
         <a href="{% url 'calendar' %}" class="sidebar-link"><img src="{% static 'images/img_9.png' %}" width="40" height="40"><span class="sidebar-title">Attendance</span></a>
         <a href="{% url 'main_leave_page' %}" class="sidebar-link"><img src="{% static 'images/img_10.png' %}" width="40" height="40"><span class="sidebar-title">Leave Page</span></a>
-        <a href="{% url 'task' %}" class="sidebar-link"><img src="{% static 'images/img_11.png' %}" width="40" height="40"><span class="sidebar-title">View Tasks</span></a>
+        <a href="{% url 'task_dashboard' %}" class="sidebar-link"><img src="{% static 'images/img_11.png' %}" width="40" height="40"><span class="sidebar-title">View Tasks</span></a>
         <a href="{% url 'logouts' %}" class="sign-out sidebar-link"><img src="{% static 'images/img_12.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> SignOut</span></a>
 </div>
 <!--            <div class="stats-sections">-->
@@ -487,226 +490,7 @@ document.addEventListener('DOMContentLoaded', function () {
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
 
-
-
-<!--{% load static %}-->
-<!--<!DOCTYPE html>-->
-<!--<html lang="en">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-<!--    <title>Attendance Calendar</title>-->
-<!--    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">-->
-<!--    <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">-->
-<!--    <style>-->
-<!--        body {-->
-<!--            background-color: #f3f6f9;-->
-<!--            font-family: Arial, sans-serif;-->
-<!--        }-->
-
-<!--        .sidebar {-->
-<!--            background-color: #002851;-->
-<!--            height: 100vh;-->
-<!--            width: 200px;-->
-<!--            position: fixed;-->
-<!--            top: 0;-->
-<!--            left: 0;-->
-<!--            padding: 20px;-->
-<!--            display: flex;-->
-<!--            flex-direction: column;-->
-<!--        }-->
-
-<!--        .sidebar a {-->
-<!--            color: #fff;-->
-<!--            text-decoration: none;-->
-<!--            margin-bottom: 20px;-->
-<!--            font-size: 1.2rem;-->
-<!--        }-->
-
-<!--        .container {-->
-<!--            margin-left: 220px;-->
-<!--            padding: 20px;-->
-<!--        }-->
-
-<!--        .top-panel {-->
-<!--            display: flex;-->
-<!--            justify-content: space-between;-->
-<!--            align-items: center;-->
-<!--            margin-bottom: 20px;-->
-<!--        }-->
-
-<!--        .top-panel .date-time, .assigned-timings, .statistics {-->
-<!--            padding: 10px;-->
-<!--            background-color: white;-->
-<!--            border-radius: 5px;-->
-<!--            box-shadow: 0 1px 5px rgba(0,0,0,0.1);-->
-<!--        }-->
-
-<!--        .assigned-timings .day-btn {-->
-<!--            background-color: #e8e8e8;-->
-<!--            color: #333;-->
-<!--            padding: 5px 10px;-->
-<!--            margin-right: 10px;-->
-<!--            border-radius: 5px;-->
-<!--        }-->
-
-<!--        .calendar {-->
-<!--            display: grid;-->
-<!--            grid-template-columns: repeat(7, 1fr);-->
-<!--            gap: 10px;-->
-<!--            width: 100%;-->
-<!--            margin-top: 20px;-->
-<!--        }-->
-
-<!--        .calendar-header {-->
-<!--            background-color: #5d6d7e;-->
-<!--            color: white;-->
-<!--            padding: 10px;-->
-<!--            text-align: center;-->
-<!--        }-->
-
-<!--        .calendar-day {-->
-<!--            background-color: #e8e8e8;-->
-<!--            padding: 15px;-->
-<!--            border-radius: 5px;-->
-<!--            text-align: center;-->
-<!--            position: relative;-->
-<!--        }-->
-
-<!--        .calendar-day.work-office {-->
-<!--            background-color: #d4edda; /* Light green */-->
-<!--        }-->
-
-<!--        .calendar-day.work-home {-->
-<!--            background-color: #f8d7da; /* Light pink */-->
-<!--        }-->
-
-<!--        .calendar-day.leave-day {-->
-<!--            background-color: #fff3cd; /* Light yellow */-->
-<!--        }-->
-
-<!--        .calendar-day.no-data {-->
-<!--            background-color: #e9ecef; /* Light gray */-->
-<!--        }-->
-
-<!--        .day-info {-->
-<!--            margin-top: 10px;-->
-<!--            font-size: 0.8rem;-->
-<!--            color: #333;-->
-<!--        }-->
-
-<!--        .action-buttons {-->
-<!--            position: absolute;-->
-<!--            bottom: 10px;-->
-<!--            right: 10px;-->
-<!--        }-->
-
-<!--        .statistics .stat-item {-->
-<!--            text-align: center;-->
-<!--            font-size: 1.5rem;-->
-<!--        }-->
-
-<!--        .btn-custom {-->
-<!--            background-color: #007bff;-->
-<!--            color: white;-->
-<!--            padding: 10px 20px;-->
-<!--            border-radius: 5px;-->
-<!--            text-decoration: none;-->
-<!--        }-->
-
-<!--        .btn-custom:hover {-->
-<!--            background-color: #0056b3;-->
-<!--            color: white;-->
-<!--        }-->
-<!--    </style>-->
-<!--</head>-->
-<!--<body>-->
-<!--    <div class="header d-flex justify-content-between align-items-center">-->
-<!--        <a href="{% url 'home' %}">-->
-<!--            <img src="{% static 'images/HOME.png' %}" alt="Home" style="width: 40px; height: 35px; border-radius: 4px;">-->
-<!--        </a>-->
-<!--        <h1 style="font-size: 1.9rem; font-weight: bold;">ATTENDANCE CALENDAR</h1>-->
-<!--        {% if user.is_authenticated %}-->
-<!--            <h4>{{ user.username }} <img src="{% static 'images/R.png' %}" alt="User" style="width: 30px; height: 35px; border-radius: 4px;"></h4>-->
-<!--        {% else %}-->
-<!--            <h4>Welcome, Guest!</h4>-->
-<!--        {% endif %}-->
-<!--    </div>-->
-<!--    <br>-->
-<!--    <div class="container">-->
-<!--        <div class="d-flex justify-content-between align-items-center mb-4">-->
-<!--            <div>-->
-<!--                <a class="btn btn-danger" href="{% url 'clear_attendance' %}"><strong>Clear Records</strong></a>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="month-nav">-->
-<!--            <button id="prevMonth">&lt;</button>-->
-<!--            <span id="currentMonth">{{ current_month_name }} {{ current_year }}</span>-->
-<!--            <button id="nextMonth">&gt;</button>-->
-<!--        </div>-->
-<!--        <div class="total-worktime">-->
-<!--            <strong>Total Time: <span id="totalTime">{{ total_worktime }}Hr</span></strong>-->
-<!--        </div>-->
-<!--        <div class="calendar">-->
-<!--            <div class="calendar-header">Mon</div>-->
-<!--            <div class="calendar-header">Tue</div>-->
-<!--            <div class="calendar-header">Wed</div>-->
-<!--            <div class="calendar-header">Thu</div>-->
-<!--            <div class="calendar-header">Fri</div>-->
-<!--            <div class="calendar-header">Sat</div>-->
-<!--            <div class="calendar-header">Sun</div>-->
-
-<!--            {% for day in calendar_data %}-->
-<!--            <div class="calendar-day-->
-<!--                {% if day.status == 'office' %} work-office-->
-<!--                {% elif day.status == 'wfh' %} work-home-->
-<!--                {% elif day.status == 'leave' %} leave-day-->
-<!--                {% else %} no-data {% endif %}">-->
-<!--                <strong>{{ day.day }}</strong>-->
-<!--                {% if day.worktime %}-->
-<!--                    <div class="daily-times"><strong>{{ day.worktime }} Hrs</strong></div>-->
-<!--                    <div class="daily-times">IN : {{ day.punch_in }}</div>-->
-<!--                    <div class="daily-times">OUT : {{ day.punch_out }}</div>-->
-<!--                    <div class="daily-times">BREAK : {{ day.break_time }}</div>-->
-<!--                    <div>-->
-<!--                        <a href="{% url 'edit_attendance' day.pk %}" class="btn btn-success btn-sm mx-1"><strong>EDIT</strong></a>-->
-<!--                        <button class="btn btn-danger btn-sm mx-1" data-toggle="modal" data-target="#deleteModal" data-pk="{{ day.pk }}"><strong>DELETE</strong></button>-->
-<!--                    </div>-->
-<!--                {% elif day.status == 'no-data' %}-->
-<!--                    <div><a class="btn btn-primary" href="{% url 'attendance' %}"><strong>ADD DATA</strong></a></div>-->
-<!--                {% endif %}-->
-<!--            </div>-->
-<!--            {% endfor %}-->
-<!--        </div>-->
-
-<!--    </div>-->
-
-<!--    &lt;!&ndash; Add scripts for modal and other functionality &ndash;&gt;-->
-<!--    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>-->
-<!--    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>-->
-<!--    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>-->
-
-<!--    <script>-->
-<!--        // Add event listeners for navigating months-->
-<!--        document.getElementById('prevMonth').addEventListener('click', function() {-->
-<!--            window.location.href = "{% url 'calendar' %}?month={{ prev_month }}&year={{ prev_year }}";-->
-<!--        });-->
-
-<!--        document.getElementById('nextMonth').addEventListener('click', function() {-->
-<!--            window.location.href = "{% url 'calendar' %}?month={{ next_month }}&year={{ next_year }}";-->
-<!--        });-->
-
-<!--        $('#deleteModal').on('show.bs.modal', function(event) {-->
-<!--            var button = $(event.relatedTarget);-->
-<!--            var pk = button.data('pk');-->
-<!--            var modal = $(this);-->
-<!--            modal.find('.modal-body input#delete_pk').val(pk);-->
-<!--            var action = "{% url 'delete_attendance' 0 %}".replace("0", pk);-->
-<!--            document.getElementById('deleteForm').action = action;-->
-<!--        });-->
-<!--    </script>-->
-<!--</body>-->
-<!--</html>-->

@@ -25,12 +25,6 @@ def holidays_view(request):
     holidays = Holiday.objects.all()
     return render(request, 'tracker/holidays.html', {'holidays': holidays})
 
-
-# views.py
-from django.shortcuts import render
-from django.db import connection
-
-
 def user_info_list(request):
     # Modify the query to use the correct table name `userinfo`
     query = "SELECT * FROM tracker_userinfo"
@@ -64,7 +58,7 @@ def user_info_list(request):
 
 @login_required
 def home_view(request):
-    return render(request, 'base.html')
+    return render(request, 'tracker/tasks_dashboard.html')
 
 @login_required
 def custom_logout_view(request):
@@ -194,6 +188,13 @@ def calendar_view(request):
     expected_weekly_hours = weekly_workdays * 9  # 9 hours per valid workday in the current week
     expected_monthly_hours = month_workdays * 9  # 9 hours per valid workday in the current month
 
+    designation = None
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT designation FROM auth_user WHERE id = %s", [request.user.id])
+        result = cursor.fetchone()
+        if result:
+            designation = result[0]
+
     return render(request, 'tracker/calendar.html', {
         'today': timezone.now().date(),
         'current_month': current_month,
@@ -207,7 +208,8 @@ def calendar_view(request):
         'total_worktime': total_worktime,
         'weekly_worktime': weekly_worktime,  # Total weekly worktime in hours
         'expected_weekly_hours': expected_weekly_hours,  # Expected weekly worktime in hours
-        'expected_monthly_hours': expected_monthly_hours,  # Expected monthly worktime in hours
+        'expected_monthly_hours': expected_monthly_hours,
+        'designation': designation,# Expected monthly worktime in hours
     })
 
 
@@ -403,13 +405,66 @@ def edit_task(request, pk):
         form = TaskForm(instance=task)
     return render(request, 'tracker/edit_task.html', {'form': form, 'task': task})
 
+from django.db import connection
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from datetime import datetime
+
 @login_required
 def task_dashboard(request):
-    # Sample data for tasks and time details
+    # Fetch the logged-in user's designation
+    designation = None
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT designation FROM auth_user WHERE id = %s", [request.user.id])
+        result = cursor.fetchone()
+        if result:
+            designation = result[0]
+
+    # Get the selected date from the request, default to today if not provided
+    selected_date = request.GET.get('date')
+    if not selected_date:
+        selected_date = datetime.now().date()
+    else:
+        selected_date = datetime.strptime(selected_date, '%Y-%m-%d').date()
+
+    # Fetch data from the tasktracker.tracker_monthlycalendar table for the selected date
+    monthly_calendar_data = []
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT 
+                id, title, scope, date, time, assigned, category, project, 
+                list, rev_no, comments, benchmark, d_no, mail_no, ref_no, created, updated
+            FROM tasktracker.tracker_monthlycalendar
+            WHERE date = %s
+        """, [selected_date])
+        rows = cursor.fetchall()
+        # Convert the result to a list of dictionaries
+        for row in rows:
+            monthly_calendar_data.append({
+                'id': row[0],
+                'title': row[1],
+                'scope': row[2],
+                'date': row[3],
+                'time': row[4],
+                'assigned': row[5],
+                'category': row[6],
+                'project': row[7],
+                'list': row[8],
+                'rev_no': row[9],
+                'comments': row[10],
+                'benchmark': row[11],
+                'd_no': row[12],
+                'mail_no': row[13],
+                'ref_no': row[14],
+                'created': row[15],
+                'updated': row[16],
+            })
+
+    # Task-related data
     task_data = {
-        'total_task_time': '0 hr',
-        'total_week_time': '28.09 hr',
-        'total_month_time': '73.9 hr',
+        'designation': designation,  # Add designation to context
+        'monthly_calendar_data': monthly_calendar_data,  # Include filtered MonthlyCalendar data
+        'selected_date': selected_date,  # Pass the selected date to the template
     }
 
     # Render the template with context data
@@ -652,6 +707,13 @@ def main_leave_page(request):
     # Calculate total leave (includes redeemed compensation leaves)
     total_leave = balance_leave + redeemed_compensation_leaves
 
+    designation = None
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT designation FROM auth_user WHERE id = %s", [request.user.id])
+        result = cursor.fetchone()
+        if result:
+            designation = result[0]
+
     context = {
         'holidays': all_holidays,
         'leave_applications': leave_applications,
@@ -662,6 +724,7 @@ def main_leave_page(request):
         'compensation_leaves': redeemed_compensation_leaves,
         'total_leave': total_leave,  # Pass the calculated total leave
         'pro_rated_leave_allowance': pro_rated_leave_allowance,
+        'designation': designation
         # Include prorated leave allowance for debugging purposes
     }
 
@@ -964,3 +1027,5 @@ class MonthlyCalendarView(View):
             return JsonResponse({"message": "Record deleted successfully"}, status=200)
 
         return JsonResponse({"error": "Invalid action"}, status=400)
+
+

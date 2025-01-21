@@ -10,13 +10,37 @@
     <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
+<style>
+    body {
+  background-image: url("{% static 'images/img_18.png' %}");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+}
+    .button-container {
+    text-align: center; /* Center-aligns content within the container */
+}
+    .card{
+        border-radius: 16px;
+        width: 540px;
+        height: Fixed (600px)
+        Padding
+        Right: 80px;
+        Left: 80px;
+        backdrop-filter: blur(60px)
+        }
+</style>
 <body>
+</br></br></br></br></br>
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header text-center">
-                        <h4>Login</h4>
+                        </br></br>
+                        <img src="{% static 'images/Fusie Engineers Logo - white -cropped (1).jpg' %}" width="160" height="40">
+                        </br></br>
+                        <h6>LOGIN TO TASK TRACKER</h6>
                     </div>
                     <div class="card-body">
                         <form method="post">
@@ -29,7 +53,10 @@
                                 <label for="password">Password</label>
                                 <input type="password" name="password" class="form-control" id="password" required>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block">Login</button>
+                            <div class="button-container">
+                                <button  type="submit" class="btn btn-primary">Login</button>
+                            </div>
+                            </br></br>
                         </form>
                     </div>
                 </div>

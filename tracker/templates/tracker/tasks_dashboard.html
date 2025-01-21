@@ -6,10 +6,12 @@
     <title>Task Tracker</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <style>
+
 
 
 </style>
@@ -22,16 +24,16 @@
              <img src="{% static 'images/img_19.png' %}" alt="Responsive image" width="150" height="40">
             </br></br>
             {% if user.is_authenticated %}
-            <h4 style="color: white; text-transform: uppercase;" align="center"><img  src="{% static 'images/R.png' %}" alt="User" style="width: 45px; height: 50px; border-radius: 16px;"></br>{{ user.username }} </h4>
-            <p>SENIOR DESIGNER</p>
+            <h4 style="color: white; text-transform: uppercase; font-weight: bold;" align="center"><img  src="{% static 'images/R.png' %}" alt="User" style="width: 45px; height: 50px; border-radius: 16px;"></br>{{ user.username }} </br></br> {{ designation }}</h4>
         {% else %}
             <h4>Welcome, Guest!</h4>
         {% endif %}
 
 </br></br></br>
+<!--             <a href="{% url 'task_dashboard' %}" class="sidebar-link"><img src="{% static 'images/img_8.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title">Dashboard</span></a>-->
         <a href="{% url 'calendar' %}" class="sidebar-link"><img src="{% static 'images/img_14.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title">Attendance</span></a>
          <a href="{% url 'main_leave_page' %}" class="sidebar-link"><img src="{% static 'images/img_10.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> LeavePage</span></a>
-        <a href="{% url 'task' %}" class="sidebar-link"><img src="{% static 'images/img_11.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> ViewTasks</span></a>
+        <a href="{% url 'task_dashboard' %}" class="sidebar-link"><img src="{% static 'images/img_21.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> ViewTasks</span></a>
         <a href="{% url 'logouts' %}" class="sign-out sidebar-link"><img src="{% static 'images/img_12.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> SignOut</span></a>
     </div>
 
@@ -45,7 +47,7 @@
                     <div class="time" id="current-time"></div>
                 </div>
  <!-- Events Section -->
- <div class="events-section">
+<div class="events-section" style="background-image: url('{% static "images/img_20.png" %}'); ">
     <div class="events-header">
         {% if user.is_authenticated %}
         <h4>Good Morning, {{ user.username }}!</h4>
@@ -170,89 +172,53 @@
         <i class="fas fa-chevron-right"></i>
     </div>
     <div class="task-button">
+        <a href="{% url 'monthly_calendar1' %}" >
         <i class="fas fa-calendar-alt"></i>
-        <span><a href="{% url 'monthly_calendar1' %}" >MANUAL TIMESHEET</a></span>
+        <span>MANUAL TIMESHEET</span></a>
         <i class="fas fa-chevron-right"></i>
     </div>
 </div>
             <section class="timesheet">
-    <div class="timesheet-header">
+   <div class="timesheet-header">
     <h3>My Daily Timesheet</h3>
     <div class="date-picker">
-        <input type="date" id="date-input" />
-        <span id="selected-date"></span>
+        <form method="get">
+            <input type="date" id="date-input" name="date" value="{{ selected_date }}" />
+            <button type="submit">GET</button>
+        </form>
+        <span id="selected-date">Selected Date: {{ selected_date }}</span>
     </div>
 </div>
 
-    <div class="timesheet-rows">
-        <!-- Row 1 -->
+<div class="timesheet-content">
+    {% if monthly_calendar_data %}
+        {% for row in monthly_calendar_data %}
         <div class="timesheet-row">
             <div class="task-info">
-                <h4 class="task-type">DISCUSSION</h4>
-                <p class="task-name">JB-119 BOATLANDING</p>
-                <p class="task-meta">FE | ME-1674 | REV NO: 3</p>
+                <h4 class="task-type">{{ row.scope }}</h4>
+                <p class="task-name">{{ row.title }}</p>
+                <p class="task-meta">{{ row.d_no }}, REV NO: {{ row.rev_no }}</p>
             </div>
             <div class="task-time">
-                <p>1 HOUR 30 MINUTES</p>
-                <span>INTERNAL PROJECTS</span>
+                <p>
+                    {% if row.time %}
+                        {{ row.time|floatformat:2 }} hours
+                    {% else %}
+                        Not Available
+                    {% endif %}
+                </p>
+                <span>{{ row.project }}</span>
             </div>
             <div class="task-actions">
                 <i class="fas fa-comment-alt"></i>
                 <i class="fas fa-trash"></i>
             </div>
         </div>
-
-        <!-- Row 2 -->
-        <div class="timesheet-row">
-            <div class="task-info">
-                <h4 class="task-type">DESIGNING</h4>
-                <p class="task-name">JB-119 BOATLANDING</p>
-                <p class="task-meta">FE | ME-1674 | REV NO: 3</p>
-            </div>
-            <div class="task-time">
-                <p>3 HOURS 20 MINUTES</p>
-                <span>INTERNAL PROJECTS</span>
-            </div>
-            <div class="task-actions">
-                <i class="fas fa-comment-alt"></i>
-                <i class="fas fa-trash"></i>
-            </div>
-        </div>
-
-        <!-- Row 3 -->
-        <div class="timesheet-row">
-            <div class="task-info">
-                <h4 class="task-type">MODELLING</h4>
-                <p class="task-name">JB-119 BOATLANDING</p>
-                <p class="task-meta">FE | ME-1674 | REV NO: 3</p>
-            </div>
-            <div class="task-time">
-                <p>3 HOURS 15 MINUTES</p>
-                <span>INTERNAL PROJECTS</span>
-            </div>
-            <div class="task-actions">
-                <i class="fas fa-comment-alt"></i>
-                <i class="fas fa-trash"></i>
-            </div>
-        </div>
-
-        <!-- Row 4 -->
-        <div class="timesheet-row">
-            <div class="task-info">
-                <h4 class="task-type">CHECKING</h4>
-                <p class="task-name">JB-119 BOATLANDING</p>
-                <p class="task-meta">FE | ME-1674 | REV NO: 3</p>
-            </div>
-            <div class="task-time">
-                <p>1 HOUR 15 MINUTES</p>
-                <span>INTERNAL PROJECTS</span>
-            </div>
-            <div class="task-actions">
-                <i class="fas fa-comment-alt"></i>
-                <i class="fas fa-trash"></i>
-            </div>
-        </div>
-    </div>
+        {% endfor %}
+    {% else %}
+        <p>No Data Found</p>
+    {% endif %}
+</div>
 
 </section>
 
@@ -401,7 +367,19 @@ selectedDate.textContent = formatDate(today);
 dateInput.addEventListener("change", (event) => {
     selectedDate.textContent = formatDate(event.target.value);
 });
-
+ document.addEventListener("DOMContentLoaded", () => {
+        const timeElements = document.querySelectorAll(".time-display");
+        timeElements.forEach((element) => {
+            const decimalTime = parseFloat(element.dataset.time);
+            if (!isNaN(decimalTime)) {
+                const hours = Math.floor(decimalTime);
+                const minutes = Math.round((decimalTime - hours) * 60);
+                element.textContent = `${hours}hr ${minutes}min`;
+            } else {
+                element.textContent = "Not Available";
+            }
+        });
+    });
 </script>
 </body>
 </html>

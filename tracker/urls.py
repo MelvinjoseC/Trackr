@@ -10,7 +10,7 @@ from .views import (attendance_view, task_view, leave_application_view, custom_l
                     # redeem_page,
 
 urlpatterns = [
-    path('', home_view, name='home'),  # Home page
+    # path('login/', home_view, name='home'),  # Home page
     # path('register/', register, name='register'),
     path('attendance/', attendance_view, name='attendance'),
     path('task/', task_view, name='task'),
