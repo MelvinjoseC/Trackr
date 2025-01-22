@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib import messages
 from django.db import connection
-
+from .models import EmployeeDetails
 import json
 
 # Define a global variable
@@ -80,6 +80,75 @@ def task_dashboard(request):
         'image_base64': image_base64,  # Base64-encoded image string
         'employee_id': user_id  # Pass employee_id to the template
     })
+
+
+
+
+
+def sign_up(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            username = data.get("username")
+            password = data.get("password")
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "message": "Invalid request format."})
+
+        if not username or not password:
+            return JsonResponse({"success": False, "message": "Both username and password are required."})
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT authentication FROM employee_details WHERE name = %s AND password = %s",
+                [username, password]
+            )
+            result = cursor.fetchone()
+
+        if result:
+            designation = result[0]
+            if designation.lower() == 'admin':
+                return render(request, 'employee_form.html')  # Render the HTML form for admin users
+            else:
+                return JsonResponse({"success": False, "message": "Only admin users are allowed to sign up."})
+        else:
+            return JsonResponse({"success": False, "message": "Invalid username or password."})
+
+    return JsonResponse({"success": False, "message": "Invalid request method."})
+
+
+def save_employee_details(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        designation = request.POST.get("designation")
+        date_joined = request.POST.get("date_joined")
+        email = request.POST.get("email")
+        phone_number = request.POST.get("phone_number")
+        department = request.POST.get("department")
+        
+        status = request.POST.get("status", "Active")
+        password = request.POST.get("password")
+        image = request.FILES.get("image")  # Get the uploaded file
+
+        # Save the data to the EmployeeDetails model
+        employee = EmployeeDetails(
+            name=name,
+            designation=designation,
+            date_joined=date_joined,
+            email=email,
+            phone_number=phone_number,
+            department=department,
+        
+            status=status,
+            password=password,
+            image=image.read() if image else None,  # Convert image to binary
+        )
+        employee.save()
+
+        return JsonResponse({"success": True})  # Respond with success
+    else:
+        return JsonResponse({"success": False, "message": "Invalid request method."})
+
+
 
 def fetch_task_dashboard_data(user_id, selected_date_str):
     """

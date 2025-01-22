@@ -79,6 +79,46 @@
         .links a:hover {
             text-decoration: underline;
         }
+
+        /* Popup Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 10px;
+        }
+
+        .close-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            background-color: #e53935;
+        }
     </style>
     <script>
         async function login() {
@@ -115,9 +155,52 @@
             }
         }
 
-        function redirectToSignUp() {
-            window.location.href = '/sign_up/'; // Update this URL to your sign-up page
+        function openSignUpPopup() {
+            const modal = document.getElementById('signUpModal');
+            modal.style.display = 'flex';
         }
+
+        function closeSignUpPopup() {
+            const modal = document.getElementById('signUpModal');
+            modal.style.display = 'none';
+        }
+
+        async function signUp() {
+            const username = document.getElementById('signUpUsername').value;
+            const password = document.getElementById('signUpPassword').value;
+        
+            if (!username || !password) {
+                alert("Please enter both username and password.");
+                return;
+            }
+        
+            try {
+                const response = await fetch('/sign_up/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
+        
+                // If the server responds with an HTML page, redirect
+                if (response.ok) {
+                    const redirectUrl = await response.text(); // Get the response text (which might be a redirect URL)
+                    document.open();
+                    document.write(redirectUrl); // Render the HTML page in the browser
+                    document.close();
+                } else {
+                    const data = await response.json(); // Attempt to parse JSON for error messages
+                    alert(data.message || "An error occurred. Please try again.");
+                }
+            } catch (error) {
+                console.error("Error during sign-up:", error);
+                alert("An error occurred. Please try again.");
+            }
+        }
+        
+        
     </script>
 </head>
 <body>
@@ -127,10 +210,21 @@
             <input type="text" id="username" placeholder="Username" required>
             <input type="password" id="password" placeholder="Password" required>
             <button id="signIn" onclick="login()">Sign In</button>
-            <button id="signUp" onclick="redirectToSignUp()">Sign Up</button>
+            <button id="signUp" onclick="openSignUpPopup()">Sign Up</button>
         </div>
         <div class="links">
             <a href="#">Forgot Password?</a>
+        </div>
+    </div>
+
+    <!-- Sign-Up Popup Modal -->
+    <div id="signUpModal" class="modal">
+        <div class="modal-content">
+            <h3>Sign Up</h3>
+            <input type="text" id="signUpUsername" placeholder="Authentication Username" required>
+            <input type="password" id="signUpPassword" placeholder="Authentication Password" required>
+            <button onclick="signUp()">Submit</button>
+            <button class="close-btn" onclick="closeSignUpPopup()">Close</button>
         </div>
     </div>
 </body>
