@@ -90,7 +90,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tasktracker',  # Name of your MySQL database
         'USER': 'root',  # Your MySQL username
-        'PASSWORD': 'Melvin@123',  # Your MySQL password
+        'PASSWORD': 'varshith123',  # Your MySQL password
         'HOST': 'localhost',  # Set to 'localhost' or your MySQL server's IP address
         'PORT': '3306',  # Default MySQL port
     }

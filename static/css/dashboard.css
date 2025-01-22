@@ -329,18 +329,17 @@
     color: #333; /* Set a neutral color for the text */
     font-weight: bold; /* Make names stand out */
 }
-
-    /* Right Sidebar */
-.right-sidebar {
-    width: 300px;
-    background-color: white;
-    padding: 20px;
-    border-left: 1px solid #ddd;
-    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
+        /* Right Sidebar */
+        .right-sidebar {
+            width: 300px;
+            background-color: white;
+            padding: 20px;
+            border-left: 1px solid #ddd;
+            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
 /* Team Performance Section */
 .team-performance {
@@ -572,15 +571,14 @@ a{
 
 /* Date and Time Section */
 .date-time {
-    width: 10%;
+    width: 15%;
     text-align: center;
     background-color: #ffffff;
-    padding: 15px;
+    padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     margin-right: 20px;
 }
-
 .date-time .date {
     font-size: 14px;
     color: #333;
@@ -646,6 +644,7 @@ a{
     background-color: #f4f9ff;
     border-radius: 10px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+
 }
 
 .event-time {
@@ -653,18 +652,21 @@ a{
     font-weight: bold;
     color: #003f80;
     margin-bottom: 10px;
+ 
 }
 
 .event-details strong {
     font-size: 14px;
     color: #333;
     margin-bottom: 5px;
+
 }
 
 .event-details p {
     font-size: 12px;
     color: #666;
     margin: 0;
+    opacity: 1;
 }
 
 .sidebar a {
@@ -720,3 +722,47 @@ a{
 .sidebar-link:hover {
     background-color: #1f4068;
 }
+
+
+.task-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .filters {
+    margin: 0 10px;
+  }
+  
+  .task-select {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    color: #333;
+  }
+  
+  .task-select:focus {
+    outline: none;
+    border-color: #007bff;
+  }
+  
+  .task-search {
+    flex: 1;
+    padding: 8px 12px;
+    margin: 0 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+  }
+  
+  .task-search:focus {
+    outline: none;
+    border-color: #007bff;
+  }
+  
