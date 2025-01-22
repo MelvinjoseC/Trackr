@@ -12,15 +12,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
-
-
-
 </head>
-
+<style>
+    </style>
 <body>
-    <script src="{% static 'js/attendence.js' %}"></script>
-    <script src="{% static 'js/task_dashbord.js' %}"></script>
-    <script src="{% static 'js/leavepage.js' %}"></script>
+
     <div class="main-container">
         <!-- Sidebar -->
 
@@ -64,7 +60,7 @@
                     <div class="time" id="current-time"></div>
                 </div>
  <!-- Events Section -->
-<div class="events-section" style="background-image: url('{% static "images/img_20.png" %}'); ">
+<div class="events-section" style="background-image: url('{% static "images/img_20.png" %}');">
     <div class="events-header">
         {% if user.is_authenticated %}
         <h4>Good Morning, {{ user.username }}!</h4>
@@ -178,9 +174,9 @@
             </section>
 
             <div class="task-buttons">
-    <div class="task-button">
+    <div class="task-button" id="openPopupButton2">
         <i class="fas fa-plus"></i>
-        <span><a >CREATE NEW TASK</a></span>
+        <span><a>CREATE TASK</a></span>
         <i class="fas fa-chevron-right"></i>
     </div>
     <div class="task-button">
@@ -320,7 +316,13 @@
 </div>
 
     </div>
+<script>
 
 
+</script>
+    <script src="{% static 'js/attendence.js' %}"></script>
+    <script src="{% static 'js/task_dashbord.js' %}"></script>
+    <script src="{% static 'js/leavepage.js' %}"></script>
+    <script src="static/js/task_dashbord.js"></script>
 </body>
 </html>
