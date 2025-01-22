@@ -1,14 +1,85 @@
+
+from datetime import datetime
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.db import connection
+import base64
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.contrib import messages
 from django.db import connection
 
-from django.shortcuts import render
-from datetime import datetime
+import json
+
+# Define a global variable
+global_user_data = None
+
+def login(request):
+    global global_user_data  # Declare the global variable
+    
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            username = data.get("username")
+            password = data.get("password")
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "message": "Invalid request format."})
+        
+        # Check the credentials in the database
+        user = None
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT employee_id, name FROM employee_details WHERE name = %s AND password = %s",
+                [username, password]
+            )
+            user = cursor.fetchone()
+        
+        if user:
+            # Store employee_id and name in a single variable (as a dictionary)
+            global_user_data = {
+                "employee_id": user[0],
+                "name": user[1]
+            }
+
+            # Save user ID in the session for further authentication
+            request.session['user_id'] = user[0]
+            return JsonResponse({"success": True, "redirect_url": "/task_dashboard/"})
+        else:
+            return JsonResponse({"success": False, "message": "Invalid username or password."})
+    
+    return render(request, 'signin.html')
 
 
+def task_dashboard(request):
+    global global_user_data  # Assuming you're using a global variable for user data
 
-from django.shortcuts import render
-from django.db import connection
-from datetime import datetime
+    # Default data
+    user_id = global_user_data.get("employee_id", None)
+    name = global_user_data.get("name", "Guest")
+    designation = "No Designation"
+    image_base64 = None
 
+    if user_id:
+        # Fetch designation and image from the database
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT designation, image FROM employee_details WHERE employee_id = %s", [user_id]
+            )
+            result = cursor.fetchone()
+            if result:
+                designation = result[0]
+                image_data = result[1]
+                if image_data:
+                    # Convert binary image data to Base64
+                    image_base64 = base64.b64encode(image_data).decode('utf-8')
+
+    # Pass data to the template
+    return render(request, 'tasks_dashboard.html', {
+        'name': name,
+        'designation': designation,
+        'image_base64': image_base64,  # Base64-encoded image string
+        'employee_id': user_id  # Pass employee_id to the template
+    })
 
 def fetch_task_dashboard_data(user_id, selected_date_str):
     """
@@ -33,8 +104,11 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
 
     # Parse the selected date or use the current date
     try:
-        selected_date = datetime.strptime(selected_date_str,
-                                          '%Y-%m-%d').date() if selected_date_str else datetime.now().date()
+        selected_date = (
+            datetime.strptime(selected_date_str, '%Y-%m-%d').date()
+            if selected_date_str
+            else datetime.now().date()
+        )
     except ValueError:
         selected_date = datetime.now().date()
         print("Invalid date format provided. Defaulting to today's date.")
@@ -83,21 +157,5 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
     }
 
 
-def task_dashboard(request):
-    """
-    Render the task dashboard page.
 
-    Args:
-        request (HttpRequest): The HTTP request object.
 
-    Returns:
-        HttpResponse: The rendered task dashboard page.
-    """
-    # Get the selected date from the request
-    selected_date_str = request.GET.get('date', None)
-
-    # Fetch the data using the helper function
-    task_data = fetch_task_dashboard_data(request.user.id, selected_date_str)
-
-    # Render the template with the data
-    return render(request, 'tasks_dashboard.html', task_data)

@@ -5,6 +5,25 @@ from django.db import models
 from django.shortcuts import render
 
 
+class EmployeeDetails(models.Model):
+    employee_id = models.AutoField(primary_key=True)  # Unique identifier for each employee
+    name = models.CharField(max_length=100)          # Employee's name
+    designation = models.CharField(max_length=100)   # Job title or designation
+    image = models.BinaryField(null=True, blank=True)  # Binary data for storing images (optional)
+    date_joined = models.DateField()                 # Date the employee joined the company
+    email = models.EmailField(max_length=150, null=True, blank=True)  # Email address (optional)
+    phone_number = models.CharField(max_length=15, null=True, blank=True)  # Phone number (optional)
+    department = models.CharField(max_length=100, null=True, blank=True)  # Department name (optional)
+    salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # Salary (optional)
+    status = models.CharField(
+        max_length=10,
+        choices=[('Active', 'Active'), ('Inactive', 'Inactive')],
+        default='Active'
+    )  # Employment status
+    password = models.CharField(max_length=255)  # Password for employee authentication
+
+
+
 class Holiday(models.Model):
     name = models.CharField(max_length=255)
     date = models.DateField()

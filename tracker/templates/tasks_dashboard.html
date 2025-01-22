@@ -22,13 +22,10 @@
 
         <div class="sidebar">
           </br>
-             <img src="{% static 'images/img_19.png' %}" alt="Responsive image" width="150" height="40">
-            </br></br>
-            {% if user.is_authenticated %}
-            <h4 style="color: white; text-transform: uppercase; font-weight: bold;" align="center"><img  src="{% static 'images/R.png' %}" alt="User" style="width: 45px; height: 50px; border-radius: 16px;"></br>{{ user.username }} </br></br> {{ designation }}</h4>
-        {% else %}
-            <h4>Welcome, Guest!</h4>
-        {% endif %}
+          <img src="data:image/png;base64,{{ image_base64 }}" alt="Profile Image" width="150" height="150" style="border-radius: 50%;">
+            <h4> {{ name }}</h4>
+            <p>Employee ID: {{ employee_id }}</p>
+            <p>Designation: {{ designation }}</p>
 
 </br></br></br>
 <!--             <a class="sidebar-link"><img src="{% static 'images/img_8.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title">Dashboard</span></a>-->
