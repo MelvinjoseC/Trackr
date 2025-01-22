@@ -86,18 +86,12 @@
     margin-bottom: 20px;
 }
 
-.task-tracker .tasks {
+.tasks {
     display: flex;
     gap: 20px;
 }
 
-.task-card {
-    background-color: #F9F9F9;
-    padding: 15px;
-    border-radius: 5px;
-    width: 300px;
-    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
-}
+
 
 .task-card .details {
     margin: 10px 0;
@@ -113,6 +107,13 @@
     margin-right: 10px;
     transition: background-color 0.3s;
 }
+.tasks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-between;
+}
+
 .task-card2 {
     background-color: #F9F9F9;
     padding: 15px;
@@ -121,8 +122,39 @@
     box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
 }
 
+.task-card2 h4 {
+    margin-bottom: 10px;
+}
+
 .task-card2 .details {
-    margin: 10px 0;
+    display: table; /* Simulates table structure */
+    width: 100%; /* Makes it full-width */
+    margin-bottom: 10px;
+}
+
+.task-card2 .details .row {
+    display: table-row; /* Each row in the table */
+}
+
+.task-card2 .details p, 
+.task-card2 .details span {
+    display: table-cell; /* Aligns as table cells */
+    padding: 5px 10px; /* Adds some spacing */
+    border-bottom: 1px solid #ddd; /* Optional row separator */
+}
+
+.task-card2 .details p {
+    font-weight: bold;
+    text-align: left; /* Aligns headings to the left */
+}
+
+.task-card2 .details span {
+    text-align: right; /* Aligns data to the right */
+}
+
+.task-card2 .actions {
+    display: flex;
+    gap: 10px;
 }
 
 .task-card2 .actions button {
@@ -132,9 +164,9 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin-right: 10px;
     transition: background-color 0.3s;
 }
+
 
 .task-card1 .actions button:hover {
     background-color: #0059B3;
