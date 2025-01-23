@@ -114,58 +114,6 @@
     justify-content: space-between;
 }
 
-.task-card2 {
-    background-color: #F9F9F9;
-    padding: 15px;
-    border-radius: 5px;
-    width: 400px;
-    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
-}
-
-.task-card2 h4 {
-    margin-bottom: 10px;
-}
-
-.task-card2 .details {
-    display: table; /* Simulates table structure */
-    width: 100%; /* Makes it full-width */
-    margin-bottom: 10px;
-}
-
-.task-card2 .details .row {
-    display: table-row; /* Each row in the table */
-}
-
-.task-card2 .details p, 
-.task-card2 .details span {
-    display: table-cell; /* Aligns as table cells */
-    padding: 5px 10px; /* Adds some spacing */
-    border-bottom: 1px solid #ddd; /* Optional row separator */
-}
-
-.task-card2 .details p {
-    font-weight: bold;
-    text-align: left; /* Aligns headings to the left */
-}
-
-.task-card2 .details span {
-    text-align: right; /* Aligns data to the right */
-}
-
-.task-card2 .actions {
-    display: flex;
-    gap: 10px;
-}
-
-.task-card2 .actions button {
-    background-color: #003F80;
-    color: white;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
 
 
 .task-card1 .actions button:hover {
@@ -724,45 +672,3 @@ a{
 }
 
 
-.task-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .filters {
-    margin: 0 10px;
-  }
-  
-  .task-select {
-    padding: 8px 12px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #fff;
-    color: #333;
-  }
-  
-  .task-select:focus {
-    outline: none;
-    border-color: #007bff;
-  }
-  
-  .task-search {
-    flex: 1;
-    padding: 8px 12px;
-    margin: 0 10px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #fff;
-  }
-  
-  .task-search:focus {
-    outline: none;
-    border-color: #007bff;
-  }
-  

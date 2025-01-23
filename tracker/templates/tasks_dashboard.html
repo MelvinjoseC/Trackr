@@ -13,8 +13,7 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
 </head>
-<style>
-    </style>
+
 <body>
  
 
@@ -22,11 +21,13 @@
         <!-- Sidebar -->
 
         <div class="sidebar">
-          </br>
+        </br>
+        <img src="{% static 'images/img_19.png' %}" alt="Responsive image" width="150" height="40">
+       </br></br>
           <img src="data:image/png;base64,{{ image_base64 }}" alt="Profile Image" width="150" height="150" style="border-radius: 50%;">
             <h4> {{ name }}</h4>
-            <p>Employee ID: {{ employee_id }}</p>
-            <p>Designation: {{ designation }}</p>
+            <!-- <p>Employee ID: {{ employee_id }}</p> -->
+            <p align="center">{{ designation }}</p>
 
 </br></br></br>
 <!--             <a class="sidebar-link"><img src="{% static 'images/img_8.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title">Dashboard</span></a>-->
@@ -93,38 +94,41 @@
     </div>
 </div>
 </div>
+<div class="task-header">
+    <div class="filters">
+      <select class="task-select">
+        <option>All Tasks</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="filters">
+      <select class="task-select">
+        <option>Marine Engineering</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <input
+      type="text"
+      class="task-search"
+      placeholder="Search for Tasks"
+    />
+    <div class="filters">
+      <select class="task-select">
+        <option>Assigned Tasks</option>
+        <option>Other</option>
+      </select>
+    </div>
+  </div>
 
-            <!-- Task Tracker -->
-            <section class="task-tracker">
-                <div class="task-header">
-                    <div class="filters">
-                        <select>
-                            <option>All Tasks</option>
-                            <option>Other</option>
-                        </select>
-                    </div>
-                    <div class="filters">
-                        <select>
-                            <option>Marine Engineering</option>
-                            <option>Other</option>
-                        </select>
-                        <input type="text" placeholder="Search Tasks">
-                    </div>
-                    <div class="filters">
-                        <select>
-                            <option>Assigned Tasks</option>
-                            <option>Other</option>
-                        </select>
-                    </div>
-                </div>
-
-              
-            </section>
+           <!-- Task Tracker -->
+<section class="task-tracker">
             <div class="tasks">
                 <!-- Task Card 1 -->
                 <div class="task-card2">
                     <h4>Q3 Asia Barge Concept Design</h4>
-                    <p>Internal Project | FE/ME-1687/REV: 2</p>
+                    <div class="priority"></div>
+                    <p>Internal Project </p>
+                    <p>FE/ME-1687/REV: 2</p>
                     <table class="details">
                         <thead>
                             <tr>
@@ -146,22 +150,24 @@
                         </tbody>
                     </table>
                     <div class="actions">
-                        <button>Info</button>
-                        <button>Edit Task</button>
-                        <button>Manual Time Sheet</button>
+                        <button><i class="fas fa-info-circle"></i> Info</button>
+                        <button><i class="fas fa-edit"></i> Edit Task</button>
+                        <button><i class="fas fa-calendar-alt"></i> Manual Time Sheet</button>
                     </div>
                 </div>
             
                 <!-- Task Card 2 -->
                 <div class="task-card2">
+                    <div class="priority">HIGH</div>
                     <h4>Q3 Asia Barge Concept Design</h4>
-                    <p>Internal Project | FE/ME-1687/REV: 2</p>
+                    <p>Internal Project </p>
+                    <p>FE/ME-1687/REV: 2</p>
                     <table class="details">
                         <thead>
                             <tr>
                                 <th>Discussion</th>
-                                <th>Calculating</th>
                                 <th>Designing</th>
+                                <th>Calculating</th>
                                 <th>Modelling</th>
                                 <th>Checking</th>
                             </tr>
@@ -169,24 +175,26 @@
                         <tbody>
                             <tr>
                                 <td>4 hrs</td>
-                                <td>14 hrs</td>
                                 <td>18 hrs</td>
+                                <td>14 hrs</td>
                                 <td>20 hrs</td>
                                 <td>10 hrs</td>
                             </tr>
                         </tbody>
                     </table>
                     <div class="actions">
-                        <button>Info</button>
-                        <button>Edit Task</button>
-                        <button>Manual Time Sheet</button>
+                        <button><i class="fas fa-info-circle"></i> Info</button>
+                        <button><i class="fas fa-edit"></i> Edit Task</button>
+                        <button><i class="fas fa-calendar-alt"></i> Manual Time Sheet</button>
                     </div>
                 </div>
+                
             
                 <!-- Task Card 3 -->
                 <div class="task-card2">
                     <h4>Q3 Asia Barge Concept Design</h4>
-                    <p>Internal Project | FE/ME-1687/REV: 2</p>
+                   <p>Internal Project </p>
+                    <p>FE/ME-1687/REV: 2</p>
                     <table class="details">
                         <thead>
                             <tr>
@@ -208,9 +216,9 @@
                         </tbody>
                     </table>
                     <div class="actions">
-                        <button>Info</button>
-                        <button>Edit Task</button>
-                        <button>Manual Time Sheet</button>
+                        <button><i class="fas fa-info-circle"></i> Info</button>
+                        <button><i class="fas fa-edit"></i> Edit Task</button>
+                        <button><i class="fas fa-calendar-alt"></i> Manual Time Sheet</button>
                     </div>
                 </div>
             </div>
@@ -221,7 +229,7 @@
         <span><a>CREATE TASK</a></span>
         <i class="fas fa-chevron-right"></i>
     </div>
-    <div class="task-button">
+    <div class="task-button" id="openPopupButton3">
         <i class="fas fa-edit"></i>
         <span><a >EDIT ALL TASKS</a> </span>
         <i class="fas fa-chevron-right"></i>
@@ -359,7 +367,6 @@
 
     </div>
 <script>
-
 
 </script>
     <script src="{% static 'js/attendence.js' %}"></script>
