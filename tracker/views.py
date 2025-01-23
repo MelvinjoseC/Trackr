@@ -11,7 +11,7 @@ from django.db import connection
 from .models import EmployeeDetails
 from .models import TrackerTasks
 import json
-import cv2
+
 
 # Define a global variable
 global_user_data = None

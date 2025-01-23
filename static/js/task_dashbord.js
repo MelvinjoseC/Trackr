@@ -78,19 +78,49 @@ dateInput.addEventListener("change", event => {
     selectedDate.textContent = formatDate(event.target.value);
 });
 
-// Create Task Modal
-function openCreateTaskModal() {
-    const modal = createTaskModal("CREATE Task", "Save Task");
-    document.body.appendChild(modal);
-    modal.style.display = "block";
-}
+document.addEventListener("DOMContentLoaded", function () {
+    const button = document.getElementById("openPopupButton2");
 
-// Edit Task Modal
-function openEditTaskModal(taskData) {
-    const modal = createTaskModal("EDIT Task", "Update Task", taskData);
-    document.body.appendChild(modal);
-    modal.style.display = "block";
-}
+    button.addEventListener("click", function (e) {
+        e.preventDefault(); // Prevent any default behavior (if needed)
+
+        // Get the modal container
+        const modal = document.getElementById('taskModalPopup');
+        modal.style.display = 'block'; // Show the modal
+
+        // Get the close button and add event listener
+        const closeButton = document.getElementById('closeModal');
+        closeButton.addEventListener('click', function () {
+            modal.style.display = 'none'; // Hide the modal when clicked
+        });
+    });
+});
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Get the button and modal elements
+    const openPopupButton = document.getElementById("openPopupButton");
+    const popupModal = document.getElementById("popupModal");
+    const closePopupButton = document.getElementById("closePopupButton");
+
+    // Show the popup when the button is clicked
+    openPopupButton.addEventListener("click", function () {
+        popupModal.style.display = "flex"; // Show the modal
+    });
+
+    // Close the popup when the close button is clicked
+    closePopupButton.addEventListener("click", function () {
+        popupModal.style.display = "none"; // Hide the modal
+    });
+
+    // Optionally, close the modal when clicking outside of it
+    window.addEventListener("click", function (event) {
+        if (event.target === popupModal) {
+            popupModal.style.display = "none"; // Hide the modal if clicked outside
+        }
+    });
+});
+
 
 // Create reusable modal for creating and editing tasks
 function createTaskModal(title, buttonText, taskData = {}) {
