@@ -203,12 +203,10 @@
  <!-- Events Section -->
 <div class="events-section" style="background-image: url('{% static "images/img_20.png" %}');">
     <div class="events-header">
-        {% if user.is_authenticated %}
-        <h4>Good Morning, {{ name }}!</h4>
-        <p>You have 3 events for today:</p>
-        {% else %}
-        <h4>Welcome, Guest!</h4>
-        {% endif %}
+
+    
+        <h4>Welcome,  {{ name }}</h4>
+  
     </div>
     <div class="events-list">
         <div class="event-item">
@@ -381,6 +379,8 @@
         <i class="fas fa-chevron-right"></i>
     </div>
 </div>
+
+
             <section class="timesheet">
    <div class="timesheet-header">
     <h3>My Daily Timesheet</h3>

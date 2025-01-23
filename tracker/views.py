@@ -9,7 +9,9 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.db import connection
 from .models import EmployeeDetails
+from .models import TrackerTasks
 import json
+import cv2
 
 # Define a global variable
 global_user_data = None
@@ -82,8 +84,21 @@ def task_dashboard(request):
     })
 
 
+def task_dashboard_api(request):
+    # Fetch all tracker tasks
+    task_list = []
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM tracker_tasks")
+            tasks = cursor.fetchall()
+            if cursor.description:
+                task_columns = [col[0] for col in cursor.description]
+                task_list = [dict(zip(task_columns, task)) for task in tasks]
+    except Exception as e:
+        return JsonResponse({"success": False, "message": f"Error fetching tasks: {str(e)}"})
 
-
+    # Return task data as JSON
+    return JsonResponse({"success": True, "tasks": task_list})
 
 def sign_up(request):
     if request.method == "POST":
