@@ -14,6 +14,148 @@
 
 </head>
 
+<style>
+  .task-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+ 
+  .filters {
+    margin: 0 10px;
+  }
+ 
+  .task-select {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    color: #333;
+  }
+ 
+  .task-select:focus {
+    outline: none;
+    border-color: #007bff;
+  }
+ 
+  .task-search {
+    flex: 1;
+    padding: 8px 12px;
+    margin: 0 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+  }
+ 
+  .task-search:focus {
+    outline: none;
+    border-color: #007bff;
+  }
+ 
+
+.task-card2 {
+    background-color: #FFFFFF; /* White background */
+    padding: 20px;
+    border-radius: 12px; /* Smooth rounded corners */
+    width: 450px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15); /* Softer shadow */
+    font-family: 'Arial', sans-serif;
+    margin: 20px auto;
+    position: relative;
+    box-sizing: border-box; /* Ensure padding and border are within the width */
+}
+
+.task-card2 h4 {
+    font-size: 20px;
+    color: #333;
+    margin: 0 0 5px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.task-card2 p {
+    font-size: 14px;
+    color: #666;
+    margin: 0 0 15px;
+}
+
+.task-card2 .details {
+    width: 100%;
+    border-spacing: 0;
+    text-align: center;
+    margin-bottom: 15px;
+    border-collapse: collapse;
+    table-layout: fixed; /* Ensure table layout does not overflow */
+    box-sizing: border-box;
+}
+
+.task-card2 .details th,
+.task-card2 .details td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    font-size: 10px;
+    box-sizing: border-box; /* Ensure padding is within the element width */
+}
+
+.task-card2 .details th {
+    background-color: #E7EFFF;
+    color: #003F80;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.task-card2 .details td {
+    background-color: #F9F9F9;
+    color: #555;
+    font-weight: bold;
+}
+
+.task-card2 .actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.task-card2 .actions button {
+    background-color: #003F80;
+    color: white;
+    padding: 10px 20px;
+    font-size: 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    font-weight: bold;
+}
+
+.task-card2 .actions button:hover {
+    background-color: #002F60;
+}
+
+.task-card2 .priority {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #003F80;
+    color: white;
+    font-weight: bold;
+    padding: 5px 15px;
+    border-radius: 15px;
+    font-size: 12px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+
+    </style>
 <body>
  
 
@@ -24,9 +166,9 @@
         </br>
         <img src="{% static 'images/img_19.png' %}" alt="Responsive image" width="150" height="40">
        </br></br>
-          <img src="data:image/png;base64,{{ image_base64 }}" alt="Profile Image" width="150" height="150" style="border-radius: 50%;">
+          <img src="data:image/png;base64,{{ image_base64 }}" alt="Profile Image" width="130" height="120" style="border-radius: 50%;">
             <h4> {{ name }}</h4>
-            <!-- <p>Employee ID: {{ employee_id }}</p> -->
+            <!-- <p>{{ employee_id }}</p> -->
             <p align="center">{{ designation }}</p>
 
 </br></br></br>
@@ -62,13 +204,12 @@
 <div class="events-section" style="background-image: url('{% static "images/img_20.png" %}');">
     <div class="events-header">
         {% if user.is_authenticated %}
-        <h4>Good Morning, {{ user.username }}!</h4>
+        <h4>Good Morning, {{ name }}!</h4>
         <p>You have 3 events for today:</p>
         {% else %}
         <h4>Welcome, Guest!</h4>
         {% endif %}
     </div>
-
     <div class="events-list">
         <div class="event-item">
             <div class="event-time">09:30 AM</div>
@@ -126,7 +267,7 @@
                 <!-- Task Card 1 -->
                 <div class="task-card2">
                     <h4>Q3 Asia Barge Concept Design</h4>
-                    <div class="priority"></div>
+                    <div class="priority">NORMAL</div>
                     <p>Internal Project </p>
                     <p>FE/ME-1687/REV: 2</p>
                     <table class="details">
@@ -222,14 +363,13 @@
                     </div>
                 </div>
             </div>
-            
             <div class="task-buttons">
     <div class="task-button" id="openPopupButton2">
         <i class="fas fa-plus"></i>
         <span><a>CREATE TASK</a></span>
         <i class="fas fa-chevron-right"></i>
     </div>
-    <div class="task-button" id="openPopupButton3">
+    <div class="task-button" id="openPopupButton">
         <i class="fas fa-edit"></i>
         <span><a >EDIT ALL TASKS</a> </span>
         <i class="fas fa-chevron-right"></i>
@@ -366,13 +506,206 @@
 </div>
 
     </div>
+
+    <!-- The div to contain the hidden popup form -->
+    <div id="popupModal" class="popup-modal">
+        <div class="popup-content">
+            <h2>Edit Task</h2>
+            <form id="editTaskForm">
+                <div class="form-group">
+                    <label for="taskTitle">Title:</label>
+                    <input type="text" id="taskTitle" placeholder="Enter task title">
+                </div>
+
+                <div class="form-group">
+                    <label for="id_project">Project</label>
+                    <select id="id_project">
+                        <option value="">Select Project</option>
+                        <option value="project1">WEB APP</option>
+                        <option value="project2">EXCEL CODING</option>
+                        <option value="project3">INTERNAL PROJECTS</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_scope">Scope</label>
+                    <select id="id_scope">
+                        <option value="">Select Scope</option>
+                        <option value="scope1">FRONT END</option>
+                        <option value="scope2">PLANNING</option>
+                        <option value="scope3">FE_WEBSITE WORKS</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_priority">Priority</label>
+                    <select id="id_priority">
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_assigned_to">Assigned To</label>
+                    <input type="text" id="id_assigned_to" placeholder="Enter task Assigned">
+                </div>
+                <div class="form-group">
+                    <label for="id_checker">Checker</label>
+                    <input type="text" id="id_checker" placeholder="Enter task Checker">
+                </div>
+                <div class="form-group">
+                    <label for="id_qc_3_checker">QC-3 Checker</label>
+                    <input type="text" id="id_qc_3_checker" placeholder="Enter task QC-3 Checker">
+                </div>
+                <div class="form-group">
+                    <label for="id_group">Group</label>
+                    <input type="text" id="id_group" placeholder="Enter task Group">
+                </div>
+                <div class="form-group">
+                    <label for="id_category">Category</label>
+                    <select id="id_category">
+                        <option value="">Select Category</option>
+                        <option value="category1">FRONT END</option>
+                        <option value="category2">DISCUSSION</option>
+                        <option value="category3">BACK END</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_start_date">Start Date</label>
+                    <input type="date" id="id_start_date">
+                </div>
+                <div class="form-group">
+                    <label for="id_end_date">End Date</label>
+                    <input type="date" id="id_end_date">
+                </div>
+                <div class="form-group">
+                    <label for="id_verification_status">Verification Status</label>
+                    <select id="id_verification_status">
+                        <option value="">Select Verification Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                        <option value="inProgress">In Progress</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_task_status">Task Status</label>
+                    <select id="id_task_status">
+                        <option value="">Select Task Status</option>
+                        <option value="notStarted">Not Started</option>
+                        <option value="inProgress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit">Update Task</button>
+                    <button id="closePopupButton">Close</button>
+                </div>
+            </form>
+           
+        </div>
+    </div>
+
+    <!-- CREATE TASK -->
+ <!-- Popup Modal -->
+ <div id="taskModalPopup" class="popup-modal">
+        <h2>Create Task</h2>
+        <form>
+            <div class="form-group">
+                <label for="taskTitle">Title:</label>
+                <input type="text" id="taskTitle" placeholder="Enter task title">
+            </div>
+            <div class="form-group">
+                <label for="id_project">Project:</label>
+                <select id="id_project">
+                    <option value="">Select Project</option>
+                    <option value="project1">WEB APP</option>
+                    <option value="project2">EXCEL CODING</option>
+                    <option value="project3">INTERNAL PROJECTS</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="id_scope">Scope:</label>
+                <select id="id_scope">
+                    <option value="">Select Scope</option>
+                    <option value="scope1">FRONT END</option>
+                    <option value="scope2">PLANNING</option>
+                    <option value="scope3">FE_WEBSITE WORKS</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="id_priority">Priority:</label>
+                <select id="id_priority">
+                    <option value="">Select Priority</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="id_assigned_to">Assigned To:</label>
+                <input type="text" id="assignedTo" placeholder="Enter task Assigned">
+            </div>
+            <div class="form-group">
+                <label for="id_checker">Checker:</label>
+                <input type="text" id="checker" placeholder="Enter task Checker">
+            </div>
+            <div class="form-group">
+                <label for="id_qc_3_checker">QC-3 Checker:</label>
+                <input type="text" id="qcChecker" placeholder="Enter task QC-3 Checker">
+            </div>
+            <div class="form-group">
+                <label for="id_group">Group:</label>
+                <input type="text" id="group" placeholder="Enter task Group">
+            </div>
+            <div class="form-group">
+                <label for="id_category">Category:</label>
+                <select id="id_category">
+                    <option value="">Select Category</option>
+                    <option value="category1">FRONT END</option>
+                    <option value="category2">DISCUSSION</option>
+                    <option value="category3">BACK END</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="id_start_date">Start Date:</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="form-group">
+                <label for="id_end_date">End Date:</label>
+                <input type="date" id="endDate">
+            </div>
+            <div class="form-group">
+                <label for="id_verification_status">Verification Status:</label>
+                <select id="id_verification_status">
+                    <option value="">Select Verification Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                    <option value="inProgress">In Progress</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="id_task_status">Task Status:</label>
+                <select id="id_task_status">
+                    <option value="">Select Task Status</option>
+                    <option value="notStarted">Not Started</option>
+                    <option value="inProgress">In Progress</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit">Save Task</button>
+                <button id="closeModal" class="close">Close</button>
+            </div>
+        </form>
+</div>
+    
+    <script src="script.js"></script>
+
+
 <script>
 
 </script>
     <script src="{% static 'js/attendence.js' %}"></script>
     <script src="{% static 'js/task_dashbord.js' %}"></script>
     <script src="{% static 'js/leavepage.js' %}"></script>
-    
-
 </body>
 </html>

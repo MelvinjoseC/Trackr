@@ -671,4 +671,134 @@ a{
     background-color: #1f4068;
 }
 
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f9ff;
+    margin: 0;
+    padding: 20px;
+}
+
+button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.popup-modal {
+    display: none; /* Initially hidden */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 600px;
+    background-color: white;
+    padding: 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    overflow-y: auto;
+    border-radius: 10px;
+}
+
+.popup-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.popup-modal .form-group {
+    margin-bottom: 15px;
+}
+
+.popup-modal input[type="text"],
+.popup-modal input[type="date"],
+.popup-modal select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.popup-modal button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.popup-modal button:hover {
+    background-color: #0056b3;
+}
+
+button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Popup modal styling */
+#taskModalPopup {
+    display: none; /* Initially hidden */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 600px;
+    background-color: white;
+    padding: 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    overflow-y: auto;
+    border-radius: 10px;
+}
+
+/* Modal content styling */
+#taskModalPopup .modal-content {
+    display: flex;
+    flex-direction: column;
+}
+
+#taskModalPopup .form-group {
+    margin-bottom: 15px;
+}
+
+#taskModalPopup input[type="text"],
+#taskModalPopup input[type="date"],
+#taskModalPopup select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+#taskModalPopup button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#taskModalPopup button:hover {
+    background-color: #0056b3;
+}
 
