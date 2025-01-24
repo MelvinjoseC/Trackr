@@ -23,21 +23,50 @@ setInterval(updateClock, 1000);
 updateClock();
 
 // Fetch and display tasks when the page loads
-document.addEventListener("DOMContentLoaded", () => {
-    fetch("/api/task_dashboard/") // Use the JSON API endpoint
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json(); // Parse the JSON response
-        })
-        .then(data => {
-            console.log("Fetched Tasks Data:", data); // Log the tasks data to the console
-        })
-        .catch(error => {
-            console.error("Error fetching tasks:", error);
-        });
-});
+
+    // Fetch tasks data from the API
+    fetch("/api/task_dashboard/")
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json(); // Parse the JSON response
+    })
+    .then(data => {
+        console.log("Fetched Tasks Data:", data); // Log the full response
+
+        if (data.success && Array.isArray(data.tasks)) {
+            populateProjectDropdown(data.tasks); // Pass the tasks array
+        } else {
+            console.error("Tasks data is not in the expected format:", data);
+        }
+    })
+    .catch(error => {
+        console.error("Error fetching tasks:", error);
+    });
+
+// Function to populate the dropdown with task projects
+function populateProjectDropdown(tasks) {
+    const projectDropdown = document.getElementById("id_project"); // Select the dropdown
+    const projectDropdown2 = document.getElementById("id_project2"); 
+    // Clear existing options
+    projectDropdown.innerHTML = '<option value="">Select Project</option>';
+    projectDropdown2.innerHTML = '<option value="">Select Project</option>';
+
+    // Loop through the tasks array
+    tasks.forEach(task => {
+        const option1 = document.createElement("option");
+        option1.value = task.project; // Use project as the value
+        option1.textContent = task.project; // Display the project name
+        projectDropdown.appendChild(option1); // Add the option to the first dropdown
+
+        const option2 = document.createElement("option");
+        option2.value = task.project; // Use project as the value
+        option2.textContent = task.project; // Display the project name
+        projectDropdown2.appendChild(option2); // Add the option to the second dropdown
+    });
+}
+
 
 
 // Handle tab switching for Running, Revisions, and Others
@@ -99,114 +128,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
 document.addEventListener("DOMContentLoaded", function () {
     // Get the button and modal elements
-    const openPopupButton = document.getElementById("openPopupButton");
-    const popupModal = document.getElementById("popupModal");
-    const closePopupButton = document.getElementById("closePopupButton");
+    const button = document.getElementById("openPopupButton");
 
-    // Show the popup when the button is clicked
-    openPopupButton.addEventListener("click", function () {
-        popupModal.style.display = "flex"; // Show the modal
-    });
+    button.addEventListener("click", function (e) {
+        e.preventDefault(); // Prevent any default behavior (if needed)
 
-    // Close the popup when the close button is clicked
-    closePopupButton.addEventListener("click", function () {
-        popupModal.style.display = "none"; // Hide the modal
-    });
+        // Get the modal container
+        const modal = document.getElementById('popupModal');
+        modal.style.display = 'block'; // Show the modal
 
-    // Optionally, close the modal when clicking outside of it
-    window.addEventListener("click", function (event) {
-        if (event.target === popupModal) {
-            popupModal.style.display = "none"; // Hide the modal if clicked outside
-        }
+        // Get the close button and add event listener
+        const closeButton = document.getElementById('closeModal');
+        closeButton.addEventListener('click', function () {
+            modal.style.display = 'none'; // Hide the modal when clicked
+        });
     });
 });
-
 
 // Create reusable modal for creating and editing tasks
-function createTaskModal(title, buttonText, taskData = {}) {
-    const modalContainer = document.createElement("div");
-    modalContainer.className = "modal";
-    modalContainer.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 800px;
-        height: auto;
-        background: #fff;
-        z-index: 1000;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    `;
-
- 
-    closeButton.innerText = "Close";
-    closeButton.style.cssText = `
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: #dc3545;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    `;
-    closeButton.addEventListener("click", () => modalContainer.remove());
-
-    const modalContent = document.createElement("div");
-    modalContent.innerHTML = `
-        <h2>${title}</h2>
-        <form id="taskForm">
-            <div class="form-group">
-                <label>Title:</label>
-                <input type="text" id="taskTitle" value="${taskData.title || ''}" />
-            </div>
-            <div class="form-group">
-                <label>Project:</label>
-                <input type="text" id="taskProject" value="${taskData.project || ''}" />
-            </div>
-            <div class="form-group">
-                <label>Scope:</label>
-                <input type="text" id="taskScope" value="${taskData.scope || ''}" />
-            </div>
-            <div class="form-group">
-                <label>Status:</label>
-                <input type="text" id="taskStatus" value="${taskData.task_status || ''}" />
-            </div>
-            <div class="form-group">
-                <button type="submit">${buttonText}</button>
-            </div>
-        </form>
-    `;
-
-    const form = modalContent.querySelector("#taskForm");
-    form.addEventListener("submit", event => {
-        event.preventDefault();
-        const taskDetails = {
-            title: document.getElementById("taskTitle").value,
-            project: document.getElementById("taskProject").value,
-            scope: document.getElementById("taskScope").value,
-            task_status: document.getElementById("taskStatus").value,
-        };
-        console.log("Task Details Submitted:", taskDetails);
-        modalContainer.remove();
-    });
-
-    modalContainer.appendChild(closeButton);
-    modalContainer.appendChild(modalContent);
-    return modalContainer;
-}
-
-// Attach button listeners for creating and editing tasks
-document.getElementById("openPopupButton2").addEventListener("click", openCreateTaskModal);
-document.getElementById("openPopupButton3").addEventListener("click", () => {
-    const sampleTask = {
-        title: "Sample Task",
-        project: "Sample Project",
-        scope: "Sample Scope",
-        task_status: "In Progress",
-    };
-    openEditTaskModal(sampleTask);
-});
 
