@@ -11,10 +11,185 @@
     <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
 
 <style>
+/* Button to trigger popup */
+
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Popup container */
+.popup-content {
+    background: white;
+    width: 90%;
+    max-width: 1000px;
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Close button */
+.close-btn4 {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #888;
+}
+
+.close-btn4:hover {
+    color: red;
+}
+
+/* Header */
+.popup-content h2 {
+    margin: 0 0 15px;
+    font-size: 22px;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+/* Grid Layout */
+.popup-grid {
+    display: flex;
+    gap: 40px; /* Increased spacing between panels */
+}
+
+/* Left Panel */
+.left-panel {
+    flex: 1;
+}
+
+/* Form Styling */
+.form-group3 {
+    margin-bottom: 10px;
+}
+
+.form-group3 label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.form-group3 input, 
+.form-group3 select, 
+.form-group3 textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+        /* Right Panel */
+        .right-panel {
+            flex: 2;
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+        }
+
+        /* Tab Buttons */
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .tab-button {
+            padding: 8px 12px;
+            border: none;
+            cursor: pointer;
+            background: #ddd;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .tab-button.active {
+            background: #007bff;
+            color: white;
+        }
+
+        /* Hidden sections */
+        .tab-content {
+            display: none;
+        }
+
+        /* Table for Task Details */
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .task-table th, .task-table td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .task-table th {
+            background: #ddd;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        /* Chart Containers */
+        .chart-container {
+            width: 100%;
+            height: 300px;
+        }
+
+        /* Button Container */
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .submit-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .clear-btn {
+            background: #ccc;
+            color: black;
+        }
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
   .task-header {
     display: flex;
     align-items: center;
@@ -372,56 +547,30 @@
         <span><a >EDIT ALL TASKS</a> </span>
         <i class="fas fa-chevron-right"></i>
     </div>
-    <div class="task-button">
-        <a >
+    <div class="task-button" onclick="openPopup()">
         <i class="fas fa-calendar-alt"></i>
-        <span>MANUAL TIMESHEET</span></a>
+        <span>MANUAL TIMESHEET</span>
         <i class="fas fa-chevron-right"></i>
     </div>
 </div>
 
-
-            <section class="timesheet">
-   <div class="timesheet-header">
-    <h3>My Daily Timesheet</h3>
-    <div class="date-picker">
-        <form method="get">
-            <input type="date" id="date-input" name="date" value="{{ selected_date }}" />
-            <button type="submit">GET</button>
-        </form>
-        <span id="selected-date">Selected Date: {{ selected_date }}</span>
-    </div>
-</div>
-
-<div class="timesheet-content">
-    {% if monthly_calendar_data %}
-        {% for row in monthly_calendar_data %}
-        <div class="timesheet-row">
-            <div class="task-info">
-                <h4 class="task-type">{{ row.scope }}</h4>
-                <p class="task-name">{{ row.title }}</p>
-                <p class="task-meta">{{ row.d_no }}, REV NO: {{ row.rev_no }}</p>
-            </div>
-            <div class="task-time">
-                <p>
-                    {% if row.time %}
-                        {{ row.time|floatformat:2 }} hours
-                    {% else %}
-                        Not Available
-                    {% endif %}
-                </p>
-                <span>{{ row.project }}</span>
-            </div>
-            <div class="task-actions">
-                <i class="fas fa-comment-alt"></i>
-                <i class="fas fa-trash"></i>
-            </div>
+<section class="timesheet">
+    <div class="timesheet-header">
+        <h3>My Daily Timesheet</h3>
+        <div class="date-picker">
+            <form method="get">
+                <input type="date" id="date-input" name="date" value="{{ selected_date|date:'Y-m-d' }}" />
+                <button id="date_in_daily_timesheet" type="submit">GET</button>
+            </form>
+            <span id="selected-date">Selected Date: {{ selected_date|date:'l, F j, Y' }}</span>
         </div>
-        {% endfor %}
-    {% else %}
-        <p>No Data Found</p>
-    {% endif %}
-</div>
+    </div>
+    
+    <div class="timesheet-content" id="timesheetContent">
+        <!-- Tasks will be populated here dynamically -->
+    </div>
+    
+                
 
 </section>
 
@@ -510,7 +659,33 @@
     <!-- The div to contain the hidden popup form -->
     <div id="popupModal" class="popup-modal">
         <div class="popup-content">
-            <h2>Edit Task</h2>
+            <!-- Header Section -->
+        <div class="header">
+            <h1>EDIT ALL TASKS</h1>
+            <button id="openPopupButton" class="copy-task-btn">
+                <i class="fas fa-copy"></i> Copy Task
+            </button>
+        </div>
+
+        <p>HYWIND SCOTLAND MAIN COMPONENT EXCHANGE</p>
+
+        <!-- Dropdowns (Populated via API) -->
+        <div class="dropdown-row">
+            <select id="id_list2">
+                <option  id="id_list2" placeholder="Select List">Select List</option>
+            </select>
+            <select id="id_project2">
+                <option  id="id_project2" placeholder="Select Project">Select Project</option>
+            </select>
+            <select id="id_scope2">
+                <option id="id_scope2" placeholder="Select Scope">Select Scope</option>
+            </select>
+            
+            <select id="id_category2">
+                <option  id="id_category2" placeholder="Select Category">Select Category</option>
+            </select>
+        </div>
+
             <form id="editTaskForm">
                 <div class="form-group">
                     <label for="taskTitle">Title:</label>
@@ -592,6 +767,11 @@
                 <input type="text" id="taskTitle2" placeholder="Enter task title">
             </div>
             <div class="form-group">
+                <label for="id_list">List:</label>
+                <select id="id_list">
+                    <option value="">Select List</option>
+                </select>
+            <div class="form-group">
                 <label for="id_project">Project:</label>
                 <select id="id_project">
                     <option value="">Select Project</option>
@@ -653,6 +833,100 @@
         </form>
 </div>
     
+
+
+ <!-- Popup Container with updated ID -->
+ <div class="popup-overlay" id="timesheetpopup">
+    <div class="popup-content">
+        <span class="close-btn4" onclick="closePopup()">&times;</span>
+        <h2>Manual Timesheet</h2>
+
+        <div class="popup-grid">
+            <!-- Left Panel -->
+            <div class="left-panel">
+                <div class="form-group3">
+                    <label>Select Date</label>
+                    <input type="date">
+                </div>
+
+                <div class="form-group3">
+                    <label>Select List</label>
+                    <select>
+                        <option>Marine Engineering</option>
+                        <option>Software Development</option>
+                        <option>Mechanical Engineering</option>
+                    </select>
+                </div>
+
+                <div class="form-group3">
+                    <label>Project Type</label>
+                    <input type="text">
+                </div>
+
+                <div class="form-group3">
+                    <label>Scope</label>
+                    <input type="text">
+                </div>
+
+                <div class="form-group3">
+                    <label>Task</label>
+                    <input type="text">
+                </div>
+
+                <div class="form-group3">
+                    <label>Phase</label>
+                    <input type="text" value="">
+                </div>
+
+
+                <div class="form-group3">
+                    <label>Hours</label>
+                    <input type="number" step="0.1" value="2.75">
+                </div>
+
+                <div class="form-group3">
+                    <label>Comments</label>
+                    <input type="text">
+                </div>
+
+            </div>
+<!-- Right Panel -->
+<div class="right-panel">
+    <div class="tab-buttons">
+        <button class="tab-button active" onclick="showTab('taskDetails')">Task Details</button>
+        <button class="tab-button" onclick="showTab('benchmark')">Benchmark</button>
+        <button class="tab-button" onclick="showTab('totalTime')">Total Time</button>
+    </div>
+
+    <!-- Task Details -->
+    <div id="taskDetails" class="tab-content" style="display: block;">
+        <table class="task-table">
+            <tr><th>Title</th><td>Q3 Asia Barge Concept Design</td></tr>
+            <tr><th>Project Type</th><td>Internal Project</td></tr>
+            <tr><th>Scope</th><td>FE_Concept Design and Structure</td></tr>
+            <tr><th>Category</th><td>Marine Engineering</td></tr>
+            <tr><th>Priority</th><td style="color: red;">HIGH</td></tr>
+        </table>
+    </div>
+
+    <!-- Benchmark Chart -->
+    <div id="benchmark" class="tab-content">
+        <canvas id="benchmarkChart"></canvas>
+    </div>
+
+    <!-- Total Time Chart -->
+    <div id="totalTime" class="tab-content">
+        <canvas id="timeChart"></canvas>
+    </div>
+</div>
+</div>
+
+<div class="button-container">
+<button class="button submit-btn">Submit</button>
+<button class="button clear-btn">Clear</button>
+</div>
+    </div>
+</div>
 
 
 <script>

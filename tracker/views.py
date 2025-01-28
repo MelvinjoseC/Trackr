@@ -159,7 +159,7 @@ def save_employee_details(request):
         )
         employee.save()
 
-        return JsonResponse({"success": True})  # Respond with success
+        return JsonResponse({"success": True, "name": employee.name})  # Respond with success
     else:
         return JsonResponse({"success": False, "message": "Invalid request method."})
 
@@ -204,7 +204,7 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
             cursor.execute("""
                 SELECT 
                     id, title, scope, date, time, assigned, category, projects, 
-                    list, rev_no, comments, benchmark, d_no, mail_no, ref_no, created, updated
+                    list, rev_no, comments, benchmark, d_no, mail_no, ref_no, created, updated,
                 FROM tasktracker.tracker_monthlycalendar
                 WHERE date = %s
             """, [selected_date])
@@ -269,11 +269,12 @@ def create_task(request):
             # SQL query to insert data into tracker_project
             query = """
                 INSERT INTO tracker_project
-                (title, projects, scope, priority, assigned, checker, qc3_checker, `group`, `category`, `start`, `end`, `verification_status`, `task_status`)
+                (title, list, projects, scope, priority, assigned, checker, qc3_checker, `group`, `category`, `start`, `end`, `verification_status`, `task_status`)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             params = (
                 data.get('title'),
+                data.get('list'),
                 data.get('project'),
                 data.get('scope'),
                 data.get('priority'),
@@ -311,7 +312,7 @@ def edit_task(request, task_id):
                 UPDATE tracker_project
                 SET title=%s, projects=%s, scope=%s, priority=%s, assigned=%s,
                     checker=%s, qc3_checker=%s,`group`=%s, category=%s,
-                    start_date=%s, end_date=%s, verification_status=%s, task_status=%s
+                    start_date=%s, end_date=%s, verification_status=%s, task_status=%s, list=%s
                 WHERE id=%s
             """
             params = (
@@ -328,6 +329,7 @@ def edit_task(request, task_id):
                 data.get('end_date'),
                 data.get('verification_status'),
                 data.get('task_status'),
+                data.get('list'), 
                 task_id,
             )
             execute_query(query, params)
@@ -336,6 +338,4 @@ def edit_task(request, task_id):
 
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
-
-
 

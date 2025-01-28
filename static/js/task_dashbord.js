@@ -19,9 +19,78 @@ function updateClock() {
     });
 }
 
+function handleButtonClick(event) {
+    event.preventDefault();  // Prevent form submission or default behavior
+
+    const selectedDate = document.getElementById('date-input').value; // Get the selected date from the input
+    console.log("Selected Date:", selectedDate);
+
+    // Normalize selectedDate
+    const selectedFormattedDate = new Date(selectedDate).toISOString().split('T')[0]; // Format to YYYY-MM-DD
+
+    // Filter tasks based on the selected date
+    const filteredTasks = golbalfetchdata.tasks.filter(task => {
+        const taskDate = task.start;
+
+        // Normalize taskDate
+        const formattedTaskDate = taskDate ? new Date(taskDate).toISOString().split('T')[0] : null;
+
+        console.log("Task Date:", formattedTaskDate);
+
+        // Check if the task's start_date matches the selected date (both strings in YYYY-MM-DD format)
+        return formattedTaskDate && formattedTaskDate === selectedFormattedDate;
+    });
+
+    // Show tasks when the button is clicked
+    if (filteredTasks.length > 0) {
+        populateTimesheet(filteredTasks);
+    } else {
+        populateTimesheet([]); // No tasks found for the selected date
+    }
+}
+
+
+// Function to populate the timesheet with tasks
+function populateTimesheet(tasks) {
+    const timesheetContent = document.getElementById("timesheetContent");
+    timesheetContent.innerHTML = "";  // Clear any existing content
+
+    if (tasks.length > 0) {
+        tasks.forEach(task => {
+            const taskRow = document.createElement("div");
+            taskRow.classList.add("timesheet-row");
+
+            taskRow.innerHTML = `
+                <div class="task-info">
+                    <h4 class="task-type">${task.scope}</h4> <!-- Scope -->
+                    <p class="task-name">${task.title}</p> <!-- Title -->
+                    <p class="task-meta">${task.projects ? task.projects : 'No Project Assigned'}, ${task.d_no ? 'REV NO: ' + task.d_no : 'No Rev No'}</p> <!-- Projects and Assigned -->
+                </div>
+                <div class="task-time">
+                    <p>
+                        ${task.start ? new Date(task.start).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Not Available'} <!-- Start date -->
+                    </p>
+                </div>
+                <div class="task-actions">
+                    <i class="fas fa-comment-alt"></i>
+                    <i class="fas fa-trash"></i>
+                </div>
+            `;
+            
+            timesheetContent.appendChild(taskRow); // Append the task row to the content
+        });
+    } else {
+        const noDataMessage = document.createElement("p");
+        noDataMessage.textContent = "No Data Found";
+        timesheetContent.appendChild(noDataMessage);
+    }
+}
+
+// Add event listener to the button
+document.getElementById("date_in_daily_timesheet").addEventListener("click", handleButtonClick);
+
 setInterval(updateClock, 1000);
 updateClock();
-
 // Fetch and display tasks when the page loads
 
 // Function to populate dropdowns
@@ -29,6 +98,7 @@ function populateDropdowns(tasks) {
     // Dropdown IDs and their pairs
     const dropdownPairs = [
         { primary: "id_project", secondary: "id_project2", field: "projects" },
+        { primary: "id_list", secondary: "id_list2", field: "list" },
         { primary: "id_scope", secondary: "id_scope2", field: "scope" },
         { primary: "id_priority", secondary: "id_priority2", field: "priority" },
         { primary: "id_category", secondary: "id_category2", field: "category" },
@@ -70,6 +140,7 @@ function populateDropdowns(tasks) {
 
 
 
+let golbalfetchdata
 
 // Fetch data and populate dropdowns
 document.addEventListener("DOMContentLoaded", () => {
@@ -83,6 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(data => {
             console.log("Fetched Tasks Data:", data);
             if (data.tasks && data.tasks.length > 0) {
+                golbalfetchdata = data
                 populateDropdowns(data.tasks);
             } else {
                 console.error("No tasks data found in API response.");
@@ -161,7 +233,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Get the modal container
         const modal = document.getElementById('popupModal');
-        modal.style.display = 'block'; // Show the modal
+        modal.style.display = "flex"; // Show the modal
 
         // Get the close button and add event listener
         const closeButton = document.getElementById('closePopupButton');
@@ -179,6 +251,7 @@ document.getElementById("createTaskForm").addEventListener("submit", function (e
     // Collect form data
     const taskData = {
         title: document.getElementById("taskTitle2").value,
+        list: document.getElementById("id_list").value,
         project: document.getElementById("id_project").value,
         scope: document.getElementById("id_scope").value,
         priority: document.getElementById("id_priority").value,
@@ -228,6 +301,7 @@ document.getElementById("editTaskForm").addEventListener("submit", function (e) 
     // Collect form data
     const taskData = {
         title: document.getElementById("taskTitle").value,
+        list: document.getElementById("id_list2").value,
         project: document.getElementById("id_project2").value,
         scope: document.getElementById("id_scope2").value,
         priority: document.getElementById("id_priority2").value,
@@ -242,7 +316,7 @@ document.getElementById("editTaskForm").addEventListener("submit", function (e) 
         task_status: document.getElementById("id_task_status2").value,
     };
 
-    fetch(`/api/edit-task/${taskId}`, {
+    fetch(`/api/edit-task/`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
@@ -256,3 +330,47 @@ document.getElementById("editTaskForm").addEventListener("submit", function (e) 
         .catch((error) => console.error("Error editing task:", error));
     
 });
+
+
+// manual timesheet
+function openPopup() {
+    document.getElementById("timesheetpopup").style.display = "flex";
+}
+
+function closePopup() {
+    document.getElementById("timesheetpopup").style.display = "none";
+}
+
+// Close when clicking outside the popup
+window.onclick = function(event) {
+    let popup = document.getElementById("timesheetpopup");
+    if (event.target === popup) {
+        closePopup();
+    }
+};
+
+function showTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+    document.getElementById(tabId).style.display = 'block';
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+// Charts
+setTimeout(() => {
+    new Chart(document.getElementById("benchmarkChart"), {
+        type: 'bar',
+        data: {
+            labels: ["Benchmark", "Total Task"],
+            datasets: [{ data: [126, 100], backgroundColor: ["#4c8bf5", "#92b4f5"] }]
+        }
+    });
+
+    new Chart(document.getElementById("timeChart"), {
+        type: 'pie',
+        data: {
+            labels: ["Discussion", "Designing", "Calculating", "Modeling", "Checking"],
+            datasets: [{ data: [19, 12, 24, 15, 30], backgroundColor: ["#98FB98", "#87CEFA", "#FFB6C1", "#FFD700", "#FFA07A"] }]
+        }
+    });
+}, 500);
