@@ -24,48 +24,74 @@ updateClock();
 
 // Fetch and display tasks when the page loads
 
-    // Fetch tasks data from the API
-    fetch("/api/task_dashboard/")
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json(); // Parse the JSON response
-    })
-    .then(data => {
-        console.log("Fetched Tasks Data:", data); // Log the full response
+// Function to populate dropdowns
+function populateDropdowns(tasks) {
+    // Dropdown IDs and their pairs
+    const dropdownPairs = [
+        { primary: "id_project", secondary: "id_project2", field: "projects" },
+        { primary: "id_scope", secondary: "id_scope2", field: "scope" },
+        { primary: "id_priority", secondary: "id_priority2", field: "priority" },
+        { primary: "id_category", secondary: "id_category2", field: "category" },
+        { primary: "id_verification_status", secondary: "id_verification_status2", field: "verification_status" },
+        { primary: "id_task_status", secondary: "id_task_status2", field: "task_status" },
+    ];
 
-        if (data.success && Array.isArray(data.tasks)) {
-            populateProjectDropdown(data.tasks); // Pass the tasks array
+    dropdownPairs.forEach(pair => {
+        const primaryDropdown = document.getElementById(pair.primary);
+        const secondaryDropdown = document.getElementById(pair.secondary);
+
+        if (primaryDropdown && secondaryDropdown) {
+            // Clear existing options
+            primaryDropdown.innerHTML = '<option value="">Select</option>';
+            secondaryDropdown.innerHTML = '<option value="">Select</option>';
+
+            // Populate dropdowns with task data
+            tasks.forEach(task => {
+                const value = task[pair.field];
+                if (value) {
+                    const option1 = document.createElement("option");
+                    const option2 = document.createElement("option");
+
+                    option1.value = value;
+                    option1.textContent = value;
+
+                    option2.value = value;
+                    option2.textContent = value;
+
+                    primaryDropdown.appendChild(option1);
+                    secondaryDropdown.appendChild(option2);
+                }
+            });
         } else {
-            console.error("Tasks data is not in the expected format:", data);
+            console.error(`Dropdowns with IDs '${pair.primary}' or '${pair.secondary}' not found.`);
         }
-    })
-    .catch(error => {
-        console.error("Error fetching tasks:", error);
-    });
-
-// Function to populate the dropdown with task projects
-function populateProjectDropdown(tasks) {
-    const projectDropdown = document.getElementById("id_project"); // Select the dropdown
-    const projectDropdown2 = document.getElementById("id_project2"); 
-    // Clear existing options
-    projectDropdown.innerHTML = '<option value="">Select Project</option>';
-    projectDropdown2.innerHTML = '<option value="">Select Project</option>';
-
-    // Loop through the tasks array
-    tasks.forEach(task => {
-        const option1 = document.createElement("option");
-        option1.value = task.project; // Use project as the value
-        option1.textContent = task.project; // Display the project name
-        projectDropdown.appendChild(option1); // Add the option to the first dropdown
-
-        const option2 = document.createElement("option");
-        option2.value = task.project; // Use project as the value
-        option2.textContent = task.project; // Display the project name
-        projectDropdown2.appendChild(option2); // Add the option to the second dropdown
     });
 }
+
+
+
+
+// Fetch data and populate dropdowns
+document.addEventListener("DOMContentLoaded", () => {
+    fetch("/api/task_dashboard/")
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Fetched Tasks Data:", data);
+            if (data.tasks && data.tasks.length > 0) {
+                populateDropdowns(data.tasks);
+            } else {
+                console.error("No tasks data found in API response.");
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching tasks:", error);
+        });
+});
 
 
 
@@ -138,7 +164,7 @@ document.addEventListener("DOMContentLoaded", function () {
         modal.style.display = 'block'; // Show the modal
 
         // Get the close button and add event listener
-        const closeButton = document.getElementById('closeModal');
+        const closeButton = document.getElementById('closePopupButton');
         closeButton.addEventListener('click', function () {
             modal.style.display = 'none'; // Hide the modal when clicked
         });
@@ -147,3 +173,86 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Create reusable modal for creating and editing tasks
 
+document.getElementById("createTaskForm").addEventListener("submit", function (e) {
+    e.preventDefault(); // Prevent the page from reloading
+
+    // Collect form data
+    const taskData = {
+        title: document.getElementById("taskTitle2").value,
+        project: document.getElementById("id_project").value,
+        scope: document.getElementById("id_scope").value,
+        priority: document.getElementById("id_priority").value,
+        assigned_to: document.getElementById("assignedTo").value,
+        checker: document.getElementById("checker").value,
+        qc_3_checker: document.getElementById("qcChecker").value,
+        group: document.getElementById("group").value,
+        category: document.getElementById("id_category").value,
+        start_date: document.getElementById("startDate").value,
+        end_date: document.getElementById("endDate").value,
+        verification_status: document.getElementById("id_verification_status").value,
+        task_status: document.getElementById("id_task_status").value,
+    };
+    console.log("Task Created taskData:", taskData); // Log the response
+    // Send the data to the backend
+    fetch("/api/create-task/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(taskData),
+    })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json().then((data) => ({
+                status: response.status,
+                body: data
+            }));
+            
+        })
+        .then((data) => {
+            console.log("Task Created:", data); // Log the response
+            alert("Task created successfully!"); // Optional success notification
+        })
+        .catch((error) => {
+            console.error("Error creating task:", error);
+            alert("Error creating task. Check console for details.");
+        });
+});
+
+
+document.getElementById("editTaskForm").addEventListener("submit", function (e) {
+    e.preventDefault(); // Prevent form from reloading the page
+
+    // Collect form data
+    const taskData = {
+        title: document.getElementById("taskTitle").value,
+        project: document.getElementById("id_project2").value,
+        scope: document.getElementById("id_scope2").value,
+        priority: document.getElementById("id_priority2").value,
+        assigned_to: document.getElementById("id_assigned_to2").value,
+        checker: document.getElementById("id_checker2").value,
+        qc_3_checker: document.getElementById("id_qc_3_checker2").value,
+        group: document.getElementById("id_group2").value,
+        category: document.getElementById("id_category2").value,
+        start_date: document.getElementById("id_start_date2").value,
+        end_date: document.getElementById("id_end_date2").value,
+        verification_status: document.getElementById("id_verification_status2").value,
+        task_status: document.getElementById("id_task_status2").value,
+    };
+
+    fetch(`/api/edit-task/${taskId}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(taskData),
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log("Task Edited:", data); // Logs the response JSON
+        })
+        .catch((error) => console.error("Error editing task:", error));
+    
+});

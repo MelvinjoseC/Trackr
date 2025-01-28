@@ -27,9 +27,21 @@ class TrackerTasks(models.Model):
     qc_1_status = models.CharField(max_length=50, null=True, blank=True)
     qc_2_status = models.CharField(max_length=50, null=True, blank=True)
     qc_3_status = models.CharField(max_length=50, null=True, blank=True)
-    iso_verification = models.BooleanField(default=False)
+    verification_status = models.BooleanField(default=False)
+    phase_1_benchmark = models.CharField(max_length=50, null=True, blank=True)
+    phase_2_benchmark = models.CharField(max_length=50, null=True, blank=True)
+    phase_3_benchmark = models.CharField(max_length=50, null=True, blank=True)
+    phase_4_benchmark = models.CharField(max_length=50, null=True, blank=True)
+    phase_5_benchmark = models.CharField(max_length=50, null=True, blank=True)
+    phase_6_benchmark = models.CharField(max_length=50, null=True, blank=True)
+    phase_7_benchmark = models.CharField(max_length=50, null=True, blank=True)
+    phase_8_benchmark = models.CharField(max_length=50, null=True, blank=True)
+    phase_9_benchmark = models.CharField(max_length=50, null=True, blank=True)
+    phase_10_benchmark = models.CharField(max_length=50, null=True, blank=True)
     task_benchmark = models.TextField(null=True, blank=True)
-
+    mail_no = models.CharField(max_length=50, null=True, blank=True)
+    ref_no = models.CharField(max_length=50, null=True, blank=True)
+    list = models.CharField(max_length=50, null=True, blank=True)
     class Meta:
         db_table = 'tracker_project'  # Custom table name
 

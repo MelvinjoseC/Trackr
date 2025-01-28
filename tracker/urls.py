@@ -7,5 +7,7 @@ urlpatterns = [
     path('sign_up/', views.sign_up, name='sign_up'),
     path('save_employee_details/', views.save_employee_details, name='save_employee_details'),
      path('api/task_dashboard/', views.task_dashboard_api, name='task_dashboard_api'),  # New API endpoint
+     path('api/create-task/', views.create_task, name='create_task'),
+    path('api/edit-task/<int:task_id>/', views.edit_task, name='edit_task'),
 ]
 

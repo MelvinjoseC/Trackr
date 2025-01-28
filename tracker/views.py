@@ -89,7 +89,7 @@ def task_dashboard_api(request):
     task_list = []
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM tracker_tasks")
+            cursor.execute("SELECT * FROM tracker_project")
             tasks = cursor.fetchall()
             if cursor.description:
                 task_columns = [col[0] for col in cursor.description]
@@ -203,7 +203,7 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT 
-                    id, title, scope, date, time, assigned, category, project, 
+                    id, title, scope, date, time, assigned, category, projects, 
                     list, rev_no, comments, benchmark, d_no, mail_no, ref_no, created, updated
                 FROM tasktracker.tracker_monthlycalendar
                 WHERE date = %s
@@ -240,6 +240,102 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
         'monthly_calendar_data': monthly_calendar_data,
     }
 
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.db import connection
+import json
+
+# Helper function to execute SQL queries
+def execute_query(query, params=None):
+    with connection.cursor() as cursor:
+        cursor.execute(query, params)
+        if query.strip().lower().startswith("select"):
+            # Fetch all rows for SELECT queries
+            return cursor.fetchall()
+        else:
+            # For INSERT, UPDATE, DELETE
+            return None
+
+
+@csrf_exempt
+def create_task(request):
+    if request.method == 'POST':
+        try:
+            # Parse the request body
+            data = json.loads(request.body.decode('utf-8'))
+
+            # SQL query to insert data into tracker_project
+            query = """
+                INSERT INTO tracker_project
+                (title, projects, scope, priority, assigned, checker, qc3_checker, `group`, `category`, `start`, `end`, `verification_status`, `task_status`)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            params = (
+                data.get('title'),
+                data.get('project'),
+                data.get('scope'),
+                data.get('priority'),
+                data.get('assigned_to'),
+                data.get('checker'),
+                data.get('qc_3_checker'),
+                data.get('group'),
+                data.get('category'),
+                data.get('start_date'),
+                data.get('end_date'),
+                data.get('verification_status'),
+                data.get('task_status'),
+            )
+
+            # Execute the query
+            with connection.cursor() as cursor:
+                cursor.execute(query, params)
+
+            # Return success response
+            return JsonResponse({'message': 'Task created successfully!', 'task': data}, status=201)
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+def edit_task(request, task_id):
+    if request.method == 'PUT':
+        try:
+            # Parse the request body
+            data = json.loads(request.body.decode('utf-8'))
+
+            # SQL query to update data in tracker_project
+            query = """
+                UPDATE tracker_project
+                SET title=%s, projects=%s, scope=%s, priority=%s, assigned=%s,
+                    checker=%s, qc3_checker=%s,`group`=%s, category=%s,
+                    start_date=%s, end_date=%s, verification_status=%s, task_status=%s
+                WHERE id=%s
+            """
+            params = (
+                data.get('title'),
+                data.get('projects'),
+                data.get('scope'),
+                data.get('priority'),
+                data.get('assigned'),
+                data.get('checker'),
+                data.get('qc3_checker'),
+                data.get('group'),
+                data.get('category'),
+                data.get('start_date'),
+                data.get('end_date'),
+                data.get('verification_status'),
+                data.get('task_status'),
+                task_id,
+            )
+            execute_query(query, params)
+
+            return JsonResponse({'message': 'Task updated successfully!', 'task': data})
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
 
 
 

@@ -201,11 +201,11 @@
                     <div class="time" id="current-time"></div>
                 </div>
  <!-- Events Section -->
-<div class="events-section" style="background-image: url('{% static "images/img_20.png" %}');">
-    <div class="events-header">
-
-    
-        <h4>Welcome,  {{ name }}</h4>
+  <!-- style="background-image: url('{% static "images/img_20.png" %}');" -->
+<div class="events-section">
+    <div class="events-header">   
+        <h4>Welcome,{{ name }}</h4>
+        <p>you have 4 tasks </p>
   
     </div>
     <div class="events-list">
@@ -520,75 +520,56 @@
                 <div class="form-group">
                     <label for="id_project2">Project</label>
                     <select id="id_project2">
-
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="id_scope">Scope</label>
-                    <select id="id_scope">
+                    <label for="id_scope2">Scope</label>
+                    <select id="id_scope2">
                         <option value="">Select Scope</option>
-                        <option value="scope1">FRONT END</option>
-                        <option value="scope2">PLANNING</option>
-                        <option value="scope3">FE_WEBSITE WORKS</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="id_priority">Priority</label>
-                    <select id="id_priority">
-                        <option value="High">High</option>
-                        <option value="Medium">Medium</option>
-                        <option value="Low">Low</option>
+                    <label for="id_priority2">Priority</label>
+                    <select id="id_priority2">
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="id_assigned_to">Assigned To</label>
-                    <input type="text" id="id_assigned_to" placeholder="Enter task Assigned">
+                    <label for="id_assigned_to2">Assigned To</label>
+                    <input type="text" id="id_assigned_to2" placeholder="Enter task Assigned">
                 </div>
                 <div class="form-group">
-                    <label for="id_checker">Checker</label>
-                    <input type="text" id="id_checker" placeholder="Enter task Checker">
+                    <label for="id_checker2">Checker</label>
+                    <input type="text" id="id_checker2" placeholder="Enter task Checker">
                 </div>
                 <div class="form-group">
-                    <label for="id_qc_3_checker">QC-3 Checker</label>
-                    <input type="text" id="id_qc_3_checker" placeholder="Enter task QC-3 Checker">
+                    <label for="id_qc_3_checker2">QC-3 Checker</label>
+                    <input type="text" id="id_qc_3_checker2" placeholder="Enter task QC-3 Checker">
                 </div>
                 <div class="form-group">
-                    <label for="id_group">Group</label>
-                    <input type="text" id="id_group" placeholder="Enter task Group">
+                    <label for="id_group2">Group</label>
+                    <input type="text" id="id_group2" placeholder="Enter task Group">
                 </div>
                 <div class="form-group">
-                    <label for="id_category">Category</label>
-                    <select id="id_category">
-                        <option value="">Select Category</option>
-                        <option value="category1">FRONT END</option>
-                        <option value="category2">DISCUSSION</option>
-                        <option value="category3">BACK END</option>
+                    <label for="id_category2">Category</label>
+                    <select id="id_category2">
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="id_start_date">Start Date</label>
-                    <input type="date" id="id_start_date">
+                    <label for="id_start_date2">Start Date</label>
+                    <input type="date" id="id_start_date2">
                 </div>
                 <div class="form-group">
-                    <label for="id_end_date">End Date</label>
-                    <input type="date" id="id_end_date">
+                    <label for="id_end_date2">End Date</label>
+                    <input type="date" id="id_end_date2">
                 </div>
                 <div class="form-group">
-                    <label for="id_verification_status">Verification Status</label>
-                    <select id="id_verification_status">
-                        <option value="">Select Verification Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="completed">Completed</option>
-                        <option value="inProgress">In Progress</option>
+                    <label for="id_verification_status2">Verification Status</label>
+                    <select id="id_verification_status2">
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="id_task_status">Task Status</label>
-                    <select id="id_task_status">
-                        <option value="">Select Task Status</option>
-                        <option value="notStarted">Not Started</option>
-                        <option value="inProgress">In Progress</option>
-                        <option value="completed">Completed</option>
+                    <label for="id_task_status2">Task Status</label>
+                    <select id="id_task_status2">
                     </select>
                 </div>
 
@@ -605,10 +586,10 @@
  <!-- Popup Modal -->
  <div id="taskModalPopup" class="popup-modal">
         <h2>Create Task</h2>
-        <form>
+        <form id="createTaskForm">
             <div class="form-group">
-                <label for="taskTitle">Title:</label>
-                <input type="text" id="taskTitle" placeholder="Enter task title">
+                <label for="taskTitle2">Title:</label>
+                <input type="text" id="taskTitle2" placeholder="Enter task title">
             </div>
             <div class="form-group">
                 <label for="id_project">Project:</label>
@@ -619,19 +600,11 @@
             <div class="form-group">
                 <label for="id_scope">Scope:</label>
                 <select id="id_scope">
-                    <option value="">Select Scope</option>
-                    <option value="scope1">FRONT END</option>
-                    <option value="scope2">PLANNING</option>
-                    <option value="scope3">FE_WEBSITE WORKS</option>
                 </select>
             </div>
             <div class="form-group">
                 <label for="id_priority">Priority:</label>
                 <select id="id_priority">
-                    <option value="">Select Priority</option>
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
-                    <option value="low">Low</option>
                 </select>
             </div>
             <div class="form-group">
@@ -653,10 +626,6 @@
             <div class="form-group">
                 <label for="id_category">Category:</label>
                 <select id="id_category">
-                    <option value="">Select Category</option>
-                    <option value="category1">FRONT END</option>
-                    <option value="category2">DISCUSSION</option>
-                    <option value="category3">BACK END</option>
                 </select>
             </div>
             <div class="form-group">
@@ -670,19 +639,11 @@
             <div class="form-group">
                 <label for="id_verification_status">Verification Status:</label>
                 <select id="id_verification_status">
-                    <option value="">Select Verification Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="completed">Completed</option>
-                    <option value="inProgress">In Progress</option>
                 </select>
             </div>
             <div class="form-group">
                 <label for="id_task_status">Task Status:</label>
                 <select id="id_task_status">
-                    <option value="">Select Task Status</option>
-                    <option value="notStarted">Not Started</option>
-                    <option value="inProgress">In Progress</option>
-                    <option value="completed">Completed</option>
                 </select>
             </div>
             <div class="form-group">
@@ -692,7 +653,6 @@
         </form>
 </div>
     
-    <script src="script.js"></script>
 
 
 <script>
