@@ -333,13 +333,14 @@ document.getElementById("editTaskForm").addEventListener("submit", function (e) 
 
 
 // manual timesheet
-function openPopup() {
+document.getElementById("manual_timesheet").addEventListener("click", function () {
     document.getElementById("timesheetpopup").style.display = "flex";
-}
+});
 
-function closePopup() {
+document.getElementById("closePopupButton").addEventListener("click", function () {
     document.getElementById("timesheetpopup").style.display = "none";
-}
+});
+
 
 // Close when clicking outside the popup
 window.onclick = function(event) {

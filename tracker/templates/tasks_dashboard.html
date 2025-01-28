@@ -547,9 +547,9 @@
         <span><a >EDIT ALL TASKS</a> </span>
         <i class="fas fa-chevron-right"></i>
     </div>
-    <div class="task-button" onclick="openPopup()">
+    <div class="task-button" id="manual_timesheet">
         <i class="fas fa-calendar-alt"></i>
-        <span>MANUAL TIMESHEET</span>
+        <span><a>MANUAL TIMESHEET</a></span>
         <i class="fas fa-chevron-right"></i>
     </div>
 </div>
@@ -757,86 +757,8 @@
         </div>
     </div>
 
-    <!-- CREATE TASK -->
- <!-- Popup Modal -->
- <div id="taskModalPopup" class="popup-modal">
-        <h2>Create Task</h2>
-        <form id="createTaskForm">
-            <div class="form-group">
-                <label for="taskTitle2">Title:</label>
-                <input type="text" id="taskTitle2" placeholder="Enter task title">
-            </div>
-            <div class="form-group">
-                <label for="id_list">List:</label>
-                <select id="id_list">
-                    <option value="">Select List</option>
-                </select>
-            <div class="form-group">
-                <label for="id_project">Project:</label>
-                <select id="id_project">
-                    <option value="">Select Project</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="id_scope">Scope:</label>
-                <select id="id_scope">
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="id_priority">Priority:</label>
-                <select id="id_priority">
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="id_assigned_to">Assigned To:</label>
-                <input type="text" id="assignedTo" placeholder="Enter task Assigned">
-            </div>
-            <div class="form-group">
-                <label for="id_checker">Checker:</label>
-                <input type="text" id="checker" placeholder="Enter task Checker">
-            </div>
-            <div class="form-group">
-                <label for="id_qc_3_checker">QC-3 Checker:</label>
-                <input type="text" id="qcChecker" placeholder="Enter task QC-3 Checker">
-            </div>
-            <div class="form-group">
-                <label for="id_group">Group:</label>
-                <input type="text" id="group" placeholder="Enter task Group">
-            </div>
-            <div class="form-group">
-                <label for="id_category">Category:</label>
-                <select id="id_category">
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="id_start_date">Start Date:</label>
-                <input type="date" id="startDate">
-            </div>
-            <div class="form-group">
-                <label for="id_end_date">End Date:</label>
-                <input type="date" id="endDate">
-            </div>
-            <div class="form-group">
-                <label for="id_verification_status">Verification Status:</label>
-                <select id="id_verification_status">
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="id_task_status">Task Status:</label>
-                <select id="id_task_status">
-                </select>
-            </div>
-            <div class="form-group">
-                <button type="submit">Save Task</button>
-                <button id="closeModal" class="close">Close</button>
-            </div>
-        </form>
-</div>
-    
-
-
- <!-- Popup Container with updated ID -->
- <div class="popup-overlay" id="timesheetpopup">
+<!-- Popup Container with updated ID -->
+<div class="popup-overlay" id="timesheetpopup">
     <div class="popup-content">
         <span class="close-btn4" onclick="closePopup()">&times;</span>
         <h2>Manual Timesheet</h2>
@@ -928,6 +850,83 @@
     </div>
 </div>
 
+
+    <!-- CREATE TASK -->
+ <!-- Popup Modal -->
+ <div id="taskModalPopup" class="popup-modal">
+        <h2>Create Task</h2>
+        <form id="createTaskForm">
+            <div class="form-group">
+                <label for="taskTitle2">Title:</label>
+                <input type="text" id="taskTitle2" placeholder="Enter task title">
+            </div>
+            <div class="form-group">
+                <label for="id_list">List:</label>
+                <select id="id_list">
+                    <option value="">Select List</option>
+                </select>
+            <div class="form-group">
+                <label for="id_project">Project:</label>
+                <select id="id_project">
+                    <option value="">Select Project</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="id_scope">Scope:</label>
+                <select id="id_scope">
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="id_priority">Priority:</label>
+                <select id="id_priority">
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="id_assigned_to">Assigned To:</label>
+                <input type="text" id="assignedTo" placeholder="Enter task Assigned">
+            </div>
+            <div class="form-group">
+                <label for="id_checker">Checker:</label>
+                <input type="text" id="checker" placeholder="Enter task Checker">
+            </div>
+            <div class="form-group">
+                <label for="id_qc_3_checker">QC-3 Checker:</label>
+                <input type="text" id="qcChecker" placeholder="Enter task QC-3 Checker">
+            </div>
+            <div class="form-group">
+                <label for="id_group">Group:</label>
+                <input type="text" id="group" placeholder="Enter task Group">
+            </div>
+            <div class="form-group">
+                <label for="id_category">Category:</label>
+                <select id="id_category">
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="id_start_date">Start Date:</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="form-group">
+                <label for="id_end_date">End Date:</label>
+                <input type="date" id="endDate">
+            </div>
+            <div class="form-group">
+                <label for="id_verification_status">Verification Status:</label>
+                <select id="id_verification_status">
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="id_task_status">Task Status:</label>
+                <select id="id_task_status">
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit">Save Task</button>
+                <button id="closeModal" class="close">Close</button>
+            </div>
+        </form>
+</div>
+    
 
 <script>
 
