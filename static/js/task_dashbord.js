@@ -104,6 +104,8 @@ function populateDropdowns(tasks) {
         { primary: "id_category", secondary: "id_category2", field: "category" },
         { primary: "id_verification_status", secondary: "id_verification_status2", field: "verification_status" },
         { primary: "id_task_status", secondary: "id_task_status2", field: "task_status" },
+        { primary: "id_revno", secondary: "id_revno2", field: "rev" },
+        { primary: "id_dno", secondary: "id_dno2", field: "d_no" }
     ];
 
     dropdownPairs.forEach(pair => {
@@ -205,6 +207,8 @@ dateInput.addEventListener("change", event => {
     selectedDate.textContent = formatDate(event.target.value);
 });
 
+// CREATE TASKS OPEN AND CLOSE BUTTON
+
 document.addEventListener("DOMContentLoaded", function () {
     const button = document.getElementById("openPopupButton2");
 
@@ -223,6 +227,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+// EDIT TASKS OPEN AND CLOSE BUTTON
 
 document.addEventListener("DOMContentLoaded", function () {
     // Get the button and modal elements
@@ -250,7 +255,7 @@ document.getElementById("createTaskForm").addEventListener("submit", function (e
 
     // Collect form data
     const taskData = {
-        title: document.getElementById("taskTitle2").value,
+        title: document.getElementById("taskTitle").value,
         list: document.getElementById("id_list").value,
         project: document.getElementById("id_project").value,
         scope: document.getElementById("id_scope").value,
@@ -264,6 +269,8 @@ document.getElementById("createTaskForm").addEventListener("submit", function (e
         end_date: document.getElementById("endDate").value,
         verification_status: document.getElementById("id_verification_status").value,
         task_status: document.getElementById("id_task_status").value,
+        rev_no: document.getElementById("id_revno").value,
+        d_no: document.getElementById("id_dno").value,
     };
     console.log("Task Created taskData:", taskData); // Log the response
     // Send the data to the backend
@@ -300,7 +307,7 @@ document.getElementById("editTaskForm").addEventListener("submit", function (e) 
 
     // Collect form data
     const taskData = {
-        title: document.getElementById("taskTitle").value,
+        title: document.getElementById("taskTitle2").value,
         list: document.getElementById("id_list2").value,
         project: document.getElementById("id_project2").value,
         scope: document.getElementById("id_scope2").value,
@@ -314,6 +321,8 @@ document.getElementById("editTaskForm").addEventListener("submit", function (e) 
         end_date: document.getElementById("id_end_date2").value,
         verification_status: document.getElementById("id_verification_status2").value,
         task_status: document.getElementById("id_task_status2").value,
+        rev_no: document.getElementById("id_revno2").value,
+        d_no: document.getElementById("id_dno2").value,
     };
 
     fetch(`/api/edit-task/`, {

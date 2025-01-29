@@ -1,18 +1,18 @@
-
 {
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Django",
+            "name": "Django Debug",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "args": [
                 "runserver",
-                "--nothreading",
-                "--noreload"
+                "127.0.0.1:8000"
             ],
-            "django": true
+            "django": true,
+            "justMyCode": false,
+            "autoReload": true
         }
     ]
 }

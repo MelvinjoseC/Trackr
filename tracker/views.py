@@ -260,44 +260,54 @@ def execute_query(query, params=None):
 
 
 @csrf_exempt
+
+
 def create_task(request):
     if request.method == 'POST':
         try:
             # Parse the request body
             data = json.loads(request.body.decode('utf-8'))
 
+            # Debugging: Print received data (Optional)
+            print("Received Data:", data)
+
             # SQL query to insert data into tracker_project
             query = """
                 INSERT INTO tracker_project
-                (title, list, projects, scope, priority, assigned, checker, qc3_checker, `group`, `category`, `start`, `end`, `verification_status`, `task_status`)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                (title, `list`, projects, scope, priority, assigned, checker, qc3_checker, `group`, category, start, end, verification_status, task_status)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             params = (
-                data.get('title'),
-                data.get('list'),
-                data.get('project'),
-                data.get('scope'),
-                data.get('priority'),
-                data.get('assigned_to'),
-                data.get('checker'),
-                data.get('qc_3_checker'),
-                data.get('group'),
-                data.get('category'),
-                data.get('start_date'),
-                data.get('end_date'),
-                data.get('verification_status'),
-                data.get('task_status'),
+                data.get('title', ''),        # Provide default empty string if None
+                data.get('list', ''),         # `list` is escaped with backticks
+                data.get('project', ''),
+                data.get('scope', ''),
+                data.get('priority', ''),
+                data.get('assigned_to', ''),
+                data.get('checker', ''),
+                data.get('qc_3_checker', ''),
+                data.get('group', ''),
+                data.get('category', ''),
+                data.get('start_date', ''),
+                data.get('end_date', ''),
+                data.get('verification_status', ''),
+                data.get('task_status', ''),
             )
 
-            # Execute the query
+
+            # Execute the query safely
             with connection.cursor() as cursor:
                 cursor.execute(query, params)
 
             # Return success response
             return JsonResponse({'message': 'Task created successfully!', 'task': data}, status=201)
 
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
 @csrf_exempt

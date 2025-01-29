@@ -672,24 +672,23 @@
         <!-- Dropdowns (Populated via API) -->
         <div class="dropdown-row">
             <select id="id_list2">
-                <option  id="id_list2" placeholder="Select List">Select List</option>
+                <option  id="id_list2" placeholder="Select List">Select Depatment</option>
             </select>
             <select id="id_project2">
                 <option  id="id_project2" placeholder="Select Project">Select Project</option>
             </select>
             <select id="id_scope2">
-                <option id="id_scope2" placeholder="Select Scope">Select Scope</option>
-            </select>
-            
-            <select id="id_category2">
-                <option  id="id_category2" placeholder="Select Category">Select Category</option>
+                <option id="id_scope2" placeholder="Select scope">Select scope</option>
+            </select>   
+            <select id="taskTitle2">
+                <option  id="taskTitle2" placeholder="Select title">Select title</option>
             </select>
         </div>
 
             <form id="editTaskForm">
                 <div class="form-group">
-                    <label for="taskTitle">Title:</label>
-                    <input type="text" id="taskTitle" placeholder="Enter task title">
+                    <label for="taskTitle2">Title:</label>
+                    <input type="text" id="taskTitle2" placeholder="Enter task title">
                 </div>
 
                 <div class="form-group">
@@ -700,8 +699,16 @@
                 <div class="form-group">
                     <label for="id_scope2">Scope</label>
                     <select id="id_scope2">
-                        <option value="">Select Scope</option>
+                        <option>Select Scope</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_revno2">REV NO</label>
+                    <input type="text" id="id_revno2" placeholder="Enter task rev no">
+                </div>
+                <div class="form-group">
+                    <label for="id_dno2">D NO</label>
+                    <input type="text" id="id_dno2" placeholder="Enter task d no">
                 </div>
                 <div class="form-group">
                     <label for="id_priority2">Priority</label>
@@ -760,7 +767,7 @@
 <!-- Popup Container with updated ID -->
 <div class="popup-overlay" id="timesheetpopup">
     <div class="popup-content">
-        <span class="close-btn4" onclick="closePopup()">&times;</span>
+        <span class="close-btn4" id="closePopupButton">&times;</span>
         <h2>Manual Timesheet</h2>
 
         <div class="popup-grid">
@@ -857,14 +864,15 @@
         <h2>Create Task</h2>
         <form id="createTaskForm">
             <div class="form-group">
-                <label for="taskTitle2">Title:</label>
-                <input type="text" id="taskTitle2" placeholder="Enter task title">
+                <label for="taskTitle">Title:</label>
+                <input type="text" id="taskTitle" placeholder="Enter task title">
             </div>
             <div class="form-group">
-                <label for="id_list">List:</label>
+                <label for="id_list">DEPARTMENT:</label>
                 <select id="id_list">
                     <option value="">Select List</option>
                 </select>
+            </div>
             <div class="form-group">
                 <label for="id_project">Project:</label>
                 <select id="id_project">
@@ -875,6 +883,14 @@
                 <label for="id_scope">Scope:</label>
                 <select id="id_scope">
                 </select>
+            </div>
+            <div class="form-group">
+                <label for="id_revno">REV NO</label>
+                <input type="text" id="id_revno" placeholder="Enter task rev no">
+            </div>
+            <div class="form-group">
+                <label for="id_dno">D NO</label>
+                <input type="text" id="id_dno" placeholder="Enter task d no">
             </div>
             <div class="form-group">
                 <label for="id_priority">Priority:</label>
