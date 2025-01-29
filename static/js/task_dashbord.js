@@ -346,6 +346,10 @@ document.getElementById("closePopupButton_creattask").addEventListener("click", 
     document.getElementById("taskModalPopup").style.display = "none";
 });
 
+
+document.getElementById("closePopupButton_updatetask").addEventListener("click", function () {
+    document.getElementById("popupModal").style.display = "none";
+});
 // Close when clicking outside the popup
 window.onclick = function(event) {
     let popup = document.getElementById("timesheetpopup");
