@@ -220,10 +220,7 @@ document.addEventListener("DOMContentLoaded", function () {
         modal.style.display = 'block'; // Show the modal
 
         // Get the close button and add event listener
-        const closeButton = document.getElementById('closeModal');
-        closeButton.addEventListener('click', function () {
-            modal.style.display = 'none'; // Hide the modal when clicked
-        });
+      
     });
 });
 
@@ -240,19 +237,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const modal = document.getElementById('popupModal');
         modal.style.display = "flex"; // Show the modal
 
-        // Get the close button and add event listener
-        const closeButton = document.getElementById('closePopupButton');
-        closeButton.addEventListener('click', function () {
-            modal.style.display = 'none'; // Hide the modal when clicked
-        });
     });
 });
 
 // Create reusable modal for creating and editing tasks
 
-document.getElementById("createTaskForm").addEventListener("submit", function (e) {
-    e.preventDefault(); // Prevent the page from reloading
-
+document.getElementById("savetask_creattask").addEventListener("click", function (e) {
+    e.preventDefault(); // Prevent default behavior (if inside a form)
     // Collect form data
     const taskData = {
         title: document.getElementById("taskTitle").value,
@@ -302,8 +293,8 @@ document.getElementById("createTaskForm").addEventListener("submit", function (e
 });
 
 
-document.getElementById("editTaskForm").addEventListener("submit", function (e) {
-    e.preventDefault(); // Prevent form from reloading the page
+document.getElementById("savetask_creattask").addEventListener("click", function (e) {
+    e.preventDefault(); // Prevent default behavior (if inside a form)
 
     // Collect form data
     const taskData = {
@@ -346,10 +337,14 @@ document.getElementById("manual_timesheet").addEventListener("click", function (
     document.getElementById("timesheetpopup").style.display = "flex";
 });
 
-document.getElementById("closePopupButton").addEventListener("click", function () {
+document.getElementById("closePopupButton_manualtimesheet").addEventListener("click", function () {
     document.getElementById("timesheetpopup").style.display = "none";
 });
 
+
+document.getElementById("closePopupButton_creattask").addEventListener("click", function () {
+    document.getElementById("taskModalPopup").style.display = "none";
+});
 
 // Close when clicking outside the popup
 window.onclick = function(event) {
