@@ -95,20 +95,6 @@ updateClock();
 
 // Function to populate dropdowns
 function populateDropdowns(tasks) {
-    // Primary dropdowns and their corresponding fields
-    const primaryDropdowns = [
-        { id: "id_project", field: "projects" },
-        { id: "id_list", field: "list" },
-        { id: "id_scope", field: "scope" },
-        { id: "id_priority", field: "priority" },
-        { id: "id_category", field: "category" },
-        { id: "id_verification_status", field: "verification_status" },
-        { id: "id_task_status", field: "task_status" },
-        { id: "id_revno", field: "rev" },
-        { id: "id_dno", field: "d_no" }
-    ];
-
-    // Track selected project and list
     let selectedProject = "";
     let selectedList = "";
 
@@ -143,7 +129,6 @@ function populateDropdowns(tasks) {
     // Filter and populate dependent dropdowns dynamically
     function handleDependentDropdowns() {
         const filteredTasks = tasks.filter(task =>
-            (!selectedProject || task.projects === selectedProject) &&
             (!selectedList || task.list === selectedList)
         );
 
@@ -154,23 +139,28 @@ function populateDropdowns(tasks) {
         populateDropdown("id_task_status", "task_status", filteredTasks);
     }
 
-    // Handle change events for project and list dropdowns
-    document.getElementById("id_project").addEventListener("change", function() {
-        selectedProject = this.value;
-        selectedList = "";  // Reset the list selection when project changes
-        populateDropdown("id_list", "list", tasks.filter(task => !selectedProject || task.projects === selectedProject));
-        handleDependentDropdowns();  // Refresh dependent dropdowns
-    });
-
+    // Handle change event for list dropdown to filter projects
     document.getElementById("id_list").addEventListener("change", function() {
         selectedList = this.value;
+
+        // Filter projects based on the selected list
+        const filteredProjects = tasks.filter(task => task.list === selectedList);
+        populateDropdown("id_project", "projects", filteredProjects);
+
         handleDependentDropdowns();  // Refresh dependent dropdowns
     });
 
-    // Initially populate project and list dropdowns
-    populateDropdown("id_project", "projects");
+    // Handle change events for project dropdown
+    document.getElementById("id_project").addEventListener("change", function() {
+        selectedProject = this.value;
+        handleDependentDropdowns();  // Refresh dependent dropdowns
+    });
+
+    // Initially populate list and project dropdowns
     populateDropdown("id_list", "list");
+    populateDropdown("id_project", "projects");
 }
+
 
 
 
