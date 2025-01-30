@@ -95,50 +95,84 @@ updateClock();
 
 // Function to populate dropdowns
 function populateDropdowns(tasks) {
-    // Dropdown IDs and their pairs
-    const dropdownPairs = [
-        { primary: "id_project", secondary: "id_project2", field: "projects" },
-        { primary: "id_list", secondary: "id_list2", field: "list" },
-        { primary: "id_scope", secondary: "id_scope2", field: "scope" },
-        { primary: "id_priority", secondary: "id_priority2", field: "priority" },
-        { primary: "id_category", secondary: "id_category2", field: "category" },
-        { primary: "id_verification_status", secondary: "id_verification_status2", field: "verification_status" },
-        { primary: "id_task_status", secondary: "id_task_status2", field: "task_status" },
-        { primary: "id_revno", secondary: "id_revno2", field: "rev" },
-        { primary: "id_dno", secondary: "id_dno2", field: "d_no" }
+    // Primary dropdowns and their corresponding fields
+    const primaryDropdowns = [
+        { id: "id_project", field: "projects" },
+        { id: "id_list", field: "list" },
+        { id: "id_scope", field: "scope" },
+        { id: "id_priority", field: "priority" },
+        { id: "id_category", field: "category" },
+        { id: "id_verification_status", field: "verification_status" },
+        { id: "id_task_status", field: "task_status" },
+        { id: "id_revno", field: "rev" },
+        { id: "id_dno", field: "d_no" }
     ];
 
-    dropdownPairs.forEach(pair => {
-        const primaryDropdown = document.getElementById(pair.primary);
-        const secondaryDropdown = document.getElementById(pair.secondary);
+    // Track selected project and list
+    let selectedProject = "";
+    let selectedList = "";
 
-        if (primaryDropdown && secondaryDropdown) {
-            // Clear existing options
-            primaryDropdown.innerHTML = '<option value="">Select</option>';
-            secondaryDropdown.innerHTML = '<option value="">Select</option>';
+    // Helper function to populate a dropdown with unique options
+    function populateDropdown(dropdownId, field, filterTasks = tasks) {
+        const dropdown = document.getElementById(dropdownId);
+        
+        if (dropdown) {
+            // Clear existing options and add a default option
+            dropdown.innerHTML = '<option value="">Select</option>';
 
-            // Populate dropdowns with task data
-            tasks.forEach(task => {
-                const value = task[pair.field];
-                if (value) {
-                    const option1 = document.createElement("option");
-                    const option2 = document.createElement("option");
+            // Track unique values using a Set
+            const uniqueOptions = new Set();
 
-                    option1.value = value;
-                    option1.textContent = value;
+            // Populate the dropdown based on the filtered tasks
+            filterTasks.forEach(task => {
+                const value = task[field];
+                if (value && !uniqueOptions.has(value)) {
+                    uniqueOptions.add(value);  // Add value to the Set
 
-                    option2.value = value;
-                    option2.textContent = value;
-
-                    primaryDropdown.appendChild(option1);
-                    secondaryDropdown.appendChild(option2);
+                    const option = document.createElement("option");
+                    option.value = value;
+                    option.textContent = value;
+                    dropdown.appendChild(option);
                 }
             });
         } else {
-            console.error(`Dropdowns with IDs '${pair.primary}' or '${pair.secondary}' not found.`);
+            console.error(`Dropdown with ID '${dropdownId}' not found.`);
         }
+    }
+
+    // Filter and populate dependent dropdowns dynamically
+    function handleDependentDropdowns() {
+        const filteredTasks = tasks.filter(task =>
+            (!selectedProject || task.projects === selectedProject) &&
+            (!selectedList || task.list === selectedList)
+        );
+
+        populateDropdown("id_scope", "scope", filteredTasks);
+        populateDropdown("id_priority", "priority", filteredTasks);
+        populateDropdown("id_category", "category", filteredTasks);
+        populateDropdown("id_verification_status", "verification_status", filteredTasks);
+        populateDropdown("id_task_status", "task_status", filteredTasks);
+    }
+
+    // Handle change events for project and list dropdowns
+    document.getElementById("id_project").addEventListener("change", function() {
+        selectedProject = this.value;
+        selectedList = "";  // Reset the list selection when project changes
+        populateDropdown("id_list", "list", tasks.filter(task => !selectedProject || task.projects === selectedProject));
+        handleDependentDropdowns();  // Refresh dependent dropdowns
     });
+
+    document.getElementById("id_list").addEventListener("change", function() {
+        selectedList = this.value;
+        handleDependentDropdowns();  // Refresh dependent dropdowns
+    });
+
+    // Initially populate project and list dropdowns
+    populateDropdown("id_project", "projects");
+    populateDropdown("id_list", "list");
 }
+
+
 
 
 
