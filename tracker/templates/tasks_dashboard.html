@@ -673,82 +673,90 @@
         <div class="dropdown-row">
    
     
-            <select id="taskTitle2">
+            <!-- <select id="taskTitle2">
                 <option  id="taskTitle2" placeholder="Select title">Select title</option>
-            </select>
+            </select> -->
         </div>
 
             <form id="editTaskForm">
-                <div class="form-group">
-                    <label for="taskTitle2">Title:</label>
-                    <input type="text" id="taskTitle2" placeholder="Enter task title">
-                </div>
-                <div class="form-group">
-                    <label for="id_list2">Project</label>
-                    <select id="id_list2">
+                
+    
+                <div class="form-group3">
+                    <label for="id_listedittask">DEPARTMENT</label>
+                    <select id="id_listedittask">
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="id_project2">Project</label>
-                    <select id="id_project2">
+                <div class="form-group3">
+                    <label for="id_projectedittask">Project</label>
+                    <select id="id_projectedittask">
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="id_scope2">Scope</label>
-                    <select id="id_scope2">
+                <div class="form-group3">
+                    <label for="id_scopeedittask">Scope</label>
+                    <select id="id_scopeedittask">
                         <option>Select Scope</option>
                     </select>
                 </div>
+                <div class="form-group3">
+                    <label for="taskTitleedittask">TITLE</label>
+                    <select id="taskTitleedittask">
+                    </select>
+                </div>
+                <div class="form-group3">
+                    <label for="id_revnoedittask">REV NO</label>
+                    <select id="id_revnoedittask"></select>
+                </div>
+
                 <div class="form-group">
-                    <label for="id_revno2">REV NO</label>
-                    <input type="text" id="id_revno2" placeholder="Enter task rev no">
+                    <label for="taskTitle3">Title:</label>
+                    <input type="text" id="taskTitle3" placeholder="Enter task title">
                 </div>
                 <div class="form-group">
-                    <label for="id_dno2">D NO</label>
-                    <input type="text" id="id_dno2" placeholder="Enter task d no">
+                    <label for="id_dnoedittask">D NO</label>
+                    <input type="text" id="id_dnoedittask" placeholder="Enter task d no">
                 </div>
                 <div class="form-group">
-                    <label for="id_priority2">Priority</label>
-                    <select id="id_priority2">
+                    <label for="id_priorityedittask">Priority</label>
+                    <select id="id_priorityedittask">
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="id_assigned_to2">Assigned To</label>
-                    <input type="text" id="id_assigned_to2" placeholder="Enter task Assigned">
+                    <label for="id_assigned_toedittask">Assigned To</label>
+                    <input type="text" id="id_assigned_toedittask" placeholder="Enter task Assigned">
                 </div>
                 <div class="form-group">
-                    <label for="id_checker2">Checker</label>
-                    <input type="text" id="id_checker2" placeholder="Enter task Checker">
+                    <label for="id_checkeredittask">Checker</label>
+                    <input type="text" id="id_checkeredittask" placeholder="Enter task Checker">
                 </div>
                 <div class="form-group">
-                    <label for="id_qc_3_checker2">QC-3 Checker</label>
-                    <input type="text" id="id_qc_3_checker2" placeholder="Enter task QC-3 Checker">
+                    <label for="id_qc_3_checkeredittask">QC-3 Checker</label>
+                    <input type="text" id="id_qc_3_checkeredittask" placeholder="Enter task QC-3 Checker">
                 </div>
                 <div class="form-group">
-                    <label for="id_group2">Group</label>
-                    <input type="text" id="id_group2" placeholder="Enter task Group">
+                    <label for="id_groupedittask">Group</label>
+                    <input type="text" id="id_groupedittask" placeholder="Enter task Group">
                 </div>
                 <div class="form-group">
-                    <label for="id_category2">Category</label>
-                    <select id="id_category2">
+                    <label for="id_categoryedittask">Category</label>
+                    <select id="id_categoryedittask">
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="id_start_date2">Start Date</label>
-                    <input type="date" id="id_start_date2">
+                    <label for="id_start_dateedittask">Start Date</label>
+                    <input type="date" id="id_start_dateedittask">
                 </div>
                 <div class="form-group">
-                    <label for="id_end_date2">End Date</label>
-                    <input type="date" id="id_end_date2">
+                    <label for="id_end_dateedittask">End Date</label>
+                    <input type="date" id="id_end_dateedittask">
                 </div>
                 <div class="form-group">
-                    <label for="id_verification_status2">Verification Status</label>
-                    <select id="id_verification_status2">
+                    <label for="id_verification_statusedittask">Verification Status</label>
+                    <select id="id_verification_statusedittask">
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="id_task_status2">Task Status</label>
-                    <select id="id_task_status2">
+                    <label for="id_task_statusedittask">Task Status</label>
+                    <select id="id_task_statusedittask">
                     </select>
                 </div>
             </form>
@@ -861,77 +869,77 @@
         <h2>Create Task</h2>
         <form id="createTaskForm">
             <div class="form-group">
-                <label for="taskTitle">Title:</label>
-                <input type="text" id="taskTitle" placeholder="Enter task title">
+                <label for="taskTitlecreatetask">Title:</label>
+                <input type="text" id="taskTitlecreatetask" placeholder="Enter task title">
             </div>
             <div class="form-group">
-                <label for="id_list">DEPARTMENT:</label>
-                <select id="id_list">
+                <label for="id_listcreatetask">DEPARTMENT:</label>
+                <select id="id_listcreatetask">
                     <option value="">Select List</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="id_project">Project:</label>
-                <select id="id_project">
+                <label for="id_projectcreatetask">Project:</label>
+                <select id="id_projectcreatetask">
                     <option value="">Select Project</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="id_scope">Scope:</label>
-                <select id="id_scope">
+                <label for="id_scopecreatetask">Scope:</label>
+                <select id="id_scopecreatetask">
                 </select>
             </div>
             <div class="form-group">
-                <label for="id_category">Category:</label>
-                <select id="id_category">
+                <label for="id_categorycreatetask">Category:</label>
+                <select id="id_categorycreatetask">
                 </select>
             </div>
             <div class="form-group">
-                <label for="id_revno">REV NO</label>
-                <input type="text" id="id_revno" placeholder="Enter task rev no">
+                <label for="id_revnocreatetask">REV NO</label>
+                <input type="text" id="id_revnocreatetask" placeholder="Enter task rev no">
             </div>
             <div class="form-group">
-                <label for="id_dno">D NO</label>
-                <input type="text" id="id_dno" placeholder="Enter task d no">
+                <label for="id_dnocreatetask">D NO</label>
+                <input type="text" id="id_dnocreatetask" placeholder="Enter task d no">
             </div>
             <div class="form-group">
-                <label for="id_priority">Priority:</label>
-                <select id="id_priority">
+                <label for="id_prioritycreatetask">Priority:</label>
+                <select id="id_prioritycreatetask">
                 </select>
             </div>
             <div class="form-group">
-                <label for="id_assigned_to">Assigned To:</label>
-                <input type="text" id="assignedTo" placeholder="Enter task Assigned">
+                <label for="assignedTocreatetask">Assigned To:</label>
+                <input type="text" id="assignedTocreatetask" placeholder="Enter task Assigned">
             </div>
             <div class="form-group">
-                <label for="id_checker">Checker:</label>
-                <input type="text" id="checker" placeholder="Enter task Checker">
+                <label for="checkercreatetask">Checker:</label>
+                <input type="text" id="checkercreatetask" placeholder="Enter task Checker">
             </div>
             <div class="form-group">
-                <label for="id_qc_3_checker">QC-3 Checker:</label>
-                <input type="text" id="qcChecker" placeholder="Enter task QC-3 Checker">
+                <label for="qcCheckercreatetask">QC-3 Checker:</label>
+                <input type="text" id="qcCheckercreatetask" placeholder="Enter task QC-3 Checker">
             </div>
             <div class="form-group">
-                <label for="id_group">Group:</label>
-                <input type="text" id="group" placeholder="Enter task Group">
+                <label for="groupcreatetask">Group:</label>
+                <input type="text" id="groupcreatetask" placeholder="Enter task Group">
             </div>
             
             <div class="form-group">
-                <label for="id_start_date">Start Date:</label>
-                <input type="date" id="startDate">
+                <label for="startDatecreatetask">Start Date:</label>
+                <input type="date" id="startDatecreatetask">
             </div>
             <div class="form-group">
-                <label for="id_end_date">End Date:</label>
-                <input type="date" id="endDate">
+                <label for="endDatecreatetask">End Date:</label>
+                <input type="date" id="endDatecreatetask">
             </div>
             <div class="form-group">
-                <label for="id_verification_status">Verification Status:</label>
-                <select id="id_verification_status">
+                <label for="id_verification_statuscreatetask">Verification Status:</label>
+                <select id="id_verification_statuscreatetask">
                 </select>
             </div>
             <div class="form-group">
-                <label for="id_task_status">Task Status:</label>
-                <select id="id_task_status">
+                <label for="id_task_statuscreatetask">Task Status:</label>
+                <select id="id_task_statuscreatetask">
                 </select>
             </div>
         </form>

@@ -137,33 +137,33 @@ function populateDropdowns(tasks) {
             (!selectedList || task.list === selectedList)
         );
 
-        populateDropdown("id_scope", "scope", filteredTasks);
-        populateDropdown("id_priority", "priority", filteredTasks);
-        populateDropdown("id_category", "category", filteredTasks);
-        populateDropdown("id_verification_status", "verification_status", filteredTasks);
-        populateDropdown("id_task_status", "task_status", filteredTasks);
+        populateDropdown("id_scopecreatetask", "scope", filteredTasks);
+        populateDropdown("id_prioritycreatetask", "priority", filteredTasks);
+        populateDropdown("id_categorycreatetask", "category", filteredTasks);
+        populateDropdown("id_verification_statuscreatetask", "verification_status", filteredTasks);
+        populateDropdown("id_task_statuscreatetask", "task_status", filteredTasks);
     }
 
     // Handle change event for list dropdown to filter projects
-    document.getElementById("id_list").addEventListener("change", function() {
+    document.getElementById("id_listcreatetask").addEventListener("change", function() {
         selectedList = this.value;
 
         // Filter projects based on the selected list
         const filteredProjects = tasks.filter(task => task.list === selectedList);
-        populateDropdown("id_project", "projects", filteredProjects);
+        populateDropdown("id_projectcreatetask", "projects", filteredProjects);
 
         handleDependentDropdowns();  // Refresh dependent dropdowns
     });
 
     // Handle change events for project dropdown
-    document.getElementById("id_project").addEventListener("change", function() {
+    document.getElementById("id_projectcreatetask").addEventListener("change", function() {
         selectedProject = this.value;
         handleDependentDropdowns();  // Refresh dependent dropdowns
     });
 
     // Initially populate list and project dropdowns
-    populateDropdown("id_list", "list");
-    populateDropdown("id_project", "projects");
+    populateDropdown("id_listcreatetask", "list");
+    populateDropdown("id_projectcreatetask", "projects");
 }
 
 
@@ -205,17 +205,17 @@ function populateDropdowns_updatetask(tasks) {
     function populateFormFields(selectedTask) {
         if (selectedTask) {
             document.getElementById("taskTitle3").value = selectedTask.title || "";
-            document.getElementById("id_dno2").value = selectedTask.d_no || "";
-            document.getElementById("id_priority2").value = selectedTask.priority || "";
-            document.getElementById("id_assigned_to2").value = selectedTask.assigned_to || "";
-            document.getElementById("id_checker2").value = selectedTask.checker || "";
-            document.getElementById("id_qc_3_checker2").value = selectedTask.qc_3_checker || "";
-            document.getElementById("id_group2").value = selectedTask.group || "";
-            document.getElementById("id_category2").value = selectedTask.category || "";
-            document.getElementById("id_start_date2").value = selectedTask.start_date || "";
-            document.getElementById("id_end_date2").value = selectedTask.end_date || "";
-            document.getElementById("id_verification_status2").value = selectedTask.verification_status || "";
-            document.getElementById("id_task_status2").value = selectedTask.task_status || "";
+            document.getElementById("id_dnoedittask").value = selectedTask.d_no || "";
+            document.getElementById("id_priorityedittask").value = selectedTask.priority || "";
+            document.getElementById("id_assigned_toedittask").value = selectedTask.assigned_to || "";
+            document.getElementById("id_checkeredittask").value = selectedTask.checker || "";
+            document.getElementById("id_qc_3_checkeredittask").value = selectedTask.qc_3_checker || "";
+            document.getElementById("id_groupedittask").value = selectedTask.group || "";
+            document.getElementById("id_categoryedittask").value = selectedTask.category || "";
+            document.getElementById("id_start_dateedittask").value = selectedTask.start_date || "";
+            document.getElementById("id_end_dateedittask").value = selectedTask.end_date || "";
+            document.getElementById("id_verification_statusedittask").value = selectedTask.verification_status || "";
+            document.getElementById("id_task_statusedittask").value = selectedTask.task_status || "";
         }
     }
 
@@ -223,17 +223,17 @@ function populateDropdowns_updatetask(tasks) {
     function handleDependentDropdowns_updatetask() {
         const filteredTasks = tasks.filter(task => (!selectedList || task.list === selectedList));
 
-        populateDropdown_updatetask("id_scope2", "scope", filteredTasks);
-        populateDropdown_updatetask("taskTitle2", "title", filteredTasks);
-        populateDropdown_updatetask("id_revno2", "rev", filteredTasks);
-        populateDropdown_updatetask("id_priority2", "priority", filteredTasks);
-        populateDropdown_updatetask("id_category2", "category", filteredTasks);
-        populateDropdown_updatetask("id_verification_status2", "verification_status", filteredTasks);
-        populateDropdown_updatetask("id_task_status2", "task_status", filteredTasks);
+        populateDropdown_updatetask("id_scopeedittask", "scope", filteredTasks);
+        populateDropdown_updatetask("taskTitleedittask", "title", filteredTasks);
+        populateDropdown_updatetask("id_revnoedittask", "rev", filteredTasks);
+        populateDropdown_updatetask("id_priorityedittask", "priority", filteredTasks);
+        populateDropdown_updatetask("id_categoryedittask", "category", filteredTasks);
+        populateDropdown_updatetask("id_verification_statusedittask", "verification_status", filteredTasks);
+        populateDropdown_updatetask("id_task_statusedittask", "task_status", filteredTasks);
     }
 
     // Event listener to populate form when title is selected
-    document.getElementById("taskTitle2").addEventListener("change", function () {
+    document.getElementById("taskTitleedittask").addEventListener("change", function () {
         const selectedTitle = this.value;
         const selectedTask = tasks.find(task => task.title === selectedTitle);
         globalselectedtitil_for_edit_task =selectedTitle;
@@ -242,39 +242,39 @@ function populateDropdowns_updatetask(tasks) {
     });
 
     // Event listener to populate form when REV NO is selected
-    document.getElementById("id_revno2").addEventListener("change", function () {
+    document.getElementById("id_revnoedittask").addEventListener("change", function () {
         const selectedRevNo = this.value;
         const selectedTask = tasks.find(task => task.rev_no === selectedRevNo);
         populateFormFields(selectedTask);
     });
 
     // Event listener for Category
-    document.getElementById("id_category2").addEventListener("change", function () {
+    document.getElementById("id_categoryedittask").addEventListener("change", function () {
         const selectedCategory = this.value.trim();
         const selectedTask = tasks.find(task => task.category.trim() === selectedCategory);
             populateFormFields(selectedTask);
     });
 
     // Handle change event for list dropdown to filter projects
-    document.getElementById("id_list2").addEventListener("change", function () {
+    document.getElementById("id_listedittask").addEventListener("change", function () {
         selectedList = this.value;
 
         // Filter projects based on the selected list
         const filteredProjects = tasks.filter(task => task.list === selectedList);
-        populateDropdown_updatetask("id_project2", "projects", filteredProjects);
+        populateDropdown_updatetask("id_projectedittask", "projects", filteredProjects);
 
         handleDependentDropdowns_updatetask();  // Refresh dependent dropdowns
     });
 
     // Handle change events for project dropdown
-    document.getElementById("id_project2").addEventListener("change", function () {
+    document.getElementById("id_projectedittask").addEventListener("change", function () {
         selectedProject = this.value;
         handleDependentDropdowns_updatetask();  // Refresh dependent dropdowns
     });
 
     // Initially populate list and project dropdowns
-    populateDropdown_updatetask("id_list2", "list");
-    populateDropdown_updatetask("id_project2", "projects");
+    populateDropdown_updatetask("id_listedittask", "list");
+    populateDropdown_updatetask("id_projectedittask", "projects");
 }
 
 
@@ -385,22 +385,22 @@ document.getElementById("savetask_creattask").addEventListener("click", function
     e.preventDefault(); // Prevent default behavior (if inside a form)
     // Collect form data
     const taskData = {
-        title: document.getElementById("taskTitle").value,
-        list: document.getElementById("id_list").value,
-        project: document.getElementById("id_project").value,
-        scope: document.getElementById("id_scope").value,
-        priority: document.getElementById("id_priority").value,
-        assigned_to: document.getElementById("assignedTo").value,
-        checker: document.getElementById("checker").value,
-        qc_3_checker: document.getElementById("qcChecker").value,
-        group: document.getElementById("group").value,
-        category: document.getElementById("id_category").value,
-        start_date: document.getElementById("startDate").value,
-        end_date: document.getElementById("endDate").value,
-        verification_status: document.getElementById("id_verification_status").value,
-        task_status: document.getElementById("id_task_status").value,
-        rev_no: document.getElementById("id_revno").value,
-        d_no: document.getElementById("id_dno").value,
+        title: document.getElementById("taskTitlecreatetask").value,
+        list: document.getElementById("id_listcreatetask").value,
+        project: document.getElementById("id_projectcreatetask").value,
+        scope: document.getElementById("id_scopecreatetask").value,
+        priority: document.getElementById("id_prioritycreatetask").value,
+        assigned_to: document.getElementById("assignedTocreatetask").value,
+        checker: document.getElementById("checkercreatetask").value,
+        qc_3_checker: document.getElementById("qcCheckercreatetask").value,
+        group: document.getElementById("groupcreatetask").value,
+        category: document.getElementById("id_categorycreatetask").value,
+        start_date: document.getElementById("startDatecreatetask").value,
+        end_date: document.getElementById("endDatecreatetask").value,
+        verification_status: document.getElementById("id_verification_statuscreatetask").value,
+        task_status: document.getElementById("id_task_statuscreatetask").value,
+        rev_no: document.getElementById("id_revnocreatetask").value,
+        d_no: document.getElementById("id_dnocreatetask").value,
     };
     console.log("Task Created taskData:", taskData); // Log the response
     // Send the data to the backend
@@ -438,21 +438,21 @@ document.getElementById("savetask_updatetask").addEventListener("click", functio
     // Collect form data
     const taskData = {
         title: document.getElementById("taskTitle3").value,
-        list: document.getElementById("id_list2").value,
-        project: document.getElementById("id_project2").value,
-        scope: document.getElementById("id_scope2").value,
-        priority: document.getElementById("id_priority2").value,
-        assigned_to: document.getElementById("id_assigned_to2").value,
-        checker: document.getElementById("id_checker2").value,
-        qc_3_checker: document.getElementById("id_qc_3_checker2").value,
-        group: document.getElementById("id_group2").value,
-        category: document.getElementById("id_category2").value,
-        start_date: document.getElementById("id_start_date2").value,
-        end_date: document.getElementById("id_end_date2").value,
-        verification_status: document.getElementById("id_verification_status2").value,
-        task_status: document.getElementById("id_task_status2").value,
-        rev_no: document.getElementById("id_revno2").value,
-        d_no: document.getElementById("id_dno2").value,
+        list: document.getElementById("id_listedittask").value,
+        project: document.getElementById("id_projectedittask").value,
+        scope: document.getElementById("id_scopeedittask").value,
+        priority: document.getElementById("id_priorityedittask").value,
+        assigned_to: document.getElementById("id_assigned_toedittask").value,
+        checker: document.getElementById("id_checkeredittask").value,
+        qc_3_checker: document.getElementById("id_qc_3_checkeredittask").value,
+        group: document.getElementById("id_groupedittask").value,
+        category: document.getElementById("id_categoryedittask").value,
+        start_date: document.getElementById("id_start_dateedittask").value,
+        end_date: document.getElementById("id_end_dateedittask").value,
+        verification_status: document.getElementById("id_verification_statusedittask").value,
+        task_status: document.getElementById("id_task_statusedittask").value,
+        rev_no: document.getElementById("id_revnoedittask").value,
+        d_no: document.getElementById("id_dnoedittask").value,
         globalselectedtitil_for_edit_task_backend : globalselectedtitil_for_edit_task
     };
 
