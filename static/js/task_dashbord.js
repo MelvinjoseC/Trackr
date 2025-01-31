@@ -89,7 +89,7 @@ function populateTimesheet(tasks) {
 
 
 
-
+var globalselectedtitil_for_edit_task
 
 // Add event listener to the button
 document.getElementById("date_in_daily_timesheet").addEventListener("click", handleButtonClick);
@@ -97,9 +97,6 @@ document.getElementById("date_in_daily_timesheet").addEventListener("click", han
 setInterval(updateClock, 1000);
 updateClock();
 // Fetch and display tasks when the page loads
-
-
-
 
 // Function to populate dropdowns
 function populateDropdowns(tasks) {
@@ -177,7 +174,7 @@ function populateDropdowns_updatetask(tasks) {
     // Helper function to populate a dropdown with unique options
     function populateDropdown_updatetask(dropdownId, field, filterTasks = tasks) {
         const dropdown = document.getElementById(dropdownId);
-        
+
         if (dropdown) {
             // Clear existing options and add a default option
             dropdown.innerHTML = '<option value="">Select</option>';
@@ -202,21 +199,64 @@ function populateDropdowns_updatetask(tasks) {
         }
     }
 
+
+
+    // Populate form fields based on selected task data
+    function populateFormFields(selectedTask) {
+        if (selectedTask) {
+            document.getElementById("taskTitle3").value = selectedTask.title || "";
+            document.getElementById("id_dno2").value = selectedTask.d_no || "";
+            document.getElementById("id_priority2").value = selectedTask.priority || "";
+            document.getElementById("id_assigned_to2").value = selectedTask.assigned_to || "";
+            document.getElementById("id_checker2").value = selectedTask.checker || "";
+            document.getElementById("id_qc_3_checker2").value = selectedTask.qc_3_checker || "";
+            document.getElementById("id_group2").value = selectedTask.group || "";
+            document.getElementById("id_category2").value = selectedTask.category || "";
+            document.getElementById("id_start_date2").value = selectedTask.start_date || "";
+            document.getElementById("id_end_date2").value = selectedTask.end_date || "";
+            document.getElementById("id_verification_status2").value = selectedTask.verification_status || "";
+            document.getElementById("id_task_status2").value = selectedTask.task_status || "";
+        }
+    }
+
     // Filter and populate dependent dropdowns dynamically
     function handleDependentDropdowns_updatetask() {
-        const filteredTasks = tasks.filter(task =>
-            (!selectedList || task.list === selectedList)
-        );
+        const filteredTasks = tasks.filter(task => (!selectedList || task.list === selectedList));
 
         populateDropdown_updatetask("id_scope2", "scope", filteredTasks);
+        populateDropdown_updatetask("taskTitle2", "title", filteredTasks);
+        populateDropdown_updatetask("id_revno2", "rev", filteredTasks);
         populateDropdown_updatetask("id_priority2", "priority", filteredTasks);
         populateDropdown_updatetask("id_category2", "category", filteredTasks);
         populateDropdown_updatetask("id_verification_status2", "verification_status", filteredTasks);
         populateDropdown_updatetask("id_task_status2", "task_status", filteredTasks);
     }
 
+    // Event listener to populate form when title is selected
+    document.getElementById("taskTitle2").addEventListener("change", function () {
+        const selectedTitle = this.value;
+        const selectedTask = tasks.find(task => task.title === selectedTitle);
+        globalselectedtitil_for_edit_task =selectedTitle;
+        console.log("globalselectedtitil_for_edit_task:",globalselectedtitil_for_edit_task);
+        populateFormFields(selectedTask);
+    });
+
+    // Event listener to populate form when REV NO is selected
+    document.getElementById("id_revno2").addEventListener("change", function () {
+        const selectedRevNo = this.value;
+        const selectedTask = tasks.find(task => task.rev_no === selectedRevNo);
+        populateFormFields(selectedTask);
+    });
+
+    // Event listener for Category
+    document.getElementById("id_category2").addEventListener("change", function () {
+        const selectedCategory = this.value.trim();
+        const selectedTask = tasks.find(task => task.category.trim() === selectedCategory);
+            populateFormFields(selectedTask);
+    });
+
     // Handle change event for list dropdown to filter projects
-    document.getElementById("id_list2").addEventListener("change", function() {
+    document.getElementById("id_list2").addEventListener("change", function () {
         selectedList = this.value;
 
         // Filter projects based on the selected list
@@ -227,7 +267,7 @@ function populateDropdowns_updatetask(tasks) {
     });
 
     // Handle change events for project dropdown
-    document.getElementById("id_project2").addEventListener("change", function() {
+    document.getElementById("id_project2").addEventListener("change", function () {
         selectedProject = this.value;
         handleDependentDropdowns_updatetask();  // Refresh dependent dropdowns
     });
@@ -392,12 +432,12 @@ document.getElementById("savetask_creattask").addEventListener("click", function
 });
 
 
-document.getElementById("savetask_creattask").addEventListener("click", function (e) {
+document.getElementById("savetask_updatetask").addEventListener("click", function (e) {
     e.preventDefault(); // Prevent default behavior (if inside a form)
 
     // Collect form data
     const taskData = {
-        title: document.getElementById("taskTitle2").value,
+        title: document.getElementById("taskTitle3").value,
         list: document.getElementById("id_list2").value,
         project: document.getElementById("id_project2").value,
         scope: document.getElementById("id_scope2").value,
@@ -413,10 +453,11 @@ document.getElementById("savetask_creattask").addEventListener("click", function
         task_status: document.getElementById("id_task_status2").value,
         rev_no: document.getElementById("id_revno2").value,
         d_no: document.getElementById("id_dno2").value,
+        globalselectedtitil_for_edit_task_backend : globalselectedtitil_for_edit_task
     };
 
     fetch(`/api/edit-task/`, {
-        method: "PUT",
+        method: "POST",
         headers: {
             "Content-Type": "application/json",
         },

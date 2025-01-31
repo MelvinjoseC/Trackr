@@ -204,7 +204,7 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
             cursor.execute("""
                 SELECT 
                     id, title, scope, date, time, assigned, category, projects, 
-                    list, rev_no, comments, benchmark, d_no, mail_no, ref_no, created, updated,
+                    list, rev, comments, benchmark, d_no, mail_no, ref_no, created, updated, verification_status, task_status,
                 FROM tasktracker.tracker_monthlycalendar
                 WHERE date = %s
             """, [selected_date])
@@ -228,6 +228,8 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
                     'ref_no': row[14],
                     'created': row[15],
                     'updated': row[16],
+                    'verification_status': row[17],
+                    'task_status': row[18],
                 }
                 for row in rows
             ]
@@ -311,41 +313,68 @@ def create_task(request):
 
 
 @csrf_exempt
-def edit_task(request, task_id):
-    if request.method == 'PUT':
+
+
+def edit_task(request):
+    if request.method == 'POST':
         try:
             # Parse the request body
             data = json.loads(request.body.decode('utf-8'))
+            title_name = data.get('globalselectedtitil_for_edit_task_backend', '')  # Old title
 
-            # SQL query to update data in tracker_project
-            query = """
-                UPDATE tracker_project
-                SET title=%s, projects=%s, scope=%s, priority=%s, assigned=%s,
-                    checker=%s, qc3_checker=%s,`group`=%s, category=%s,
-                    start_date=%s, end_date=%s, verification_status=%s, task_status=%s, list=%s
-                WHERE id=%s
+            # Debugging: Print received data (Optional)
+            print("Received Data:", data)
+            print("Old Title Name:", title_name)
+
+            # Check if the task with the given old title, project, and scope already exists
+            check_query = """
+                SELECT id FROM tracker_project 
+                WHERE title = %s AND projects = %s AND scope = %s
             """
-            params = (
-                data.get('title'),
-                data.get('projects'),
-                data.get('scope'),
-                data.get('priority'),
-                data.get('assigned'),
-                data.get('checker'),
-                data.get('qc3_checker'),
-                data.get('group'),
-                data.get('category'),
-                data.get('start_date'),
-                data.get('end_date'),
-                data.get('verification_status'),
-                data.get('task_status'),
-                data.get('list'), 
-                task_id,
-            )
-            execute_query(query, params)
+            params_check = (title_name, data.get('project', ''), data.get('scope', ''))
 
-            return JsonResponse({'message': 'Task updated successfully!', 'task': data})
+            # Execute the check query
+            with connection.cursor() as cursor:
+                cursor.execute(check_query, params_check)
+                result = cursor.fetchone()  # Get the result if it exists
 
+            if result:
+                # Task exists, update the existing row with new title and other values
+                update_query = """
+                    UPDATE tracker_project
+                    SET title = %s, `list` = %s, priority = %s, assigned = %s, checker = %s, qc3_checker = %s,
+                        `group` = %s, category = %s, start = %s, end = %s, verification_status = %s, task_status = %s
+                    WHERE id = %s
+                """
+                params_update = (
+                    data.get('title', ''),  # Update with new title
+                    data.get('list', ''),
+                    data.get('priority', ''),
+                    data.get('assigned_to', ''),
+                    data.get('checker', ''),
+                    data.get('qc_3_checker', ''),
+                    data.get('group', ''),
+                    data.get('category', ''),
+                    data.get('start_date', ''),
+                    data.get('end_date', ''),
+                    data.get('verification_status', ''),
+                    data.get('task_status', ''),
+                    result[0]  # ID of the existing row
+                )
+
+                with connection.cursor() as cursor:
+                    cursor.execute(update_query, params_update)
+
+                return JsonResponse({'message': 'Task updated successfully!', 'task': data}, status=200)
+
+            else:
+                return JsonResponse({'error': 'Task with the given title, project, and scope not found'}, status=404)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
