@@ -86,12 +86,20 @@ function populateTimesheet(tasks) {
     }
 }
 
+
+
+
+
+
 // Add event listener to the button
 document.getElementById("date_in_daily_timesheet").addEventListener("click", handleButtonClick);
 
 setInterval(updateClock, 1000);
 updateClock();
 // Fetch and display tasks when the page loads
+
+
+
 
 // Function to populate dropdowns
 function populateDropdowns(tasks) {
@@ -162,7 +170,72 @@ function populateDropdowns(tasks) {
 }
 
 
+function populateDropdowns_updatetask(tasks) {
+    let selectedProject = "";
+    let selectedList = "";
 
+    // Helper function to populate a dropdown with unique options
+    function populateDropdown_updatetask(dropdownId, field, filterTasks = tasks) {
+        const dropdown = document.getElementById(dropdownId);
+        
+        if (dropdown) {
+            // Clear existing options and add a default option
+            dropdown.innerHTML = '<option value="">Select</option>';
+
+            // Track unique values using a Set
+            const uniqueOptions = new Set();
+
+            // Populate the dropdown based on the filtered tasks
+            filterTasks.forEach(task => {
+                const value = task[field];
+                if (value && !uniqueOptions.has(value)) {
+                    uniqueOptions.add(value);  // Add value to the Set
+
+                    const option = document.createElement("option");
+                    option.value = value;
+                    option.textContent = value;
+                    dropdown.appendChild(option);
+                }
+            });
+        } else {
+            console.error(`Dropdown with ID '${dropdownId}' not found.`);
+        }
+    }
+
+    // Filter and populate dependent dropdowns dynamically
+    function handleDependentDropdowns_updatetask() {
+        const filteredTasks = tasks.filter(task =>
+            (!selectedList || task.list === selectedList)
+        );
+
+        populateDropdown_updatetask("id_scope2", "scope", filteredTasks);
+        populateDropdown_updatetask("id_priority2", "priority", filteredTasks);
+        populateDropdown_updatetask("id_category2", "category", filteredTasks);
+        populateDropdown_updatetask("id_verification_status2", "verification_status", filteredTasks);
+        populateDropdown_updatetask("id_task_status2", "task_status", filteredTasks);
+    }
+
+    // Handle change event for list dropdown to filter projects
+    document.getElementById("id_list2").addEventListener("change", function() {
+        selectedList = this.value;
+
+        // Filter projects based on the selected list
+        const filteredProjects = tasks.filter(task => task.list === selectedList);
+        populateDropdown_updatetask("id_project2", "projects", filteredProjects);
+
+        handleDependentDropdowns_updatetask();  // Refresh dependent dropdowns
+    });
+
+    // Handle change events for project dropdown
+    document.getElementById("id_project2").addEventListener("change", function() {
+        selectedProject = this.value;
+        handleDependentDropdowns_updatetask();  // Refresh dependent dropdowns
+    });
+
+    // Initially populate list and project dropdowns
+    populateDropdown_updatetask("id_list2", "list");
+    populateDropdown_updatetask("id_project2", "projects");
+}
 
 
 
@@ -182,6 +255,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (data.tasks && data.tasks.length > 0) {
                 golbalfetchdata = data
                 populateDropdowns(data.tasks);
+                populateDropdowns_updatetask(data.tasks);
+                console.log("Fetched Tasks Data:", data);
             } else {
                 console.error("No tasks data found in API response.");
             }
