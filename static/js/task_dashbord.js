@@ -1,3 +1,17 @@
+document.getElementById('up-arrow').addEventListener('click', function() {
+    document.getElementById('scrollable-list').scrollBy({
+        top: -50, // Adjust the scroll amount as needed
+        behavior: 'smooth'
+    });
+});
+
+document.getElementById('down-arrow').addEventListener('click', function() {
+    document.getElementById('scrollable-list').scrollBy({
+        top: 50, // Adjust the scroll amount as needed
+        behavior: 'smooth'
+    });
+});
+
 function updateClock() {
     const now = new Date();
     const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });

@@ -51,7 +51,7 @@
 .content {
     padding: 1vw;
     width: 65%;
-    overflow-y: auto;
+    /* overflow-y: auto; */
 }
 
 #first-box{
@@ -115,7 +115,7 @@
 }
 .tasks {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 20px;
     justify-content: space-between;
 }
@@ -271,8 +271,8 @@
 }
 
 .member img {
-    width: 40px; /* Set width for the profile image */
-    height: 40px; /* Set height for the profile image */
+    width: 2vw;
+    height: 5vh;
     border-radius: 10%; /* Make the image circular */
     object-fit: cover; /* Ensure the image fills the container */
 }
@@ -286,14 +286,36 @@
 
 /* Right Sidebar */
 .right-sidebar {
-    width: 300px;
-    background-color: white;
-    padding: 20px;
-    border-left: 1px solid #ddd;
-    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 0.5vh;
+}
+
+#my-team{
+    background-color: #FFFFFF;
+    padding: 1vw;    
+    height: 30vh;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+}
+
+#task-details{
+    background-color: #FFFFFF;
+    padding: 1vw;    
+    height: 30vh;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+}
+
+#team-status{
+    background-color: #FFFFFF;
+    padding: 1vw;    
+    height: 35.6vh;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
 }
 
 /* Team Performance Section */
@@ -301,17 +323,44 @@
     text-align: center;
 }
 
-.team-performance h3 {
-    font-size: 18px;
-    margin: 10px 0;
+#my_project {
+    font-size: 1.6vh;
+    margin: 1vh 0;
     text-transform: uppercase;
-    color: #333;
+    color: #484848;
+    text-decoration: underline;
+}
+
+#task_details {
+    font-size: 1.6vh;
+    margin: 0 0 1vh;
+    text-transform: uppercase;
+    color: #484848;
+    text-align: center;
+    text-decoration: underline;
+}
+
+#status {
+    font-size: 1.6vh;
+    margin: 0 0 1vh;
+    text-transform: uppercase;
+    color: #484848;
+    text-align: center;
+    text-decoration: underline;
 }
 
 .team-performance p {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 15px;
+    font-size: 1.6vh;
+    color: #484848;
+    font-weight: 200;
+    margin-top: -5px;
+}
+
+.team-projects p{
+    font-size: 1.6vh;
+    color: #484848;
+    font-weight: 200;
+    margin-top: -5px;
 }
 
 .team-stats {
@@ -326,14 +375,36 @@
 
 .team-stats .stat p {
     margin: 0;
-    font-size: 12px;
-    color: #666;
+    font-size: 1.2vh;
+    color: #484848;
+    font-weight: 400;
 }
 
 .team-stats .stat h4 {
-    margin: 5px 0 0;
-    font-size: 16px;
-    color: #003f80;
+    margin: 0.5vh 0 0;
+    font-size: 2.8vh;
+    color: #333DAE;
+}
+
+.team-stats .stat h4.stats_1 {
+    margin: 0.5vh 0 0;
+    font-size: 2.8vh;
+    color: #414141;
+}
+
+#team_member{
+    text-align: left;
+    font-size: 1.3vh;
+    font-weight: 400;
+}
+
+.member span{
+    font-size: 1.2vh;
+    margin: 0 auto; /* Center spacing for block-level element */
+    display: inline-block; /* Ensure inline alignment */
+    line-height: 1.5;
+    color: #242424;
+    font-style: italic;
 }
 
 .team-members {
@@ -375,16 +446,33 @@
 }
 
 .task-placeholder {
-    font-size: 14px;
-    color: #666;
-    line-height: 1.5;
+    text-align: center;
 }
 
-.task-placeholder i {
-    color: #003f80;
-    margin-right: 5px;
+.info-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #F6F6F6;
+    border-radius: 10px;
+    padding: 2vw;
+    height: 14vh;
 }
 
+.info-icon {
+    width: 2vw;
+    height: 2.6vh;
+    margin-right: 0.5vw;
+    display: block;
+}
+
+.info-box p {
+    font-size: 1.4vh;
+    color: #898989;
+    font-style: italic;
+    font-weight: 200;
+    text-align: left;
+}
 
 /* Team Projects Section */
 .team-projects {
@@ -398,51 +486,94 @@
     color: #333;
 }
 
-.team-projects p {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 15px;
-}
-
 .project-tabs {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin-bottom: 15px;
+    border-radius: 8px;
+    gap: 0.2vw;
 }
 
 .project-tabs .tab {
-    padding: 5px 10px;
-    font-size: 12px;
-    color: #333;
-    background-color: #f1f1f1;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    padding: 1vh 1.79vw;
+    border: none;
+    font-size: 1.2vh;
+    background-color: #DAE6FB;
+    color: #484848;
+    font-weight: 300;
     cursor: pointer;
 }
 
 .project-tabs .tab.active {
-    background-color: #003f80;
-    color: white;
-    border-color: #003f80;
+    font-size: 1.2vh;
+    font-weight: bold;
+    background-color: #F3F3F3;
+    color: #484848;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .project-list {
-    text-align: left;
-    margin-top: 10px;
+    visibility: visible;
+    display: block; 
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+    height: 20vh; 
 }
 
 .project-item {
-    font-size: 14px;
-    color: #333;
-    padding: 10px 0;
-    border-bottom: 1px solid #ddd;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    padding: 1.7vh 2vw;
+    border-bottom: 1px solid #7a7a7a6e;
+    font-size: 1.4vh;
+    color: #000000;
+    text-align: left;
+}
+
+.scroll-container {
+    position: relative;
+    border-radius: 10px;
+    height: 22vh;
+    background-color: #f5f5f5;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    margin-top: 0.5vh;
+}
+
+.project-list::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome, Safari, Edge */
+}
+
+/* Arrow Buttons */
+.arrow {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    background-color: #FFFFFF;
+    padding: 0;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.up-arrow {
+    top: 0;
+    display: none;
+    border-bottom: 1px solid #ddd;
+}
+
+.down-arrow {
+    bottom: 0;
+    border-top: 1px solid #ddd;
 }
 
 .project-item:last-child {
     border-bottom: none;
+}
+
+.project-item span {
+    font-size: 1.4vh;
+    color: #838383;
 }
 
  .task-buttons {
@@ -546,7 +677,7 @@ a{
 }
 
 .date-time .time {
-    font-size: 3.7vh;
+    font-size: 3.5vh;
     font-weight: bold;
     color: #333DAE;
     font-family: Roboto;

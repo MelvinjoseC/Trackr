@@ -260,85 +260,98 @@
 </section>
 
         </div>
-                <div class="right-sidebar">
-    <!-- My Team Section -->
-    <section class="team-performance">
-        <h3>MY TEAM - MARINE ENGINEERING</h3>
-        <p>Team Performance for October, 2024</p>
-        <div class="team-stats">
-            <div class="stat">
-                <p>Total Tasks</p>
-                <h4>42</h4>
+    <div class="right-sidebar">
+        <!-- My Team Section -->
+        <div id="my-team">
+            <section class="team-performance">
+                <h3 id="my_project">MY PROJECT - MARINE ENGINEERING</h3>
+                <p>Team Performance for October, 2024</p>
+                <div class="team-stats">
+                    <div class="stat">
+                        <p>Total Tasks</p>
+                        <h4 class="stats_1">42</h4>
+                        </div>
+                    <div class="stat">
+                        <p>Assigned</p>
+                        <h4>30</h4>
+                        </div>
+                    <div class="stat">
+                        <p>Pending</p>
+                        <h4>18</h4>
+                        </div>
+                    <div class="stat">
+                        <p>Completed</p>
+                        <h4>12</h4>
+                    </div>
                 </div>
-            <div class="stat">
-                <p>Assigned</p>
-                <h4>30</h4>
+                    
+
+                <h3 id="team_member">Team Members</h3>
+                <div class="team-stats">
+                    <div class="member">
+                        <img src="{% static 'images/R.png' %}" alt="Me" >
+                        <span>Me</span>
+                    </div>
+                    <div class="member">
+                        <img src="{% static 'images/R.png' %}" alt="Priya Ganesh">
+                        <span>Priya Ganesh</span>
+                    </div>
+                    <div class="member">
+                        <img src="{% static 'images/R.png' %}" alt="Afzal K">
+                        <span>Afzal K</span>
+                    </div>
+                    <div class="member">
+                        <img src="{% static 'images/R.png' %}" alt="Ajith Kumar">
+                        <span>Ajith Kumar</span>
+                    </div>
+                    <div class="member">
+                        <img src="{% static 'images/R.png' %}" alt="Liya Paul">
+                        <span>Liya Paul</span>
+                    </div>
                 </div>
-            <div class="stat">
-                <p>Pending</p>
-                <h4>18</h4>
+            </section>
+        </div>
+
+        <div id="task-details">
+            <!-- Task Details Section -->
+            <section class="task-card">
+                <h3 id="task_details">TASK DETAILS</h3>
+                <div class="task-placeholder">
+                    <div class="info-box">
+                        <img src="{% static 'images/Vector.png' %}" alt="info icon" class="info-icon">
+                        <p>Click on the info button of a particular task to view corresponding task details.</p>
+                    </div>
+                </div>                
+            </section>
+        </div>
+
+        <div id="team-status">
+            <!-- Status of Team Projects Section -->
+            <section class="team-projects">
+                <h3 id="status">STATUS OF TEAM PROJECTS</h3>
+                <p>Project Status for October, 2024</p>
+                <div class="project-tabs">
+                    <button class="tab active">Running</button>
+                    <button class="tab">Revisions</button>
+                    <button class="tab">Upcoming</button>
                 </div>
-            <div class="stat">
-                <p>Completed</p>
-                <h4>12</h4>
-            </div>
+                <div class="scroll-container">
+                    <div class="arrow up-arrow" id="up-arrow"><img src="{% static 'images/up_arrow.png' %}"></div>
+                    
+                    <div class="project-list" id="scrollable-list">
+                        <div class="project-item">RORO Bridge <span>DEME</span></div>
+                        <div class="project-item">PANAMA Chock Support <span>Value Maritime</span></div>
+                        <div class="project-item">JB-119 Boatlanding <span>CADELER</span></div>
+                        <div class="project-item">New Project <span>Company XYZ</span></div>
+                        <div class="project-item">Future Project <span>Another Company</span></div>
+                    </div>
+                
+                    <div class="arrow down-arrow" id="down-arrow"><img src="{% static 'images/down_arrow.png' %}"></div>
+                </div>
+                
+            </section>
         </div>
-               
-    </section>
-    <section class="team-members">
-        <h3>Team Members</h3>
-        <div class="team-stats">
-            <div class="member">
-                <img src="{% static 'images/R.png' %}" alt="Me" >
-                <span>Me</span>
-            </div>
-            <div class="member">
-                <img src="{% static 'images/R.png' %}" alt="Priya Ganesh">
-                <span>Priya Ganesh</span>
-            </div>
-            <div class="member">
-                <img src="{% static 'images/R.png' %}" alt="Afzal K">
-                <span>Afzal K</span>
-            </div>
-            <div class="member">
-                <img src="{% static 'images/R.png' %}" alt="Ajith Kumar">
-                <span>Ajith Kumar</span>
-            </div>
-            <div class="member">
-                <img src="{% static 'images/R.png' %}" alt="Liya Paul">
-                <span>Liya Paul</span>
-            </div>
-        </div>
-    </section>
-
-
-    <!-- Task Details Section -->
-    <section class="task-card">
-        <h3>TASK DETAILS</h3>
-        <div class="task-placeholder">
-            <p>
-                <i class="fas fa-info-circle"></i> Click on the info button of a particular task to view corresponding task details.
-            </p>
-        </div>
-    </section>
-
-    <!-- Status of Team Projects Section -->
-    <section class="team-projects">
-        <h3>STATUS OF TEAM PROJECTS</h3>
-        <p>Project Status for October, 2024</p>
-        <div class="project-tabs">
-            <button class="tab active">Running</button>
-            <button class="tab">Revisions</button>
-            <button class="tab">Upcoming</button>
-        </div>
-        <div class="project-list">
-            <div class="project-item">RORO Bridge <span>DEME</span></div>
-            <div class="project-item">PANAMA Chock Support <span>Value Maritime</span></div>
-            <div class="project-item">JB-119 Boatlanding <span>CADELER</span></div>
-        </div>
-    </section>
-</div>
-
+    </div>
     </div>
 
     <!-- The div to contain the hidden popup form -->
