@@ -126,6 +126,47 @@ function populateTimesheet(tasks) {
 
 var globalselectedtitil_for_edit_task
 
+
+document.getElementById("manual_timesheet").addEventListener("click", function() {
+  document.getElementById("timesheetpopup").style.display = "flex";
+
+    // Reference to select elements
+    var projectListSelect = document.getElementById("projectListSelect");
+    var projectTypeSelect = document.getElementById("projectTypeSelect");
+    var scopeSelect = document.getElementById("scopeSelect");
+
+    // Clear previous options to avoid duplicates
+    projectListSelect.innerHTML = "";
+    projectTypeSelect.innerHTML = "";
+    scopeSelect.innerHTML = "";
+
+    // Loop through tasks and add options dynamically
+    if (golbalfetchdata && golbalfetchdata.tasks) {
+        golbalfetchdata.tasks.forEach(task => {
+            // Adding project as an option
+            var projectOption = document.createElement("option");
+            projectOption.text = task.projects || "No Project Assigned";  // Fallback if project is missing
+            projectListSelect.add(projectOption);
+
+            // Adding project type (using project as type for now)
+            var projectTypeOption = document.createElement("option");
+            projectTypeOption.text = task.projects || "No Project Type";
+            projectTypeSelect.add(projectTypeOption);
+
+            // Adding scope as an option
+            var scopeOption = document.createElement("option");
+            scopeOption.text = task.scope || "No Scope Assigned";
+            scopeSelect.add(scopeOption);
+        });
+    } else {
+        console.error("Error: golbalfetchdata or tasks array is undefined.");
+    }
+
+    // Show the popup (if hidden)
+   
+});
+
+
 // Add event listener to the button
 document.getElementById("date_in_daily_timesheet").addEventListener("click", handleButtonClick);
 
@@ -508,9 +549,6 @@ document.getElementById("savetask_updatetask").addEventListener("click", functio
 
 
 // manual timesheet
-document.getElementById("manual_timesheet").addEventListener("click", function () {
-    document.getElementById("timesheetpopup").style.display = "flex";
-});
 
 document.getElementById("closePopupButton_manualtimesheet").addEventListener("click", function () {
     document.getElementById("timesheetpopup").style.display = "none";
