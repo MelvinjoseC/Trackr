@@ -207,7 +207,7 @@ function populateDropdowns_updatetask(tasks) {
             document.getElementById("taskTitle3").value = selectedTask.title || "";
             document.getElementById("id_dnoedittask").value = selectedTask.d_no || "";
             document.getElementById("id_priorityedittask").value = selectedTask.priority || "";
-            document.getElementById("id_assigned_toedittask").value = selectedTask.assigned_to || "";
+            document.getElementById("id_assigned_toedittask").value = selectedTask.assigned || "";
             document.getElementById("id_checkeredittask").value = selectedTask.checker || "";
             document.getElementById("id_qc_3_checkeredittask").value = selectedTask.qc_3_checker || "";
             document.getElementById("id_groupedittask").value = selectedTask.group || "";
