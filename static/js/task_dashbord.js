@@ -1,8 +1,23 @@
-// Function to initialize clock and highlight the current day
+document.getElementById('up-arrow').addEventListener('click', function() {
+    document.getElementById('scrollable-list').scrollBy({
+        top: -50, // Adjust the scroll amount as needed
+        behavior: 'smooth'
+    });
+});
+
+document.getElementById('down-arrow').addEventListener('click', function() {
+    document.getElementById('scrollable-list').scrollBy({
+        top: 50, // Adjust the scroll amount as needed
+        behavior: 'smooth'
+    });
+});
+
 function updateClock() {
     const now = new Date();
     const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const date = now.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+
+    // Format the date as "Fri, 31 Jan 2025"
+    const date = now.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 
     document.getElementById('current-time').textContent = time;
     document.getElementById('current-date').textContent = date;
@@ -18,6 +33,26 @@ function updateClock() {
         }
     });
 }
+
+function updateGreeting() {
+    const now = new Date();
+    const hour = now.getHours();
+    let greeting = "Welcome";
+
+    if (hour >= 5 && hour < 12) {
+        greeting = "Good Morning";
+    } else if (hour >= 12 && hour < 18) {
+        greeting = "Good Afternoon";
+    } else {
+        greeting = "Good Evening";
+    }
+
+    // Only update the greeting part, leave the name intact
+    document.getElementById('dynamic-greeting').textContent = greeting;
+}
+
+// Call the function to update the greeting
+updateGreeting();
 
 function handleButtonClick(event) {
     event.preventDefault();  // Prevent form submission or default behavior
