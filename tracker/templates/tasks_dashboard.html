@@ -23,12 +23,12 @@
 
         <div class="sidebar">
         </br>
-        <img src="{% static 'images/img_19.png' %}" alt="Responsive image" width="150" height="40">
-       </br></br>
-          <img src="data:image/png;base64,{{ image_base64 }}" alt="Profile Image" width="130" height="120" style="border-radius: 50%;">
-            <h4> {{ name }}</h4>
+        <img id="fusie" src="{% static 'images/img_19.png' %}" alt="Responsive image">
+       </br></br></br></br>
+          <img id="profile_pic" src="data:image/png;base64,{{ image_base64 }}" alt="Profile Image">
+            <h4 id="profile_name"> {{ name }}</h4>
             <!-- <p>{{ employee_id }}</p> -->
-            <p align="center">{{ designation }}</p>
+            <p id="profile_designation" align="center">{{ designation }}</p>
 
 </br></br></br>
 <!--             <a class="sidebar-link"><img src="{% static 'images/img_8.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title">Dashboard</span></a>-->
@@ -41,15 +41,30 @@
 </div>
 
 <!-- Attendance Button -->
-<a class="sidebar-link" id="attendance-button">
-    <img src="{% static 'images/img_14.png' %}" width="40" height="40">
-    &nbsp;&nbsp;<span class="sidebar-title">Attendance</span>
-</a>
-         <a  class="sidebar-link" id="leave-button"><img src="{% static 'images/img_10.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> LeavePage</span></a>
-        <a  class="sidebar-link"><img src="{% static 'images/img_21.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> ViewTasks</span></a>
-        <a  class="sign-out sidebar-link"><img src="{% static 'images/img_12.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title"> SignOut</span></a>
+<div class="sidebar_buttons">
+    <a class="sidebar-link" id="task-button" 
+       data-default-img="{% static 'images/task_tracker.png' %}" 
+       data-active-img="{% static 'images/task_tracker1.png' %}">
+        <img src="{% static 'images/task_tracker.png' %}" alt="Task Tracker Icon"> TASK TRACKER
+    </a>
+    <a class="sidebar-link" id="attendance-button" 
+       data-default-img="{% static 'images/attendance.png' %}" 
+       data-active-img="{% static 'images/attendance1.png' %}">
+        <img src="{% static 'images/attendance.png' %}" alt="Attendance Icon"> ATTENDANCE
+    </a>
+    <a class="sidebar-link" id="leave-button" 
+       data-default-img="{% static 'images/leavepage.png' %}" 
+       data-active-img="{% static 'images/leavepage1.png' %}">
+        <img src="{% static 'images/leavepage.png' %}" alt="Leave Tracker Icon"> LEAVE TRACKER
+    </a>
+</div>
+    <a  class="sign-out sidebar-link" id="signout-button"
+        data-default-img="{% static 'images/signout.png' %}"
+        data-active-img="{% static 'images/signout1.png' %}">
+        <img src="{% static 'images/signout.png' %}" alt="Sign Out Icon"> SIGN OUT
+    </a>
     </div>
-
+        
         <!-- Main Content -->
  <div class="content">
     <div id="first-box">
