@@ -12,6 +12,39 @@ document.getElementById('down-arrow').addEventListener('click', function() {
     });
 });
 
+const sidebarLinks = document.querySelectorAll('.sidebar-link');
+
+sidebarLinks.forEach(link => {
+    link.addEventListener('click', function () {
+        // Remove the active class from all links
+        sidebarLinks.forEach(l => l.classList.remove('active'));
+        
+        // Add the active class to the clicked link
+        this.classList.add('active');
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    const buttons = document.querySelectorAll('.sidebar-link');
+    buttons.forEach(button => {
+        const img = button.querySelector('img');
+        const defaultImg = button.getAttribute('data-default-img');
+        const activeImg = button.getAttribute('data-active-img');
+
+        button.addEventListener('click', function() {
+            // Reset all buttons
+            buttons.forEach(otherButton => {
+                const otherImg = otherButton.querySelector('img');
+                otherImg.src = otherButton.getAttribute('data-default-img');
+            });
+
+            // Activate the clicked button
+            img.src = activeImg;
+        });
+    });
+});
+
+
 function updateClock() {
     const now = new Date();
     const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
