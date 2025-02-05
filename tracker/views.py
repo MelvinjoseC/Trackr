@@ -276,8 +276,8 @@ def create_task(request):
             # SQL query to insert data into tracker_project
             query = """
                 INSERT INTO tracker_project
-                (title, `list`, projects, scope, priority, assigned, checker, qc3_checker, `group`, category, start, end, verification_status, task_status)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                (title, `list`, projects, scope, priority, assigned, checker, qc3_checker, `group`, category, start, end, verification_status, task_status, d_no, rev)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             params = (
                 data.get('title', ''),        # Provide default empty string if None
@@ -294,6 +294,8 @@ def create_task(request):
                 data.get('end_date', ''),
                 data.get('verification_status', ''),
                 data.get('task_status', ''),
+                data.get('d_no', ''),
+                data.get('rev_no', ''),
             )
 
 
@@ -313,7 +315,6 @@ def create_task(request):
 
 
 @csrf_exempt
-
 
 def edit_task(request):
     if request.method == 'POST':
@@ -378,3 +379,85 @@ def edit_task(request):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
+import json
+from django.http import JsonResponse
+from django.db import connection, transaction
+@csrf_exempt
+
+
+def submit_timesheet(request):
+    if request.method == 'POST':
+        try:
+            # Parse the request body
+            data = json.loads(request.body.decode('utf-8'))
+
+            # Extract form data
+            department = data.get('list')
+            project_type = data.get('project_type')
+            scope = data.get('scope')
+            task = data.get('task')
+            phase = data.get('phase')
+            date1 = data.get('date1')
+            time = data.get('time')
+            comments = data.get('comments')
+
+            # Validate required fields
+            if not (department and project_type and scope and task and phase and date1 and time):
+                return JsonResponse({'error': 'Missing required fields'}, status=400)
+
+            # Check if a record exists with NULL date and time
+            select_query = """
+                SELECT id, date1 FROM tracker_project 
+                WHERE `list` = %s AND projects = %s AND scope = %s 
+                AND title = %s AND category = %s
+            """
+            with connection.cursor() as cursor:
+                cursor.execute(select_query, [department, project_type, scope, task, phase])
+                result = cursor.fetchone()
+
+            if result:
+                existing_id, existing_date1 = result
+
+                if existing_date1 is None:
+                    # If date1 is NULL, update the existing row
+                    update_query = """
+                        UPDATE tracker_project 
+                        SET date1 = %s, time = %s, comments = %s 
+                        WHERE id = %s
+                    """
+                    with connection.cursor() as cursor:
+                        cursor.execute(update_query, [date1, time, comments, existing_id])
+                    return JsonResponse({'message': 'Timesheet entry updated successfully (existing row).'}, status=200)
+
+                else:
+                    # If date1 is NOT NULL, insert a new row
+                    insert_query = """
+                        INSERT INTO tracker_project (title, `list`, projects, scope, category, date1, time, comments) 
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    """
+                    with transaction.atomic():
+                        with connection.cursor() as cursor:
+                            cursor.execute(insert_query, [
+                                task, department, project_type, scope, phase, date1, time, comments
+                            ])
+                    return JsonResponse({'message': 'New timesheet entry created successfully!'}, status=201)
+
+            else:
+                # If no matching record is found, create a new row
+                insert_query = """
+                    INSERT INTO tracker_project (title, `list`, projects, scope, category, date1, time, comments) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """
+                with transaction.atomic():
+                    with connection.cursor() as cursor:
+                        cursor.execute(insert_query, [
+                            task, department, project_type, scope, phase, date1, time, comments
+                        ])
+                return JsonResponse({'message': 'New timesheet entry created successfully!'}, status=201)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)

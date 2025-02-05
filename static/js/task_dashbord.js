@@ -154,50 +154,171 @@ function populateTimesheet(tasks) {
     }
 }
 
+document.getElementById("submitTimesheetButton").addEventListener("click", submitTimesheet);
+
+function submitTimesheet() {
+    const formData = {
+        date1: document.getElementById("date1").value,
+        list: document.getElementById("projectListSelect").value,
+        project_type: document.getElementById("projectTypeSelect").value,
+        scope: document.getElementById("scopeSelect").value,
+        task: document.getElementById("TaskSelect").value,
+        phase: document.getElementById("phaseSelect").value,
+        phase_status: document.getElementById("phaseStatusSelect").value,
+        time: document.getElementById("time").value,
+        comments: document.getElementById("comments").value
+    };
+
+    console.log("Form Data Sent to Backend:", formData);
+
+    fetch("/api/submit_timesheet/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+                console.log("Success:", data);
+            } else {
+                console.error("Error:", data.error);
+            }
+        })
+        .catch(error => {
+            console.error("Error submitting timesheet:", error);
+        });
+}
 
 
 
-var globalselectedtitil_for_edit_task
+// FOR MANUAL TIMESHEETS 
 
+var globalselectedtitil_for_edit_task;
 
 document.getElementById("manual_timesheet").addEventListener("click", function() {
-  document.getElementById("timesheetpopup").style.display = "flex";
+    document.getElementById("timesheetpopup").style.display = "flex";
 
-    // Reference to select elements
+    // References to select elements
     var projectListSelect = document.getElementById("projectListSelect");
     var projectTypeSelect = document.getElementById("projectTypeSelect");
     var scopeSelect = document.getElementById("scopeSelect");
+    var TaskSelect = document.getElementById("TaskSelect");
+    var phaseSelect = document.getElementById("phaseSelect");
 
-    // Clear previous options to avoid duplicates
-    projectListSelect.innerHTML = "";
-    projectTypeSelect.innerHTML = "";
-    scopeSelect.innerHTML = "";
+    // Clear all select inputs to avoid duplicate options
+    projectListSelect.innerHTML = "<option value=''>Select List</option>";
+    projectTypeSelect.innerHTML = "<option value=''>Select Project</option>";
+    scopeSelect.innerHTML = "<option value=''>Select Scope</option>";
+    TaskSelect.innerHTML = "<option value=''>Select Task</option>";
+    phaseSelect.innerHTML = "<option value=''>Select Phase</option>";
 
-    // Loop through tasks and add options dynamically
-    if (golbalfetchdata && golbalfetchdata.tasks) {
+    // Initial population of the first dropdown (list of projects)
+    var listsSet = new Set();
+    golbalfetchdata.tasks.forEach(task => {
+        if (!listsSet.has(task.list)) {
+            listsSet.add(task.list);
+            var option = document.createElement("option");
+            option.value = task.list;
+            option.textContent = task.list || "No List Assigned";
+            projectListSelect.appendChild(option);
+        }
+    });
+
+    // Event listener for list selection
+    projectListSelect.addEventListener("change", function() {
+        var selectedList = projectListSelect.value;
+
+        // Clear and reset the dependent dropdowns
+        projectTypeSelect.innerHTML = "<option value=''>Select Project</option>";
+        scopeSelect.innerHTML = "<option value=''>Select Scope</option>";
+        TaskSelect.innerHTML = "<option value=''>Select Task</option>";
+        phaseSelect.innerHTML = "<option value=''>Select Phase</option>";
+
+        // Populate projects related to the selected list
+        var projectSet = new Set();
         golbalfetchdata.tasks.forEach(task => {
-            // Adding project as an option
-            var projectOption = document.createElement("option");
-            projectOption.text = task.projects || "No Project Assigned";  // Fallback if project is missing
-            projectListSelect.add(projectOption);
-
-            // Adding project type (using project as type for now)
-            var projectTypeOption = document.createElement("option");
-            projectTypeOption.text = task.projects || "No Project Type";
-            projectTypeSelect.add(projectTypeOption);
-
-            // Adding scope as an option
-            var scopeOption = document.createElement("option");
-            scopeOption.text = task.scope || "No Scope Assigned";
-            scopeSelect.add(scopeOption);
+            if (task.list === selectedList && !projectSet.has(task.projects)) {
+                projectSet.add(task.projects);
+                var option = document.createElement("option");
+                option.value = task.projects;
+                option.textContent = task.projects || "No Project Assigned";
+                projectTypeSelect.appendChild(option);
+            }
         });
-    } else {
-        console.error("Error: golbalfetchdata or tasks array is undefined.");
-    }
+    });
 
-    // Show the popup (if hidden)
-   
+    // Event listener for project selection
+    projectTypeSelect.addEventListener("change", function() {
+        var selectedProject = projectTypeSelect.value;
+
+        // Clear and reset dependent dropdowns
+        scopeSelect.innerHTML = "<option value=''>Select Scope</option>";
+        TaskSelect.innerHTML = "<option value=''>Select Task</option>";
+        phaseSelect.innerHTML = "<option value=''>Select Phase</option>";
+
+        // Populate scopes related to the selected project
+        var scopeSet = new Set();
+        golbalfetchdata.tasks.forEach(task => {
+            if (task.projects === selectedProject && !scopeSet.has(task.scope)) {
+                scopeSet.add(task.scope);
+                var option = document.createElement("option");
+                option.value = task.scope;
+                option.textContent = task.scope || "No Scope Assigned";
+                scopeSelect.appendChild(option);
+            }
+        });
+    });
+
+    // Event listener for scope selection
+    scopeSelect.addEventListener("change", function() {
+        var selectedScope = scopeSelect.value;
+
+        // Clear and reset dependent dropdowns
+        TaskSelect.innerHTML = "<option value=''>Select Task</option>";
+        phaseSelect.innerHTML = "<option value=''>Select Phase</option>";
+
+        // Populate tasks related to the selected scope
+        var taskSet = new Set();
+        golbalfetchdata.tasks.forEach(task => {
+            if (task.scope === selectedScope && !taskSet.has(task.title)) {
+                taskSet.add(task.title);
+                var option = document.createElement("option");
+                option.value = task.title;
+                option.textContent = task.title || "No Task Assigned";
+                TaskSelect.appendChild(option);
+            }
+        });
+    });
+
+    // Event listener for task selection
+    TaskSelect.addEventListener("change", function() {
+        var selectedTask = TaskSelect.value;
+
+        // Clear and reset the phase dropdown
+        phaseSelect.innerHTML = "<option value=''>Select Phase</option>";
+
+        // Populate phases related to the selected task
+        var phaseSet = new Set();
+        golbalfetchdata.tasks.forEach(task => {
+            if (task.title === selectedTask && !phaseSet.has(task.category)) {
+                phaseSet.add(task.category);
+                var option = document.createElement("option");
+                option.value = task.category;
+                option.textContent = task.category || "No Phase Assigned";
+                phaseSelect.appendChild(option);
+            }
+        });
+    });
 });
+
 
 
 // Add event listener to the button
@@ -239,6 +360,12 @@ function populateDropdowns(tasks) {
             console.error(`Dropdown with ID '${dropdownId}' not found.`);
         }
     }
+
+
+    
+    // Populate form fields based on selected task data
+
+
 
     // Filter and populate dependent dropdowns dynamically
     function handleDependentDropdowns() {
@@ -327,7 +454,22 @@ function populateDropdowns_updatetask(tasks) {
             document.getElementById("id_task_statusedittask").value = selectedTask.task_status || "";
         }
     }
-
+    function populateFormFields_creattask(selectedTask) {
+        if (selectedTask) {
+           
+            document.getElementById("id_dnocreatetask").value = selectedTask.d_no || "";
+            document.getElementById("id_prioritycreatetask").value = selectedTask.priority || "";
+            document.getElementById("assignedTocreatetask").value = selectedTask.assigned || "";
+            document.getElementById("checkercreatetask").value = selectedTask.checker || "";
+            document.getElementById("qcCheckercreatetask").value = selectedTask.qc_3_checker || "";
+            document.getElementById("groupcreatetask").value = selectedTask.group || "";
+            document.getElementById("id_categorycreatetask").value = selectedTask.category || "";
+            document.getElementById("startDatecreatetask").value = selectedTask.start_date || "";
+            document.getElementById("endDatecreatetask").value = selectedTask.end_date || "";
+            document.getElementById("id_verification_statuscreatetask").value = selectedTask.verification_status || "";
+            document.getElementById("id_task_statuscreatetask").value = selectedTask.task_status || "";
+        }
+    }
     // Filter and populate dependent dropdowns dynamically
     function handleDependentDropdowns_updatetask() {
         const filteredTasks = tasks.filter(task => (!selectedList || task.list === selectedList));
@@ -341,7 +483,23 @@ function populateDropdowns_updatetask(tasks) {
         populateDropdown_updatetask("id_task_statusedittask", "task_status", filteredTasks);
     }
 
-    // Event listener to populate form when title is selected
+
+    // Event listener to populate form when REV NO is selected
+    document.getElementById("id_revnocreatetask").addEventListener("change", function () {
+        const selectedRevNo = this.value;
+        const selectedTask = tasks.find(task => task.rev_no === selectedRevNo);
+        populateFormFields_creattask(selectedTask);
+    });
+
+    // Event listener for Category
+    document.getElementById("id_categorycreatetask").addEventListener("change", function () {
+        const selectedCategory = this.value.trim();
+        const selectedTask = tasks.find(task => task.category.trim() === selectedCategory);
+        populateFormFields_creattask(selectedTask);
+    });
+
+
+
     document.getElementById("taskTitleedittask").addEventListener("change", function () {
         const selectedTitle = this.value;
         const selectedTask = tasks.find(task => task.title === selectedTitle);
@@ -363,6 +521,8 @@ function populateDropdowns_updatetask(tasks) {
         const selectedTask = tasks.find(task => task.category.trim() === selectedCategory);
             populateFormFields(selectedTask);
     });
+
+
 
     // Handle change event for list dropdown to filter projects
     document.getElementById("id_listedittask").addEventListener("change", function () {
@@ -596,13 +756,22 @@ document.getElementById("closePopupButton_creattask").addEventListener("click", 
 document.getElementById("closePopupButton_updatetask").addEventListener("click", function () {
     document.getElementById("popupModal").style.display = "none";
 });
-// Close when clicking outside the popup
+// Close the popup by hiding it
+function closePopup() {
+    document.getElementById("timesheetpopup").style.display = "none";
+}
+
+// Attach the close button to the `closePopup` function
+document.getElementById("closePopupButton").addEventListener("click", closePopup);
+
+// Optionally, close the popup when the user clicks outside of it
 window.onclick = function(event) {
-    let popup = document.getElementById("timesheetpopup");
+    const popup = document.getElementById("timesheetpopup");
     if (event.target === popup) {
         closePopup();
     }
 };
+
 
 function showTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');

@@ -14,7 +14,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
-
 <body>
  
 
@@ -23,10 +22,10 @@
 
         <div class="sidebar">
         </br>
-        <img id="fusie" src="{% static 'images/img_19.png' %}" alt="Responsive image">
-       </br></br></br></br>
-          <img id="profile_pic" src="data:image/png;base64,{{ image_base64 }}" alt="Profile Image">
-            <h4 id="profile_name"> {{ name }}</h4>
+        <img src="{% static 'images/img_19.png' %}" alt="Responsive image" width="150" height="40">
+    </br></br>
+       <img src="data:image/png;base64,{{ image_base64 }}" alt="Profile Image" width="130" height="120" style="border-radius: 50%;">
+         <h4> {{ name }}</h4>
             <!-- <p>{{ employee_id }}</p> -->
             <p id="profile_designation" align="center">{{ designation }}</p>
 
@@ -483,6 +482,7 @@
     </div>
 
 <!-- Popup Container with updated ID -->
+<!-- Popup Container with updated IDs -->
 <div class="popup-overlay" id="timesheetpopup">
     <div class="popup-content">
         <span class="close-btn4" id="closePopupButton">&times;</span>
@@ -493,44 +493,58 @@
             <div class="left-panel">
                 <div class="form-group3">
                     <label>Select Date</label>
-                    <input type="date">
+                    <input type="date" id="date1" required>
                 </div>
 
                 <div class="form-group3">
-                    <label>Select Project</label>
-                    <select id="projectListSelect"></select>
+                    <label>Select Department</label>
+                    <select id="projectListSelect" required></select>
                 </div>
 
                 <div class="form-group3">
                     <label>Project Type</label>
-                    <select id="projectTypeSelect"></select>
+                    <select id="projectTypeSelect" required></select>
                 </div>
 
                 <div class="form-group3">
                     <label>Scope</label>
-                    <select id="scopeSelect"></select>
+                    <select id="scopeSelect" required></select>
                 </div>
 
                 <div class="form-group3">
                     <label>Task</label>
-                    <input type="text">
+                    <select id="TaskSelect" required></select>
                 </div>
 
                 <div class="form-group3">
                     <label>Phase</label>
-                    <input type="text" value="">
+                    <select id="phaseSelect" required></select>
+                </div>
+
+                <div class="form-group3">
+                    <label>Phase Status</label>
+                    <select id="phaseStatusSelect">
+                        <option value="completed">Completed</option>
+                        <option value="paused">Paused</option>
+                        <option value="in_progress">In Progress</option>
+                    </select>
                 </div>
 
                 <div class="form-group3">
                     <label>Hours</label>
-                    <input type="number" step="0.1" value="2.75">
+                    <input type="number" id="time" step="0.1" min="0" value="2.75" required>
                 </div>
 
                 <div class="form-group3">
                     <label>Comments</label>
-                    <input type="text">
+                    <input type="text" id="comments" required>
                 </div>
+
+                <!-- <div class="form-group3">
+                    <button type="button" onclick="submitTimesheet()">Submit Timesheet</button>
+                </div> -->
             </div>
+
 
 <!-- Right Panel -->
 <div class="right-panel">
@@ -564,9 +578,10 @@
 </div>
 
 <div class="button-container">
-<button class="button submit-btn">Submit</button>
+    <button type="button" id="submitTimesheetButton">Submit Timesheet</button>
 <button id="closePopupButton_manualtimesheet">Close</button>
 </div>
+
     </div>
 </div>
 
