@@ -87,6 +87,12 @@ function updateGreeting() {
 // Call the function to update the greeting
 updateGreeting();
 
+
+
+document.getElementById("date_in_daily_timesheet").addEventListener("click", handleButtonClick);
+
+
+
 function handleButtonClick(event) {
     event.preventDefault();  // Prevent form submission or default behavior
 
@@ -98,7 +104,8 @@ function handleButtonClick(event) {
 
     // Filter tasks based on the selected date
     const filteredTasks = golbalfetchdata.tasks.filter(task => {
-        const taskDate = task.start;
+        const taskDate = task.date1
+        ;
 
         // Normalize taskDate
         const formattedTaskDate = taskDate ? new Date(taskDate).toISOString().split('T')[0] : null;
@@ -117,14 +124,28 @@ function handleButtonClick(event) {
     }
 }
 
+function formatTime(hoursDecimal) {
+    const hours = Math.floor(hoursDecimal); // Get the integer part (hours)
+    const remainingMinutes = Math.round((hoursDecimal - hours) * 60); // Convert decimal part to minutes
 
-// Function to populate the timesheet with tasks
+    let result = "";
+    if (hours > 0) result += `${hours} ${hours === 1 ? "Hour" : "Hours"}`;
+    if (remainingMinutes > 0) result += `${hours > 0 ? " " : ""}${remainingMinutes} ${remainingMinutes === 1 ? "Minute" : "Minutes"}`;
+    
+    return result || "0 Minutes"; // Fallback for 0 minutes
+}
+
+// Function to populate the timesheet with tasks and display the total hours
 function populateTimesheet(tasks) {
     const timesheetContent = document.getElementById("timesheetContent");
     timesheetContent.innerHTML = "";  // Clear any existing content
 
+    let totalTime = 0; // Initialize total time accumulator
+
     if (tasks.length > 0) {
         tasks.forEach(task => {
+            totalTime += parseFloat(task.time) || 0;  // Sum the task time in decimal hours
+
             const taskRow = document.createElement("div");
             taskRow.classList.add("timesheet-row");
 
@@ -134,25 +155,35 @@ function populateTimesheet(tasks) {
                     <p class="task-name">${task.title}</p> <!-- Title -->
                     <p class="task-meta">${task.projects ? task.projects : 'No Project Assigned'}, ${task.d_no ? 'REV NO: ' + task.d_no : 'No Rev No'}</p> <!-- Projects and Assigned -->
                 </div>
+                
                 <div class="task-time">
-                    <p>
-                        ${task.start ? new Date(task.start).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Not Available'} <!-- Start date -->
-                    </p>
+                    <p class="task-name">${formatTime(parseFloat(task.time) || 0)}</p> <!-- Formatted Task Time -->
                 </div>
                 <div class="task-actions">
                     <i class="fas fa-comment-alt"></i>
                     <i class="fas fa-trash"></i>
                 </div>
             `;
-            
+
             timesheetContent.appendChild(taskRow); // Append the task row to the content
         });
+
+        // Display the total time at the bottom
+        const totalTimeElement = document.createElement("div");
+        totalTimeElement.classList.add("total-time");
+        totalTimeElement.innerHTML = `
+            <div style="text-align: right; font-weight: bold; margin-top: 10px;">
+                <p>TOTAL HOURS : ${formatTime(totalTime)}</p>
+            </div>
+        `;
+        timesheetContent.appendChild(totalTimeElement); // Append the total time display
     } else {
         const noDataMessage = document.createElement("p");
         noDataMessage.textContent = "No Data Found";
         timesheetContent.appendChild(noDataMessage);
     }
 }
+
 
 document.getElementById("submitTimesheetButton").addEventListener("click", submitTimesheet);
 
@@ -330,7 +361,7 @@ document.getElementById("manual_timesheet").addEventListener("click", function()
 
 
 // Add event listener to the button
-document.getElementById("date_in_daily_timesheet").addEventListener("click", handleButtonClick);
+
 
 setInterval(updateClock, 1000);
 updateClock();
