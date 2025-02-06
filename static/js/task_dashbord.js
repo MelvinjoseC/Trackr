@@ -806,3 +806,51 @@ setTimeout(() => {
         }
     });
 }, 500);
+
+
+
+// Listen for task selection change
+document.getElementById("TaskSelect").addEventListener("change", function () {
+    const selectedTask = this.value;
+
+    // Find the selected task data in `golbalfetchdata.tasks`
+    const taskData = golbalfetchdata.tasks.find(task => task.title === selectedTask);
+
+    if (taskData) {
+        // Update the task details table with selected task data
+        document.getElementById("taskTitle").textContent = taskData.title || '-';
+        document.getElementById("projectType").textContent = taskData.projects || '-';
+        document.getElementById("taskScope").textContent = taskData.scope || '-';
+        document.getElementById("taskCategory").textContent = taskData.category || '-';
+
+        // Update and change priority color
+        const priorityElement = document.getElementById("taskPriority");
+        const priorityValue = taskData.priority || 'Medium';
+        priorityElement.textContent = priorityValue;
+
+        // Change text color based on priority value
+        switch (priorityValue.toUpperCase()) {
+            case 'HIGH':
+                priorityElement.style.color = 'green';
+                break;
+            case 'MEDIUM':
+                priorityElement.style.color = 'orange';
+                break;
+            case 'LOW':
+                priorityElement.style.color = 'red';
+                break;
+            default:
+                priorityElement.style.color = 'black';  // Default color if priority is unknown
+        }
+    } else {
+        // Clear the task details if no valid task is found
+        document.getElementById("taskTitle").textContent = '-';
+        document.getElementById("projectType").textContent = '-';
+        document.getElementById("taskScope").textContent = '-';
+        document.getElementById("taskCategory").textContent = '-';
+
+        const priorityElement = document.getElementById("taskPriority");
+        priorityElement.textContent = '-';
+        priorityElement.style.color = 'black';  // Reset to default
+    }
+});
