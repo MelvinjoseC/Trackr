@@ -109,22 +109,30 @@
     </div>    
 <div class="task-header">
     <div class="filters">
+        <div class="task-header" id="initial">23</div>
+      </div>
+    <div class="filters">
       <select class="task-select">
         <option>All Tasks</option>
         <option>Other</option>
       </select>
     </div>
-    <div class="filters">
-      <select class="task-select">
+    <div class="filters_lock">
+        <div id="lock_button">
+            <img id="lock" src="{% static 'images/lockbutton.png' %}">
+        </div>
+      <select id="task_select">
         <option>Marine Engineering</option>
         <option>Other</option>
       </select>
     </div>
-    <input
-      type="text"
-      class="task-search"
-      placeholder="Search for Tasks"
-    />
+
+        <input
+            type="text"
+            class="task-search"
+            placeholder="Search for Tasks"
+        />
+        <img src="{% static 'images/search_icon.png' %}" alt="Search Icon" class="search-icon">
     <div class="filters">
       <select class="task-select">
         <option>Assigned Tasks</option>
