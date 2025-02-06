@@ -169,6 +169,14 @@ function submitTimesheet() {
         comments: document.getElementById("comments").value
     };
 
+    // Check for missing inputs
+    if (!formData.date1 || !formData.list || !formData.project_type || 
+        !formData.scope || !formData.task || !formData.phase || 
+        !formData.time || !formData.comments) {
+        alert("Please fill in all fields before submitting.");
+        return;
+    }
+
     console.log("Form Data Sent to Backend:", formData);
 
     fetch("/api/submit_timesheet/", {

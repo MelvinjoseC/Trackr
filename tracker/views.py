@@ -384,76 +384,87 @@ from django.http import JsonResponse
 from django.db import connection, transaction
 @csrf_exempt
 
-
 def submit_timesheet(request):
     if request.method == 'POST':
         try:
             # Parse the request body
             data = json.loads(request.body.decode('utf-8'))
 
-            # Extract form data
-            department = data.get('list')
-            project_type = data.get('project_type')
-            scope = data.get('scope')
-            task = data.get('task')
-            phase = data.get('phase')
-            date1 = data.get('date1')
-            time = data.get('time')
-            comments = data.get('comments')
+            department = data.get('list', '')
+            project_type = data.get('project_type', '')
+            scope = data.get('scope', '')
+            task = data.get('task', '')
+            phase = data.get('phase', '')
+            date1 = data.get('date1', '')
+            time = data.get('time', 0)
+            comments = data.get('comments', '')
 
-            # Validate required fields
-            if not (department and project_type and scope and task and phase and date1 and time):
-                return JsonResponse({'error': 'Missing required fields'}, status=400)
+            # Assume assigned user is coming from global_user_data['name']
+            assigned = global_user_data.get('name', 'Unassigned')
 
-            # Check if a record exists with NULL date and time
+            # Check if a record exists with the same task
             select_query = """
-                SELECT id, date1 FROM tracker_project 
+                SELECT * FROM tracker_project 
                 WHERE `list` = %s AND projects = %s AND scope = %s 
-                AND title = %s AND category = %s
+                AND title = %s AND category = %s 
+                ORDER BY id DESC LIMIT 1
             """
             with connection.cursor() as cursor:
                 cursor.execute(select_query, [department, project_type, scope, task, phase])
                 result = cursor.fetchone()
+                columns = [col[0] for col in cursor.description]  # Get column names
 
             if result:
-                existing_id, existing_date1 = result
+                existing_row = dict(zip(columns, result))  # Convert the result to a dictionary
 
-                if existing_date1 is None:
+                if existing_row['date1'] is None:
                     # If date1 is NULL, update the existing row
                     update_query = """
                         UPDATE tracker_project 
-                        SET date1 = %s, time = %s, comments = %s 
+                        SET date1 = %s, time = %s, comments = %s, assigned = %s 
                         WHERE id = %s
                     """
                     with connection.cursor() as cursor:
-                        cursor.execute(update_query, [date1, time, comments, existing_id])
+                        cursor.execute(update_query, [
+                            date1, time, comments, assigned, existing_row['id']
+                        ])
                     return JsonResponse({'message': 'Timesheet entry updated successfully (existing row).'}, status=200)
 
                 else:
-                    # If date1 is NOT NULL, insert a new row
+                    # If date1 is NOT NULL, copy values from the existing row and insert a new row
                     insert_query = """
-                        INSERT INTO tracker_project (title, `list`, projects, scope, category, date1, time, comments) 
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                        INSERT INTO tracker_project (title, `list`, projects, scope, category, date1, time, comments, 
+                                                     priority, checker, qc3_checker, `group`, start, end, 
+                                                     verification_status, assigned, d_no, rev) 
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """
                     with transaction.atomic():
                         with connection.cursor() as cursor:
                             cursor.execute(insert_query, [
-                                task, department, project_type, scope, phase, date1, time, comments
+                                existing_row['title'], existing_row['list'], existing_row['projects'], 
+                                existing_row['scope'], existing_row['category'], date1, time, comments, 
+                                existing_row['priority'], existing_row['checker'], existing_row['qc3_checker'], 
+                                existing_row['group'], existing_row['start'], existing_row['end'], 
+                                existing_row['verification_status'], assigned, existing_row['d_no'], existing_row['rev']
                             ])
-                    return JsonResponse({'message': 'New timesheet entry created successfully!'}, status=201)
+                    return JsonResponse({'message': 'New timesheet entry created successfully (with copied values).'}, status=201)
 
             else:
-                # If no matching record is found, create a new row
+                # If no matching record is found, insert a new row with default values
                 insert_query = """
-                    INSERT INTO tracker_project (title, `list`, projects, scope, category, date1, time, comments) 
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    INSERT INTO tracker_project (title, `list`, projects, scope, category, date1, time, comments, 
+                                                 priority, checker, qc3_checker, `group`, start, end, 
+                                                 verification_status, assigned, d_no, rev) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
                 with transaction.atomic():
                     with connection.cursor() as cursor:
                         cursor.execute(insert_query, [
-                            task, department, project_type, scope, phase, date1, time, comments
+                            task, department, project_type, scope, phase, date1, time, comments, 
+                            'Medium', 'Unassigned', 'Unassigned', 'Default Group', '1970-01-01', '1970-01-01', 
+                            False, assigned, 0, '0.0'
                         ])
-                return JsonResponse({'message': 'New timesheet entry created successfully!'}, status=201)
+                return JsonResponse({'message': 'New timesheet entry created successfully (default values).'}, status=201)
 
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON format'}, status=400)
