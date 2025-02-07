@@ -142,13 +142,16 @@
   </div>
 
            <!-- Task Tracker -->
-<section class="task-tracker">
-            <div class="tasks">
+    <div class="scroll">
+        <div class="arrow1 left" id="left-arrow"><img src="/static/images/left_arrow.png"></div>
+        <div class="tasks">
+            <div class="row1">
                 <!-- Task Card 1 -->
+                <div id="blue_box"></div>
                 <div class="task-card2">
                     <h4>Q3 Asia Barge Concept Design</h4>
                     <div class="priority">NORMAL</div>
-                    <p>Internal Project </p>
+                    <p id="project_hd">Internal Project </p>
                     <p>FE/ME-1687/REV: 2</p>
                     <table class="details">
                         <thead>
@@ -171,105 +174,85 @@
                         </tbody>
                     </table>
                     <div class="actions">
-                        <button><i class="fas fa-info-circle"></i> Info</button>
-                        <button><i class="fas fa-edit"></i> Edit Task</button>
-                        <button><i class="fas fa-calendar-alt"></i> Manual Time Sheet</button>
-                    </div>
-                </div>
-            
-                <!-- Task Card 2 -->
-                <div class="task-card2">
-                    <div class="priority">HIGH</div>
-                    <h4>Q3 Asia Barge Concept Design</h4>
-                    <p>Internal Project </p>
-                    <p>FE/ME-1687/REV: 2</p>
-                    <table class="details">
-                        <thead>
-                            <tr>
-                                <th>Discussion</th>
-                                <th>Designing</th>
-                                <th>Calculating</th>
-                                <th>Modelling</th>
-                                <th>Checking</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>4 hrs</td>
-                                <td>18 hrs</td>
-                                <td>14 hrs</td>
-                                <td>20 hrs</td>
-                                <td>10 hrs</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="actions">
-                        <button><i class="fas fa-info-circle"></i> Info</button>
-                        <button><i class="fas fa-edit"></i> Edit Task</button>
-                        <button><i class="fas fa-calendar-alt"></i> Manual Time Sheet</button>
-                    </div>
-                </div>
-                
-            
-                <!-- Task Card 3 -->
-                <div class="task-card2">
-                    <h4>Q3 Asia Barge Concept Design</h4>
-                   <p>Internal Project </p>
-                    <p>FE/ME-1687/REV: 2</p>
-                    <table class="details">
-                        <thead>
-                            <tr>
-                                <th>Discussion</th>
-                                <th>Calculating</th>
-                                <th>Designing</th>
-                                <th>Modelling</th>
-                                <th>Checking</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>4 hrs</td>
-                                <td>14 hrs</td>
-                                <td>18 hrs</td>
-                                <td>20 hrs</td>
-                                <td>10 hrs</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="actions">
-                        <button><i class="fas fa-info-circle"></i> Info</button>
-                        <button><i class="fas fa-edit"></i> Edit Task</button>
-                        <button><i class="fas fa-calendar-alt"></i> Manual Time Sheet</button>
+                        <button id="info_button"><i class="fas fa-info-circle"></i> Info</button>
+                        <button id="editTask_button"><i class="fas fa-edit"></i> Edit Task</button>
+                        <button id="timeSheet_button"><i class="fas fa-calendar-alt"></i> Manual Time Sheet</button>
                     </div>
                 </div>
             </div>
-            <div class="task-buttons">
-    <div class="task-button" id="openPopupButton2">
-        <i class="fas fa-plus"></i>
-        <span><a>CREATE TASK</a></span>
-        <i class="fas fa-chevron-right"></i>
-    </div>
-    <div class="task-button" id="openPopupButton">
-        <i class="fas fa-edit"></i>
-        <span><a >EDIT ALL TASKS</a> </span>
-        <i class="fas fa-chevron-right"></i>
-    </div>
-    <div class="task-button" id="manual_timesheet">
-        <i class="fas fa-calendar-alt"></i>
-        <span><a>MANUAL TIMESHEET</a></span>
-        <i class="fas fa-chevron-right"></i>
-    </div>
-</div>
 
-<section class="timesheet">
-    <div class="timesheet-header">
-        <h3>My Daily Timesheet</h3>
-        <div class="date-picker">
-            <form method="get">
-                <input type="date" id="date-input" name="date" value="{{ selected_date|date:'Y-m-d' }}" />
-                <button id="date_in_daily_timesheet" type="submit">GET</button>
-            </form>
-            <span id="selected-date">Selected Date: {{ selected_date|date:'l, F j, Y' }}</span>
+                <!-- Task Card 2 -->
+            <div class="row1">
+                <div id="blue_box"></div>
+                <div class="task-card2">
+                    <div class="priority">HIGH</div>
+                    <h4>Q3 Asia Barge Concept Design</h4>
+                    <p id="project_hd">Internal Project </p>
+                    <p>FE/ME-1687/REV: 2</p>
+                    <table class="details">
+                        <thead>
+                            <tr>
+                                <th>Discussion</th>
+                                <th>Designing</th>
+                                <th>Calculating</th>
+                                <th>Modelling</th>
+                                <th>Checking</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>4 hrs</td>
+                                <td>18 hrs</td>
+                                <td>14 hrs</td>
+                                <td>20 hrs</td>
+                                <td>10 hrs</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="actions">
+                        <button id="info_button"><i class="fas fa-info-circle"></i> Info</button>
+                        <button id="editTask_button"><i class="fas fa-edit"></i> Edit Task</button>
+                        <button id="timeSheet_button"><i class="fas fa-calendar-alt"></i> Manual Time Sheet</button>
+                    </div>
+                </div>
+            </div>    
+            
+            <div class="row1">
+                <div id="blue_box"></div>
+                <!-- Task Card 3 -->
+                <div class="task-card2">
+                    <h4>Q3 Asia Barge Concept Design</h4>
+                   <p id="project_hd">Internal Project </p>
+                    <p>FE/ME-1687/REV: 2</p>
+                    <table class="details">
+                        <thead>
+                            <tr>
+                                <th>Discussion</th>
+                                <th>Calculating</th>
+                                <th>Designing</th>
+                                <th>Modelling</th>
+                                <th>Checking</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>4 hrs</td>
+                                <td>14 hrs</td>
+                                <td>18 hrs</td>
+                                <td>20 hrs</td>
+                                <td>10 hrs</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="actions">
+                        <button id="info_button"><i class="fas fa-info-circle"></i> Info</button>
+                        <button id="editTask_button"><i class="fas fa-edit"></i> Edit Task</button>
+                        <button id="timeSheet_button"><i class="fas fa-calendar-alt"></i> Manual Time Sheet</button>
+                    </div>
+                </div>
+            </div>
+            </div>
+            <div class="arrow1 right" id="right-arrow"><img src="/static/images/right_arrow.png"></div>
         </div>
     </div>
     
@@ -278,8 +261,41 @@
     </div>
 
                 
+           
+            <div class="task-buttons">
+                <div class="task-button" id="openPopupButton2">
+                    <img src="/static/images/add_button.png">
+                    <span><a>CREATE TASK</a></span>
+                    <img src="/static/images/blue_arrow.png">
+                </div>
+                <div class="task-button" id="openPopupButton">
+                    <img src="/static/images/edit_button.png">
+                    <span><a >EDIT ALL TASKS</a> </span>
+                    <img src="/static/images/blue_arrow.png">
+                </div>
+            </div>
+            <div class="task-button" id="manual_timesheet">
+                <img src="/static/images/manual_button.png">
+                <span><a>MANUAL TIMESHEET</a></span>
+                <img src="/static/images/blue_arrow.png">
+            </div>
 
-</section>
+        <section class="timesheet">
+            <div class="timesheet-header">
+                <h3>My Daily Timesheet</h3>
+                <div class="date-picker">
+                    <form method="get">
+                        <input type="date" id="date-input" name="date" value="{{ selected_date|date:'Y-m-d' }}" />
+                        <button id="date_in_daily_timesheet" type="submit">GET</button>
+                    </form>
+                    <span id="selected-date">Selected Date: {{ selected_date|date:'l, F j, Y' }}</span>
+                </div>
+            </div>
+            
+            <div class="timesheet-content" id="timesheetContent">
+                <!-- Tasks will be populated here dynamically -->
+            </div>
+        </section>
 
         </div>
     <div class="right-sidebar">

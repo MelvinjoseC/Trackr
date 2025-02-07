@@ -12,6 +12,22 @@ document.getElementById('down-arrow').addEventListener('click', function() {
     });
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('left-arrow').addEventListener('click', function() {
+        document.querySelector('.tasks').scrollBy({
+            left: -300, // Adjust the scroll amount as needed
+            behavior: 'smooth'
+        });
+    });
+
+    document.getElementById('right-arrow').addEventListener('click', function() {
+        document.querySelector('.tasks').scrollBy({
+            left: 300, // Adjust the scroll amount as needed
+            behavior: 'smooth'
+        });
+    });
+});
+
 const sidebarLinks = document.querySelectorAll('.sidebar-link');
 
 sidebarLinks.forEach(link => {
