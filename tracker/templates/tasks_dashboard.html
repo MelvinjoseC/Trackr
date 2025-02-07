@@ -22,10 +22,10 @@
 
         <div class="sidebar">
         </br>
-        <img src="{% static 'images/img_19.png' %}" alt="Responsive image" width="150" height="40">
-    </br></br>
-       <img src="data:image/png;base64,{{ image_base64 }}" alt="Profile Image" width="130" height="120" style="border-radius: 50%;">
-         <h4> {{ name }}</h4>
+        <img id="fusie" src="{% static 'images/img_19.png' %}" alt="Responsive image">
+       </br></br></br></br>
+          <img id="profile_pic" src="data:image/png;base64,{{ image_base64 }}" alt="Profile Image">
+            <h4 id="profile_name"> {{ name }}</h4>
             <!-- <p>{{ employee_id }}</p> -->
             <p id="profile_designation" align="center">{{ designation }}</p>
 
@@ -254,31 +254,29 @@
             </div>
             <div class="arrow1 right" id="right-arrow"><img src="/static/images/right_arrow.png"></div>
         </div>
-    </div>
+        <div class="task-buttons">
+            <div class="task-button" id="openPopupButton2">
+                <img src="/static/images/add_button.png">
+                <span><a>CREATE TASK</a></span>
+                <img src="/static/images/blue_arrow.png">
+            </div>
+            <div class="task-button" id="openPopupButton">
+                <img src="/static/images/edit_button.png">
+                <span><a >EDIT ALL TASKS</a> </span>
+                <img src="/static/images/blue_arrow.png">
+            </div>
+        </div>
+        <div class="task-button" id="manual_timesheet">
+            <img src="/static/images/manual_button.png">
+            <span><a>MANUAL TIMESHEET</a></span>
+            <img src="/static/images/blue_arrow.png">
+        </div>
+
     
     <div class="timesheet-content" id="timesheetContent">
         <!-- Tasks will be populated here dynamically -->
     </div>
 
-                
-           
-            <div class="task-buttons">
-                <div class="task-button" id="openPopupButton2">
-                    <img src="/static/images/add_button.png">
-                    <span><a>CREATE TASK</a></span>
-                    <img src="/static/images/blue_arrow.png">
-                </div>
-                <div class="task-button" id="openPopupButton">
-                    <img src="/static/images/edit_button.png">
-                    <span><a >EDIT ALL TASKS</a> </span>
-                    <img src="/static/images/blue_arrow.png">
-                </div>
-            </div>
-            <div class="task-button" id="manual_timesheet">
-                <img src="/static/images/manual_button.png">
-                <span><a>MANUAL TIMESHEET</a></span>
-                <img src="/static/images/blue_arrow.png">
-            </div>
 
         <section class="timesheet">
             <div class="timesheet-header">
@@ -297,7 +295,7 @@
             </div>
         </section>
 
-        </div>
+</div>
     <div class="right-sidebar">
         <!-- My Team Section -->
         <div id="my-team">
