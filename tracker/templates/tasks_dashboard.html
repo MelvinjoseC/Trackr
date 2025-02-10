@@ -272,28 +272,23 @@
             <img src="/static/images/blue_arrow.png">
         </div>
 
-    
-    <div class="timesheet-content" id="timesheetContent">
-        <!-- Tasks will be populated here dynamically -->
-    </div>
-
-
         <section class="timesheet">
             <div class="timesheet-header">
                 <h3>My Daily Timesheet</h3>
                 <div class="date-picker">
-                    <form method="get">
-                        <input type="date" id="date-input" name="date" value="{{ selected_date|date:'Y-m-d' }}" />
-                        <button id="date_in_daily_timesheet" type="submit">GET</button>
+                    <form id="form_date" method="get">
+                        <input type="date" id="date-input" name="date">
+                        <span id="selected-date">Selected Date: {{ selected_date|date:'l, F j, Y' }}</span>
                     </form>
-                    <span id="selected-date">Selected Date: {{ selected_date|date:'l, F j, Y' }}</span>
+                    <button id="date_in_daily_timesheet" type="submit">GET</button>
+                   
                 </div>
             </div>
-            
             <div class="timesheet-content" id="timesheetContent">
                 <!-- Tasks will be populated here dynamically -->
             </div>
         </section>
+    
 
 </div>
     <div class="right-sidebar">

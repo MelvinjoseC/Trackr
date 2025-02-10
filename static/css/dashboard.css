@@ -170,28 +170,38 @@ div#right-arrow {
 }
 
     /* Timesheet Section */
+
+div#timesheetContent {
+    overflow-y: auto;
+    height: 22vh;
+    scrollbar-width: thin;
+}
+
 .timesheet {
     background-color: white;
-    padding: 20px;
-    border-radius: 10px;
+    padding: 2vh 2vw;    
+    border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    height: 32vh;
 }
 
 .timesheet-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 1.5vh;
 }
 
 .timesheet-header h3 {
     margin: 0;
-    font-size: 20px;
-    color: #333;
+    font-size: 2vh;
+    color: #484848;
+    text-decoration: underline;
+    text-transform: uppercase;
+    font-weight: 500;
 }
 
-.timesheet-header .date-picker {
+/* .timesheet-header .date-picker {
     font-size: 14px;
     color: #666;
     display: flex;
@@ -201,7 +211,7 @@ div#right-arrow {
 .timesheet-header .date-picker i {
     margin-right: 5px;
     color: #003f80;
-}
+} */
 
 .timesheet-rows {
     border-top: 1px solid #e0e0e0;
@@ -210,10 +220,8 @@ div#right-arrow {
 
 .timesheet-row {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #e0e0e0;
+    flex-direction: column;
+    padding: 0 0 1vh 0;
 }
 
 .timesheet-row:last-child {
@@ -221,20 +229,50 @@ div#right-arrow {
 }
 
 .task-info {
-    flex: 2;
-}
-
-.task-info h4 {
-    margin: 0 0 5px;
-    font-size: 16px;
-    color: #003f80;
-    text-transform: uppercase;
+    width: 100%;
 }
 
 .task-info p {
     margin: 0;
-    font-size: 14px;
-    color: #666;
+    /* background-color: #F6F6F6; */
+}
+
+.task-set {
+    background-color: #F6F6F6;
+    padding: 0.5vh;
+}
+
+p.task-meta {
+    font-size: 1.4vh;
+    font-weight: 400;
+    color: #838383;
+    text-transform: uppercase;
+}
+
+.task-info h4 {
+    background-color: #D6E3FF;
+    margin: 0;
+    font-weight: 500;
+    font-size: 1.5vh;
+    padding: 0.5vh 0.5vh 0.5vh 3vh;
+    color: #333DAE;
+    text-transform: uppercase;
+}
+
+p.task-name {
+    color: #000000;
+    font-size: 1.4vh;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin: 0;
+}
+
+p.task-duration {
+    color: #000000;
+    font-size: 1.4vh;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin: 0;
 }
 
 .task-time {
@@ -242,40 +280,74 @@ div#right-arrow {
     text-align: right;
 }
 
-.task-time p {
-    margin: 0;
-    font-size: 16px;
-    color: #333;
-    font-weight: bold;
-}
-
 .task-time span {
     font-size: 12px;
     color: #666;
 }
 
-.task-actions {
-    flex: 0.5;
+p.project-type {
+    font-size: 1.4vh;
+    font-weight: 400;
+    text-transform: uppercase;
+    color: #838383;
+    margin: 0;
+}
+
+
+.details-top, .details-bottom {
     display: flex;
-    justify-content: space-evenly;
-    align-items: center;
-    font-size: 18px;
+    justify-content: space-between;
+    width: 45vw;
 }
 
-.task-actions i {
-    color: #666;
-    cursor: pointer;
-    transition: color 0.3s ease;
+span#label_hours {
+    color: #484848;
+    font-size: 1.4vh;
+    font-weight: 300;
+    text-transform: uppercase;
 }
 
-.task-actions i:hover
+div#value_hours {
+    color: #484848;
+    font-size: 1.4vh;
+    text-transform: uppercase;
+    font-weight: bold;
+}
 
-    .team-list {
-    display: flex; /* Display items in a row */
-    justify-content: center; /* Center the items horizontally */
-    align-items: center; /* Center items vertically */
-    gap: 20px; /* Add space between each member */
+img#comment_button {
+    margin-right: 2vw;
+    width: 1vw;
+    height: 2.1vh;
+}
 
+img#delete_button {
+    margin-right: 3vw;
+    width: 1vw;
+    height: 2.1vh;
+}
+
+.bottom_row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Ensures vertical alignment is centered */
+}
+
+#calender_view {
+    text-align: left; /* Aligns the text to the left */
+}
+
+#total_time_container {
+    text-align: right; /* Aligns the text of the total time container to the right */
+    display: flex;
+    flex-direction: column; /* Stacks the label and value vertically */
+    align-items: flex-end; /* Aligns the content to the right side */
+}
+
+p#p_calender {
+    color: #4E00BB;
+    font-size: 1.4vh;
+    font-weight: 500;
+    text-decoration: underline;
 }
 
 .member {
@@ -447,11 +519,18 @@ div#right-arrow {
 
 /* Task Details Section */
 .task-details {
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background-color: #f9f9f9;
+    padding: 0.5vh 0.5vh 0.5vh 3vh;
+    border: none;
+    background-color: #F6F6F6;
     text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.task-actions, .image-set {
+    /* flex: 1;  */
+    margin: 0;
 }
 
 .task-details h3 {
@@ -511,6 +590,7 @@ div#right-arrow {
 
 .project-tabs .tab {
     padding: 1vh 1.74vw;
+    border-radius: 3px;
     border: none;
     font-size: 1.2vh;
     background-color: #DAE6FB;
@@ -522,6 +602,7 @@ div#right-arrow {
 .project-tabs .tab.active {
     font-size: 1.2vh;
     font-weight: bold;
+    border-radius: 3px;
     background-color: #F3F3F3;
     color: #484848;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -633,13 +714,6 @@ div#manual_timesheet {
     color: #4E4F51;
 }
 
-.timesheet-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
 .task-button img {
     width: 1vw;
     height: 2vh;
@@ -648,20 +722,65 @@ div#manual_timesheet {
 .date-picker {
     display: flex;
     align-items: center;
-    gap: 10px; /* Add space between the calendar icon, input, and text */
+    gap: 1vw;
 }
 
 #date-input {
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 14px;
+    display: flex;
+    padding: 0.4vh 0.4vw;
+    border: none;
+    background: #ECECEC;
+    font-size: 2vh;
+    align-items: center;
+    border-radius: 5px 0px 0px 5px;
+}
+
+form#form_date {
+    display: flex;
+    align-items: center;
+}
+
+input[type="date"]::-webkit-datetime-edit, input[type="date"]::-webkit-inner-spin-button, input[type="date"]::-webkit-clear-button {
+    display: none;
+}
+
+input[type="date"] {
+    text-indent: 100%;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 #selected-date {
-    font-size: 16px;
-    color: #333;
+    font-size: 1.3vh;
+    color: #4F4F4F;
+    padding-left: 0.5vw;
+    padding-right: 0.5vw;
+    padding-top: 0.8vh;
+    padding-bottom: 0.8vh;
+    border: 1px solid #D2D5DA;
+    border-left: none;
     font-weight: bold;
+    border-radius: 0px 5px 5px 0px;
+}
+
+button#date_in_daily_timesheet{
+    background-color: #B5CAFF;
+    color: #263A82;
+    font-weight: 500;
+    padding: 0.8vh 0.8vw;
+    border-radius: 5px;
+    font-size: 1.4vh;
+    border: none;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+#no_data_text{
+    margin: 8vh;
+    text-align: center;
+    font-size: 1.8vh;
+    color: #4F4F4F;
+    font-weight: 400;
 }
 
 /* Container Styling */

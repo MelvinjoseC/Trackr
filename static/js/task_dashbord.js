@@ -156,6 +156,12 @@ function populateTimesheet(tasks) {
     const timesheetContent = document.getElementById("timesheetContent");
     timesheetContent.innerHTML = "";  // Clear any existing content
 
+    // Remove existing total time element if it exists
+    let totalTimeElement = document.querySelector(".bottom_row");
+    if (totalTimeElement) {
+        totalTimeElement.remove();
+    }
+
     let totalTime = 0; // Initialize total time accumulator
 
     if (tasks.length > 0) {
@@ -166,36 +172,49 @@ function populateTimesheet(tasks) {
             taskRow.classList.add("timesheet-row");
 
             taskRow.innerHTML = `
-                <div class="task-info">
-                    <h4 class="task-type">${task.scope}</h4> <!-- Scope -->
-                    <p class="task-name">${task.title}</p> <!-- Title -->
-                    <p class="task-meta">${task.projects ? task.projects : 'No Project Assigned'}, ${task.d_no ? 'REV NO: ' + task.d_no : 'No Rev No'}</p> <!-- Projects and Assigned -->
+            <div class="task-info">
+                <h4 class="task-type">${task.scope}</h4> <!-- Scope -->
+                <div class="task-details">
+                    <div class="task-actions">
+                        <div class="details-top">
+                            <p class="task-name">${task.title}</p> <!-- Title -->
+                            <p class="task-duration">${formatTime(parseFloat(task.time) || 0)}</p> <!-- Formatted Task Time -->
+                        </div>
+                        <div class="details-bottom">
+                            <p class="task-meta">${task.projects ? task.projects : 'No Project Assigned'}, ${task.d_no ? 'REV NO: ' + task.d_no : 'No Rev No'}</p> <!-- Projects and Assigned -->
+                            <p class="project-type">Internal Projects</p>
+                        </div>
+                    </div>
+                    <div class="image-set">
+                        <img id="comment_button" src="/static/images/comment_button.png">
+                        <img id="delete_button" src="/static/images/delete_button.png">
+                    </div>
                 </div>
-                
-                <div class="task-time">
-                    <p class="task-name">${formatTime(parseFloat(task.time) || 0)}</p> <!-- Formatted Task Time -->
-                </div>
-                <div class="task-actions">
-                    <i class="fas fa-comment-alt"></i>
-                    <i class="fas fa-trash"></i>
-                </div>
-            `;
+
+            </div>
+        `;
 
             timesheetContent.appendChild(taskRow); // Append the task row to the content
         });
 
-        // Display the total time at the bottom
-        const totalTimeElement = document.createElement("div");
-        totalTimeElement.classList.add("total-time");
+        // Create a new total time element since the old one was removed
+        totalTimeElement = document.createElement("div");
         totalTimeElement.innerHTML = `
-            <div style="text-align: right; font-weight: bold; margin-top: 10px;">
-                <p>TOTAL HOURS : ${formatTime(totalTime)}</p>
+            <div class="bottom_row">
+                <div id="calender_view">
+                    <p id="p_calender">Switch to Calendar View</p>
+                </div>
+                <div id="total_time_container">
+                    <span id="label_hours">TOTAL HOURS :</span>
+                    <div id="value_hours">${formatTime(totalTime)}</div>
+                </div>
             </div>
         `;
-        timesheetContent.appendChild(totalTimeElement); // Append the total time display
+        timesheetContent.parentNode.appendChild(totalTimeElement); // Append the new total time display
     } else {
         const noDataMessage = document.createElement("p");
         noDataMessage.textContent = "No Data Found";
+        noDataMessage.id = "no_data_text";
         timesheetContent.appendChild(noDataMessage);
     }
 }
@@ -658,10 +677,19 @@ const dateInput = document.getElementById("date-input");
 const selectedDate = document.getElementById("selected-date");
 
 function formatDate(dateString) {
-    const options = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", options);
+
+    const optionsWeekday = { weekday: 'long' };
+    const optionsDay = { day: 'numeric' };
+    const optionsMonthYear = { month: 'long', year: 'numeric' };
+
+    const weekday = date.toLocaleDateString("en-GB", optionsWeekday);
+    const day = date.toLocaleDateString("en-GB", optionsDay);
+    const monthYear = date.toLocaleDateString("en-GB", optionsMonthYear);
+
+    return `${weekday}, ${day} ${monthYear}`;
 }
+
 
 dateInput.value = new Date().toISOString().split("T")[0];
 selectedDate.textContent = formatDate(dateInput.value);
