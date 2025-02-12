@@ -1,17 +1,14 @@
 
 from datetime import datetime
-from django.shortcuts import render, redirect
-from django.contrib import messages
+from django.shortcuts import render
 from django.db import connection
 import base64
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
-from django.contrib import messages
-from django.db import connection
 from .models import EmployeeDetails
-from .models import TrackerTasks
 import json
-
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import ProjectTacker
+from django.db import connection, transaction
 
 # Define a global variable
 global_user_data = None
@@ -40,7 +37,8 @@ def login(request):
             # Store employee_id and name in a single variable (as a dictionary)
             global_user_data = {
                 "employee_id": user[0],
-                "name": user[1]
+                "name": user[1],
+               
             }
 
             # Save user ID in the session for further authentication
@@ -84,21 +82,67 @@ def task_dashboard(request):
     })
 
 
+def convert_bytes_safe(data):
+    """Convert bytes to strings where possible, handle non-UTF-8 bytes gracefully."""
+    if isinstance(data, bytes):
+        try:
+            # Try decoding as UTF-8
+            return data.decode('utf-8')
+        except UnicodeDecodeError:
+            # If decoding fails, return a placeholder or handle it differently
+            return f"[binary data: {len(data)} bytes]"  # Or return None to ignore it
+
+    if isinstance(data, dict):
+        return {key: convert_bytes_safe(value) for key, value in data.items()}
+    if isinstance(data, list):
+        return [convert_bytes_safe(item) for item in data]
+    return data
+
+
+
+
+
+
 def task_dashboard_api(request):
-    # Fetch all tracker tasks
+    # Initialize lists to store tasks and employee details
     task_list = []
+    employee_details = []
+    project_statuses = []  # Default empty list for statuses
+
+    # Retrieve global_user_data (assuming it's stored in session)
+    global_user_data 
+    if global_user_data:
+        # Fetch only statuses where sender_name matches global_user_data
+        project_statuses = list(ProjectTacker.objects.filter(sender_name=global_user_data)
+                                .values_list('status', flat=True))
+
     try:
         with connection.cursor() as cursor:
+            # Fetch all tracker tasks
             cursor.execute("SELECT * FROM tracker_project")
+            task_columns = [col[0] for col in cursor.description]
             tasks = cursor.fetchall()
-            if cursor.description:
-                task_columns = [col[0] for col in cursor.description]
-                task_list = [dict(zip(task_columns, task)) for task in tasks]
-    except Exception as e:
-        return JsonResponse({"success": False, "message": f"Error fetching tasks: {str(e)}"})
+            task_list = [dict(zip(task_columns, task)) for task in tasks]
+            
+            # Fetch all employee details
+            cursor.execute("SELECT * FROM employee_details")
+            employee_columns = [col[0] for col in cursor.description]
+            employees = cursor.fetchall()
+            employee_details = [dict(zip(employee_columns, emp)) for emp in employees]
+            employee_details = convert_bytes_safe(employee_details)
 
-    # Return task data as JSON
-    return JsonResponse({"success": True, "tasks": task_list})
+    except Exception as e:
+        return JsonResponse({"success": False, "message": f"Error fetching data: {str(e)}"})
+
+    # Return a single JSON response with all required data
+    return JsonResponse({
+        "success": request.user.is_authenticated,
+        "message": "Authentication required" if not request.user.is_authenticated else "Data fetched successfully",
+        "status_list": project_statuses,
+        "tasks": task_list,
+        "employee_details": employee_details
+    })
+
 
 def sign_up(request):
     if request.method == "POST":
@@ -244,10 +288,6 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
 
 
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.db import connection
-import json
 
 # Helper function to execute SQL queries
 def execute_query(query, params=None):
@@ -314,6 +354,96 @@ def create_task(request):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from datetime import datetime
+from .models import ProjectTacker
+
+@csrf_exempt
+def aproove_task(request):
+    if request.method == 'POST':
+        try:
+            # Parse JSON data
+            data = json.loads(request.body)
+
+            # Debugging: Print received JSON data
+            print("Received Data:", data)
+
+            # Validate approver_name
+            approver_name = data.get('approver_name')
+            if not approver_name or not isinstance(approver_name, str):
+                return JsonResponse({'error': 'Invalid or missing approver_name.'}, status=400)
+
+            # Validate required fields
+            required_fields = ['title', 'project']
+            missing_fields = [field for field in required_fields if not data.get(field)]
+            if missing_fields:
+                return JsonResponse({'error': f'Missing required fields: {", ".join(missing_fields)}'}, status=400)
+
+            # Extract task title
+            task_title = data.get('title')
+
+            # Validate and format dates
+            start_date = data.get('start_date')
+            end_date = data.get('end_date')
+
+            try:
+                if start_date:
+                    start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+                if end_date:
+                    end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            except ValueError:
+                return JsonResponse({'error': 'Invalid date format. Use YYYY-MM-DD.'}, status=400)
+
+            # Convert dates to strings for JSON serialization
+            task_details = {
+                'task_title': task_title,
+                'project': data.get('project'),
+                'scope': data.get('scope'),
+                'priority': data.get('priority'),
+                'assigned_to': data.get('assigned_to'),
+                'checker': data.get('checker'),
+                'qc_3_checker': data.get('qc_3_checker'),
+                'group': data.get('group'),
+                'category': data.get('category'),
+                'start_date': start_date.strftime('%Y-%m-%d') if start_date else None,
+                'end_date': end_date.strftime('%Y-%m-%d') if end_date else None,
+                'verification_status': data.get('verification_status'),
+                'task_status': data.get('task_status'),
+                'rev_no': data.get('rev_no'),
+                'd_no': data.get('d_no'),
+            }
+
+            # Save task details to the database
+            project_tacker_entry = ProjectTacker.objects.create(
+                name=approver_name,
+                to_aproove=task_details,
+                status='Pending',
+                sender_name= global_user_data,
+            )
+
+            return JsonResponse({'message': 'Task created successfully!', 'project_tacker_id': project_tacker_entry.id}, status=201)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+        except Exception as e:
+            # Log the error for debugging purposes
+            print("Error:", str(e))
+            return JsonResponse({'error': f'Internal server error: {str(e)}'}, status=500)
+
+    return JsonResponse({'error': 'Invalid HTTP method'}, status=405)
+
+
+
+
+
+
+    
+
+
 @csrf_exempt
 
 def edit_task(request):
@@ -323,9 +453,8 @@ def edit_task(request):
             data = json.loads(request.body.decode('utf-8'))
             title_name = data.get('globalselectedtitil_for_edit_task_backend', '')  # Old title
 
-            # Debugging: Print received data (Optional)
-            print("Received Data:", data)
-            print("Old Title Name:", title_name)
+    
+
 
             # Check if the task with the given old title, project, and scope already exists
             check_query = """
@@ -379,9 +508,7 @@ def edit_task(request):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
-import json
-from django.http import JsonResponse
-from django.db import connection, transaction
+
 @csrf_exempt
 
 def submit_timesheet(request):
@@ -472,3 +599,59 @@ def submit_timesheet(request):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+@csrf_exempt  # Use if you do not want to handle CSRF manually; otherwise, pass the token from the template
+
+def project_tracker(request):
+    global global_user_data
+
+
+
+    # Fetch the row from ProjectTacker where name matches global_user_data['name']
+    project_data = ProjectTacker.objects.filter(name=global_user_data['name']).first()
+
+    # If project_data exists, load the to_aproove JSON as a Python dictionary
+    to_approve_data = project_data.to_aproove if project_data else []
+
+    context = {
+        'user_data': global_user_data,
+        'project_data': project_data,
+        'to_approve_data': to_approve_data,  # Pass JSON data to the template
+    }
+
+    return render(request, 'project_tracker.html', context)
+
+
+
+
+@csrf_exempt  # Required if CSRF protection is enabled
+def task_action(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            task_data = data.get('task_data')  # Task data being passed
+            action = data.get('action')  # Action: 'accept' or 'reject'
+
+            # Find the ProjectTacker record by name (or any other unique identifier you are using)
+            project_tracker = ProjectTacker.objects.filter(name=task_data.get('name')).first()
+
+            if project_tracker:
+                # Update the status based on the action
+                if action == 'accept':
+                    project_tracker.status = 'Accepted'
+                elif action == 'reject':
+                    project_tracker.status = 'Rejected'
+                else:
+                    return JsonResponse({"success": False, "message": "Invalid action specified."})
+
+                # Save the updated status in the database
+                project_tracker.save()
+
+                return JsonResponse({"success": True, "message": f"Task has been {action}ed."})
+            else:
+                return JsonResponse({"success": False, "message": "Project task not found."})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "message": "Invalid JSON format."})
+
+    return JsonResponse({"success": False, "message": "Invalid request method."})

@@ -26,6 +26,7 @@ from django.urls import include, path
 
 urlpatterns = [
     path('', include('tracker.urls')),  # Replace 'tracker' with your app name
+    path('admin/', admin.site.urls),
 ]
 
 

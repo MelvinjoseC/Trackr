@@ -1,7 +1,130 @@
+
+document.getElementById('aproover_creattask').addEventListener('click', function () {
+    const dropdownContainer = document.getElementById('dropdownContainer');
+
+    // Toggle dropdown visibility
+    if (dropdownContainer.style.display === 'none' || dropdownContainer.style.display === '') {
+        dropdownContainer.style.display = 'block';  // Show
+        populateDropdown();  // Populate list when shown
+    } else {
+        dropdownContainer.style.display = 'none';  // Hide
+    }
+});
+
+// Function to populate dropdown list
+function populateDropdown() {
+    const dropdownContainer = document.getElementById('dropdownContainer');
+    dropdownContainer.innerHTML = '';  // Clear previous options
+
+    // Filter employee details for admins and populate the list
+    golbalfetchdata.employee_details
+        .filter(employee => employee.authentication === 'admin')
+        .forEach(employee => {
+            const option = document.createElement('div');
+            option.textContent = employee.name;
+            option.style.padding = '5px';
+            option.style.cursor = 'pointer';
+
+            // Select the name and display it on the button
+            option.addEventListener('click', () => {
+                document.getElementById('aproover_creattask').textContent = employee.name;
+                dropdownContainer.style.display = 'none';  // Hide dropdown after selection
+                
+                // Show the alert modal
+                showModal(employee.name);
+            });
+
+            dropdownContainer.appendChild(option);
+        });
+}
+
+// Function to show the alert modal
+// Function to show the alert modal and blur the background
+function showModal(name) {
+    document.getElementById('modalTitle').textContent = `Selected: ${name}`;
+    document.getElementById('alertModal').style.display = 'block';
+
+    // Blur both the main container and task modal popup
+    document.querySelector('.main-container').classList.add('blur');
+    document.getElementById('taskModalPopup').classList.add('blur');
+}
+
+// Function to close the modal and remove the blur effect
+function closeModal() {
+    document.getElementById('alertModal').style.display = 'none';
+
+    // Remove blur effect
+    document.querySelector('.main-container').classList.remove('blur');
+    document.getElementById('taskModalPopup').classList.remove('blur');
+}
+
+// Close the modal when clicking the close button or OK button
+document.getElementById('closeModal').addEventListener('click', closeModal);
+document.getElementById('okButton').addEventListener('click', closeModal);
+
+
+
+document.getElementById("okButton").addEventListener("click", function (e) {
+    e.preventDefault(); // Prevent default behavior (if inside a form)
+    // Collect form data
+    const taskData = {
+        approver_name: document.getElementById('aproover_creattask').textContent,  // Selected approver name
+        title: document.getElementById("taskTitlecreatetask").value,
+        list: document.getElementById("id_listcreatetask").value,
+        project: document.getElementById("id_projectcreatetask").value,
+        scope: document.getElementById("id_scopecreatetask").value,
+        priority: document.getElementById("id_prioritycreatetask").value,
+        assigned_to: document.getElementById("assignedTocreatetask").value,
+        checker: document.getElementById("checkercreatetask").value,
+        qc_3_checker: document.getElementById("qcCheckercreatetask").value,
+        group: document.getElementById("groupcreatetask").value,
+        category: document.getElementById("id_categorycreatetask").value,
+        start_date: document.getElementById("startDatecreatetask").value,
+        end_date: document.getElementById("endDatecreatetask").value,
+        verification_status: document.getElementById("id_verification_statuscreatetask").value,
+        task_status: document.getElementById("id_task_statuscreatetask").value,
+        rev_no: document.getElementById("id_revnocreatetask").value,
+        d_no: document.getElementById("id_dnocreatetask").value,
+    };
+    console.log("Task Created taskData:", taskData); // Log the response
+    // Send the data to the backend
+    fetch("/aproove_task/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(taskData),
+    })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json().then((data) => ({
+                status: response.status,
+                body: data
+            }));
+            
+        })
+        .then((data) => {
+            console.log("Task Created:", data); // Log the response
+            alert("Task created successfully!"); // Optional success notification
+        })
+        .catch((error) => {
+            console.error("Error creating task:", error);
+            alert("Error creating task. Check console for details.");
+        });
+});
+
+document.getElementById("closePopupButton_creattask").addEventListener("click", function () {
+    document.getElementById("taskModalPopup").style.display = "none";
+});
+
+
 document.getElementById('up-arrow').addEventListener('click', function() {
     document.getElementById('scrollable-list').scrollBy({
         top: -50, // Adjust the scroll amount as needed
         behavior: 'smooth'
+
     });
 });
 
@@ -39,6 +162,12 @@ sidebarLinks.forEach(link => {
         this.classList.add('active');
     });
 });
+
+
+
+
+// Helper function to get CSRF token
+
 
 document.addEventListener("DOMContentLoaded", function() {
     const buttons = document.querySelectorAll('.sidebar-link');
@@ -439,7 +568,7 @@ function populateDropdowns(tasks) {
     
     // Populate form fields based on selected task data
 
-
+ 
 
     // Filter and populate dependent dropdowns dynamically
     function handleDependentDropdowns() {
@@ -623,7 +752,7 @@ function populateDropdowns_updatetask(tasks) {
 
 
 let golbalfetchdata
-
+let currentUserName
 // Fetch data and populate dropdowns
 document.addEventListener("DOMContentLoaded", () => {
     fetch("/api/task_dashboard/")
@@ -635,11 +764,29 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .then(data => {
             console.log("Fetched Tasks Data:", data);
+            golbalfetchdata = data;
+
+            currentUserName = document.getElementById('profile_name').textContent.trim();
+
+            // Check if the current user is an admin
+            const isAdmin = golbalfetchdata.employee_details.some(
+                employee => employee.name === currentUserName && employee.authentication === 'admin'
+            );
+
+            // Show/hide buttons based on admin status
+            if (isAdmin) {
+                document.getElementById('savetask_creatask').style.display = 'block';
+              document.getElementById('project-button').style.display = 'block';
+                document.getElementById('aproover_creattask').style.display = 'none';
+            } else {
+                document.getElementById('savetask_creatask').style.display = 'none';
+                document.getElementById('aproover_creattask').style.display = 'block';
+                document.getElementById('project-button').style.display = 'none';
+            }
+
             if (data.tasks && data.tasks.length > 0) {
-                golbalfetchdata = data
                 populateDropdowns(data.tasks);
                 populateDropdowns_updatetask(data.tasks);
-                console.log("Fetched Tasks Data:", data);
             } else {
                 console.error("No tasks data found in API response.");
             }
@@ -648,8 +795,6 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error fetching tasks:", error);
         });
 });
-
-
 
 // Handle tab switching for Running, Revisions, and Others
 document.querySelectorAll('.tab').forEach(tab => {
@@ -733,7 +878,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Create reusable modal for creating and editing tasks
 
-document.getElementById("savetask_creattask").addEventListener("click", function (e) {
+document.getElementById("savetask_creatask").addEventListener("click", function (e) {
     e.preventDefault(); // Prevent default behavior (if inside a form)
     // Collect form data
     const taskData = {
@@ -767,15 +912,10 @@ document.getElementById("savetask_creattask").addEventListener("click", function
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-            return response.json().then((data) => ({
-                status: response.status,
-                body: data
-            }));
-            
+            return response.json();
         })
         .then((data) => {
-            console.log("Task Created:", data); // Log the response
-            alert("Task created successfully!"); // Optional success notification
+            console.log("Task Created:", data);
         })
         .catch((error) => {
             console.error("Error creating task:", error);
@@ -831,9 +971,6 @@ document.getElementById("closePopupButton_manualtimesheet").addEventListener("cl
 });
 
 
-document.getElementById("closePopupButton_creattask").addEventListener("click", function () {
-    document.getElementById("taskModalPopup").style.display = "none";
-});
 
 
 document.getElementById("closePopupButton_updatetask").addEventListener("click", function () {

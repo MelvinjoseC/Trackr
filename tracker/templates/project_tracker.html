@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Tracker</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+
+        .action-btn {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .accept-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .reject-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .button-container {
+            text-align: right;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the Project Tracker</h1>
+
+    <h3>User Details</h3>
+    <p><strong>Employee ID:</strong> {{ user_data.employee_id }}</p>
+    <p><strong>Name:</strong> {{ user_data.name }}</p>
+
+    <h3>Task To Approve</h3>
+    {% if to_approve_data %}
+        <table>
+            <thead>
+                <tr>
+                    {% for key, value in to_approve_data.items %}
+                        <th>{{ key|capfirst }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for key, value in to_approve_data.items %}
+                        <td>{{ value }}</td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="button-container">
+            <button class="action-btn accept-btn" onclick="handleTaskAction('accept')">Accept</button>
+            <button class="action-btn reject-btn" onclick="handleTaskAction('reject')">Reject</button>
+        </div>
+    {% else %}
+        <p>No tasks to approve.</p>
+    {% endif %}
+
+    <script>
+        function handleTaskAction(action) {
+            fetch('/task_action/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    task_data: { 
+                        name: '{{ project_data.name }}'  // Include project name to identify the task
+                    },
+                    action: action
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Task has been ${action}ed.`);
+                    location.reload();  // Reload the page to reflect changes
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+    </script>
+</body>
+</html>

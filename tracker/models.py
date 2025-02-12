@@ -3,6 +3,15 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.shortcuts import render
 
+class ProjectTacker(models.Model):
+    name = models.CharField(max_length=45, null=True, blank=True)
+    to_aproove = models.JSONField(null=True, blank=True)
+    status = models.CharField(max_length=45, null=True, blank=True)
+    sender_name = models.CharField(max_length=45, null=True, blank=True)  # Added missing field
+
+
+    class Meta:
+        db_table = 'project_tacker'  # Matches the DB table name
 class TrackerTasks(models.Model):
     task_id = models.AutoField(primary_key=True)
     d_no = models.IntegerField(null=True, blank=True)
@@ -62,6 +71,7 @@ class EmployeeDetails(models.Model):
     )
     password = models.CharField(max_length=255)
     authentication = models.CharField(max_length=50)
+    approval = models.JSONField(null=True, blank=True)  # Added approval field as JSON
 
     class Meta:
         db_table = 'employee_details'  # Custom table name

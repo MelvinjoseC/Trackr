@@ -55,7 +55,21 @@
        data-default-img="{% static 'images/leavepage.png' %}" 
        data-active-img="{% static 'images/leavepage1.png' %}">
         <img src="{% static 'images/leavepage.png' %}" alt="Leave Tracker Icon"> LEAVE TRACKER
+  
     </a>
+
+
+    <a class="sidebar-link" id="project-button" 
+    href="{% url 'project_tracker' %}" 
+    data-default-img="{% static 'images/leavepage.png' %}" 
+    data-active-img="{% static 'images/leavepage1.png' %}" 
+    style="display: none;">
+    <img src="{% static 'images/leavepage.png' %}" alt="Leave Tracker Icon"> PROJECT TRACKER
+</a>
+
+ 
+
+
 </div>
     <a  class="sign-out sidebar-link" id="signout-button"
         data-default-img="{% static 'images/signout.png' %}"
@@ -683,13 +697,25 @@
                 </select>
             </div>
         </form>
-            <div class="form-group">
-                <button id="savetask_creattask">Save Task</button>
-                <button id="closePopupButton_creattask" >Close</button>
+        <div class="form-group">
+            <button id="savetask_creatask" style="display: none;">Save Task</button>
+            <button id="aproover_creattask" style="display: none;">Approver</button>
+            <button id="closePopupButton_creattask">Close</button>
+            
+            <div id="dropdownContainer" style="display: none; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9; width: 200px; position: absolute;">
+                <!-- Dynamically populated list will go here -->
             </div>
+        </div>
+        
        
 </div>
-    
+  <!-- Alert Modal -->
+<div id="alertModal">
+    <span id="closeModal">&times;</span>
+    <h3 id="modalTitle">Selected: </h3>
+    <button id="okButton">OK</button>
+</div>
+  
 
 <script>
 
