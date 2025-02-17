@@ -655,3 +655,47 @@ def task_action(request):
             return JsonResponse({"success": False, "message": "Invalid JSON format."})
 
     return JsonResponse({"success": False, "message": "Invalid request method."})
+
+
+def notifications_view(request):
+    return render(request, 'notifications.html')
+
+from django.core.exceptions import ObjectDoesNotExist
+
+@csrf_exempt
+def check_task_status(request):
+    global global_user_data  # Use global variable
+
+    if request.method == "POST":
+        try:
+            # Fetch all records where sender_name matches global_user_data['name']
+            if not global_user_data:
+                return JsonResponse({"status": None, "message": "User not authenticated"}, status=401)
+
+            sender_name = global_user_data.get("name")
+
+            projects = ProjectTacker.objects.filter(sender_name__icontains=sender_name)
+
+            if not projects.exists():
+                return JsonResponse({"status": None, "message": "No projects found for sender"}, status=404)
+
+            approved_rejected_projects = []
+
+            for project in projects:
+                # Convert to_aproove JSONField to a Python dictionary
+                to_aprove_data = json.loads(project.to_aproove) if isinstance(project.to_aproove, str) else project.to_aproove
+                
+                if project.status in ["Approved", "Rejected","Pending"]:
+                    approved_rejected_projects.append({
+                        "status": project.status,
+                        "project": to_aprove_data.get("project", "Unknown Project")
+                    })
+
+            return JsonResponse({"projects": approved_rejected_projects})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"status": None, "message": "Invalid JSON format"}, status=400)
+        except Exception as e:
+            return JsonResponse({"status": None, "message": f"Internal server error: {str(e)}"}, status=500)
+
+    return JsonResponse({"status": None, "message": "Invalid request method"}, status=405)

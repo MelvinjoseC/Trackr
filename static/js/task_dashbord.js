@@ -1,4 +1,7 @@
 
+
+
+
 document.getElementById('aproover_creattask').addEventListener('click', function () {
     const dropdownContainer = document.getElementById('dropdownContainer');
 
@@ -776,12 +779,14 @@ document.addEventListener("DOMContentLoaded", () => {
             // Show/hide buttons based on admin status
             if (isAdmin) {
                 document.getElementById('savetask_creatask').style.display = 'block';
-              document.getElementById('project-button').style.display = 'block';
+                document.getElementById('project-button').style.display = 'block';
                 document.getElementById('aproover_creattask').style.display = 'none';
+                document.getElementById('notifications').style.display = 'none';
             } else {
                 document.getElementById('savetask_creatask').style.display = 'none';
                 document.getElementById('aproover_creattask').style.display = 'block';
                 document.getElementById('project-button').style.display = 'none';
+                document.getElementById('notifications').style.display = 'block';
             }
 
             if (data.tasks && data.tasks.length > 0) {
@@ -822,17 +827,9 @@ const dateInput = document.getElementById("date-input");
 const selectedDate = document.getElementById("selected-date");
 
 function formatDate(dateString) {
+    const options = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
     const date = new Date(dateString);
-
-    const optionsWeekday = { weekday: 'long' };
-    const optionsDay = { day: 'numeric' };
-    const optionsMonthYear = { month: 'long', year: 'numeric' };
-
-    const weekday = date.toLocaleDateString("en-GB", optionsWeekday);
-    const day = date.toLocaleDateString("en-GB", optionsDay);
-    const monthYear = date.toLocaleDateString("en-GB", optionsMonthYear);
-
-    return `${weekday}, ${day} ${monthYear}`;
+    return date.toLocaleDateString("en-US", options);
 }
 
 

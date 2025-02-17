@@ -13,5 +13,7 @@ urlpatterns = [
       path('aproove_task/', views.aproove_task, name='aproove_task'),
   path('project-tracker/', views.project_tracker, name='project_tracker'),
    path('task_action/', views.task_action, name='task_action'),
+    path('notifications/', views.notifications_view, name='notifications_page'),
+    path('check_task_status/', views.check_task_status, name='check_task_status'),
 ]
 
