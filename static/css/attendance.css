@@ -1,0 +1,878 @@
+/* General Reset */
+body {
+    margin: 0;
+    font-family: Roboto;
+    background-color: #ECECEC;
+    padding: 0;
+    flex-wrap: wrap;
+}
+
+/* Main Container */
+.main-container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    background-image: url(/static/images/Left_Panel.png);   
+    background-size: cover;
+    background-repeat: no-repeat;
+    color: white;
+    width: 250px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 10%;
+}
+
+img#fusie {
+    width: 7.5vw;
+    height: 4vh;
+}
+
+img#profile_pic {
+    width: 50%;
+    height: 11%;
+    border-radius: 50%;
+}
+
+h4#profile_name {
+    color: #FFFFFF;
+    font-size: 1.5vh;
+    font-weight: bold;
+    text-transform: capitalize;
+    margin: 2vh 0 0;
+}
+
+p#profile_designation {
+    color: #FFFFFF;
+    font-size: 1.5vh;
+    font-weight: 300;
+    text-transform: capitalize;
+    margin: 0.3vh 0 0;
+}
+
+.sidebar_buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Align items to the start for consistency */
+    gap: 2vh; /* Adds space between buttons */
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    font-size: 1.4vh;
+    font-weight: 300;
+    color: #FFFFFF;
+    gap: 1vw;
+}
+
+.sidebar-link.active {
+    font-size: 1.4vh;
+    font-weight: bold;
+    color: #FFFFFF; /* Keep text white */
+}
+
+.sidebar .sign-out {
+    margin-top: auto;
+}
+
+/* Content */
+.content {
+    padding: 1vw;
+    width: 71%;
+    /* overflow-y: auto; */
+}
+
+#first-box{
+    display: flex;
+    align-items: flex-start;
+    gap: 1vw; /* Space between the two divs */
+}
+
+/* Date and Time Section */
+.date-time {
+    width: 13%;
+    height: 14vh;
+    text-align: center;
+    background-color: #ffffff;
+    padding: 1vw;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+ 
+.date-time .date {
+    font-size: 2vh;
+    font-weight: bold;
+    font-family: Roboto;
+    color: #767676;
+    margin-bottom: 1vh;
+    margin-top: 3.3vh;
+}
+
+.date-time .time {
+    font-size: 3.5vh;
+    font-weight: bold;
+    color: #333DAE;
+    font-family: Roboto;
+}
+
+/* Container Styling */
+.date-time-container {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-size: cover;
+    background-position: center;
+    height:14vh;
+    padding:1vw;
+}
+
+/* Events Section */
+.events-section {
+    flex: 1;
+    /* padding: 1vw; */
+    border-radius: 10px;
+    /* box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); */
+    background-size: cover; /* Ensures the image covers the entire area */
+    background-position: center; /* Centers the image */
+    background-repeat: no-repeat; /* Prevents the image from repeating */
+
+}
+
+.events-header {
+    display: flex;
+    gap: 0.5vw;
+    align-items: center;
+    width: 50%;
+    padding: 0.7vw;
+}
+
+.events-header h4 {
+    font-size: 1.8vh;
+    font-weight: bold;
+    font-style: italic;
+    color: #252525;
+    font-family: Roboto;
+    margin: 0;
+}
+
+.events-header p {
+    font-size: 1.5vh;
+    color: #252525;
+    font-family: Roboto;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* Events List */
+.events-list {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 0.7vw 0 0.7vw;
+    /* margin-top: 1vh; */
+}
+
+.event-time {
+    font-size: 2vh;
+    font-weight: bold;
+    color: #16151C;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding-right: 1vw;
+}
+
+.event-time::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, #7152F3, #7152f342);
+}
+
+.event-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.event-details strong {
+    font-size: 1.8vh;
+    color: #16151C;
+}
+
+.event-details p {
+    font-size: 1.5vh;
+    color: #16151C;
+    margin: 0.3vw 0; /* Remove extra margin */
+}
+
+/* Weekday Display */
+.week-days {
+    display: flex;
+    gap: 0.5vw;
+    justify-content: center;
+    align-items: center;
+    /* margin: 1vh 0; */
+}
+
+.day {
+    width: 2vw;
+    height: 2vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-weight: bold;
+    color: white;
+    background-color: #333DAE;
+    font-size: 1.5vh;
+    cursor: pointer;
+}
+
+/* Current Day (Highlighted in White) */
+.day.active {
+    background-color: white;
+    color: #333DAE;
+    border: 2px solid #333DAE;
+}
+
+/* Saturday & Sunday (Gray) */
+.day.weekend {
+    background-color: #d3d3d3;
+    color: #666;
+}
+
+.shift-details {
+    display: flex;
+    flex-direction: column;
+    width:50%;
+}
+
+.shift-details p {
+    font-size: 1.5vh;
+    color: #16151C;
+    margin: 0.3vw 0; /* Remove extra margin */
+}
+
+/* Shift Timing  bar*/
+.shift-timing {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* margin: 1vh 0; */
+}
+
+.shift-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 2vh;
+    background-color: #333DAE;
+    border-radius: 5px;
+    position: relative;
+    padding: 0 1vw;
+}
+
+/* White Break Section in the Middle */
+.break-section {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10%;
+    height: 100%;
+    background-color: #dae6fb;
+    border-radius: 3px;
+}
+
+/* Shift Start & End Time Inside Bar */
+.shift-time {
+    position: absolute;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2vh;
+}
+
+.start-time {
+    left: 5%;
+}
+
+.end-time {
+    right: 5%;
+}
+
+/* Shift Info (Duration & Break) */
+.shift-info {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1vh;
+}
+
+.shift-info strong {
+    font-size: 1.3vh;
+    color: #16151C;
+}
+
+/* Weekly Average Time Section */
+.average-week-time {
+    width: 18%;
+    height: 14vh;
+    text-align: center;
+    background-color: #ffffff;
+    padding: 1vw;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.week-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.3vh;
+    /* font-weight: bold; */
+    color: #333;
+    /* padding:0.7vw; */
+    padding-top: 0.7vw;
+}
+.week-header span {
+    text-decoration: underline;
+}
+.user-heading{
+    padding-right:1.5vh;
+}
+
+.week-metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.3vh;
+    /* margin: 10px 0; */
+}
+
+.highlight-text {
+    font-size: 2.5vh;
+    font-weight: bold;
+    color: #333DAE;
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 5px 0;
+}
+
+/* Divider between event items */
+.event-item:not(:last-child) {
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    padding-right: 15px;
+}
+
+/* .timesheet {
+    background-color: white;
+    padding: 2vh 2vw;    
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    height: 56vh;
+    margin-top:2vh;
+}
+
+.timesheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5vh;
+}
+
+.timesheet-header h3 {
+    margin: 0;
+    font-size: 2vh;
+    color: #484848;
+    text-decoration: underline;
+    text-transform: uppercase;
+    font-weight: 500;
+} */
+
+.date-picker {
+    display: flex;
+    align-items: center;
+    gap: 1vw;
+}
+
+.date-picker {
+    display: flex;
+    align-items: center;
+    gap: 1vw;
+}
+
+#date-input {
+    display: flex;
+    padding: 0.4vh 0.4vw;
+    border: none;
+    background: #ECECEC;
+    font-size: 2vh;
+    align-items: center;
+    border-radius: 5px 0px 0px 5px;
+}
+
+input[type="date"]::-webkit-datetime-edit, input[type="date"]::-webkit-inner-spin-button, input[type="date"]::-webkit-clear-button {
+    display: none;
+}
+
+input[type="date"] {
+    text-indent: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+#selected-date {
+    font-size: 1.3vh;
+    color: #4F4F4F;
+    padding-left: 0.5vw;
+    padding-right: 0.5vw;
+    padding-top: 0.8vh;
+    padding-bottom: 0.8vh;
+    border: 1px solid #D2D5DA;
+    border-left: none;
+    font-weight: bold;
+    border-radius: 0px 5px 5px 0px;
+}
+
+button#date_in_daily_timesheet{
+    background-color: #B5CAFF;
+    color: #263A82;
+    font-weight: 500;
+    padding: 0.8vh 0.8vw;
+    border-radius: 5px;
+    font-size: 1.4vh;
+    border: none;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+/* div#timesheetContent {
+    overflow-y: auto;
+    height: 68vh;
+    scrollbar-width: thin;
+} */
+
+/* Right Sidebar */
+.right-sidebar {
+    position: fixed;
+    top: 2%;
+    right: 0.5%;
+    height: 100vh;
+    border-radius: 10px;
+    background: #ECECEC;
+    bottom: 0;
+    z-index: 1000;
+    width: 14.5%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5vh;
+}
+
+/* Team Status Container */
+#team-status {
+    background-color: #FFFFFF;
+    padding: 1vw;
+    height: 88.7vh;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+/* Info Section */
+.info-section {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Space between icon and text */
+    color: #666;
+    font-size: 1.5vh;
+    margin-top:auto;
+    margin-bottom: auto;
+    margin-left: 5vh;
+    margin-right: auto;
+}
+
+.info-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px; /* Adjust size */
+    height: 18px;
+    font-size: 1.6vh;
+    font-weight: bold;
+    color: #333DAE; /* Blue color */
+    /* border: 1.5px solid #333DAE; */
+    border-radius: 50%;
+}
+
+/* Monthly Hours Section */
+.monthly-hours {
+    text-align: center;
+    font-size: 1.4vh;
+    color: #16151C;
+    margin-bottom: 10px;
+}
+
+.hours {
+    font-size: 1.4vh;
+}
+
+.red-text {
+    color: red;
+}
+
+/* Attendance Buttons */
+.attendance-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    margin-bottom:2vh;
+}
+
+.edit-btn, .add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 5px;
+    font-size: 1.4vh;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    width: 9.5vw;
+    height: 4.5vh;
+    margin-left: 1.4vw;
+    gap:8px;
+}
+
+/* Edit Attendance Button */
+.edit-btn {
+    background-color: #E0E8F2;
+    color: #333;
+    /* border: 1px solid #ccc; */
+}
+
+/* Add Attendance Button */
+.add-btn {
+    background-color: #333DAE;
+    color: white;
+}
+
+/* Button Icons */
+.btn-icon {
+    width:16px;
+    height:16px;
+}
+
+
+
+/* .right-sidebar h4 {
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    color: black;
+}
+
+#team-status{
+    background-color: #FFFFFF;
+    padding: 1vw;    
+    height: 80vh;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+} */
+
+/* Team Projects Section */
+.team-projects {
+    text-align: center;
+}
+
+.project-tabs {
+    display: flex;
+    justify-content: center;
+    border-radius: 8px;
+    gap: 0.2vw;
+}
+
+.project-tabs .tab {
+    padding: 1vh 1.74vw;
+    border-radius: 3px;
+    border: none;
+    font-size: 1.2vh;
+    background-color: #DAE6FB;
+    color: #484848;
+    font-weight: 300;
+    cursor: pointer;
+}
+
+.project-tabs .tab.active {
+    font-size: 1.2vh;
+    font-weight: bold;
+    border-radius: 3px;
+    background-color: #F3F3F3;
+    color: #484848;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.task-card2 .actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.2vw;
+}
+
+button#info_button {
+    background-color: #FFFFFF;
+    color: #252525;
+    padding: 0.5vw;
+    font-size: 1vh;
+    border: none;
+    text-transform: capitalize;
+    border-radius: 5px;
+    cursor: pointer;
+    /* transition: background-color 0.3s ease; */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+    font-weight: bold;
+}
+
+button#editTask_button {
+    background-color: #6389DA;
+    color: white;
+    padding: 0.5vw;
+    font-size: 1vh;
+    border: none;
+    text-transform: capitalize;
+    border-radius: 5px;
+    cursor: pointer;
+    /* transition: background-color 0.3s ease; */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+    font-weight: bold;
+}
+
+button#timeSheet_button {
+    background-color: #333DAE;
+    color: white;
+    padding: 0.5vw;
+    font-size: 1vh;
+    border: none;
+    text-transform: capitalize;
+    border-radius: 5px;
+    cursor: pointer;
+    /* transition: background-color 0.3s ease; */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+    font-weight: bold;
+}
+
+
+/* Calendar Container */
+.calendar-container {
+    width: 100%;
+    text-align: center;
+    border-radius: 10px;
+    margin-top: 1.5vh;
+}
+
+/* Calendar Header (Month and Navigation Buttons) */
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center align the title */
+    font-size: 1.8vh;
+    font-weight: bold;
+    position: relative; /* Allow buttons to be positioned near the title */
+    background-color: white;
+    height: 5vh;
+    border-top-right-radius: 1.5vh;
+    border-top-left-radius: 1.5vh;
+}
+
+/* Navigation Buttons (Now Closer to Title) */
+.nav-btn {
+    background: none;
+    border: none;
+    /* font-size: 2vh; */
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Move Left Button to the Left of Title */
+#prevMonth {
+    left: 40%;
+}
+
+/* Move Right Button to the Right of Title */
+#nextMonth {
+    right: 40%;
+}
+
+/* Weekday Labels (With Horizontal Divider) */
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-top: 2px solid #ddd; /* Horizontal divider */
+    background: white;
+    height:5vh;
+}
+
+/* Each Weekday Label */
+.day-label {
+    text-align: center;
+    padding: 10px;
+    position: relative;
+}
+
+/* Vertical Divider Between Days */
+.day-label:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 20%;
+    bottom: 20%;
+    width: 2px;
+    background: #ddd;
+}
+
+/* Calendar Grid (7 Columns, Fixed 6 Rows) */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* Always 7 columns */
+    grid-template-rows: repeat(6, auto); /* Fixed 6 rows */
+    gap: 0.5vh;
+    padding-top: 1vh;
+}
+
+/* Calendar Day Cells */
+.day-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    height: 7vh;
+    font-size: 1.4vh;
+    border-radius: 1.5vh;
+    background: white;
+    border: 1px solid #ddd;
+    text-align: center;
+    font-weight: bold;
+    position: relative; /* Allow precise positioning */
+}
+
+/* Position Date at the Top-Left */
+.day-block span:first-child {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    font-size: 1.8vh;
+    font-weight: bold;
+}
+
+/* Center User Input (In, Out, Break, etc.) */
+.user-inputs {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.3vh;
+    line-height: 1.4vh;
+    text-align: center;
+    width: 100%;
+    margin-top: 10px;
+}
+
+
+/* Empty Cells (Before First Day of Month) */
+.empty {
+    background: none;
+    border: none;
+}
+
+/* Previous Month Days */
+.prev-month {
+    color: #bbb; /* Light grey for previous month's dates */
+    font-weight: bold;
+}
+
+/* Next Month Days */
+.next-month {
+    color: #bbb; /* Light grey for next month's dates */
+    font-weight: bold;
+}
+
+/* Updated Days (Workdays with Data) */
+.updated {
+    background-color: #b5caff;
+    color: black;
+}
+
+/* Edited Days */
+.edited {
+    background-color: #dae6fb;
+    color: black;
+}
+
+/* Holiday Days */
+.holiday {
+    background-color: #f3f3f3;
+    color: #666;
+}
+
+/* Leave Days */
+.leave {
+    background-color: #f3f3f3;
+    color: red;
+}
+
+/* Today Highlight */
+.today {
+    color: #333DAE;
+    font-weight: bold;
+}
+
+
+/* Empty Cells (Before First Day of Month) */
+.empty {
+    background: none;
+    border: none;
+}
+
+/* Updated Days (Workdays with Data) */
+.updated {
+    background-color: #b5caff;
+    color: black;
+}
+
+/* Edited Days */
+.edited {
+    background-color: #dae6fb;
+    color: black;
+}
+
+/* Holiday Days */
+.holiday {
+    background-color: #f3f3f3;
+    color: #666;
+}
+
+/* Leave Days */
+.leave {
+    background-color: #f3f3f3;
+    color: red;
+}
+
+

@@ -1,4 +1,3 @@
-
 from datetime import datetime
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -16,40 +15,42 @@ import json
 # Define a global variable
 global_user_data = None
 
+
 def login(request):
     global global_user_data  # Declare the global variable
-    
+
     if request.method == "POST":
         try:
             data = json.loads(request.body)
             username = data.get("username")
             password = data.get("password")
         except json.JSONDecodeError:
-            return JsonResponse({"success": False, "message": "Invalid request format."})
-        
+            return JsonResponse(
+                {"success": False, "message": "Invalid request format."}
+            )
+
         # Check the credentials in the database
         user = None
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT employee_id, name FROM employee_details WHERE name = %s AND password = %s",
-                [username, password]
+                [username, password],
             )
             user = cursor.fetchone()
-        
+
         if user:
             # Store employee_id and name in a single variable (as a dictionary)
-            global_user_data = {
-                "employee_id": user[0],
-                "name": user[1]
-            }
+            global_user_data = {"employee_id": user[0], "name": user[1]}
 
             # Save user ID in the session for further authentication
-            request.session['user_id'] = user[0]
+            request.session["user_id"] = user[0]
             return JsonResponse({"success": True, "redirect_url": "/task_dashboard/"})
         else:
-            return JsonResponse({"success": False, "message": "Invalid username or password."})
-    
-    return render(request, 'signin.html')
+            return JsonResponse(
+                {"success": False, "message": "Invalid username or password."}
+            )
+
+    return render(request, "signin.html")
 
 
 def task_dashboard(request):
@@ -65,7 +66,8 @@ def task_dashboard(request):
         # Fetch designation and image from the database
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT designation, image FROM employee_details WHERE employee_id = %s", [user_id]
+                "SELECT designation, image FROM employee_details WHERE employee_id = %s",
+                [user_id],
             )
             result = cursor.fetchone()
             if result:
@@ -73,15 +75,19 @@ def task_dashboard(request):
                 image_data = result[1]
                 if image_data:
                     # Convert binary image data to Base64
-                    image_base64 = base64.b64encode(image_data).decode('utf-8')
+                    image_base64 = base64.b64encode(image_data).decode("utf-8")
 
     # Pass data to the template
-    return render(request, 'tasks_dashboard.html', {
-        'name': name,
-        'designation': designation,
-        'image_base64': image_base64,  # Base64-encoded image string
-        'employee_id': user_id  # Pass employee_id to the template
-    })
+    return render(
+        request,
+        "tasks_dashboard.html",
+        {
+            "name": name,
+            "designation": designation,
+            "image_base64": image_base64,  # Base64-encoded image string
+            "employee_id": user_id,  # Pass employee_id to the template
+        },
+    )
 
 
 def task_dashboard_api(request):
@@ -95,10 +101,13 @@ def task_dashboard_api(request):
                 task_columns = [col[0] for col in cursor.description]
                 task_list = [dict(zip(task_columns, task)) for task in tasks]
     except Exception as e:
-        return JsonResponse({"success": False, "message": f"Error fetching tasks: {str(e)}"})
+        return JsonResponse(
+            {"success": False, "message": f"Error fetching tasks: {str(e)}"}
+        )
 
     # Return task data as JSON
     return JsonResponse({"success": True, "tasks": task_list})
+
 
 def sign_up(request):
     if request.method == "POST":
@@ -107,26 +116,42 @@ def sign_up(request):
             username = data.get("username")
             password = data.get("password")
         except json.JSONDecodeError:
-            return JsonResponse({"success": False, "message": "Invalid request format."})
+            return JsonResponse(
+                {"success": False, "message": "Invalid request format."}
+            )
 
         if not username or not password:
-            return JsonResponse({"success": False, "message": "Both username and password are required."})
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": "Both username and password are required.",
+                }
+            )
 
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT authentication FROM employee_details WHERE name = %s AND password = %s",
-                [username, password]
+                [username, password],
             )
             result = cursor.fetchone()
 
         if result:
             designation = result[0]
-            if designation.lower() == 'admin':
-                return render(request, 'employee_form.html')  # Render the HTML form for admin users
+            if designation.lower() == "admin":
+                return render(
+                    request, "employee_form.html"
+                )  # Render the HTML form for admin users
             else:
-                return JsonResponse({"success": False, "message": "Only admin users are allowed to sign up."})
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "Only admin users are allowed to sign up.",
+                    }
+                )
         else:
-            return JsonResponse({"success": False, "message": "Invalid username or password."})
+            return JsonResponse(
+                {"success": False, "message": "Invalid username or password."}
+            )
 
     return JsonResponse({"success": False, "message": "Invalid request method."})
 
@@ -139,7 +164,7 @@ def save_employee_details(request):
         email = request.POST.get("email")
         phone_number = request.POST.get("phone_number")
         department = request.POST.get("department")
-        
+
         status = request.POST.get("status", "Active")
         password = request.POST.get("password")
         image = request.FILES.get("image")  # Get the uploaded file
@@ -152,17 +177,17 @@ def save_employee_details(request):
             email=email,
             phone_number=phone_number,
             department=department,
-        
             status=status,
             password=password,
             image=image.read() if image else None,  # Convert image to binary
         )
         employee.save()
 
-        return JsonResponse({"success": True, "name": employee.name})  # Respond with success
+        return JsonResponse(
+            {"success": True, "name": employee.name}
+        )  # Respond with success
     else:
         return JsonResponse({"success": False, "message": "Invalid request method."})
-
 
 
 def fetch_task_dashboard_data(user_id, selected_date_str):
@@ -189,7 +214,7 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
     # Parse the selected date or use the current date
     try:
         selected_date = (
-            datetime.strptime(selected_date_str, '%Y-%m-%d').date()
+            datetime.strptime(selected_date_str, "%Y-%m-%d").date()
             if selected_date_str
             else datetime.now().date()
         )
@@ -201,35 +226,38 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
     monthly_calendar_data = []
     try:
         with connection.cursor() as cursor:
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT 
                     id, title, scope, date, time, assigned, category, projects, 
                     list, rev, comments, benchmark, d_no, mail_no, ref_no, created, updated, verification_status, task_status,
                 FROM tasktracker.tracker_monthlycalendar
                 WHERE date = %s
-            """, [selected_date])
+            """,
+                [selected_date],
+            )
             rows = cursor.fetchall()
             monthly_calendar_data = [
                 {
-                    'id': row[0],
-                    'title': row[1],
-                    'scope': row[2],
-                    'date': row[3],
-                    'time': row[4],
-                    'assigned': row[5],
-                    'category': row[6],
-                    'project': row[7],
-                    'list': row[8],
-                    'rev_no': row[9],
-                    'comments': row[10],
-                    'benchmark': row[11],
-                    'd_no': row[12],
-                    'mail_no': row[13],
-                    'ref_no': row[14],
-                    'created': row[15],
-                    'updated': row[16],
-                    'verification_status': row[17],
-                    'task_status': row[18],
+                    "id": row[0],
+                    "title": row[1],
+                    "scope": row[2],
+                    "date": row[3],
+                    "time": row[4],
+                    "assigned": row[5],
+                    "category": row[6],
+                    "project": row[7],
+                    "list": row[8],
+                    "rev_no": row[9],
+                    "comments": row[10],
+                    "benchmark": row[11],
+                    "d_no": row[12],
+                    "mail_no": row[13],
+                    "ref_no": row[14],
+                    "created": row[15],
+                    "updated": row[16],
+                    "verification_status": row[17],
+                    "task_status": row[18],
                 }
                 for row in rows
             ]
@@ -237,17 +265,17 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
         print(f"Error fetching monthly calendar data: {e}")
 
     return {
-        'designation': designation,
-        'selected_date': selected_date,
-        'monthly_calendar_data': monthly_calendar_data,
+        "designation": designation,
+        "selected_date": selected_date,
+        "monthly_calendar_data": monthly_calendar_data,
     }
-
 
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import connection
 import json
+
 
 # Helper function to execute SQL queries
 def execute_query(query, params=None):
@@ -262,13 +290,11 @@ def execute_query(query, params=None):
 
 
 @csrf_exempt
-
-
 def create_task(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
             # Parse the request body
-            data = json.loads(request.body.decode('utf-8'))
+            data = json.loads(request.body.decode("utf-8"))
 
             # Debugging: Print received data (Optional)
             print("Received Data:", data)
@@ -280,48 +306,50 @@ def create_task(request):
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             params = (
-                data.get('title', ''),        # Provide default empty string if None
-                data.get('list', ''),         # `list` is escaped with backticks
-                data.get('project', ''),
-                data.get('scope', ''),
-                data.get('priority', ''),
-                data.get('assigned_to', ''),
-                data.get('checker', ''),
-                data.get('qc_3_checker', ''),
-                data.get('group', ''),
-                data.get('category', ''),
-                data.get('start_date', ''),
-                data.get('end_date', ''),
-                data.get('verification_status', ''),
-                data.get('task_status', ''),
-                data.get('d_no', ''),
-                data.get('rev_no', ''),
+                data.get("title", ""),  # Provide default empty string if None
+                data.get("list", ""),  # `list` is escaped with backticks
+                data.get("project", ""),
+                data.get("scope", ""),
+                data.get("priority", ""),
+                data.get("assigned_to", ""),
+                data.get("checker", ""),
+                data.get("qc_3_checker", ""),
+                data.get("group", ""),
+                data.get("category", ""),
+                data.get("start_date", ""),
+                data.get("end_date", ""),
+                data.get("verification_status", ""),
+                data.get("task_status", ""),
+                data.get("d_no", ""),
+                data.get("rev_no", ""),
             )
-
 
             # Execute the query safely
             with connection.cursor() as cursor:
                 cursor.execute(query, params)
 
             # Return success response
-            return JsonResponse({'message': 'Task created successfully!', 'task': data}, status=201)
+            return JsonResponse(
+                {"message": "Task created successfully!", "task": data}, status=201
+            )
 
         except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+            return JsonResponse({"error": "Invalid JSON format"}, status=400)
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+            return JsonResponse({"error": str(e)}, status=500)
 
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
+    return JsonResponse({"error": "Invalid request method"}, status=405)
 
 
 @csrf_exempt
-
 def edit_task(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
             # Parse the request body
-            data = json.loads(request.body.decode('utf-8'))
-            title_name = data.get('globalselectedtitil_for_edit_task_backend', '')  # Old title
+            data = json.loads(request.body.decode("utf-8"))
+            title_name = data.get(
+                "globalselectedtitil_for_edit_task_backend", ""
+            )  # Old title
 
             # Debugging: Print received data (Optional)
             print("Received Data:", data)
@@ -332,7 +360,7 @@ def edit_task(request):
                 SELECT id FROM tracker_project 
                 WHERE title = %s AND projects = %s AND scope = %s
             """
-            params_check = (title_name, data.get('project', ''), data.get('scope', ''))
+            params_check = (title_name, data.get("project", ""), data.get("scope", ""))
 
             # Execute the check query
             with connection.cursor() as cursor:
@@ -348,59 +376,67 @@ def edit_task(request):
                     WHERE id = %s
                 """
                 params_update = (
-                    data.get('title', ''),  # Update with new title
-                    data.get('list', ''),
-                    data.get('priority', ''),
-                    data.get('assigned_to', ''),
-                    data.get('checker', ''),
-                    data.get('qc_3_checker', ''),
-                    data.get('group', ''),
-                    data.get('category', ''),
-                    data.get('start_date', ''),
-                    data.get('end_date', ''),
-                    data.get('verification_status', ''),
-                    data.get('task_status', ''),
-                    result[0]  # ID of the existing row
+                    data.get("title", ""),  # Update with new title
+                    data.get("list", ""),
+                    data.get("priority", ""),
+                    data.get("assigned_to", ""),
+                    data.get("checker", ""),
+                    data.get("qc_3_checker", ""),
+                    data.get("group", ""),
+                    data.get("category", ""),
+                    data.get("start_date", ""),
+                    data.get("end_date", ""),
+                    data.get("verification_status", ""),
+                    data.get("task_status", ""),
+                    result[0],  # ID of the existing row
                 )
 
                 with connection.cursor() as cursor:
                     cursor.execute(update_query, params_update)
 
-                return JsonResponse({'message': 'Task updated successfully!', 'task': data}, status=200)
+                return JsonResponse(
+                    {"message": "Task updated successfully!", "task": data}, status=200
+                )
 
             else:
-                return JsonResponse({'error': 'Task with the given title, project, and scope not found'}, status=404)
+                return JsonResponse(
+                    {
+                        "error": "Task with the given title, project, and scope not found"
+                    },
+                    status=404,
+                )
 
         except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+            return JsonResponse({"error": "Invalid JSON format"}, status=400)
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+            return JsonResponse({"error": str(e)}, status=500)
 
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
+    return JsonResponse({"error": "Invalid request method"}, status=405)
 
 
 import json
 from django.http import JsonResponse
 from django.db import connection, transaction
-@csrf_exempt
 
+
+@csrf_exempt
 def submit_timesheet(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
             # Parse the request body
-            data = json.loads(request.body.decode('utf-8'))
+            data = json.loads(request.body.decode("utf-8"))
 
-            department = data.get('list', '')
-            project_type = data.get('project_type', '')
-            scope = data.get('scope', '')
-            task = data.get('task', '')
-            phase = data.get('phase', '')
-            date1 = data.get('date1', '')
-            time = data.get('time', 0)
-            comments = data.get('comments', '')
+            department = data.get("list", "")
+            project_type = data.get("project_type", "")
+            scope = data.get("scope", "")
+            task = data.get("task", "")
+            phase = data.get("phase", "")
+            date1 = data.get("date1", "")
+            time = data.get("time", 0)
+            comments = data.get("comments", "")
 
             # Assume assigned user is coming from global_user_data['name']
-            assigned = global_user_data.get('name', 'Unassigned')
+            assigned = global_user_data.get("name", "Unassigned")
 
             # Check if a record exists with the same task
             select_query = """
@@ -410,14 +446,18 @@ def submit_timesheet(request):
                 ORDER BY id DESC LIMIT 1
             """
             with connection.cursor() as cursor:
-                cursor.execute(select_query, [department, project_type, scope, task, phase])
+                cursor.execute(
+                    select_query, [department, project_type, scope, task, phase]
+                )
                 result = cursor.fetchone()
                 columns = [col[0] for col in cursor.description]  # Get column names
 
             if result:
-                existing_row = dict(zip(columns, result))  # Convert the result to a dictionary
+                existing_row = dict(
+                    zip(columns, result)
+                )  # Convert the result to a dictionary
 
-                if existing_row['date1'] is None:
+                if existing_row["date1"] is None:
                     # If date1 is NULL, update the existing row
                     update_query = """
                         UPDATE tracker_project 
@@ -425,10 +465,16 @@ def submit_timesheet(request):
                         WHERE id = %s
                     """
                     with connection.cursor() as cursor:
-                        cursor.execute(update_query, [
-                            date1, time, comments, assigned, existing_row['id']
-                        ])
-                    return JsonResponse({'message': 'Timesheet entry updated successfully (existing row).'}, status=200)
+                        cursor.execute(
+                            update_query,
+                            [date1, time, comments, assigned, existing_row["id"]],
+                        )
+                    return JsonResponse(
+                        {
+                            "message": "Timesheet entry updated successfully (existing row)."
+                        },
+                        status=200,
+                    )
 
                 else:
                     # If date1 is NOT NULL, copy values from the existing row and insert a new row
@@ -440,14 +486,35 @@ def submit_timesheet(request):
                     """
                     with transaction.atomic():
                         with connection.cursor() as cursor:
-                            cursor.execute(insert_query, [
-                                existing_row['title'], existing_row['list'], existing_row['projects'], 
-                                existing_row['scope'], existing_row['category'], date1, time, comments, 
-                                existing_row['priority'], existing_row['checker'], existing_row['qc3_checker'], 
-                                existing_row['group'], existing_row['start'], existing_row['end'], 
-                                existing_row['verification_status'], assigned, existing_row['d_no'], existing_row['rev']
-                            ])
-                    return JsonResponse({'message': 'New timesheet entry created successfully (with copied values).'}, status=201)
+                            cursor.execute(
+                                insert_query,
+                                [
+                                    existing_row["title"],
+                                    existing_row["list"],
+                                    existing_row["projects"],
+                                    existing_row["scope"],
+                                    existing_row["category"],
+                                    date1,
+                                    time,
+                                    comments,
+                                    existing_row["priority"],
+                                    existing_row["checker"],
+                                    existing_row["qc3_checker"],
+                                    existing_row["group"],
+                                    existing_row["start"],
+                                    existing_row["end"],
+                                    existing_row["verification_status"],
+                                    assigned,
+                                    existing_row["d_no"],
+                                    existing_row["rev"],
+                                ],
+                            )
+                    return JsonResponse(
+                        {
+                            "message": "New timesheet entry created successfully (with copied values)."
+                        },
+                        status=201,
+                    )
 
             else:
                 # If no matching record is found, insert a new row with default values
@@ -459,16 +526,43 @@ def submit_timesheet(request):
                 """
                 with transaction.atomic():
                     with connection.cursor() as cursor:
-                        cursor.execute(insert_query, [
-                            task, department, project_type, scope, phase, date1, time, comments, 
-                            'Medium', 'Unassigned', 'Unassigned', 'Default Group', '1970-01-01', '1970-01-01', 
-                            False, assigned, 0, '0.0'
-                        ])
-                return JsonResponse({'message': 'New timesheet entry created successfully (default values).'}, status=201)
+                        cursor.execute(
+                            insert_query,
+                            [
+                                task,
+                                department,
+                                project_type,
+                                scope,
+                                phase,
+                                date1,
+                                time,
+                                comments,
+                                "Medium",
+                                "Unassigned",
+                                "Unassigned",
+                                "Default Group",
+                                "1970-01-01",
+                                "1970-01-01",
+                                False,
+                                assigned,
+                                0,
+                                "0.0",
+                            ],
+                        )
+                return JsonResponse(
+                    {
+                        "message": "New timesheet entry created successfully (default values)."
+                    },
+                    status=201,
+                )
 
         except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+            return JsonResponse({"error": "Invalid JSON format"}, status=400)
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+            return JsonResponse({"error": str(e)}, status=500)
 
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+def attendance_calendar(request):
+    return render(request, "calendar.html")

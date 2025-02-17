@@ -1,123 +1,167 @@
 document.addEventListener("DOMContentLoaded", function () {
     const attendanceButton = document.getElementById("attendance-button");
 
-    attendanceButton.addEventListener("click", function (e) {
-        e.preventDefault(); // Prevent default link behavior
+    if (attendanceButton) {
+        attendanceButton.addEventListener("click", function (e) {
+            e.preventDefault(); // Prevent default link behavior
 
-        // Open a new window
-               // Window dimensions
-    const width = 800;
-    const height = 600;
+            // Get the correct URL from the <a> tag
+            const url = attendanceButton.getAttribute("href");
 
-    // Calculate the center position
-    const screenLeft = window.screenLeft ?? window.screenX;
-    const screenTop = window.screenTop ?? window.screenY;
-    const screenWidth = window.innerWidth ?? document.documentElement.clientWidth;
-    const screenHeight = window.innerHeight ?? document.documentElement.clientHeight;
+            if (!url) {
+                console.error("Attendance button does not have a valid URL.");
+                return;
+            }
 
-    const left = screenLeft + (screenWidth - width) / 2;
-    const top = screenTop + (screenHeight - height) / 2;
+            // Window dimensions
+            const width = 800;
+            const height = 600;
 
-    // Open a new window
-    const newWindow = window.open(
-        "",
-        "_blank",
-        `width=${width},height=${height},top=${top},left=${left},resizable=yes`
-    );
+            // Calculate the center position
+            const screenLeft = window.screenLeft ?? window.screenX;
+            const screenTop = window.screenTop ?? window.screenY;
+            const screenWidth = window.innerWidth ?? document.documentElement.clientWidth;
+            const screenHeight = window.innerHeight ?? document.documentElement.clientHeight;
 
-        // Check if the new window was successfully opened
-        if (newWindow) {
-            // Write the content for the new window
-            newWindow.document.open();
-            newWindow.document.write(`
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Edit Attendance</title>
-                    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-                    <style>
-                        body {
-                            background-color: #1a1a2e;
-                            color: #fff;
-                            font-family: Arial, sans-serif;
-                            margin: 0;
-                            padding: 0;
-                        }
-                        .container {
-                            background-color: #0f3460;
-                            padding: 30px;
-                            border-radius: 10px;
-                            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-                            max-width: 600px;
-                            margin: 50px auto;
-                        }
-                        .form-control {
-                            background-color: #162447;
-                            color: #fff;
-                            border: 1px solid #d13452;
-                        }
-                        .form-control::placeholder {
-                            color: #bbb;
-                        }
-                        .form-control:focus {
-                            background-color: #d13452;
-                            color: #fff;
-                            border: 1px solid #d13452;
-                            box-shadow: none;
-                        }
-                        .btn-primary, .btn-secondary {
-                            width: 48%;
-                        }
-                        .btn-primary:hover, .btn-secondary:hover {
-                            background-color: #d13452;
-                            border-color: #d13452;
-                        }
-                        .text-center h1 {
-                            color: #fff;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <div class="text-center mb-4">
-                            <button onclick="window.close()" class="btn btn-secondary">Back</button>
-                            <h1>Edit Attendance</h1>
-                        </div>
-                        <form method="post">
-                            <div class="form-group">
-                                <label for="id_date">Date:</label>
-                                <input type="date" id="id_date" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="id_punch_in">Punch In:</label>
-                                <input type="time" id="id_punch_in" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="id_punch_out">Punch Out:</label>
-                                <input type="time" id="id_punch_out" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="id_break_time">Break Time:</label>
-                                <input type="time" id="id_break_time" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="worktime">Total Work Time (Hours):</label>
-                                <input type="text" id="worktime" name="worktime" class="form-control" readonly>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <button type="button" onclick="window.close()" class="btn btn-secondary">Cancel</button>
-                                <button type="submit" class="btn btn-primary">Save</button>
-                            </div>
-                        </form>
-                    </div>
-                </body>
-                </html>
-            `);
-            newWindow.document.close();
-        } else {
-            alert("Please allow pop-ups for this website to view the attendance window.");
-        }
-    });
+            const left = screenLeft + (screenWidth - width) / 2;
+            const top = screenTop + (screenHeight - height) / 2;
+
+            // Open the Django view in a new window
+            const newWindow = window.open(
+                url,
+                "_blank",
+                `width=${width},height=${height},top=${top},left=${left},resizable=yes`
+            );
+
+            if (!newWindow) {
+                alert("Please allow pop-ups for this website to view the attendance window.");
+            }
+        });
+    }
 });
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    function updateClock() {
+        const now = new Date();
+
+        // Format the date as "Wed, 12 Feb 2025"
+        const dateOptions = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' };
+        const formattedDate = now.toLocaleDateString('en-GB', dateOptions);
+
+        // Format the time as "02:31 PM"
+        const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: true };
+        const formattedTime = now.toLocaleTimeString('en-US', timeOptions);
+
+        document.getElementById('current-date').textContent = formattedDate;
+        document.getElementById('current-time').textContent = formattedTime;
+
+        setTimeout(updateClock, 1000);
+    }
+
+    updateClock();
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    function highlightCurrentDay() {
+        const now = new Date();
+        const currentDayIndex = now.getDay(); // 0 = Sunday, 6 = Saturday
+        const days = document.querySelectorAll('.day');
+
+        days.forEach(day => {
+            if (parseInt(day.getAttribute('data-day')) === currentDayIndex) {
+                day.classList.add('active');
+            } else {
+                day.classList.remove('active');
+            }
+        });
+    }
+
+    highlightCurrentDay();
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const timesheetContent = document.getElementById('timesheetContent');
+    const currentMonthHeader = document.getElementById('currentMonth');
+    const prevMonthBtn = document.getElementById('prevMonth');
+    const nextMonthBtn = document.getElementById('nextMonth');
+
+    let currentDate = new Date(); // Auto-load current month
+
+    function generateCalendar(date) {
+        timesheetContent.innerHTML = ""; // Clear previous month
+
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        currentMonthHeader.textContent = `${date.toLocaleString('default', { month: 'long' }).toUpperCase()} ${year}`;
+
+
+        const firstDay = new Date(year, month, 1).getDay(); // Get the first weekday (0 = Sunday, 6 = Saturday)
+        const daysInMonth = new Date(year, month + 1, 0).getDate(); // Get total days in the current month
+        const totalCells = 42; // Always 6 rows (6 × 7 = 42)
+
+        let dayCount = 0;
+
+        // **Step 1: Fill Empty Blocks with Previous Month's Days**
+        const prevMonthDays = new Date(year, month, 0).getDate(); // Get last day of previous month
+        for (let i = firstDay - 1; i >= 0; i--) { // Fill backwards
+            const prevBlock = document.createElement('div');
+            prevBlock.classList.add('day-block', 'prev-month');
+            prevBlock.innerHTML = `<span>${prevMonthDays - i}</span>`; // Get previous month's last few days
+            timesheetContent.appendChild(prevBlock);
+            dayCount++;
+        }
+
+        // **Step 2: Generate Current Month Days**
+        for (let day = 1; day <= daysInMonth; day++) {
+            const block = document.createElement('div');
+            block.classList.add('day-block');
+            block.innerHTML = `<span>${day}</span>`;
+
+            // Highlight Today's Date
+            const today = new Date();
+            if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+                block.classList.add('today');
+            }
+
+            timesheetContent.appendChild(block);
+            dayCount++;
+        }
+
+        // **Step 3: Fill Next Month's Days to Complete 6 Rows**
+        let nextMonthDay = 1;
+        while (dayCount < totalCells) { // Ensure exactly 42 cells (6 rows × 7 columns)
+            const nextBlock = document.createElement('div');
+            nextBlock.classList.add('day-block', 'next-month');
+            nextBlock.innerHTML = `<span>${nextMonthDay}</span>`;
+            timesheetContent.appendChild(nextBlock);
+            nextMonthDay++;
+            dayCount++;
+        }
+    }
+
+    // **Navigation Buttons**
+    prevMonthBtn.addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        generateCalendar(currentDate);
+    });
+
+    nextMonthBtn.addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        generateCalendar(currentDate);
+    });
+
+    generateCalendar(currentDate); // **Initial Load**
+});
+
+
+
+
+
+
+
+
+
+
+
+
