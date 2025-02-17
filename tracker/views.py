@@ -685,7 +685,7 @@ def check_task_status(request):
                 # Convert to_aproove JSONField to a Python dictionary
                 to_aprove_data = json.loads(project.to_aproove) if isinstance(project.to_aproove, str) else project.to_aproove
                 
-                if project.status in ["Approved", "Rejected","Pending"]:
+                if project.status in ["Accepted", "Rejected","Pending"]:
                     approved_rejected_projects.append({
                         "status": project.status,
                         "project": to_aprove_data.get("project", "Unknown Project")
