@@ -1,49 +1,14 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Tracker</title>
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #f2f2f2;
-            text-align: left;
-        }
-
-        .action-btn {
-            padding: 10px 15px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        .accept-btn {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        .reject-btn {
-            background-color: #f44336;
-            color: white;
-        }
-
-        .button-container {
-            text-align: right;
-            margin-top: 20px;
-        }
-    </style>
+   
+    <link rel="stylesheet" href="{% static 'css/project_tracker.css' %}">
+    <script src="project_tracker.js" defer></script>
 </head>
 <body>
     <h1>Welcome to the Project Tracker</h1>
@@ -78,36 +43,5 @@
     {% else %}
         <p>No tasks to approve.</p>
     {% endif %}
-
-    <script>
-        function handleTaskAction(action) {
-            fetch('/task_action/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({
-                    task_data: { 
-                        name: '{{ project_data.name }}'  // Include project name to identify the task
-                    },
-                    action: action
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(`Task has been ${action}ed.`);
-                    location.reload();  // Reload the page to reflect changes
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
-        
-    </script>
 </body>
 </html>

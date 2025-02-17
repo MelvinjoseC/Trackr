@@ -1,0 +1,38 @@
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+}
+
+th {
+    background-color: #f2f2f2;
+    text-align: left;
+}
+
+.action-btn {
+    padding: 10px 15px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.accept-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.reject-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+.button-container {
+    text-align: right;
+    margin-top: 20px;
+}
