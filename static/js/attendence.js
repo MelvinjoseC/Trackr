@@ -13,24 +13,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            // Window dimensions
-            const width = 800;
-            const height = 600;
+            // Get the actual screen width and height
+            const width = window.screen.width; 
+            const height = window.screen.height;
 
-            // Calculate the center position
-            const screenLeft = window.screenLeft ?? window.screenX;
-            const screenTop = window.screenTop ?? window.screenY;
-            const screenWidth = window.innerWidth ?? document.documentElement.clientWidth;
-            const screenHeight = window.innerHeight ?? document.documentElement.clientHeight;
-
-            const left = screenLeft + (screenWidth - width) / 2;
-            const top = screenTop + (screenHeight - height) / 2;
-
-            // Open the Django view in a new window
+            // Open the Django view in a new window, using full screen size
             const newWindow = window.open(
                 url,
                 "_blank",
-                `width=${width},height=${height},top=${top},left=${left},resizable=yes`
+                `width=${width},height=${height},top=0,left=0,resizable=yes`
             );
 
             if (!newWindow) {
@@ -39,6 +30,8 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
+
 
 
 document.addEventListener('DOMContentLoaded', function () {
