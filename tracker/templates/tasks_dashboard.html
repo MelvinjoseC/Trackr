@@ -65,7 +65,7 @@
     </div>
         
         <!-- Main Content -->
- <div class="content">
+ <div class="content" >
     <div id="first-box">
         <!-- Clock section -->
         <div class="date-time">
@@ -383,7 +383,323 @@
             </section>
         </div>
     </div>
+
+    <!--LEAVE TRACKER PAGE-->
+    <div class="leave_tracker" style="display: none;">
+        <div class="leave-status">
+            <div class="leave-statistics">
+                <h2 id="ls_hd">LEAVE STATISTICS FOR THE YEAR 2025</h2>
+                <div class="pie-container">
+                    <div id="pie_chart"></div>
+                    <div id="pie_chart_content">
+                        <div class="legend">
+                            <div class="legend-header">
+                                <span class="legend-number">12</span>
+                                <span class="legend-title">Balance <br>Leave Available</span>
+                            </div>
+                            <div class="legend-items">
+                                <div class="legend-item">
+                                    <span class="legend-color" style="background-color: #6389DA;"></span>
+                                    <span class="legend-text">Balance Leave Available</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color" style="background-color: #A5BDF1;"></span>
+                                    <span class="legend-text">Full Day Leave Taken</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color" style="background-color: #DAE6FB;"></span>
+                                    <span class="legend-text">Half Day Leave Taken</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color" style="background-color: #EEF3FF;"></span>
+                                    <span class="legend-text">Work from Home Taken</span>
+                                </div>
+                            </div>
+                            <div class="legend-footer">Know More About Company<br> Leave Policy</div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>            
+            <div class="upcoming-holidays">
+                <h2 id="uh_hd">UPCOMING HOLIDAYS FOR THE YEAR 2025</h2>
+                <div class="holiday-table">
+                    <div class="holiday-row">
+                        <span class="holiday-name">Bakrid</span>
+                        <span class="holiday-date">Monday 17/06/2025</span>
+                    </div>
+                    <div class="holiday-row">
+                        <span class="holiday-name">Sree Krishna Jayanti</span>
+                        <span class="holiday-date">Monday /08/2025</span>
+                    </div>
+                    <div class="holiday-row">
+                        <span class="holiday-name">Third Onam</span>
+                        <span class="holiday-date">Monday 16/09/2025</span>
+                    </div>
+                    <div class="holiday-row">
+                        <span class="holiday-name">Fourth Onam</span>
+                        <span class="holiday-date">Tuesday 17/09/2025</span>
+                    </div>
+                    <div class="holiday-row highlight">
+                        <span class="holiday-name">Mahanavami</span>
+                        <span class="holiday-date">Friday 11/10/2025</span>
+                    </div>
+                    <div class="holiday-row highlight">
+                        <span class="holiday-name">Deepavali</span>
+                        <span class="holiday-date">Thursday 31/10/2025</span>
+                    </div>
+                    <div class="holiday-row highlight">
+                        <span class="holiday-name">Christmas</span>
+                        <span class="holiday-date">Wednesday 25/12/2025</span>
+                    </div>
+                </div>                
+            </div>
+            <div class="calendar-view">
+                <div class="calendar_header">
+                    <button id="prevMonth"><img id="arrow_left" src="{% static 'images/arrow_left.png' %}"></button>
+                    <h2 id="monthYear"></h2>
+                    <button id="nextMonth"><img id="arrow_right" src="{% static 'images/arrow_right.png' %}"></button>
+                </div>
+                <div class="calendar-days">
+                    <div>Su</div> <div>Mo</div> <div>Tu</div> <div>We</div> <div>Th</div> <div>Fr</div> <div>Sa</div>
+                </div>
+                <div id="calendarDates" class="calendar-dates"></div>
+                <button class="apply-btn"><img id="calendar-check" src="{% static 'images/calendar-check.png' %}">Apply for Leave</button>
+            </div>
+        </div>
+        <div class="leave-history-header">
+            <span>Past Leave History</span>
+            <img id="filter_button" src="{% static 'images/filter_button.png' %}">
+        </div>
+        <div class="leave-history">
+            <div class="leave-history-content">
+                <div class="leave-row">
+                    <div class="leave-cell">
+                        <div class="leave-date">Mon, 28 Aug - Wed, 30 Aug</div>
+                        <div class="leave-duration">3 days</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-form work-from-home">WORK FROM HOME</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Leave Type</div>
+                        <div class="leave-value">Compensatory Leave</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Requested On</div>
+                        <div class="leave-value">Tue, 19 Sep</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Status</div>
+                        <div class="leave-approval rejected">Rejected</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Approved By</div>
+                        <div class="leave-value">Jose Maliekal</div>
+                    </div>
+                    <div class="leave-cell actions">
+                        <button class="action-btn"><img id="leave_comment" src="{% static 'images/comment_button.png' %}"></button>
+                        <button class="action-btn"><img id="leave_edit" src="{% static 'images/blue_edit_button.png' %}"></button>
+                        <button class="action-btn"><img id="leave_delete" src="{% static 'images/delete_button.png' %}"></button>
+                    </div>
+                </div>
+
+                <div class="leave-row">
+                    <div class="leave-cell">
+                        <div class="leave-date">Mon, 28 Aug - Wed, 30 Aug</div>
+                        <div class="leave-duration">3 days</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-form half-day-leave">HALF DAY LEAVE</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Leave Type</div>
+                        <div class="leave-value">Compensatory Leave</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Requested On</div>
+                        <div class="leave-value">Tue, 19 Sep</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Status</div>
+                        <div class="leave-approval approved">Approved</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Approved By</div>
+                        <div class="leave-value">Jose Maliekal</div>
+                    </div>
+                    <div class="leave-cell actions">
+                        <button class="action-btn"><img id="leave_comment" src="{% static 'images/comment_button.png' %}"></button>
+                        <button class="action-btn"><img id="leave_edit" src="{% static 'images/blue_edit_button.png' %}"></button>
+                        <button class="action-btn"><img id="leave_delete" src="{% static 'images/delete_button.png' %}"></button>
+                    </div>
+                </div>
+
+                <div class="leave-row">
+                    <div class="leave-cell">
+                        <div class="leave-date">Mon, 28 Aug - Wed, 30 Aug</div>
+                        <div class="leave-duration">3 days</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-form full-day-leave">FULL DAY LEAVE</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Leave Type</div>
+                        <div class="leave-value">Compensatory Leave</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Requested On</div>
+                        <div class="leave-value">Tue, 19 Sep</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Status</div>
+                        <div class="leave-approval approved">Approved</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Approved By</div>
+                        <div class="leave-value">Jose Maliekal</div>
+                    </div>
+                    <div class="leave-cell actions">
+                        <button class="action-btn"><img id="leave_comment" src="{% static 'images/comment_button.png' %}"></button>
+                        <button class="action-btn"><img id="leave_edit" src="{% static 'images/blue_edit_button.png' %}"></button>
+                        <button class="action-btn"><img id="leave_delete" src="{% static 'images/delete_button.png' %}"></button>
+                    </div>
+                </div>
+
+                <div class="leave-row">
+                    <div class="leave-cell">
+                        <div class="leave-date">Mon, 28 Aug - Wed, 30 Aug</div>
+                        <div class="leave-duration">3 days</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-form work-from-home">WORK FROM HOME</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Leave Type</div>
+                        <div class="leave-value">Compensatory Leave</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Requested On</div>
+                        <div class="leave-value">Tue, 19 Sep</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Status</div>
+                        <div class="leave-approval rejected">Rejected</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Approved By</div>
+                        <div class="leave-value">Jose Maliekal</div>
+                    </div>
+                    <div class="leave-cell actions">
+                        <button class="action-btn"><img id="leave_comment" src="{% static 'images/comment_button.png' %}"></button>
+                        <button class="action-btn"><img id="leave_edit" src="{% static 'images/blue_edit_button.png' %}"></button>
+                        <button class="action-btn"><img id="leave_delete" src="{% static 'images/delete_button.png' %}"></button>
+                    </div>
+                </div>
+
+                <div class="leave-row">
+                    <div class="leave-cell">
+                        <div class="leave-date">Mon, 28 Aug - Wed, 30 Aug</div>
+                        <div class="leave-duration">3 days</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-form work-from-home">WORK FROM HOME</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Leave Type</div>
+                        <div class="leave-value">Compensatory Leave</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Requested On</div>
+                        <div class="leave-value">Tue, 19 Sep</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Status</div>
+                        <div class="leave-approval rejected">Rejected</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Approved By</div>
+                        <div class="leave-value">Jose Maliekal</div>
+                    </div>
+                    <div class="leave-cell actions">
+                        <button class="action-btn"><img id="leave_comment" src="{% static 'images/comment_button.png' %}"></button>
+                        <button class="action-btn"><img id="leave_edit" src="{% static 'images/blue_edit_button.png' %}"></button>
+                        <button class="action-btn"><img id="leave_delete" src="{% static 'images/delete_button.png' %}"></button>
+                    </div>
+                </div>
+
+                <div class="leave-row">
+                    <div class="leave-cell">
+                        <div class="leave-date">Mon, 28 Aug - Wed, 30 Aug</div>
+                        <div class="leave-duration">3 days</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-form work-from-home">WORK FROM HOME</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Leave Type</div>
+                        <div class="leave-value">Paid Leave</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Requested On</div>
+                        <div class="leave-value">Tue, 19 Sep</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Status</div>
+                        <div class="leave-approval approved">Approved</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Approved By</div>
+                        <div class="leave-value">Jose Maliekal</div>
+                    </div>
+                    <div class="leave-cell actions">
+                        <button class="action-btn"><img id="leave_comment" src="{% static 'images/comment_button.png' %}"></button>
+                        <button class="action-btn"><img id="leave_edit" src="{% static 'images/blue_edit_button.png' %}"></button>
+                        <button class="action-btn"><img id="leave_delete" src="{% static 'images/delete_button.png' %}"></button>
+                    </div>
+                </div>
+                
+                <div class="leave-row">
+                    <div class="leave-cell">
+                        <div class="leave-date">Mon, 28 Aug - Wed, 30 Aug</div>
+                        <div class="leave-duration">3 days</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-form work-from-home">WORK FROM HOME</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Leave Type</div>
+                        <div class="leave-value">Compensatory Leave</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Requested On</div>
+                        <div class="leave-value">Tue, 19 Sep</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Status</div>
+                        <div class="leave-approval rejected">Rejected</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Approved By</div>
+                        <div class="leave-value">Jose Maliekal</div>
+                    </div>
+                    <div class="leave-cell actions">
+                        <button class="action-btn"><img id="leave_comment" src="{% static 'images/comment_button.png' %}"></button>
+                        <button class="action-btn"><img id="leave_edit" src="{% static 'images/blue_edit_button.png' %}"></button>
+                        <button class="action-btn"><img id="leave_delete" src="{% static 'images/delete_button.png' %}"></button>
+                    </div>
+                </div>
+                <!-- Add more leave rows as needed -->
+            </div>
+        </div>
+        
     </div>
+    
+</div>
+
+
+
+
 
     <!-- The div to contain the hidden popup form -->
     <div id="popupModal" class="popup-modal">

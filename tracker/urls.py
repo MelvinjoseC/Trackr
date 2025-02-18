@@ -10,6 +10,8 @@ urlpatterns = [
      path('api/create-task/', views.create_task, name='create_task'),
     path('api/edit-task/', views.edit_task, name='edit_task'),
      path('api/submit_timesheet/', views.submit_timesheet, name='submit_timesheet'),
+    path('generate-pie-chart/', views.generate_pie_chart, name='generate_pie_chart'),
+
 
 ]
 
