@@ -1531,10 +1531,10 @@ button#timeSheet_button {
 .leave_tracker {
     margin-left: 2vw;
     margin-top: 4vh;
-    background-color: #FFFFFF;
+    /* background-color: #FFFFFF; */
     height: 92%;
     width: 84%;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); */
     box-sizing: border-box;
     display: none;
 }
@@ -1543,11 +1543,12 @@ button#timeSheet_button {
     display: flex;
     flex-direction: row;
     height: 40vh;
-    padding: 2vw 2vw 0 2vw;
+    gap: 0.6vw;
+    background-color: #ECECEC;
 }
 
 .leave-statistics {
-    flex: 0 0 30vw;
+    flex: 0 0 32vw;
     padding: 1vw 0 1vw 0;
     background-color: #FFFFFF;
 }
@@ -1555,8 +1556,15 @@ button#timeSheet_button {
 .upcoming-holidays {
     text-align: center;
     flex: 0 0 23vw;
-    padding: 1vw;
+    padding: 1vw 1.4vw 1vw 1.4vw;
+    border-radius: 10px;
     background-color: #FFFFFF;
+}
+
+.holiday-calendar-container {
+    display: flex;
+    flex-direction: row;
+    margin-top: 1vh;  /* Creates separation */
 }
 
 .leave-statistics {
@@ -1564,11 +1572,12 @@ button#timeSheet_button {
     flex-direction: column;
     align-items: center;
     text-align: center;
+    border-radius: 10px;
 }
 
 #ls_hd {
-    margin-top: 0;
-    margin-bottom: 0.5vh;
+    margin-top: 1vh;
+    margin-bottom: 0vh;
     font-size: 1.9vh;
     color: #484848;
     font-weight: bold;
@@ -1578,7 +1587,7 @@ button#timeSheet_button {
     display: flex;
     justify-content: center;
     gap: 1vw; /* Adjust spacing between elements */
-    width: 100%;
+    width: 90%;
 }
 
 #pie_chart_content {
@@ -1654,7 +1663,7 @@ button#timeSheet_button {
 }
 
 #uh_hd {
-    margin-top: 0;
+    margin-top: 1vh;
     margin-bottom: 2vh;
     font-size: 1.9vh;
     color: #484848;
@@ -1667,7 +1676,7 @@ button#timeSheet_button {
     width: 100%;
     overflow-y: auto;
     scrollbar-width: thin;
-    height: 31vh;
+    height: 30vh;
 }
 
 .holiday-row {
@@ -1698,8 +1707,9 @@ button#timeSheet_button {
 
 .calendar-view {
     flex: 0 0 21vw;
-    padding: 1vh 2vw 2vw 2vw;
+    padding: 3vh 2vw;
     text-align: center;
+    border-radius: 10px;
     background-color: #FFFFFF;
 }
 
@@ -1814,11 +1824,12 @@ img#calendar-check {
 }
 
 .leave-history {
-    max-width: 100%;
+    width: 100%;
     border: none;
     overflow: auto;
     background-color:#FFFFFF;
-    height: 38vh;
+    height: 50vh;
+    border-radius: 10px;
     scrollbar-width: thin;
 }
 
@@ -1826,17 +1837,13 @@ img#calendar-check {
     background-color: #FFFFFF;
     font-weight: bold;
     font-size: 1.6vh;
-    padding: 1vh 3.5vw 2vh 3.5vw;
+    padding: 2vh 3.5vw 2vh 3.5vw;
     position: sticky;
     top: 0;
     gap: 1vw;
     display: flex;
     z-index: 10;
     border-bottom: 1px solid #ddd;
-}
-
-.leave-history-content {
-    height: 38vh;
 }
 
 img#filter_button {

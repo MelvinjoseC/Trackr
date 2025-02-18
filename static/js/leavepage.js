@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function() {
     .then(response => response.json())
     .then(data => {
         let pieChartDiv = document.getElementById("pie_chart");
-        pieChartDiv.innerHTML = `<img src="${data.image_base64}" alt="Pie Chart" style="width: 100%; max-width: 20vw;">`;
+        pieChartDiv.innerHTML = `<img src="${data.image_base64}" alt="Pie Chart" style="width: 100%; max-width: 18vw;">`;
     })
     .catch(error => console.error("Error loading pie chart:", error));
 });
