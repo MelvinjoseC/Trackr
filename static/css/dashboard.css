@@ -1520,3 +1520,100 @@ button#timeSheet_button {
 }
 /* MANUAL TIMESHEET */
 
+    /* Example CSS for calendar styling */
+    .calendar-container {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+        padding: 10px;
+    }
+    
+    .calendar-day {
+        padding: 10px;
+        border: 1px solid #ddd;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: #e0e7ff;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #333;
+        border-radius: 10px;
+        transition: background-color 0.3s ease, transform 0.2s;
+    }
+    
+    .calendar-day:hover {
+        background-color: #d0d9ff;
+        transform: scale(1.05);
+        cursor: pointer;
+    }
+    
+    .empty-day {
+        background-color: transparent;
+        border: none;
+    }
+    
+    .calendar-time-display {
+        font-size: 0.9rem;
+        color: #444;
+        margin-top: 5px;
+    }
+    
+    .highlighted-day {
+        background-color: #c3c9ff !important;
+        font-weight: bold;
+        border: 2px solid #9debff;
+    }
+    .calendar-navigation {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .nav-button {
+        padding: 8px 15px;
+        background-color: #9debff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+    
+    .nav-button:hover {
+        background-color: #9debff;
+    }
+    
+    .calendar-navigation {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .nav-button {
+        padding: 8px 15px;
+        background-color:  #9debff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+    
+    .nav-button:hover {
+        background-color: #9debff;
+    }
+    .currentMonthDisplay{
+        font-weight: bold; 
+        font-size: 2rem;
+    }
+    
+    .calendar-grid{
+        display: grid; 
+        grid-template-columns: repeat(7, 1fr); 
+        gap: 5px;
+    }
+    

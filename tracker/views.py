@@ -699,3 +699,124 @@ def check_task_status(request):
             return JsonResponse({"status": None, "message": f"Internal server error: {str(e)}"}, status=500)
 
     return JsonResponse({"status": None, "message": "Invalid request method"}, status=405)
+
+
+from django.http import JsonResponse
+from django.db import connection
+
+def get_times_by_date(request):
+    if request.method == 'GET':
+        # Get the date1 parameter from the GET request
+        date1 = request.GET.get('date1', None)
+        
+        if not date1:
+            return JsonResponse({'error': 'date1 parameter is required'}, status=400)
+        
+        try:
+            # Fetch rows matching the provided date1
+            select_query = """
+                SELECT id, title, `list`, projects, scope, category, date1, time, comments, assigned
+                FROM tracker_project 
+                WHERE date1 = %s
+                ORDER BY id ASC
+            """
+            with connection.cursor() as cursor:
+                cursor.execute(select_query, [date1])
+                rows = cursor.fetchall()
+                columns = [col[0] for col in cursor.description]
+            
+            # Convert the query result to a list of dictionaries
+            timesheet_entries = [dict(zip(columns, row)) for row in rows]
+
+            # Return the results as a JSON response
+            return JsonResponse({'timesheet_entries': timesheet_entries}, status=200)
+        
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+def get_all_times_by_month(request):
+    year = request.GET.get('year')
+    month = request.GET.get('month')
+
+    if not year or not month:
+        return JsonResponse({'error': 'Year and month parameters are required'}, status=400)
+
+    try:
+        # Query to get entries for the given year and month
+        query = """
+            SELECT id, title, date1, time, projects, scope 
+            FROM tracker_project 
+            WHERE YEAR(date1) = %s AND MONTH(date1) = %s
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(query, [year, month])
+            rows = cursor.fetchall()
+            columns = [col[0] for col in cursor.description]
+
+        # Convert query result to a list of dictionaries
+        timesheet_entries = [dict(zip(columns, row)) for row in rows]
+
+        return JsonResponse({'timesheet_entries': timesheet_entries}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+
+from django.http import JsonResponse
+from django.db import connection
+
+def get_tasks_by_date(request):
+    date1 = request.GET.get('date1')
+
+    if not date1:
+        return JsonResponse({'error': 'date1 parameter is required'}, status=400)
+
+    try:
+        query = """
+            SELECT id, title, projects, scope, date1, time, comments 
+            FROM tracker_project 
+            WHERE date1 = %s
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(query, [date1])
+            rows = cursor.fetchall()
+            columns = [col[0] for col in cursor.description]
+
+        tasks = [dict(zip(columns, row)) for row in rows]
+        return JsonResponse({'tasks': tasks}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.db import connection
+
+def get_project_tasks(request):
+    if request.method == "GET":
+        try:
+            query = """
+                SELECT title, priority, projects, d_no, rev, 
+                       discussion_time, calculating_time, designing_time, 
+                       modelling_time, checking_time 
+                FROM tracker_project
+                ORDER BY id DESC
+            """
+            with connection.cursor() as cursor:
+                cursor.execute(query)
+                rows = cursor.fetchall()
+                columns = [col[0] for col in cursor.description]
+
+            projects = [dict(zip(columns, row)) for row in rows]
+
+            return JsonResponse({"projects": projects}, status=200)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    
+    return JsonResponse({"error": "Invalid request method"}, status=405)

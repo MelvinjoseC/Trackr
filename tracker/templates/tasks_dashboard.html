@@ -14,6 +14,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
+<style>
+
+</style>
+
 <body>
  
 
@@ -308,7 +312,23 @@
             </div>
             <div class="timesheet-content" id="timesheetContent">
                 <!-- Tasks will be populated here dynamically -->
+            
+                <!-- Move calendar inside timesheetContent -->
+                <div id="calendarContainer" style="display: none;">
+                    <div class="calendar-navigation">
+                        <button id="prevMonthBtn" class="nav-button">&#8249;</button>
+                        <span id="currentMonthDisplay"></span>
+                        <button id="nextMonthBtn" class="nav-button">&#8250;</button>
+                    </div>
+            
+                    <div id="calendar" class="calendar-grid">
+                        <!-- Calendar days will be dynamically generated -->
+                    </div>
+                </div>
             </div>
+            
+            <!-- <button id="calendarViewButton" style="margin-top: 10px;">View Calendar</button> -->
+            
         </section>
     
 
