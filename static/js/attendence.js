@@ -1,23 +1,57 @@
 document.addEventListener("DOMContentLoaded", function () {
     const attendanceButton = document.getElementById("attendance-button");
+    const taskButton = document.getElementById("task-button");
+    const leaveButton = document.getElementById("leave-button");
 
+    // Function to set active button
+    function setActiveButton(activeButton) {
+        taskButton.classList.remove("active");
+        leaveButton.classList.remove("active");
+        attendanceButton.classList.remove("active");
+
+        activeButton.classList.add("active");
+
+        taskButton.querySelector("img").src = taskButton.getAttribute("data-default-img");
+        leaveButton.querySelector("img").src = leaveButton.getAttribute("data-default-img");
+        attendanceButton.querySelector("img").src = attendanceButton.getAttribute("data-default-img");
+
+        activeButton.querySelector("img").src = activeButton.getAttribute("data-active-img");
+    }
+
+    // Restore active button from URL parameters
+    function restoreActiveButtonFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeTab = urlParams.get("activeTab");
+
+        if (activeTab === "attendance") {
+            setActiveButton(attendanceButton);
+        } else if (activeTab === "task") {
+            setActiveButton(taskButton);
+        } else if (activeTab === "leave") {
+            setActiveButton(leaveButton);
+        }
+    }
+
+    restoreActiveButtonFromURL();
+
+    // Open new window for Attendance
     if (attendanceButton) {
         attendanceButton.addEventListener("click", function (e) {
-            e.preventDefault(); // Prevent default link behavior
+            e.preventDefault();
 
-            // Get the correct URL from the <a> tag
-            const url = attendanceButton.getAttribute("href");
+            setActiveButton(attendanceButton);
+            let url = attendanceButton.getAttribute("href");
 
             if (!url) {
                 console.error("Attendance button does not have a valid URL.");
                 return;
             }
 
-            // Get the actual screen width and height
-            const width = window.screen.width; 
+            url += (url.includes("?") ? "&" : "?") + "activeTab=attendance";
+
+            const width = window.screen.width;
             const height = window.screen.height;
 
-            // Open the Django view in a new window, using full screen size
             const newWindow = window.open(
                 url,
                 "_blank",
@@ -29,7 +63,24 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+    // Minimize (close) the current tab when Task Tracker or Leave Tracker is clicked
+    function minimizeWindow() {
+        window.open('', '_self').close(); // Close the current tab
+    }
+
+    taskButton.addEventListener("click", function () {
+        setActiveButton(taskButton);
+        minimizeWindow();
+    });
+
+    leaveButton.addEventListener("click", function () {
+        setActiveButton(leaveButton);
+        minimizeWindow();
+    });
 });
+
+
 
 
 
