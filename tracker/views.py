@@ -9,6 +9,15 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import ProjectTacker
 from django.db import connection, transaction
+import matplotlib
+matplotlib.use('Agg')  # Set the backend to avoid GUI errors
+
+import matplotlib.pyplot as plt
+import numpy as np
+import io
+import base64
+from django.http import JsonResponse
+
 
 # Define a global variable
 global_user_data = None
@@ -599,6 +608,49 @@ def submit_timesheet(request):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+def generate_pie_chart(request):
+    # Data for the pie chart
+    values = [2, 6, 8, 12]  # The numbers outside the chart
+    colors = ['#EEF3FF', '#DAE6FB', '#A5BDF1', '#6389DA']  # Colors corresponding to values
+
+    # Create figure
+    fig, ax = plt.subplots(figsize=(5, 5))
+    
+    # Generate pie chart without white separators
+    wedges, texts, autotexts = ax.pie(
+        values, labels=values, autopct='', colors=colors, startangle=140,
+        wedgeprops={'linewidth': 0},  # Removes white separator lines
+        pctdistance=0.85
+    )
+
+    # Draw a circle in the center to make it a donut chart
+    center_circle = plt.Circle((0, 0), 0.60, fc='white')
+    fig.gca().add_artist(center_circle)
+
+    # Adjust labels (font size & color)
+    for text in texts:
+        text.set_fontsize(13)  
+        text.set_color('#484848')  # Set font color
+
+    # Set aspect ratio
+    ax.set_aspect('equal')
+
+    # Save the figure into a BytesIO object instead of saving it to a file
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png', bbox_inches='tight')
+    buffer.seek(0)
+
+    # Encode the image to base64
+    image_base64 = base64.b64encode(buffer.getvalue()).decode()
+
+    # Close the plot to free memory
+    plt.close()
+
+    # Return the base64 image as JSON
+    return JsonResponse({"image_base64": f"data:image/png;base64,{image_base64}"})
+
 
 @csrf_exempt  # Use if you do not want to handle CSRF manually; otherwise, pass the token from the template
 

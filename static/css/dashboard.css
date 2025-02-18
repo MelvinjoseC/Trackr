@@ -10,6 +10,8 @@
 /* Main Container */
 .main-container {
     display: flex;
+    flex-direction: row;
+    width: 100%;
     height: 100vh;
 }
 
@@ -398,6 +400,7 @@ p#p_calender {
     font-size: 1.4vh;
     font-weight: 500;
     text-decoration: underline;
+    cursor: pointer;
 }
 
 .member {
@@ -426,11 +429,11 @@ p#p_calender {
 .right-sidebar {
     display: flex;
     flex-direction: column;
-    gap: 0.5vh;
 }
 
 #my-team{
     background-color: #FFFFFF;
+    margin-bottom: 0.5vh;
     padding: 1vw;    
     height: 30vh;
     border-radius: 10px;
@@ -439,6 +442,7 @@ p#p_calender {
 }
 
 #task-details{
+    margin-bottom: 0.5vh;
     background-color: #FFFFFF;
     padding: 1vw;    
     height: 30vh;
@@ -1520,3 +1524,413 @@ button#timeSheet_button {
 }
 /* MANUAL TIMESHEET */
 
+ 
+/* LEAVE TRACKER */
+
+
+.leave_tracker {
+    margin-left: 2vw;
+    margin-top: 4vh;
+    background-color: #FFFFFF;
+    height: 92%;
+    width: 84%;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    display: none;
+}
+
+.leave-status {
+    display: flex;
+    flex-direction: row;
+    height: 40vh;
+    padding: 2vw 2vw 0 2vw;
+}
+
+.leave-statistics {
+    flex: 0 0 30vw;
+    padding: 1vw 0 1vw 0;
+    background-color: #FFFFFF;
+}
+
+.upcoming-holidays {
+    text-align: center;
+    flex: 0 0 23vw;
+    padding: 1vw;
+    background-color: #FFFFFF;
+}
+
+.leave-statistics {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+#ls_hd {
+    margin-top: 0;
+    margin-bottom: 0.5vh;
+    font-size: 1.9vh;
+    color: #484848;
+    font-weight: bold;
+}
+
+.pie-container {
+    display: flex;
+    justify-content: center;
+    gap: 1vw; /* Adjust spacing between elements */
+    width: 100%;
+}
+
+#pie_chart_content {
+    width: 50%; /* Adjust size as needed */
+    max-width: 20vw;
+    color: #484848;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.legend {
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.legend-header {
+    display: flex;
+    align-items: center;
+    gap: 1vw;
+    margin-bottom: 2vh;
+}
+
+.legend-number {
+    font-size: 3.6vh;
+    font-weight: bold;
+    color: #0B51E7;
+}
+
+.legend-title {
+    font-size: 1.6vh;
+    font-weight: 400;
+    line-height: 1.2;
+    text-align: left;
+    color: #484848;
+}
+
+.legend-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    margin-bottom: 2vh;
+    line-height: 1.2;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5vw;
+}
+
+.legend-color {
+    width: 1vw;
+    height: 2vh;
+    display: inline-block;
+}
+
+.legend-text {
+    font-size: 1.6vh;
+    color: #484848;
+}
+
+.legend-footer {
+    display: flex;
+    align-items: center;
+    color: #4E00BB;
+    font-weight: 400;
+    font-size: 1.6vh;
+    text-decoration: underline;
+    text-align: left;
+}
+
+#uh_hd {
+    margin-top: 0;
+    margin-bottom: 2vh;
+    font-size: 1.9vh;
+    color: #484848;
+    font-weight: bold;
+}
+
+.holiday-table {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    height: 31vh;
+}
+
+.holiday-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 1vh 2.5vw;
+    background-color: #EDEDED;
+    margin-bottom: 0.5vh;
+}
+
+.holiday-row.highlight {
+    background-color: #DAE6FB;
+}
+
+.holiday-name {
+    font-weight: 500;
+    font-size: 1.4vh;
+    color: #000000;
+    font-family: Montserrat;
+}
+
+.holiday-date {
+    font-weight: 500;
+    font-size: 1.4vh;
+    color: #000000;
+    font-family: Montserrat;
+}
+
+.calendar-view {
+    flex: 0 0 21vw;
+    padding: 1vh 2vw 2vw 2vw;
+    text-align: center;
+    background-color: #FFFFFF;
+}
+
+.calendar_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    background-color: #FFFFFF;
+}
+
+#monthYear{
+    font-size: 1.8vh;
+    font-weight: 500;
+    color: #16151C;
+}
+
+button#prevMonth {
+    border: none;
+    background-color: #6389DA;
+    width: 1.5vw;
+    height: 3vh;
+    border-radius: 5px;
+}
+
+img#arrow_left {
+    height: 1vh;
+    width: 0.6vw;
+}
+
+button#nextMonth {
+    border: none;
+    background-color: #6389DA;
+    width: 1.5vw;
+    height: 3vh;
+    border-radius: 5px;
+}
+
+img#arrow_right {
+    height: 1vh;
+    width: 0.6vw;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    font-weight: 500;
+    margin-bottom: 0.5vh;
+    font-family: Lexend;
+    font-size: 1.5vh;
+    color: #16151C;
+}
+
+img#calendar-check {
+    width: 1.1vw;
+    height: 2.2vh;
+}
+
+.calendar-dates {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.3vw;
+}
+
+.current-month {
+    width: 1.8vw;
+    height: 3vh;
+    margin-left: 0.6vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 1.5vh;
+    font-family: Lexend;
+    color: #16151C;
+}
+
+.date:hover {
+    background: #e0e0e0;
+}
+
+.current-month {
+    color: #16151C;
+}
+
+.other-month {
+    visibility: hidden;
+}
+
+.selected {
+    background: #6389DA;
+    color: white;
+}
+
+.apply-btn {
+    margin-top: 1.5vh;
+    margin-left: 6.2vw;
+    width: 45%;
+    padding: 0.5vh 0.5vw;
+    background: #333DAE;
+    color: white;
+    font-size: 1.7vh;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    border: none;
+    gap: 0.5vw;
+    line-height: 1.3;
+}
+
+.leave-history {
+    max-width: 100%;
+    border: none;
+    overflow: auto;
+    background-color:#FFFFFF;
+    height: 38vh;
+    scrollbar-width: thin;
+}
+
+.leave-history-header {
+    background-color: #FFFFFF;
+    font-weight: bold;
+    font-size: 1.6vh;
+    padding: 1vh 3.5vw 2vh 3.5vw;
+    position: sticky;
+    top: 0;
+    gap: 1vw;
+    display: flex;
+    z-index: 10;
+    border-bottom: 1px solid #ddd;
+}
+
+.leave-history-content {
+    height: 38vh;
+}
+
+img#filter_button {
+    width: 1vw;
+    height: 1.8vh;
+}
+
+.leave-row {
+    align-items: center;
+    display: grid;
+    grid-template-columns: 15% 15% 15% 15% 10% 15% 15%;
+    border-bottom: 1px solid #ddd;
+    padding: 1vh 3vw 1vh 3vw;
+}
+
+.leave-cell {
+    padding: 0.5vh 0.5vw;
+    text-align: left;
+    white-space: nowrap; /* Prevents text from wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Adds "..." if text is too long */
+}
+
+.leave-date {
+    font-size: 1.4vh;
+    color: #000000;
+    font-weight: 400;
+}
+
+.leave-duration {
+    font-size: 1.4vh;
+    color: #838383;
+    font-weight: 400;
+}
+
+.work-from-home {
+    color: #547CFF;
+}
+
+.half-day-leave {
+    color: #4D00B9;
+}
+
+.full-day-leave {
+    color: #0040C9;
+}
+
+.leave-form {
+    font-weight: 400;
+    font-size: 1.4vh;
+}
+
+.leave-label {
+    font-size: 1.4vh;
+    color: #838383;
+    font-weight: 400;
+}
+
+.leave-value {
+    font-size: 1.4vh;
+    color: #000000;
+    font-weight: 400;
+}
+
+.leave-approval {
+    font-weight: bold;
+}
+
+.rejected {
+    color: #A30000;
+}
+
+.approved {
+    color: #001BA3;
+}
+
+.leave-approval {
+    font-weight: 400;
+    font-size: 1.4vh;
+}
+
+.actions {
+    display: flex;
+    gap: 2vw;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.action-btn img {
+    width: 1.1vw;
+    height: 2.3vh;
+}
