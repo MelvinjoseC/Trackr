@@ -325,6 +325,10 @@ function populateTimesheet(tasks) {
                         <img class="delete_button" src="/static/images/delete_button.png">
                     </div>
                 </div>
+                <div id="total_time_container">
+                    <span id="label_hours">TOTAL HOURS :</span>
+                    <div id="value_hours">${formatTime(totalTime)}</div>
+                </div>
             </div>
         `;
 
@@ -338,10 +342,7 @@ function populateTimesheet(tasks) {
                 <div id="calendar_view">
                     <button id="p_calendar">Switch to Calendar View</button>
                 </div>
-                <div id="total_time_container">
-                    <span id="label_hours">TOTAL HOURS :</span>
-                    <div id="value_hours">${formatTime(totalTime)}</div>
-                </div>
+                
             </div>
         `;
         timesheetContent.appendChild(totalTimeElement);
@@ -1239,6 +1240,16 @@ function displayTaskDetails(tasks) {
         taskDetailsSection.innerHTML = `<p>No tasks available for this date.</p>`;
     }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    const scrollBtn = document.querySelector(".scroll-right-btn");
+    const taskSection = document.querySelector(".task-placeholder");
+
+    scrollBtn.addEventListener("click", () => {
+        taskSection.scrollBy({ top: 30, behavior: "smooth" }); // Scrolls down
+    });
+});
+
 
 function generateCalendarDays(year, month) {
     const firstDayOfMonth = new Date(year, month - 1, 1).getDay();  // Get the starting day of the month

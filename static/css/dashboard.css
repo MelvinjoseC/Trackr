@@ -1617,3 +1617,18 @@ button#timeSheet_button {
         gap: 5px;
     }
     
+
+ .task-container {
+    position: relative;
+    width: 100%;
+}
+
+.task-placeholder {
+    max-height: 200px; /* Adjust as needed */
+    overflow-y: auto;
+    padding-right: 20px;
+    border: 1px solid #ccc;
+    align-items: center;
+    position: relative;
+    
+}

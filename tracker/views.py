@@ -747,7 +747,7 @@ def get_all_times_by_month(request):
     try:
         # Query to get entries for the given year and month
         query = """
-            SELECT id, title, date1, time, projects, scope 
+            SELECT id, title, date1, time, projects, scope ,comments
             FROM tracker_project 
             WHERE YEAR(date1) = %s AND MONTH(date1) = %s
         """
