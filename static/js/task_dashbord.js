@@ -1275,3 +1275,6 @@ function formatTime(hoursDecimal) {
 
     return result || "0 Minutes";
 }
+
+
+//TASK CARD //

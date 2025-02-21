@@ -130,7 +130,23 @@ document.addEventListener('DOMContentLoaded', function () {
     const prevMonthBtn = document.getElementById('prevMonth');
     const nextMonthBtn = document.getElementById('nextMonth');
 
+    if (!currentMonthHeader || !timesheetContent) {
+        console.error("Error: Required elements not found in DOM.");
+        return;
+    }
+
     let currentDate = new Date(); // Auto-load current month
+    generateCalendar(currentDate);
+
+    prevMonthBtn?.addEventListener('click', function () {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        generateCalendar(currentDate);
+    });
+
+    nextMonthBtn?.addEventListener('click', function () {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        generateCalendar(currentDate);
+    });
 
     function generateCalendar(date) {
         timesheetContent.innerHTML = ""; // Clear previous month
@@ -139,14 +155,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const month = date.getMonth();
         currentMonthHeader.textContent = `${date.toLocaleString('default', { month: 'long' }).toUpperCase()} ${year}`;
 
-
         const firstDay = new Date(year, month, 1).getDay(); // Get the first weekday (0 = Sunday, 6 = Saturday)
         const daysInMonth = new Date(year, month + 1, 0).getDate(); // Get total days in the current month
         const totalCells = 42; // Always 6 rows (6 × 7 = 42)
 
         let dayCount = 0;
 
-        // **Step 1: Fill Empty Blocks with Previous Month's Days**
+        // Step 1: Fill Empty Blocks with Previous Month's Days
         const prevMonthDays = new Date(year, month, 0).getDate(); // Get last day of previous month
         for (let i = firstDay - 1; i >= 0; i--) { // Fill backwards
             const prevBlock = document.createElement('div');
@@ -156,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
             dayCount++;
         }
 
-        // **Step 2: Generate Current Month Days**
+        // Step 2: Generate Current Month Days
         for (let day = 1; day <= daysInMonth; day++) {
             const block = document.createElement('div');
             block.classList.add('day-block');
@@ -172,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function () {
             dayCount++;
         }
 
-        // **Step 3: Fill Next Month's Days to Complete 6 Rows**
+        // Step 3: Fill Next Month's Days to Complete 6 Rows
         let nextMonthDay = 1;
         while (dayCount < totalCells) { // Ensure exactly 42 cells (6 rows × 7 columns)
             const nextBlock = document.createElement('div');
@@ -183,7 +198,6 @@ document.addEventListener('DOMContentLoaded', function () {
             dayCount++;
         }
     }
-
     // **Navigation Buttons**
     prevMonthBtn.addEventListener('click', () => {
         currentDate.setMonth(currentDate.getMonth() - 1);
