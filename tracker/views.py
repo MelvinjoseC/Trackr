@@ -747,7 +747,7 @@ def get_all_times_by_month(request):
     try:
         # Query to get entries for the given year and month
         query = """
-            SELECT id, title, date1, time, projects, scope ,comments
+            SELECT id, title, date1, time, projects, scope ,comments, assigned
             FROM tracker_project 
             WHERE YEAR(date1) = %s AND MONTH(date1) = %s
         """
@@ -793,30 +793,3 @@ def get_tasks_by_date(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.db import connection
-
-def get_project_tasks(request):
-    if request.method == "GET":
-        try:
-            query = """
-                SELECT title, priority, projects, d_no, rev, 
-                       discussion_time, calculating_time, designing_time, 
-                       modelling_time, checking_time 
-                FROM tracker_project
-                ORDER BY id DESC
-            """
-            with connection.cursor() as cursor:
-                cursor.execute(query)
-                rows = cursor.fetchall()
-                columns = [col[0] for col in cursor.description]
-
-            projects = [dict(zip(columns, row)) for row in rows]
-
-            return JsonResponse({"projects": projects}, status=200)
-
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
-    
-    return JsonResponse({"error": "Invalid request method"}, status=405)

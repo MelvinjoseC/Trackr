@@ -299,8 +299,9 @@ function populateTimesheet(tasks) {
 
     let totalTime = 0; // Initialize total time accumulator
 
-    if (tasks.length > 0) {
-        tasks.forEach(task => {
+    const filteredTasks = tasks.filter(task => task.assigned === currentUserName);
+    if (filteredTasks.length > 0) {
+        filteredTasks.forEach(task => {
             totalTime += parseFloat(task.time) || 0; // Sum the task time in decimal hours
 
             const taskRow = document.createElement("div");
@@ -367,33 +368,31 @@ function populateTimesheet(tasks) {
 
 // Function to hide task-info and show calendar inside the timesheet container
 function toggleTaskInfo() {
-    const timesheetContent = document.getElementById("timesheetContent");
-    const taskInfos = document.querySelectorAll(".task-info");
-    const calendarContainer = document.getElementById("calendarContainer");
+    let calendarContainer = document.getElementById("calendarContainer"); // Re-fetch here
 
     if (!calendarContainer) {
-        console.error("Error: Calendar container not found.");
+        console.error("Error: Calendar container not found at execution time.");
         return;
     }
 
-    // Check if the calendar is visible
     const isCalendarVisible = calendarContainer.style.display === "block";
 
     if (isCalendarVisible) {
-        // Show task-info, hide calendar
-        taskInfos.forEach(taskInfo => taskInfo.style.display = "block");
+        document.querySelectorAll(".task-info").forEach(taskInfo => taskInfo.style.display = "block");
         calendarContainer.style.display = "none";
     } else {
-        // Hide task-info, show calendar inside timesheet container and keep order
-        taskInfos.forEach(taskInfo => taskInfo.style.display = "none");
+        document.querySelectorAll(".task-info").forEach(taskInfo => taskInfo.style.display = "none");
 
-        // Ensure calendar stays within timesheetContent in correct order
-        if (!timesheetContent.contains(calendarContainer)) {
+        let timesheetContent = document.getElementById("timesheetContent");
+        if (timesheetContent && !timesheetContent.contains(calendarContainer)) {
             timesheetContent.appendChild(calendarContainer);
         }
+
         calendarContainer.style.display = "block";
+        fetchAndDisplayCalendarTimesheet(currentYear, currentMonth + 1);
     }
 }
+
 
 // Function to update switch button text dynamically
 function updateSwitchText(element) {
@@ -411,16 +410,14 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Attach event listener for the "Switch to Calendar View" button
-    const toggleButton = document.getElementById("toggleViewButton");
-    if (toggleButton) {
-        toggleButton.addEventListener("click", function () {
+    document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("toggleViewButton").addEventListener("click", function () {
             toggleTaskInfo();
             updateSwitchText(this);
         });
-    }
+    });
+    
 });
-
-
 
 
 document.getElementById("submitTimesheetButton").addEventListener("click", submitTimesheet);
@@ -1181,7 +1178,8 @@ function fetchAndDisplayCalendarTimesheet(year, month) {
         })
         .then(data => {
             if (data.timesheet_entries) {
-                populateCalendar(data.timesheet_entries, year, month);
+                const filteredTasks = data.timesheet_entries.filter(task => task.assigned === currentUserName);
+                populateCalendar(filteredTasks, year, month);
             } else {
                 document.getElementById("calendar").innerHTML = generateCalendarDays(year, month);
                 console.error("No valid timesheet entries found.");
@@ -1220,8 +1218,11 @@ function displayTaskDetails(tasks) {
     const taskDetailsSection = document.querySelector(".task-placeholder");
     taskDetailsSection.innerHTML = "";  // Clear previous task details
 
-    if (tasks.length > 0) {
-        tasks.forEach(task => {
+    const filteredTasks = tasks.filter(task => task.assigned === currentUserName);
+
+
+    if (filteredTasks.length > 0) {
+        filteredTasks.forEach(task => {
             const taskCard = document.createElement("div");
             taskCard.classList.add("task-detail-card");
 
@@ -1241,14 +1242,6 @@ function displayTaskDetails(tasks) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const scrollBtn = document.querySelector(".scroll-right-btn");
-    const taskSection = document.querySelector(".task-placeholder");
-
-    scrollBtn.addEventListener("click", () => {
-        taskSection.scrollBy({ top: 30, behavior: "smooth" }); // Scrolls down
-    });
-});
 
 
 function generateCalendarDays(year, month) {
