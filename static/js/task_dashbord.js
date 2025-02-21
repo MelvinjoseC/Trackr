@@ -239,54 +239,57 @@ updateGreeting();
 
 document.getElementById("date_in_daily_timesheet").addEventListener("click", handleButtonClick);
 
-
-
 function handleButtonClick(event) {
-    event.preventDefault();  // Prevent form submission or default behavior
+    event.preventDefault(); // Prevent form submission or default behavior
 
-    const selectedDate = document.getElementById('date-input').value; // Get the selected date from the input
+    const selectedDate = document.getElementById('date-input').value; // Get selected date
     console.log("Selected Date:", selectedDate);
 
     // Normalize selectedDate
-    const selectedFormattedDate = new Date(selectedDate).toISOString().split('T')[0]; // Format to YYYY-MM-DD
+    const selectedFormattedDate = new Date(selectedDate).toISOString().split('T')[0]; // Format YYYY-MM-DD
 
     // Filter tasks based on the selected date
     const filteredTasks = golbalfetchdata.tasks.filter(task => {
-        const taskDate = task.date1
-        ;
+        const taskDate = task.date1;
 
         // Normalize taskDate
         const formattedTaskDate = taskDate ? new Date(taskDate).toISOString().split('T')[0] : null;
 
         console.log("Task Date:", formattedTaskDate);
 
-        // Check if the task's start_date matches the selected date (both strings in YYYY-MM-DD format)
+        // Match task date with selected date
         return formattedTaskDate && formattedTaskDate === selectedFormattedDate;
     });
 
-    // Show tasks when the button is clicked
+    // Show tasks when button is clicked
     if (filteredTasks.length > 0) {
         populateTimesheet(filteredTasks);
     } else {
-        populateTimesheet([]); // No tasks found for the selected date
+        populateTimesheet([]); // No tasks found
     }
 }
 
 function formatTime(hoursDecimal) {
-    const hours = Math.floor(hoursDecimal); // Get the integer part (hours)
-    const remainingMinutes = Math.round((hoursDecimal - hours) * 60); // Convert decimal part to minutes
+    const hours = Math.floor(hoursDecimal);
+    const remainingMinutes = Math.round((hoursDecimal - hours) * 60);
 
     let result = "";
     if (hours > 0) result += `${hours} ${hours === 1 ? "Hour" : "Hours"}`;
     if (remainingMinutes > 0) result += `${hours > 0 ? " " : ""}${remainingMinutes} ${remainingMinutes === 1 ? "Minute" : "Minutes"}`;
-    
+
     return result || "0 Minutes"; // Fallback for 0 minutes
 }
 
 // Function to populate the timesheet with tasks and display the total hours
 function populateTimesheet(tasks) {
     const timesheetContent = document.getElementById("timesheetContent");
-    timesheetContent.innerHTML = "";  // Clear any existing content
+    const calendarContainer = document.getElementById("calendarContainer");
+    timesheetContent.innerHTML = ""; // Clear any existing content
+
+    // Ensure calendar is hidden when loading tasks
+    if (calendarContainer) {
+        calendarContainer.style.display = "none";
+    }
 
     // Remove existing total time element if it exists
     let totalTimeElement = document.querySelector(".bottom_row");
@@ -296,45 +299,32 @@ function populateTimesheet(tasks) {
 
     let totalTime = 0; // Initialize total time accumulator
 
-    if (tasks.length > 0) {
-        tasks.forEach(task => {
-            totalTime += parseFloat(task.time) || 0;  // Sum the task time in decimal hours
+    const filteredTasks = tasks.filter(task => task.assigned === currentUserName);
+    if (filteredTasks.length > 0) {
+        filteredTasks.forEach(task => {
+            totalTime += parseFloat(task.time) || 0; // Sum the task time in decimal hours
 
             const taskRow = document.createElement("div");
             taskRow.classList.add("timesheet-row");
 
             taskRow.innerHTML = `
             <div class="task-info">
-                <h4 class="task-type">${task.scope}</h4> <!-- Scope -->
+                <h4 class="task-type">${task.scope}</h4>
                 <div class="task-details">
                     <div class="task-actions">
                         <div class="details-top">
-                            <p class="task-name">${task.title}</p> <!-- Title -->
-                            <p class="task-duration">${formatTime(parseFloat(task.time) || 0)}</p> <!-- Formatted Task Time -->
+                            <p class="task-name">${task.title}</p>
+                            <p class="task-duration">${formatTime(parseFloat(task.time) || 0)}</p>
                         </div>
                         <div class="details-bottom">
-                            <p class="task-meta">${task.projects ? task.projects : 'No Project Assigned'}, ${task.d_no ? 'REV NO: ' + task.d_no : 'No Rev No'}</p> <!-- Projects and Assigned -->
+                            <p class="task-meta">${task.projects ? task.projects : 'No Project Assigned'}, ${task.d_no ? 'REV NO: ' + task.d_no : 'No Rev No'}</p>
                             <p class="project-type">Internal Projects</p>
                         </div>
                     </div>
                     <div class="image-set">
-                        <img id="comment_button" src="/static/images/comment_button.png">
-                        <img id="delete_button" src="/static/images/delete_button.png">
+                        <img class="comment_button" src="/static/images/comment_button.png">
+                        <img class="delete_button" src="/static/images/delete_button.png">
                     </div>
-                </div>
-
-            </div>
-        `;
-
-            timesheetContent.appendChild(taskRow); // Append the task row to the content
-        });
-
-        // Create a new total time element since the old one was removed
-        totalTimeElement = document.createElement("div");
-        totalTimeElement.innerHTML = `
-            <div class="bottom_row">
-                <div id="calender_view">
-                    <p id="p_calender">Switch to Calendar View</p>
                 </div>
                 <div id="total_time_container">
                     <span id="label_hours">TOTAL HOURS :</span>
@@ -342,7 +332,32 @@ function populateTimesheet(tasks) {
                 </div>
             </div>
         `;
-        timesheetContent.parentNode.appendChild(totalTimeElement); // Append the new total time display
+
+            timesheetContent.appendChild(taskRow);
+        });
+
+        // Create a new total time element
+        totalTimeElement = document.createElement("div");
+        totalTimeElement.innerHTML = `
+            <div class="bottom_row">
+                <div id="calendar_view">
+                    <button id="p_calendar">Switch to Calendar View</button>
+                </div>
+                
+            </div>
+        `;
+        timesheetContent.appendChild(totalTimeElement);
+
+        // Ensure the calendar is placed inside the timesheet container correctly
+        if (calendarContainer && !timesheetContent.contains(calendarContainer)) {
+            timesheetContent.appendChild(calendarContainer);
+        }
+
+        // Add event listener to dynamically created "Switch to Calendar View" button
+        document.getElementById("p_calendar").addEventListener("click", function () {
+            toggleTaskInfo();
+            updateSwitchText(this);
+        });
     } else {
         const noDataMessage = document.createElement("p");
         noDataMessage.textContent = "No Data Found";
@@ -350,6 +365,59 @@ function populateTimesheet(tasks) {
         timesheetContent.appendChild(noDataMessage);
     }
 }
+
+// Function to hide task-info and show calendar inside the timesheet container
+function toggleTaskInfo() {
+    let calendarContainer = document.getElementById("calendarContainer"); // Re-fetch here
+
+    if (!calendarContainer) {
+        console.error("Error: Calendar container not found at execution time.");
+        return;
+    }
+
+    const isCalendarVisible = calendarContainer.style.display === "block";
+
+    if (isCalendarVisible) {
+        document.querySelectorAll(".task-info").forEach(taskInfo => taskInfo.style.display = "block");
+        calendarContainer.style.display = "none";
+    } else {
+        document.querySelectorAll(".task-info").forEach(taskInfo => taskInfo.style.display = "none");
+
+        let timesheetContent = document.getElementById("timesheetContent");
+        if (timesheetContent && !timesheetContent.contains(calendarContainer)) {
+            timesheetContent.appendChild(calendarContainer);
+        }
+
+        calendarContainer.style.display = "block";
+        fetchAndDisplayCalendarTimesheet(currentYear, currentMonth + 1);
+    }
+}
+
+
+// Function to update switch button text dynamically
+function updateSwitchText(element) {
+    const calendarContainer = document.getElementById("calendarContainer");
+    const isCalendarVisible = calendarContainer.style.display === "block";
+
+    element.textContent = isCalendarVisible ? "Switch to Timesheet View" : "Switch to Calendar View";
+}
+
+// Ensure calendar is hidden on page load
+document.addEventListener("DOMContentLoaded", function () {
+    const calendarContainer = document.getElementById("calendarContainer");
+    if (calendarContainer) {
+        calendarContainer.style.display = "none";
+    }
+
+    // Attach event listener for the "Switch to Calendar View" button
+    document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("toggleViewButton").addEventListener("click", function () {
+            toggleTaskInfo();
+            updateSwitchText(this);
+        });
+    });
+    
+});
 
 
 document.getElementById("submitTimesheetButton").addEventListener("click", submitTimesheet);
@@ -1063,3 +1131,147 @@ document.getElementById("TaskSelect").addEventListener("change", function () {
         priorityElement.style.color = 'black';  // Reset to default
     }
 });
+// CALENDER CODE
+
+// JavaScript code to fetch task details when a calendar day is clicked and show time in calendar cells
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth();
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Initial calendar display
+    fetchAndDisplayCalendarTimesheet(currentYear, currentMonth + 1);
+    updateMonthLabel();
+
+    // Attach event listeners to navigation buttons
+    document.getElementById("prevMonthBtn").addEventListener("click", () => changeMonth(-1));
+    document.getElementById("nextMonthBtn").addEventListener("click", () => changeMonth(1));
+});
+
+function changeMonth(offset) {
+    currentMonth += offset;
+    if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+    } else if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+    }
+    updateMonthLabel();
+    fetchAndDisplayCalendarTimesheet(currentYear, currentMonth + 1);
+}
+
+function updateMonthLabel() {
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    document.getElementById("currentMonthDisplay").textContent = `${monthNames[currentMonth]} ${currentYear}`;
+}
+
+function fetchAndDisplayCalendarTimesheet(year, month) {
+    fetch(`/timesheet/get_all_times_by_month/?year=${year}&month=${month}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to fetch data: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.timesheet_entries) {
+                const filteredTasks = data.timesheet_entries.filter(task => task.assigned === currentUserName);
+                populateCalendar(filteredTasks, year, month);
+            } else {
+                document.getElementById("calendar").innerHTML = generateCalendarDays(year, month);
+                console.error("No valid timesheet entries found.");
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching timesheet data:", error);
+        });
+}
+
+function populateCalendar(tasks, year, month) {
+    const calendar = document.getElementById("calendar");
+    calendar.innerHTML = generateCalendarDays(year, month);  // Generate calendar days for the selected month
+
+    const dateMap = {};  // Map to store tasks and total time by date
+    tasks.forEach(task => {
+        if (!dateMap[task.date1]) {
+            dateMap[task.date1] = { tasks: [], totalTime: 0 };
+        }
+        dateMap[task.date1].tasks.push(task);
+        dateMap[task.date1].totalTime += parseFloat(task.time) || 0;
+    });
+
+    // Attach task info to calendar days and show total time
+    Object.keys(dateMap).forEach(date => {
+        const dayCell = document.getElementById(`day-${date}`);
+        if (dayCell) {
+            dayCell.classList.add("clickable-day");
+            dayCell.innerHTML += `<p class="calendar-time-display">${formatTime(dateMap[date].totalTime)}</p>`;
+            dayCell.addEventListener("click", () => displayTaskDetails(dateMap[date].tasks));
+        }
+    });
+}
+
+function displayTaskDetails(tasks) {
+    const taskDetailsSection = document.querySelector(".task-placeholder");
+    taskDetailsSection.innerHTML = "";  // Clear previous task details
+
+    const filteredTasks = tasks.filter(task => task.assigned === currentUserName);
+
+
+    if (filteredTasks.length > 0) {
+        filteredTasks.forEach(task => {
+            const taskCard = document.createElement("div");
+            taskCard.classList.add("task-detail-card");
+
+            taskCard.innerHTML = `
+                <h4>${task.title}</h4>
+                <p><strong>Project:</strong> ${task.projects || 'N/A'}</p>
+                <p><strong>Scope:</strong> ${task.scope}</p>
+                <p><strong>Time Spent:</strong> ${formatTime(parseFloat(task.time) || 0)}</p>
+                <p><strong>Comments:</strong> ${task.comments || 'No comments available'}</p>
+                <hr>
+            `;
+
+            taskDetailsSection.appendChild(taskCard);
+        });
+    } else {
+        taskDetailsSection.innerHTML = `<p>No tasks available for this date.</p>`;
+    }
+}
+
+
+
+function generateCalendarDays(year, month) {
+    const firstDayOfMonth = new Date(year, month - 1, 1).getDay();  // Get the starting day of the month
+    const daysInMonth = new Date(year, month, 0).getDate();  // Total days in the month
+
+    let calendarDaysHTML = "";
+
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < firstDayOfMonth; i++) {
+        calendarDaysHTML += `<div class="calendar-day empty-day"></div>`;
+    }
+
+    // Add actual days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+        const formattedDay = String(day).padStart(2, '0');
+        const dateId = `day-${year}-${String(month).padStart(2, '0')}-${formattedDay}`;
+        calendarDaysHTML += `<div id="${dateId}" class="calendar-day">${day}</div>`;
+    }
+
+    return calendarDaysHTML;
+}
+
+function formatTime(hoursDecimal) {
+    const hours = Math.floor(hoursDecimal);
+    const remainingMinutes = Math.round((hoursDecimal - hours) * 60);
+
+    let result = "";
+    if (hours > 0) result += `${hours} ${hours === 1 ? "Hour" : "Hours"}`;
+    if (remainingMinutes > 0) result += `${hours > 0 ? " " : ""}${remainingMinutes} ${remainingMinutes === 1 ? "Minute" : "Minutes"}`;
+
+    return result || "0 Minutes";
+}

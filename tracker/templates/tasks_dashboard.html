@@ -14,6 +14,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
+<style>
+
+</style>
+
 <body>
  
 
@@ -171,27 +175,27 @@
                 <!-- Task Card 1 -->
                 <div id="blue_box"></div>
                 <div class="task-card2">
-                    <h4>Q3 Asia Barge Concept Design</h4>
-                    <div class="priority">NORMAL</div>
-                    <p id="project_hd">Internal Project </p>
-                    <p>FE/ME-1687/REV: 2</p>
+                    <h4>Q3 Asia Barge Concept Design</h4> <!-- TITLE -->
+                    <div class="priority">NORMAL</div><!-- priority -->
+                    <p id="project_hd">Internal Project </p><!-- Project -->
+                    <p>FE/ME-1687/REV: 2</p><!-- D.NO & REV NO -->
                     <table class="details">
                         <thead>
                             <tr>
-                                <th>Discussion</th>
-                                <th>Calculating</th>
-                                <th>Designing</th>
-                                <th>Modelling</th>
-                                <th>Checking</th>
+                                <th>Discussion</th><!-- CATEGORY -->
+                                <th>Calculating</th><!-- CATEGORY -->
+                                <th>Designing</th><!-- CATEGORY -->
+                                <th>Modelling</th><!-- CATEGORY -->
+                                <th>Checking</th><!-- CATEGORY -->
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td>4 hrs</td>
-                                <td>14 hrs</td>
-                                <td>18 hrs</td>
-                                <td>20 hrs</td>
-                                <td>10 hrs</td>
+                                <td>4 hrs</td><!-- TIME -->
+                                <td>14 hrs</td><!-- TIME -->
+                                <td>18 hrs</td><!-- TIME -->
+                                <td>20 hrs</td><!-- TIME -->
+                                <td>10 hrs</td><!-- TIME -->
                             </tr>
                         </tbody>
                     </table>
@@ -308,7 +312,23 @@
             </div>
             <div class="timesheet-content" id="timesheetContent">
                 <!-- Tasks will be populated here dynamically -->
+            
+                <!-- Move calendar inside timesheetContent -->
+                <div id="calendarContainer" style="display: none;">
+                    <div class="calendar-navigation">
+                        <button id="prevMonthBtn" class="nav-button">&#8249;</button>
+                        <span id="currentMonthDisplay"></span>
+                        <button id="nextMonthBtn" class="nav-button">&#8250;</button>
+                    </div>
+            
+                    <div id="calendar" class="calendar-grid">
+                        <!-- Calendar days will be dynamically generated -->
+                    </div>
+                </div>
             </div>
+            
+            <!-- <button id="calendarViewButton" style="margin-top: 10px;">View Calendar</button> -->
+            
         </section>
     
 
@@ -371,6 +391,7 @@
                 <h3 id="task_details">TASK DETAILS</h3>
                 <div class="task-placeholder">
                     <div class="info-box">
+                        
                         <img src="{% static 'images/Vector.png' %}" alt="info icon" class="info-icon">
                         <p>Click on the info button of a particular task to view corresponding task details.</p>
                     </div>
