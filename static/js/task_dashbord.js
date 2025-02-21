@@ -720,7 +720,6 @@ function populateDropdowns_updatetask(tasks) {
             document.getElementById("id_assigned_toedittask").value = selectedTask.assigned || "";
             document.getElementById("id_checkeredittask").value = selectedTask.checker || "";
             document.getElementById("id_qc_3_checkeredittask").value = selectedTask.qc_3_checker || "";
-            document.getElementById("id_groupedittask").value = selectedTask.group || "";
             document.getElementById("id_categoryedittask").value = selectedTask.category || "";
             document.getElementById("id_start_dateedittask").value = selectedTask.start_date || "";
             document.getElementById("id_end_dateedittask").value = selectedTask.end_date || "";
@@ -736,7 +735,6 @@ function populateDropdowns_updatetask(tasks) {
             document.getElementById("assignedTocreatetask").value = selectedTask.assigned || "";
             document.getElementById("checkercreatetask").value = selectedTask.checker || "";
             document.getElementById("qcCheckercreatetask").value = selectedTask.qc_3_checker || "";
-            document.getElementById("groupcreatetask").value = selectedTask.group || "";
             document.getElementById("id_categorycreatetask").value = selectedTask.category || "";
             document.getElementById("startDatecreatetask").value = selectedTask.start_date || "";
             document.getElementById("endDatecreatetask").value = selectedTask.end_date || "";
@@ -955,7 +953,6 @@ document.getElementById("savetask_creatask").addEventListener("click", function 
         assigned_to: document.getElementById("assignedTocreatetask").value,
         checker: document.getElementById("checkercreatetask").value,
         qc_3_checker: document.getElementById("qcCheckercreatetask").value,
-        group: document.getElementById("groupcreatetask").value,
         category: document.getElementById("id_categorycreatetask").value,
         start_date: document.getElementById("startDatecreatetask").value,
         end_date: document.getElementById("endDatecreatetask").value,
@@ -1002,7 +999,6 @@ document.getElementById("savetask_updatetask").addEventListener("click", functio
         assigned_to: document.getElementById("id_assigned_toedittask").value,
         checker: document.getElementById("id_checkeredittask").value,
         qc_3_checker: document.getElementById("id_qc_3_checkeredittask").value,
-        group: document.getElementById("id_groupedittask").value,
         category: document.getElementById("id_categoryedittask").value,
         start_date: document.getElementById("id_start_dateedittask").value,
         end_date: document.getElementById("id_end_dateedittask").value,

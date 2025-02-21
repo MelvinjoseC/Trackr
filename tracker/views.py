@@ -356,8 +356,8 @@ def create_task(request):
             # SQL query to insert data into tracker_project
             query = """
                 INSERT INTO tracker_project
-                (title, `list`, projects, scope, priority, assigned, checker, qc3_checker, `group`, category, start, end, verification_status, task_status, d_no, rev)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                (title, `list`, projects, scope, priority, assigned, checker, qc3_checker, category, start, end, verification_status, task_status, d_no, rev)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             params = (
                 data.get("title", ""),  # Provide default empty string if None
@@ -368,7 +368,6 @@ def create_task(request):
                 data.get("assigned_to", ""),
                 data.get("checker", ""),
                 data.get("qc_3_checker", ""),
-                data.get("group", ""),
                 data.get("category", ""),
                 data.get("start_date", ""),
                 data.get("end_date", ""),
@@ -454,7 +453,6 @@ def aproove_task(request):
                 "assigned_to": data.get("assigned_to"),
                 "checker": data.get("checker"),
                 "qc_3_checker": data.get("qc_3_checker"),
-                "group": data.get("group"),
                 "category": data.get("category"),
                 "start_date": start_date.strftime("%Y-%m-%d") if start_date else None,
                 "end_date": end_date.strftime("%Y-%m-%d") if end_date else None,
@@ -519,7 +517,7 @@ def edit_task(request):
                 update_query = """
                     UPDATE tracker_project
                     SET title = %s, `list` = %s, priority = %s, assigned = %s, checker = %s, qc3_checker = %s,
-                        `group` = %s, category = %s, start = %s, end = %s, verification_status = %s, task_status = %s
+                     category = %s, start = %s, end = %s, verification_status = %s, task_status = %s
                     WHERE id = %s
                 """
                 params_update = (
@@ -529,7 +527,6 @@ def edit_task(request):
                     data.get("assigned_to", ""),
                     data.get("checker", ""),
                     data.get("qc_3_checker", ""),
-                    data.get("group", ""),
                     data.get("category", ""),
                     data.get("start_date", ""),
                     data.get("end_date", ""),
