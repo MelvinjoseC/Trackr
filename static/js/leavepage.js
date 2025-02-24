@@ -180,3 +180,83 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(error => console.error("Error fetching admins:", error));
 });
+
+
+// SAVING LEAVE APPLICATION
+document.addEventListener("DOMContentLoaded", function () {
+    let requestLeaveButton = document.querySelector(".submit-leave-btn");
+
+    if (requestLeaveButton) {
+        requestLeaveButton.addEventListener("click", function (event) {
+            event.preventDefault();
+
+            // ✅ Get form values
+            let startDate = document.getElementById("from_date")?.value.trim() || "";
+            let endDate = document.getElementById("to_date")?.value.trim() || "";
+            let leaveType = document.getElementById("leave-type")?.value.trim() || "";
+            let reason = document.getElementById("reason")?.value.trim() || "";
+            let approverSelect = document.getElementById("notify");
+            let approver = approverSelect.options[approverSelect.selectedIndex].text.trim();
+
+            // ✅ Ensure fields are filled
+            if (!startDate || !endDate || !leaveType || !reason || !approver) {
+                alert("All fields are required!");
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append("from_date", startDate);
+            formData.append("to_date", endDate);
+            formData.append("leave-type", leaveType);
+            formData.append("reason", reason);
+            formData.append("approver", approver);
+
+            requestLeaveButton.disabled = true;
+            requestLeaveButton.textContent = "Submitting...";
+
+            fetch("/apply-leave/", {
+                method: "POST",
+                body: formData,
+                headers: { "X-CSRFToken": getCsrfToken() }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    alert(data.message);
+
+                    // ✅ Fix: Check if form exists before resetting
+                    let leaveForm = document.getElementById("leave-form");
+                    if (leaveForm) {
+                        leaveForm.reset();
+                    }
+
+                 
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Something went wrong. Please try again.");
+            })
+            .finally(() => {
+                requestLeaveButton.disabled = false;
+                requestLeaveButton.textContent = "Request Leave";
+            });
+        });
+    }
+});
+
+// ✅ Function to get CSRF token from cookies
+function getCsrfToken() {
+    let cookieValue = null;
+    let cookies = document.cookie ? document.cookie.split("; ") : [];
+
+    for (let cookie of cookies) {
+        let [key, value] = cookie.split("=");
+        if (key === "csrftoken") {
+            return decodeURIComponent(value);
+        }
+    }
+    return cookieValue;
+}

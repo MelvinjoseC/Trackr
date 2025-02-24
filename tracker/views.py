@@ -1011,3 +1011,56 @@ def create_project_view(request):
             return JsonResponse({"error": "Something went wrong. Please try again later."}, status=500)
 
     return render(request, "project_tracker.html")  # Load the form page
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.db import connection
+from datetime import datetime
+
+global_user_data = None  # Store the logged-in user's details globally
+
+def apply_leave_view(request):
+    global global_user_data  # Retrieve logged-in user data
+
+    if request.method == "POST":
+        try:
+            if not global_user_data:
+                return JsonResponse({"error": "User not logged in."}, status=401)
+
+            # ✅ Get the logged-in user's name from global_user_data
+            current_user_name = global_user_data["name"]
+            current_user_id = global_user_data["employee_id"]
+
+            # ✅ Fetch form data (sent from JavaScript)
+            start_date = request.POST.get("from_date", "").strip()
+            end_date = request.POST.get("to_date", "").strip()
+            leave_type = request.POST.get("leave-type", "").strip()
+            reason = request.POST.get("reason", "").strip()
+            approver = request.POST.get("approver", "").strip()  # ✅ Now storing the name
+
+            status = "Pending"  # Default status
+
+            # ✅ Debugging: Print received values
+            print(f"Received Data - Start: {start_date}, End: {end_date}, Type: {leave_type}, Reason: {reason}, Approver: {approver}")
+
+            # ✅ Validate required fields
+            if not all([start_date, end_date, leave_type, reason, approver]):
+                return JsonResponse({"error": "All fields are required!"}, status=400)
+
+            created_at = updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            # ✅ Insert leave request into the database
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO tracker_leaveapplication 
+                    (start_date, end_date, reason, username, approver, leave_type, created_at, updated_at, status) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, [start_date, end_date, reason, current_user_name, approver, leave_type, created_at, updated_at, status])
+
+            return JsonResponse({"message": "Leave request submitted successfully!"})
+
+        except Exception as e:
+            print("Database Error:", e)
+            return JsonResponse({"error": "Something went wrong. Please try again later."}, status=500)
+
+

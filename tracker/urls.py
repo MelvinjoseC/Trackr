@@ -22,4 +22,5 @@ urlpatterns = [
     path('timesheet/get_tasks_by_date/', views.get_tasks_by_date, name='get_tasks_by_date'),
     path('create-project/', views.create_project_view, name='create_project'),
     path('get-admins/', views.get_admins, name='get_admins'),
+    path('apply-leave/', views.apply_leave_view, name='apply_leave'),  # ✅ Leave request form submission
 ]
