@@ -20,4 +20,5 @@ urlpatterns = [
     path('timesheet/get_times_by_date/', views.get_times_by_date, name='get_times_by_date'),
     path('timesheet/get_all_times_by_month/', views.get_all_times_by_month, name='get_all_times_by_month'),
     path('timesheet/get_tasks_by_date/', views.get_tasks_by_date, name='get_tasks_by_date'),
+    path('get-admins/', views.get_admins, name='get_admins'),
 ]

@@ -137,3 +137,18 @@ document.addEventListener("DOMContentLoaded", function () {
     updateSelectedDate("from_date", "selected-from");
     updateSelectedDate("to_date", "selected-to");
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    fetch('/get-admins/')
+        .then(response => response.json())
+        .then(data => {
+            let select = document.getElementById("notify");
+            data.admins.forEach(admin => {
+                let option = document.createElement("option");
+                option.value = admin.id;
+                option.textContent = admin.name;
+                select.appendChild(option);
+            });
+        })
+        .catch(error => console.error("Error fetching admins:", error));
+});
