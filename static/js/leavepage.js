@@ -28,9 +28,19 @@ document.addEventListener("DOMContentLoaded", function() {
 
 document.addEventListener("DOMContentLoaded", function () {
     const applyBtn = document.querySelector(".apply-btn");
+    const cancelBtn = document.querySelector(".btn-secondary"); // Cancel button
     const leaveStatistics = document.querySelector(".leave-statistics");
     const upcomingHolidays = document.querySelector(".upcoming-holidays");
     const applyLeave = document.querySelector(".apply-leave");
+
+    // Input fields to be cleared on Cancel
+    const fromDate = document.getElementById("from_date");
+    const toDate = document.getElementById("to_date");
+    const selectedFrom = document.getElementById("selected-from");
+    const selectedTo = document.getElementById("selected-to");
+    const leaveType = document.getElementById("leave-type");
+    const notify = document.getElementById("notify");
+    const reason = document.getElementById("reason");
 
     applyBtn.addEventListener("click", function () {
         // Hide leave statistics and upcoming holidays
@@ -39,6 +49,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Show apply leave section
         applyLeave.style.display = "block";
+    });
+
+    cancelBtn.addEventListener("click", function () {
+        // Show leave statistics and upcoming holidays
+        leaveStatistics.style.display = "block";
+        upcomingHolidays.style.display = "block";
+
+        // Hide apply leave section
+        applyLeave.style.display = "none";
+
+        // Clear form fields
+        fromDate.value = "";  // Clear FROM date
+        toDate.value = "";  // Clear TO date
+        selectedFrom.textContent = ""; // Clear displayed FROM date
+        selectedTo.textContent = ""; // Clear displayed TO date
+        leaveType.selectedIndex = 0;  // Reset leave type dropdown
+        notify.selectedIndex = 0;  // Reset notify dropdown
+        reason.value = "";  // Clear reason textarea
     });
 });
 
@@ -136,4 +164,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
     updateSelectedDate("from_date", "selected-from");
     updateSelectedDate("to_date", "selected-to");
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    fetch('/get-admins/')
+        .then(response => response.json())
+        .then(data => {
+            let select = document.getElementById("notify");
+            data.admins.forEach(admin => {
+                let option = document.createElement("option");
+                option.value = admin.id;
+                option.textContent = admin.name;
+                select.appendChild(option);
+            });
+        })
+        .catch(error => console.error("Error fetching admins:", error));
 });
