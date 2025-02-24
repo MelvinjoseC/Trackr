@@ -27,6 +27,22 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
+    const applyBtn = document.querySelector(".apply-btn");
+    const leaveStatistics = document.querySelector(".leave-statistics");
+    const upcomingHolidays = document.querySelector(".upcoming-holidays");
+    const applyLeave = document.querySelector(".apply-leave");
+
+    applyBtn.addEventListener("click", function () {
+        // Hide leave statistics and upcoming holidays
+        leaveStatistics.style.display = "none";
+        upcomingHolidays.style.display = "none";
+
+        // Show apply leave section
+        applyLeave.style.display = "block";
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
     const monthYear = document.getElementById("monthYear");
     const calendarDates = document.getElementById("calendarDates");
     const prevMonthBtn = document.getElementById("prevMonth");
@@ -35,6 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentDate = new Date();
 
     function renderCalendar() {
+        const today = new Date();
         const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
         const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
         const firstDayOfWeek = firstDayOfMonth.getDay();
@@ -58,6 +75,15 @@ document.addEventListener("DOMContentLoaded", function () {
             let dateEl = document.createElement("div");
             dateEl.classList.add("date", "current-month");
             dateEl.textContent = i;
+
+            // Set active class if it matches today's date
+            if (
+                today.getDate() === i &&
+                today.getMonth() === currentDate.getMonth() &&
+                today.getFullYear() === currentDate.getFullYear()
+            ) {
+                dateEl.classList.add("selected");
+            }
 
             dateEl.addEventListener("click", function () {
                 document.querySelectorAll(".date").forEach(el => el.classList.remove("selected"));
@@ -87,4 +113,27 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     renderCalendar();
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    function formatDate(dateString) {
+        const options = { weekday: "long", month: "long", day: "numeric", year: "numeric" };
+        return new Date(dateString).toLocaleDateString("en-US", options);
+    }
+
+    function updateSelectedDate(inputId, spanId) {
+        const input = document.getElementById(inputId);
+        const span = document.getElementById(spanId);
+
+        input.addEventListener("change", function () {
+            if (this.value) {
+                span.textContent = "" + formatDate(this.value);
+            } else {
+                span.textContent = "";
+            }
+        });
+    }
+
+    updateSelectedDate("from_date", "selected-from");
+    updateSelectedDate("to_date", "selected-to");
 });

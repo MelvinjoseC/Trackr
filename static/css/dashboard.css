@@ -779,16 +779,6 @@ div#manual_timesheet {
     gap: 1vw;
 }
 
-#date-input {
-    display: flex;
-    padding: 0.4vh 0.4vw;
-    border: none;
-    background: #ECECEC;
-    font-size: 2vh;
-    align-items: center;
-    border-radius: 5px 0px 0px 5px;
-}
-
 form#form_date {
     display: flex;
     align-items: center;
@@ -804,6 +794,16 @@ input[type="date"] {
     overflow: hidden;
 }
 
+#date-input {
+    display: flex;
+    padding: 0.4vh 0.4vw;
+    border: none;
+    background: #ECECEC;
+    font-size: 2vh;
+    align-items: center;
+    border-radius: 5px 0px 0px 5px;
+}
+
 #selected-date {
     font-size: 1.3vh;
     color: #4F4F4F;
@@ -817,6 +817,68 @@ input[type="date"] {
     border-radius: 0px 5px 5px 0px;
 }
 
+input#from_date {
+    width: 8%;
+    display: flex;
+    padding: 0.4vh 0.4vw;
+    border: none;
+    background: #ECECEC;
+    font-size: 2vh;
+    align-items: center;
+    border-radius: 5px 0px 0px 5px;
+}
+
+span#selected-from {
+    height: 1.3vh;
+    font-size: 1.3vh;
+    width: 100%;
+    color: #4F4F4F;
+    padding-left: 0.5vw;
+    padding-right: 0.5vw;
+    padding-top: 0.8vh;
+    padding-bottom: 0.8vh;
+    border: 1px solid #D2D5DA;
+    border-left: none;
+    font-weight: bold;
+    border-radius: 0px 5px 5px 0px;
+}
+
+.from_div{
+ display: flex;
+ align-items: center;
+}
+
+input#to_date {
+    width: 8%;
+    display: flex;
+    padding: 0.4vh 0.4vw;
+    border: none;
+    background: #ECECEC;
+    font-size: 2vh;
+    align-items: center;
+    border-radius: 5px 0px 0px 5px;
+}
+
+span#selected-to {
+    height: 1.3vh;
+    font-size: 1.3vh;
+    width: 100%;
+    color: #4F4F4F;
+    padding-left: 0.5vw;
+    padding-right: 0.5vw;
+    padding-top: 0.8vh;
+    padding-bottom: 0.8vh;
+    border: 1px solid #D2D5DA;
+    border-left: none;
+    font-weight: bold;
+    border-radius: 0px 5px 5px 0px;
+}
+
+.to_div{
+    display: flex;
+    align-items: center;
+   }
+   
 button#date_in_daily_timesheet{
     background-color: #B5CAFF;
     color: #263A82;
@@ -1564,7 +1626,7 @@ button#timeSheet_button {
 .holiday-calendar-container {
     display: flex;
     flex-direction: row;
-    margin-top: 1vh;  /* Creates separation */
+    margin-top: 1.2vh;  /* Creates separation */
 }
 
 .leave-statistics {
@@ -1808,19 +1870,19 @@ img#calendar-check {
 
 .apply-btn {
     margin-top: 1.5vh;
-    margin-left: 6.2vw;
-    width: 45%;
+    margin-left: 6.6vw;
+    width: 39%;
     padding: 0.5vh 0.5vw;
     background: #333DAE;
     color: white;
-    font-size: 1.7vh;
+    font-size: 1.4vh;
     font-weight: bold;
-    border-radius: 10px;
+    border-radius: 5px;
     cursor: pointer;
     display: flex;
     border: none;
     gap: 0.5vw;
-    line-height: 1.3;
+    line-height: 1.6;
 }
 
 .leave-history {
@@ -1831,6 +1893,155 @@ img#calendar-check {
     height: 50vh;
     border-radius: 10px;
     scrollbar-width: thin;
+}
+
+.apply-leave {
+    display: none;
+    flex: 0 0 52.4vw;
+    border-radius: 10px;
+    background: #FFFFFF;
+    padding: 4vh 3vw;
+}
+
+.leave-form {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 1vw;
+}
+
+.leave-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.leave-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1vw;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+label {
+    font-size: 1.5vh;
+    font-weight: bold;
+    color: #484848;
+    margin-bottom: 0.5vh;
+}
+
+input#to {
+    width: 8%;
+    padding: 0.7vh;
+    border: 1px solid #ccc;
+    border-radius: 5px 0px 0px 5px;
+    font-size: 1.4vh;
+    color: #534f4f;
+    background: #534f4f0a;
+}
+
+input#notify {
+    width: 95%;
+    padding: 0.7vh;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1.4vh;
+    color: #534f4f;
+}
+
+label.select_type {
+    margin-top: 2vh;
+}
+
+select {
+    width: 98%;
+    padding: 0.7vh;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1.4vh;
+    color: #534f4f;
+    background: #534f4f0a;
+}
+
+label#reason_hd {
+    margin-left: 3vw;
+}
+
+textarea {
+    width: 85%;
+    padding: 0.7vh;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1.4vh;
+    color: #534f4f;
+    height: 10vh;
+    margin-left: 3vw;
+    resize: none;
+    background: #534f4f0a;
+}
+
+label.notify_hd {
+    margin-top: 8vh;
+}
+
+small {
+    font-size: 1.2vh;
+    color: #838383;
+    margin-top: 0.5vh;
+}
+
+.reason-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1vw;
+}
+
+.btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background: #333DAE;
+    color: white;
+    font-size: 1.4vh;
+    font-weight: bold;
+    padding: 0.8vh 1vw;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-secondary {
+    background: #afa9a9;
+    color: white;
+    font-size: 1.4vh;
+    font-weight: bold;
+    padding: 0.8vh 1vw;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
 .leave-history-header {

@@ -497,6 +497,62 @@
                     </div>
                 </div>                
             </div>
+            <div class="apply-leave">
+                <div class="leave-form">
+                    <div class="leave-left">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="from">FROM</label>
+                                <div class="from_div"> 
+                                    <input type="date" id="from_date" name="from">
+                                    <span id="selected-from"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="to">TO</label>
+                                <div class="to_div"> 
+                                    <input type="date" id="to_date" name="to">
+                                    <span id="selected-to"></span>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <div class="form-group">
+                            <label for="leave-type" class="select_type">SELECT LEAVE TYPE</label>
+                            <select id="leave-type" name="leave-type">
+                                <option value="" disabled selected>Select</option>
+                                <option value="">Full Day</option>
+                                <option value="">Half Day</option>
+                                <option value="">Work From Home</option>
+                            </select>
+                        </div>
+                
+                        <div class="form-group">
+                            <label class="notify_hd" for="notify">NOTIFY</label>
+                            <select id="notify" name="notify">
+                                <option value="" disabled selected>Select</option>
+                                <option value="">name1</option>
+                                <option value="">name2</option>
+                                <option value="">name3</option>
+                            </select>
+                            <small>Note: These employees will be notified through email when your leave request is approved.</small>
+                        </div>
+                    </div>
+
+                    <div class="leave-right">
+                        <div class="reason-group">
+                            <label id="reason_hd" for="reason">REASON</label>
+                            <textarea id="reason" name="reason"></textarea>
+                        </div>
+                
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Request Leave</button>
+                            <button type="button" class="btn btn-secondary">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="calendar-view">
                 <div class="calendar_header">
                     <button id="prevMonth"><img id="arrow_left" src="{% static 'images/arrow_left.png' %}"></button>
