@@ -8,9 +8,131 @@
     <title>Project Tracker</title>
    
     <link rel="stylesheet" href="{% static 'css/project_tracker.css' %}">
-    <script src="project_tracker.js" defer></script>
+
+    <script src="{% static 'js/project_tracker.js' %}"></script>
+    <style>
+        /* Popup Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 50%;
+            text-align: center;
+            position: relative;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        input {
+            width: 95%;
+            padding: 5px;
+        }
+        .submit-btn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: green;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .submit-btn:hover {
+            background-color: darkgreen;
+        }
+    </style>
+
+    <script>
+        function openCreateProjectPopup() {
+            document.getElementById("createProjectModal").style.display = "flex";
+        }
+
+        function closeCreateProjectPopup() {
+            document.getElementById("createProjectModal").style.display = "none";
+        }
+
+        function submitProjectForm() {
+            alert("Project submitted successfully!");
+            closeCreateProjectPopup();
+        }
+    </script>
 </head>
 <body>
+
+    <!-- Button to open the popup -->
+    <button onclick="openCreateProjectPopup()">Create Project</button>
+
+    <!-- Popup Modal for Creating a Project -->
+    <div id="createProjectModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeCreateProjectPopup()">&times;</span>
+            <h1>Create Project</h1>
+
+            <!-- Form Table -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Input</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Project Name</td>
+                        <td><input type="text" id="projectName" placeholder="Enter project name"></td>
+                    </tr>
+                    <tr>
+                        <td>Start Date</td>
+                        <td><input type="date" id="startDate"></td>
+                    </tr>
+                    <tr>
+                        <td>End Date</td>
+                        <td><input type="date" id="endDate"></td>
+                    </tr>
+                    <tr>
+                        <td>Scope</td>
+                        <td><input type="number" id="budget" placeholder="Enter budget"></td>
+                    </tr>
+                    <tr>
+                        <td>Benchmark</td>
+                        <td><input type="text" id="description" placeholder="Enter project description"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Submit Button -->
+            <button class="submit-btn" onclick="submitProjectForm()">Submit</button>
+        </div>
+    </div>
+
     <h1>Welcome to the Project Tracker</h1>
 
     <h3>User Details</h3>
@@ -43,5 +165,6 @@
     {% else %}
         <p>No tasks to approve.</p>
     {% endif %}
+
 </body>
 </html>
