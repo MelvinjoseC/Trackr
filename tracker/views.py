@@ -974,4 +974,36 @@ def get_tasks_by_date(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.db import connection
+from datetime import datetime
 
+def create_project_view(request):
+    if request.method == "POST":
+        try:
+            project_name = request.POST.get("projectName")
+            start_date = request.POST.get("startDate")
+            end_date = request.POST.get("endDate")
+            scope = request.POST.get("scope")
+            category = request.POST.get("category")
+            benchmark = request.POST.get("Benchmark")
+
+            # Ensure all fields are filled
+            if not all([project_name, start_date, end_date, scope, category, benchmark]):
+                return JsonResponse({"error": "All fields are required!"}, status=400)
+
+            # Insert into the database
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO tracker_project (projects, scope, category, task_benchmark, start, end)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, [project_name, scope, category, benchmark, start_date, end_date])
+
+            return JsonResponse({"message": "Project Created Successfully!"})
+
+        except Exception as e:
+            print("Database Error:", e)  # Log the error for debugging
+            return JsonResponse({"error": "Something went wrong. Please try again later."}, status=500)
+
+    return render(request, "project_tracker.html")  # Load the form page
