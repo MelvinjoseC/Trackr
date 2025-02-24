@@ -878,7 +878,11 @@ span#selected-to {
     display: flex;
     align-items: center;
    }
-   
+
+option {
+    text-transform: capitalize;
+}
+
 button#date_in_daily_timesheet{
     background-color: #B5CAFF;
     color: #263A82;
@@ -1970,6 +1974,7 @@ select {
     width: 98%;
     padding: 0.7vh;
     border: 1px solid #ccc;
+    text-transform: capitalize;
     border-radius: 5px;
     font-size: 1.4vh;
     color: #534f4f;
