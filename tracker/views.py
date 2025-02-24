@@ -62,6 +62,10 @@ def login(request):
 
     return render(request, "signin.html")
 
+def get_admins(request):
+    admins = EmployeeDetails.objects.filter(authentication__iexact='admin')  # Case-insensitive check
+    admin_list = [{"id": admin.employee_id, "name": admin.name} for admin in admins]
+    return JsonResponse({"admins": admin_list})
 
 def task_dashboard(request):
     global global_user_data  # Assuming you're using a global variable for user data
