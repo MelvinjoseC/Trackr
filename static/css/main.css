@@ -97,6 +97,7 @@ body {
     flex: 1 1 calc(33.33% - 10px); /* Flex for 3 columns */
     min-width: 250px;
     text-align: center;
+    overflow: hidden;
 }
 
 .calendar {

@@ -529,3 +529,61 @@ body {
 .modal-close:hover {
     background: #0056b3;
 }
+
+.holiday-table {
+    display: flex;
+    flex-direction: column;
+    max-height: 300px; /* ✅ Set a fixed height to avoid large lists */
+    overflow-y: auto; /* ✅ Enable scrolling when there are many holidays */
+    border-radius: 8px;
+}
+
+.holiday-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    font-size: 1rem;
+    background: #d0f0ff; /* Light blue for upcoming holidays */
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.holiday-row:last-child {
+    border-bottom: none; /* Remove border for last row */
+}
+
+.holiday-name {
+    font-weight: bold;
+    color: #444;
+    text-align: left;
+    flex: 1;
+}
+
+.holiday-date {
+    font-style: italic;
+    color: #666;
+    text-align: right;
+    flex: 1;
+}
+
+/* ✅ Past holidays (Grey background) */
+.past-holiday {
+    background-color: #d3d3d3;
+    color: #777;
+}
+
+/* ✅ Scrollbar Styling */
+.holiday-table::-webkit-scrollbar {
+    width: 8px;
+}
+
+.holiday-table::-webkit-scrollbar-thumb {
+    background: #999;
+    border-radius: 4px;
+}
+
+.holiday-table::-webkit-scrollbar-track {
+    background: #f0f0f0;
+}

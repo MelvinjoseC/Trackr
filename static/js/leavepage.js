@@ -260,3 +260,37 @@ function getCsrfToken() {
     }
     return cookieValue;
 }
+
+
+// HOLIDAYS
+document.addEventListener("DOMContentLoaded", function () {
+    fetch("/get-holidays/")
+        .then(response => response.json())
+        .then(data => {
+            let holidayContainer = document.getElementById("holiday-container");
+            holidayContainer.innerHTML = ""; // Clear existing rows
+
+            if (data.holidays.length === 0) {
+                holidayContainer.innerHTML = "<div class='holiday-row'><span class='holiday-name'>No upcoming holidays</span></div>";
+                return;
+            }
+
+            data.holidays.forEach(holiday => {
+                let statusClass = holiday.status === "past" ? "past-holiday" : "upcoming-holiday";
+
+                let holidayRow = `<div class="holiday-row ${statusClass}">
+                    <span class="holiday-name">${holiday.name}</span>
+                    <span class="holiday-date">${formatDate(holiday.date)}</span>
+                </div>`;
+                holidayContainer.innerHTML += holidayRow;
+            });
+        })
+        .catch(error => console.error("Error fetching holidays:", error));
+});
+
+// ✅ Helper function to format date properly (YYYY-MM-DD → Day DD/MM/YYYY)
+function formatDate(dateStr) {
+    let dateObj = new Date(dateStr);
+    let options = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' };
+    return dateObj.toLocaleDateString("en-GB", options);  // Example: Monday 17/06/2025
+}

@@ -1064,3 +1064,40 @@ def apply_leave_view(request):
             return JsonResponse({"error": "Something went wrong. Please try again later."}, status=500)
 
 
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.db import connection
+from datetime import datetime
+
+def get_holidays(request):
+    """Fetch upcoming holidays only for the current year, excluding Saturdays."""
+    try:
+        today = datetime.today().date()
+        current_year = today.year  # Get current year dynamically
+
+        with connection.cursor() as cursor:
+            # ✅ Get holidays for the current year, excluding Saturdays
+            cursor.execute("""
+                SELECT name, date 
+                FROM tracker_holiday 
+                WHERE YEAR(date) = %s AND DAYOFWEEK(date) != 7  
+                ORDER BY date ASC
+            """, [current_year])
+            holidays = cursor.fetchall()
+
+        # Convert holidays to JSON format with status
+        holiday_list = []
+        for row in holidays:
+            holiday_date = row[1]
+            status = "past" if holiday_date < today else "upcoming"
+
+            holiday_list.append({
+                "name": row[0],
+                "date": holiday_date.strftime("%Y-%m-%d"),
+                "status": status  # ✅ Add status for styling in JS
+            })
+
+        return JsonResponse({"holidays": holiday_list})
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
