@@ -1046,6 +1046,7 @@ button#date_in_daily_timesheet{
     text-decoration: none;
     font-size: 1.4vh;
     font-weight: 300;
+    cursor: pointer;
     color: #FFFFFF;
     gap: 1vw;
 }
@@ -1054,6 +1055,23 @@ button#date_in_daily_timesheet{
     font-size: 1.4vh;
     font-weight: bold;
     color: #FFFFFF; /* Keep text white */
+}
+
+.sidebar_link {
+    display: inline-block; 
+    width: 100%; 
+    text-decoration: none;
+    font-size: 1.4vh;
+    font-weight: 300;
+    color: #FFFFFF;
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+.sidebar_link img {
+    vertical-align: middle;
+    margin-right: 0.8vw;
+    height: 2.1vh;
+    width: 1.1vw;
 }
 
 body {

@@ -80,7 +80,6 @@ document.getElementById("okButton").addEventListener("click", function (e) {
         assigned_to: document.getElementById("assignedTocreatetask").value,
         checker: document.getElementById("checkercreatetask").value,
         qc_3_checker: document.getElementById("qcCheckercreatetask").value,
-        group: document.getElementById("groupcreatetask").value,
         category: document.getElementById("id_categorycreatetask").value,
         start_date: document.getElementById("startDatecreatetask").value,
         end_date: document.getElementById("endDatecreatetask").value,
