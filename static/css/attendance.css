@@ -151,7 +151,7 @@ p#profile_designation {
     gap: 0.5vw;
     align-items: center;
     width: 50%;
-    padding: 0.7vw;
+    padding: 0vh 0.7vw 2vh 0.7vw;
 }
 
 .events-header h4 {
@@ -164,8 +164,8 @@ p#profile_designation {
 }
 
 .events-header p {
-    font-size: 1.5vh;
-    color: #252525;
+    font-size: 1.8vh;
+    color: #484848;
     font-family: Roboto;
     font-weight: bold;
     margin: 0;
@@ -209,9 +209,9 @@ p#profile_designation {
 }
 
 .event-details p {
-    font-size: 1.5vh;
-    color: #16151C;
-    margin: 0.3vw 0; /* Remove extra margin */
+    font-size: 1.6vh;
+    color: #484848;
+    margin: 0vh 0.7vw 1.5vh 0vw; /* Remove extra margin */
 }
 
 /* Weekday Display */
@@ -246,8 +246,8 @@ p#profile_designation {
 
 /* Saturday & Sunday (Gray) */
 .day.weekend {
-    background-color: #d3d3d3;
-    color: #666;
+    background-color: #CACACA;
+    color: white;
 }
 
 .shift-details {
@@ -257,9 +257,9 @@ p#profile_designation {
 }
 
 .shift-details p {
-    font-size: 1.5vh;
-    color: #16151C;
-    margin: 0.3vw 0; /* Remove extra margin */
+    font-size: 1.6vh;
+    color: #484848;
+    margin: 0vh 0.7vw 1.5vh 0vw; /* Remove extra margin */
 }
 
 /* Shift Timing  bar*/
@@ -289,7 +289,7 @@ p#profile_designation {
     transform: translateX(-50%);
     width: 10%;
     height: 100%;
-    background-color: #dae6fb;
+    background-color: #DAE6FB;
     border-radius: 3px;
 }
 
@@ -298,7 +298,7 @@ p#profile_designation {
     position: absolute;
     color: white;
     font-weight: bold;
-    font-size: 1.2vh;
+    font-size: 1.4vh;
 }
 
 .start-time {
@@ -317,13 +317,20 @@ p#profile_designation {
 }
 
 .shift-info strong {
-    font-size: 1.3vh;
-    color: #16151C;
+    font-size: 1.4vh;
+    font-weight: bold;
+    color: #484848;
+}
+
+.shift-info span {
+    font-size: 1.4vh;
+    font-weight: 400;
+    color: #484848;
 }
 
 /* Weekly Average Time Section */
 .average-week-time {
-    width: 18%;
+    width: 16%;
     height: 14vh;
     text-align: center;
     background-color: #ffffff;
@@ -335,17 +342,19 @@ p#profile_designation {
 .week-header {
     display: flex;
     justify-content: space-between;
-    font-size: 1.3vh;
-    /* font-weight: bold; */
-    color: #333;
-    /* padding:0.7vw; */
-    padding-top: 0.7vw;
+    font-size: 1.5vh;
+    font-weight: 500;
+    color: #484848;
+    /* align-items: center; */
+    padding-top: 1vh;
 }
+
 .week-header span {
     text-decoration: underline;
 }
+
 .user-heading{
-    padding-right:1.5vh;
+    padding-right:1vw;
 }
 
 .week-metric {
@@ -353,13 +362,21 @@ p#profile_designation {
     justify-content: space-between;
     align-items: center;
     font-size: 1.3vh;
-    /* margin: 10px 0; */
+    color: #484848;
+    margin-top: 1vh;
 }
 
-.highlight-text {
-    font-size: 2.5vh;
-    font-weight: bold;
+.highlight-text1 {
+    font-size: 2.7vh;
+    font-weight: 500;
     color: #333DAE;
+}
+
+.highlight-text2 {
+    font-size: 2.7vh;
+    font-weight: 500;
+    color: #333DAE;
+    margin-right: 0.5vw;
 }
 
 .divider {
