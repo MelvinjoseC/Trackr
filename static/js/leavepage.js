@@ -294,3 +294,245 @@ function formatDate(dateStr) {
     let options = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' };
     return dateObj.toLocaleDateString("en-GB", options);  // Example: Monday 17/06/2025
 }
+
+
+//REQUESTS
+
+document.addEventListener("DOMContentLoaded", function () {
+    fetch("/api/leave-applications/")  // Use the exact endpoint from urls.py
+        .then(response => response.json())
+        .then(data => {
+            const leaveContainer = document.getElementById("leave-container"); // Ensure this container exists in your HTML
+            
+            data.forEach(leave => {
+                const leaveRow = document.createElement("div");
+                leaveRow.classList.add("leave-row");
+
+                leaveRow.innerHTML = `
+                    <div class="leave-cell">
+                        <div class="leave-date">${formatDate(leave.start_date)} - ${formatDate(leave.end_date)}</div>
+                        <div class="leave-duration">${calculateDays(leave.start_date, leave.end_date)} days</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-form ${formatLeaveType(leave.leave_type)}">${leave.leave_type.toUpperCase()}</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Leave Type</div>
+                        <div class="leave-value">${leave.leave_type}</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Requested On</div>
+                        <div class="leave-value">${formatDate(leave.created_at)}</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Status</div>
+                        <div class="leave-approval ${formatStatus(leave.status)}">${leave.status}</div>
+                    </div>
+                    <div class="leave-cell">
+                        <div class="leave-label">Approved By</div>
+                        <div class="leave-value">${leave.approver}</div>
+                    </div>
+                    <div class="leave-cell actions">
+                        <button class="action-btn"><img id="leave_comment" src="/static/images/comment_button.png"></button>
+                        <button class="action-btn"><img id="leave_edit" src="/static/images/blue_edit_button.png"></button>
+                        <button class="action-btn"><img id="leave_delete" src="/static/images/delete_button.png"></button>
+                    </div>
+                `;
+
+                leaveContainer.appendChild(leaveRow);
+            });
+        })
+        .catch(error => console.error("Error fetching leave applications:", error));
+});
+
+
+// Helper function to calculate total leave days
+function calculateDays(start, end) {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffTime = Math.abs(endDate - startDate);
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+}
+
+// Helper function to apply CSS classes for status
+function formatStatus(status) {
+    return status.toLowerCase() === "pending" ? "pending" : status.toLowerCase();
+}
+
+// Helper function to format leave type for CSS classes
+function formatLeaveType(type) {
+    return type.toLowerCase().replace(/\s+/g, "-");
+}
+
+
+
+//APPROVAL 
+document.addEventListener("DOMContentLoaded", function () {
+    const leaveContainer = document.getElementById("leave-container");
+    const approvalButton = document.getElementById("approvals-btn");
+
+    // Get the username from global_user_data (exposed in Django template)
+    const currentUsername = "{{ global_user_data.name }}"; // Use Django template syntax
+
+    // Fetch the list of admins from the database
+    fetch("/get-admins/")  // Ensure this matches your Django API URL
+        .then(response => response.json())
+        .then(data => {
+            if (!data.admins || !Array.isArray(data.admins)) {
+                console.error("Invalid admin data:", data);
+                return;
+            }
+
+            // Check if the logged-in username exists in the admin list
+            const isAdmin = data.admins.some(admin => admin.name === currentUsername);
+
+            if (isAdmin) {
+                approvalButton.style.display = "block"; // Show button if user is admin
+            }
+        })
+        .catch(error => console.error("Error fetching admins:", error));
+
+        approvalButton.addEventListener("click", function () {
+            loadApprovals();
+        });
+    
+        function loadApprovals() {
+            fetch("/api/leave-approvals/")
+                .then(response => response.json())
+                .then(data => {
+                    const approvalContainer = document.getElementById("approval-container");
+        
+                    if (!approvalContainer) {
+                        console.error("❌ Missing approval list container!");
+                        return;
+                    }
+        
+                    approvalContainer.innerHTML = ""; // ✅ Clear old approvals before adding new ones
+        
+                    data.forEach(leave => {
+                        const leaveRow = document.createElement("div");
+                        leaveRow.classList.add("leave-row");
+        
+                        leaveRow.innerHTML = `
+                            <div class="leave-cell">
+                                <div class="leave-date">(${formatDate(leave.start_date)} - ${formatDate(leave.end_date)})</div>
+                            </div>
+                            <div class="leave-cell">
+                                <div class="leave-label">User</div>
+                                <div class="leave-value">${leave.username}</div>
+                            </div>
+                            <div class="leave-cell">
+                                <div class="leave-label">Reason</div>
+                                <div class="leave-value">${leave.reason}</div>
+                            </div>
+                            <div class="leave-cell">
+                                <div class="leave-label">Type</div>
+                                <div class="leave-value">${leave.leave_type}</div>
+                            </div>
+                            <div class="leave-cell">
+                                <button class="approve-btn" data-id="${leave.id}" data-status="Approved">Approve</button>
+                                <button class="reject-btn" data-id="${leave.id}" data-status="Rejected">Reject</button>
+                            </div>
+                        `;
+        
+                        approvalContainer.appendChild(leaveRow);
+                    });
+        
+                    // ✅ Attach event listeners to buttons
+                    document.querySelectorAll(".approve-btn, .reject-btn").forEach(button => {
+                        button.addEventListener("click", updateLeaveStatus);
+                    });
+        
+                })
+                .catch(error => console.error("❌ Error fetching approvals:", error));
+        }
+        
+        
+        
+        function updateLeaveStatus(event) {
+            const leaveId = event.target.getAttribute("data-id");
+            const newStatus = event.target.getAttribute("data-status");        
+           console.log("Leave ID:", leaveId, "New Status:", newStatus);  // Debugging
+        
+            if (!leaveId || !newStatus) {
+                console.error("Invalid leave ID or status.");
+                return;
+            }
+        
+            console.log("CSRF Token:", getCsrfToken());  // ✅ Now logs the actual token value
+            console.log("Leave ID:", leaveId);
+            console.log("New Status:", newStatus);
+            
+            fetch('/api/update-leave-status/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken':getCsrfToken(),  // Include the CSRF token
+                },
+                body: JSON.stringify({ id: leaveId, status: newStatus }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Server Response:', data);
+                if (data.message) {
+                    alert(data.message);
+                    loadApprovals();  // Refresh or update the UI as needed
+                } else if (data.error) {
+                    alert(`Error: ${data.error}`);
+                }
+            })
+            .catch(error => console.error('Error updating status:', error));        
+}    
+
+    
+});
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    fetch('/api/check-admin-status/', {
+        method: 'GET',
+        credentials: 'include', // ✅ Ensures authentication session is sent
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("🔍 API Response:", data); // ✅ Debugging: Check API response
+
+        const approvalButton = document.getElementById("approvals-btn");
+
+        if (data.is_admin) {
+            console.log("✅ User is admin, showing button");
+            approvalButton.style.display = "block";  // ✅ Show button for admins
+        } else {
+            console.log("❌ User is NOT admin, hiding button");
+            approvalButton.style.display = "none";   // ❌ Hide button for non-admins
+        }
+    })
+    .catch(error => console.error("❌ Error fetching admin status:", error));
+});
+
+
+// ✅ Now define toggleButton AFTER loadApprovals
+function toggleButton() {
+    const button = document.getElementById("approvals-btn");
+    const leaveContainer = document.getElementById("leave-container");
+    const approvalContainer = document.getElementById("approval-container");
+
+    if (!button || !leaveContainer || !approvalContainer) {
+        console.error("❌ Missing required elements in HTML!");
+        return;
+    }
+
+    if (leaveContainer.style.display === "block" || leaveContainer.style.display === "") {
+        // ✅ First click → Show approvals, hide leave history
+        button.innerText = "VIEW HISTORY";
+        leaveContainer.style.display = "none";
+        approvalContainer.style.display = "block";
+        
+    } else {
+        // ✅ Second click → Show leave history, hide approvals
+        button.innerText = "APPROVALS";
+        leaveContainer.style.display = "block";
+        approvalContainer.style.display = "none";
+    }
+}
+

@@ -2076,11 +2076,9 @@ img#filter_button {
 }
 
 .leave-cell {
-    padding: 0.5vh 0.5vw;
-    text-align: left;
-    white-space: nowrap; /* Prevents text from wrapping */
-    overflow: hidden;
-    text-overflow: ellipsis; /* Adds "..." if text is too long */
+    display: inline-block; /* Ensures proper alignment */
+    max-width: 250px; /* Adjust width as needed */
+    white-space: normal;
 }
 
 .leave-date {
@@ -2311,3 +2309,4 @@ img#filter_button {
     outline: none;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
 }
+

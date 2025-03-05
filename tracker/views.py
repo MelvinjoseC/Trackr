@@ -1101,3 +1101,168 @@ def get_holidays(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+
+
+from django.http import JsonResponse
+from django.db import connection
+
+# Define a global variable
+global_user_data = None
+def leave_application_view(request):
+    global global_user_data  # Declare the global variable
+    if not global_user_data:
+        return JsonResponse({"error": "User not logged in."}, status=401)
+
+    current_user_name = global_user_data["name"]  # Get logged-in user's name
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id, start_date, end_date, reason, username, approver, leave_type, created_at, updated_at, status
+            FROM tracker_leaveapplication
+            WHERE username = %s
+        """, [current_user_name])  # Filter by logged-in user's username
+
+        columns = [col[0] for col in cursor.description]
+        data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+    return JsonResponse(data, safe=False)
+
+
+from django.http import JsonResponse
+from django.db import connection
+
+global_user_data = None  # Assume this holds the logged-in user's data
+
+
+def leave_approvals_view(request):
+    global global_user_data
+    if not global_user_data:
+        return JsonResponse({"error": "User not logged in."}, status=401)
+
+    # Ensure the logged-in user is an admin
+    is_admin = EmployeeDetails.objects.filter(
+        name=global_user_data["name"], authentication__iexact="admin"
+    ).exists()
+
+    if not is_admin:
+        return JsonResponse({"error": "Forbidden: Only admins can access this."}, status=403)
+
+    # Fetch only pending leave approvals
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id, start_date, end_date, reason, username, approver, leave_type, created_at, updated_at, status
+            FROM tracker_leaveapplication
+            WHERE status = 'Pending'
+        """)  
+
+        columns = [col[0] for col in cursor.description]
+        data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+    return JsonResponse(data, safe=False)
+
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.db import connection
+import json
+
+@csrf_exempt  # ✅ Temporarily bypass CSRF for debugging (Remove this in production)
+def update_leave_status(request):
+    print("🔍 CSRF Token Received:", request.META.get("HTTP_X_CSRFTOKEN"))  # ✅ Debugging
+
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method. Only POST is allowed."}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        leave_id = data.get("id")
+        new_status = data.get("status")
+
+        print("🔍 Received Data:", data)  # ✅ Debugging
+
+        # Validate input data
+        if leave_id is None or new_status is None:
+            return JsonResponse({"error": "Missing required fields: 'id' and 'status' are needed."}, status=400)
+
+       
+
+        # Update the database
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE tracker_leaveapplication
+                SET status = %s
+                WHERE id = %s
+                """,
+                [new_status, leave_id]
+            )
+
+        print(f"✅ Leave ID {leave_id} updated to {new_status}")  # ✅ Debugging
+        return JsonResponse({"message": f"Leave status successfully updated to {new_status}."})
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON data. Ensure the request body is properly formatted."}, status=400)
+
+    except Exception as e:
+        print("❌ Unexpected Error:", str(e))  # ✅ Debugging
+        return JsonResponse({"error": f"Internal Server Error: {str(e)}"}, status=500)
+
+
+from django.http import JsonResponse
+
+def check_admin_status(request):
+    global global_user_data
+    # Check if the logged-in user is an admin
+    is_admin = EmployeeDetails.objects.filter(
+        name=global_user_data["name"], authentication__iexact="admin"
+    ).exists()
+
+    return JsonResponse({"is_admin": is_admin})
+
+
+from django.http import JsonResponse
+from django.db import connection
+import json
+
+def update_task(request, task_id):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            title = data.get("title")
+            projects = data.get("projects")
+            scope = data.get("scope")
+            date1 = data.get("date1")
+            time = data.get("time")
+            comments = data.get("comments")
+
+            query = """
+                UPDATE tracker_project 
+                SET title = %s, projects = %s, scope = %s, date1 = %s, time = %s, comments = %s 
+                WHERE id = %s
+            """
+            with connection.cursor() as cursor:
+                cursor.execute(query, [title, projects, scope, date1, time, comments, task_id])
+
+            return JsonResponse({"success": True}, status=200)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request method"}, status=400)
+
+
+def delete_task(request, task_id):
+    if request.method == "POST":
+        try:
+            query = "DELETE FROM tracker_project WHERE id = %s"
+            with connection.cursor() as cursor:
+                cursor.execute(query, [task_id])
+
+            return JsonResponse({"success": True}, status=200)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request method"}, status=400)

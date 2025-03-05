@@ -279,6 +279,92 @@ function formatTime(hoursDecimal) {
     return result || "0 Minutes"; // Fallback for 0 minutes
 }
 
+//UPDATE TASK AND DELETE TASK
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("timesheetContent").addEventListener("click", function (event) {
+        const target = event.target;
+        const taskId = target.dataset.taskId; // Get task ID from data attribute
+
+        if (target.classList.contains("comment_button")) {
+            handleEditTask(taskId, target);
+        } else if (target.classList.contains("delete_button")) {
+            handleDeleteTask(taskId, target);
+        }
+    });
+});
+
+// Function to handle task editing
+function handleEditTask(taskId, button) {
+    const taskRow = button.closest(".timesheet-row");
+    const taskNameElement = taskRow.querySelector(".task-name");
+    const taskDurationElement = taskRow.querySelector(".task-duration");
+
+    if (!taskNameElement || !taskDurationElement) return;
+
+    const originalTitle = taskNameElement.textContent;
+    const originalTime = parseFloat(taskDurationElement.textContent) || 0;
+
+    // Convert to input fields for editing
+    taskNameElement.innerHTML = `<input type="text" class="edit-task-name" value="${originalTitle}">`;
+    taskDurationElement.innerHTML = `<input type="number" class="edit-task-time" value="${originalTime}" step="0.1">`;
+
+    // Create a Save Button
+    const saveButton = document.createElement("button");
+    saveButton.textContent = "Save";
+    saveButton.classList.add("save-edit");
+    taskRow.appendChild(saveButton);
+
+    saveButton.addEventListener("click", function () {
+        const updatedTitle = taskRow.querySelector(".edit-task-name").value;
+        const updatedTime = parseFloat(taskRow.querySelector(".edit-task-time").value) || 0;
+
+        fetch(`/update-task/${taskId}/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRFToken() },
+            body: JSON.stringify({ title: updatedTitle, time: updatedTime })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                taskNameElement.textContent = updatedTitle;
+                taskDurationElement.textContent = formatTime(updatedTime);
+                saveButton.remove();
+            } else {
+                alert("Failed to update task");
+            }
+        })
+        .catch(error => console.error("Error updating task:", error));
+    });
+}
+
+// Function to handle task deletion
+function handleDeleteTask(taskId, button) {
+    if (!confirm("Are you sure you want to delete this task?")) return;
+
+    fetch(`/delete-task/${taskId}/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRFToken() }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            button.closest(".timesheet-row").remove(); // Remove task row from UI
+        } else {
+            alert("Failed to delete task");
+        }
+    })
+    .catch(error => console.error("Error deleting task:", error));
+}
+
+// Function to get CSRF token for Django
+function getCSRFToken() {
+    return document.cookie.split("; ").find(row => row.startsWith("csrftoken="))?.split("=")[1];
+}
+
+
+
+
+
 // Function to populate the timesheet with tasks and display the total hours
 function populateTimesheet(tasks) {
     const timesheetContent = document.getElementById("timesheetContent");
@@ -305,7 +391,7 @@ function populateTimesheet(tasks) {
 
             const taskRow = document.createElement("div");
             taskRow.classList.add("timesheet-row");
-
+            taskRow.setAttribute("data-task-id", task.id); // Add task ID for reference
             taskRow.innerHTML = `
             <div class="task-info">
                 <h4 class="task-type">${task.scope}</h4>
@@ -321,8 +407,8 @@ function populateTimesheet(tasks) {
                         </div>
                     </div>
                     <div class="image-set">
-                        <img class="comment_button" src="/static/images/comment_button.png">
-                        <img class="delete_button" src="/static/images/delete_button.png">
+                        <img class="comment_button" src="/static/images/comment_button.png" data-task-id="${task.id}">
+                        <img class="delete_button" src="/static/images/delete_button.png" data-task-id="${task.id}">
                     </div>
                 </div>
                 <div id="total_time_container">
@@ -364,6 +450,9 @@ function populateTimesheet(tasks) {
         timesheetContent.appendChild(noDataMessage);
     }
 }
+
+
+
 
 // Function to hide task-info and show calendar inside the timesheet container
 function toggleTaskInfo() {

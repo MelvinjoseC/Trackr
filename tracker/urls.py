@@ -24,4 +24,13 @@ urlpatterns = [
     path('get-admins/', views.get_admins, name='get_admins'),
     path('apply-leave/', views.apply_leave_view, name='apply_leave'),  # ✅ Leave request form submission
     path('get-holidays/', views.get_holidays, name='get_holidays'),
+    path("api/leave-applications/", views.leave_application_view, name="leave-applications"),
+    path('api/leave-approvals/', views.leave_approvals_view, name='leave_approvals'),
+    path('api/update-leave-status/', views.update_leave_status, name='update_leave_status'),
+    path("api/check-admin-status/", views.check_admin_status, name="check-admin-status"),
+    path('update-task/<int:task_id>/', views.update_task, name="update_task"),
+    path('delete-task/<int:task_id>/', views.delete_task, name="delete_task"),
 ]
+
+
+
