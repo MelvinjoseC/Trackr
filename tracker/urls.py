@@ -28,5 +28,8 @@ urlpatterns = [
     path('api/leave-approvals/', views.leave_approvals_view, name='leave_approvals'),
     path('api/update-leave-status/', views.update_leave_status, name='update_leave_status'),
     path("api/check-admin-status/", views.check_admin_status, name="check-admin-status"),
+    path("update_task/", views.update_timesheet, name="update_timesheet"),
+    path("delete_task/", views.delete_task, name="delete_task"),
+    path("get_task_details/", views.get_task_details, name="get_task_details"),
 ]
 

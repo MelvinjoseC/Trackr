@@ -199,8 +199,8 @@ function updateClock() {
     // Format the date as "Fri, 31 Jan 2025"
     const date = now.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 
-    document.getElementById('current-time').textContent = time;
-    document.getElementById('current-date').textContent = date;
+    document.getElementById('current-time1').textContent = time;
+    document.getElementById('current-date1').textContent = date;
 
     // Highlight the current day
     const dayIndex = now.getDay(); // 0 = Sunday, 6 = Saturday
@@ -307,30 +307,30 @@ function populateTimesheet(tasks) {
             taskRow.classList.add("timesheet-row");
 
             taskRow.innerHTML = `
-            <div class="task-info">
-                <h4 class="task-type">${task.scope}</h4>
-                <div class="task-details">
-                    <div class="task-actions">
-                        <div class="details-top">
-                            <p class="task-name">${task.title}</p>
-                            <p class="task-duration">${formatTime(parseFloat(task.time) || 0)}</p>
+                <div class="task-info">
+                    <h4 class="task-type">${task.scope}</h4>
+                    <div class="task-details">
+                        <div class="task-actions">
+                            <div class="details-top">
+                                <p class="task-name">${task.title}</p>
+                                <p class="task-duration">${formatTime(parseFloat(task.time) || 0)}</p>
+                            </div>
+                            <div class="details-bottom">
+                                <p class="task-meta">
+                                  
+                                    ${task.d_no ? 'DWG NO: ' + task.rev : 'Rev No'}
+                                </p>
+                                <p class="project-type">${task.projects ? task.projects : 'No Project Assigned'}</p>
+                            </div>
                         </div>
-                        <div class="details-bottom">
-                            <p class="task-meta">${task.projects ? task.projects : 'No Project Assigned'}, ${task.d_no ? 'REV NO: ' + task.d_no : 'No Rev No'}</p>
-                            <p class="project-type">Internal Projects</p>
-                        </div>
-                    </div>
-                    <div class="image-set">
-                        <img class="comment_button" src="/static/images/comment_button.png">
-                        <img class="delete_button" src="/static/images/delete_button.png">
+                         <div class="button-set">
+                    <button class="comment_button" data-id="${task.id}">Edit</button>
+                    <button class="delete_button" data-id="${task.id}">Delete</button>
+                </div>
                     </div>
                 </div>
-                <div id="total_time_container">
-                    <span id="label_hours">TOTAL HOURS :</span>
-                    <div id="value_hours">${formatTime(totalTime)}</div>
-                </div>
-            </div>
-        `;
+            `;
+
 
             timesheetContent.appendChild(taskRow);
         });
@@ -1272,4 +1272,195 @@ function formatTime(hoursDecimal) {
 }
 
 
-//TASK CARD //
+// Create and append the update modal dynamically
+document.addEventListener("DOMContentLoaded", function () {
+    const modalHTML = `
+       <div id="updateTimesheetModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Update Timesheet</h2>
+        <form id="updateTimesheetForm">
+            <input type="hidden" id="task_id">
+
+            <div class="form-group">
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+
+            <div class="form-group">
+                <label for="projects">Projects:</label>
+                <input type="text" id="projects" name="projects">
+            </div>
+
+            <div class="form-group">
+                <label for="scope">Scope:</label>
+                <input type="text" id="scope" name="scope">
+            </div>
+
+            <div class="form-group">
+                <label for="date1">Date:</label>
+                <input type="date" id="date1" name="date1" required>
+            </div>
+
+            <div class="form-group">
+                <label for="time">Time (hours):</label>
+                <input type="number" step="0.1" id="timeforupdatetimesheet" name="time" required>
+            </div>
+
+            <div class="form-group">
+                <label for="comments">Comments:</label>
+                <textarea id="commentsforupdatetimesheet" name="comments"></textarea>
+            </div>
+
+            <div class="form-group">
+                <button type="submit">Update Timesheet</button>
+            </div>
+        </form>
+    </div>
+</div>
+    `;
+    document.body.insertAdjacentHTML("beforeend", modalHTML);
+
+    const modal = document.getElementById("updateTimesheetModal");
+    const closeModal = document.querySelector(".close");
+
+    closeModal.addEventListener("click", function () {
+        modal.style.display = "none";
+    });
+
+    window.addEventListener("click", function (event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+
+    document.getElementById("updateTimesheetForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        updateTask();
+    });
+});
+
+// Click event listener for updating and deleting tasks
+document.getElementById("timesheetContent").addEventListener("click", function(event) {
+    if (event.target.classList.contains("comment_button")) {
+        const taskId = event.target.dataset.id;  
+        openUpdateTimesheetModal(taskId);
+    } else if (event.target.classList.contains("delete_button")) {
+        const taskId = event.target.dataset.id;
+        deleteTask(taskId);
+    }
+});
+
+// Function to open update modal with prefilled data
+function openUpdateTimesheetModal(taskId) {
+    fetch(`/get_task_details/?task_id=${taskId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                alert("Error fetching task details: " + data.error);
+                return;
+            }
+
+            document.getElementById("task_id").value = taskId;
+            document.getElementById("title").value = data.title || "";
+            document.getElementById("projects").value = data.projects || "";
+            document.getElementById("scope").value = data.scope || "";
+            document.getElementById("date1").value = data.date1 || "";
+            document.getElementById("time").value = data.time || "";
+            document.getElementById("comments").value = data.comments || "";
+
+            document.getElementById("updateTimesheetModal").style.display = "block";
+        })
+        .catch(error => {
+            console.error("Error fetching task details:", error);
+            alert("Failed to fetch task details. Please check the backend.");
+        });
+}
+
+
+// Function to update a task entry
+function updateTask() {
+    const taskId = document.getElementById("task_id").value;
+
+    // 🚀 Capture the latest input values
+
+
+    // 🚀 Debugging: Log values before sending the request
+    console.log("Before Sending:");
+    console.log("Time Value from Input Field:", time);
+    console.log("Comment Value from Input Field:", comments);
+
+    fetch(`/update_task/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({
+            task_id: taskId,
+            list: document.getElementById("list") ? document.getElementById("list").value : "",
+            project_type: document.getElementById("projects").value,
+            scope: document.getElementById("scope").value,
+            task: document.getElementById("title").value,
+            phase: document.getElementById("phase") ? document.getElementById("phase").value : "",
+            date1: document.getElementById("date1").value,
+            time : document.getElementById("timeforupdatetimesheet").value,
+            comments : document.getElementById("commentsforupdatetimesheet").value,
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Update Response:", data);  // Debugging backend response
+        if (data.message) {
+            alert("Timesheet updated successfully!");
+            document.getElementById("updateTimesheetModal").style.display = "none";
+            location.reload();
+        } else {
+            alert("Error: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error("Error updating timesheet:", error);
+        alert("An error occurred while updating the timesheet.");
+    });
+}
+
+// Function to delete a task entry (Unchanged as per request)
+function deleteTask(taskId) {
+    if (confirm("Are you sure you want to delete this task?")) {
+        fetch(`/delete_task/?task_id=${taskId}`, {
+            method: "GET",
+            headers: {
+                "X-CSRFToken": getCSRFToken()
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert("Task deleted successfully!");
+                location.reload();
+            } else {
+                alert("Error: " + data.error);
+            }
+        });
+    }
+}
+
+// Function to get CSRF Token
+function getCSRFToken() {
+    let cookieValue = null;
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith("csrftoken=")) {
+            cookieValue = cookie.substring("csrftoken=".length);
+            break;
+        }
+    }
+    return cookieValue;
+}

@@ -1221,4 +1221,118 @@ def check_admin_status(request):
 
     return JsonResponse({"is_admin": is_admin})
 
+from django.http import JsonResponse
+from django.db import connection
 
+def get_task_details(request):
+    task_id = request.GET.get("task_id")
+
+    if not task_id:
+        return JsonResponse({"error": "Task ID is required"}, status=400)
+
+    try:
+        query = """
+            SELECT id, title, projects, scope, date1, time, comments 
+            FROM tracker_project 
+            WHERE id = %s
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(query, [task_id])
+            row = cursor.fetchone()
+            if not row:
+                return JsonResponse({"error": "Task not found"}, status=404)
+
+        columns = ["id", "title", "projects", "scope", "date1", "time", "comments"]
+        task = dict(zip(columns, row))
+
+        return JsonResponse(task, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+from django.http import JsonResponse
+from django.db import connection, transaction
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@csrf_exempt  # Remove in production
+def update_timesheet(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+
+    try:
+        # Parse request body
+        data = json.loads(request.body.decode("utf-8"))
+
+        print("Received Data for Update:", json.dumps(data, indent=2))  # Debugging
+
+        task_id = data.get("task_id")
+        department = data.get("list", "")
+        project_type = data.get("project_type", "")
+        scope = data.get("scope", "")
+        task = data.get("task", "")
+        phase = data.get("phase", "")
+        date1 = data.get("date1", "")
+        time = data.get("time", 0)  # Default to 0 if missing
+        comments = data.get("comments", "")
+
+        if not task_id:
+            return JsonResponse({"error": "task_id parameter is required"}, status=400)
+
+        # ✅ Debugging before updating
+        print(f"Received Time Value in Django: {time}")
+        print(f"Received Comments Value in Django: {comments}")
+
+        # Check if task exists
+        select_query = "SELECT id FROM tracker_project WHERE id = %s"
+        with connection.cursor() as cursor:
+            cursor.execute(select_query, [task_id])
+            result = cursor.fetchone()
+
+        if not result:
+            return JsonResponse({"error": "Task not found"}, status=404)
+
+        # ✅ Debug: Print update query before execution
+        print(f"Executing SQL: UPDATE tracker_project SET time = {time}, comments = '{comments}' WHERE id = {task_id}")
+
+        # Perform the update
+        update_query = """
+            UPDATE tracker_project 
+            SET title = %s, `list` = %s, projects = %s, scope = %s, category = %s, 
+                date1 = %s, time = %s, comments = %s 
+            WHERE id = %s
+        """
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    update_query,
+                    [task, department, project_type, scope, phase, date1, time, comments, task_id],
+                )
+
+        print("Update executed successfully.")  # Debugging confirmation
+
+        return JsonResponse({"message": "Timesheet updated successfully.", "updated_time": time, "updated_comments": comments}, status=200)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON format"}, status=400)
+    except Exception as e:
+        print(f"Error Updating Task ID {task_id}: {e}")  # Debugging
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+def delete_task(request):
+    task_id = request.GET.get('task_id')
+
+    if not task_id:
+        return JsonResponse({'error': 'task_id parameter is required'}, status=400)
+
+    try:
+        query = "DELETE FROM tracker_project WHERE id = %s"
+        with connection.cursor() as cursor:
+            cursor.execute(query, [task_id])
+
+        return JsonResponse({'message': 'Task deleted successfully'}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
