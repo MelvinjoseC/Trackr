@@ -318,7 +318,7 @@ function populateTimesheet(tasks) {
                             <div class="details-bottom">
                                 <p class="task-meta">
                                   
-                                    ${task.d_no ? 'DWG NO: ' + task.rev : 'Rev No'}
+                                    DWG NO: ${task.d_no ? task.d_no :' NULL '} ,  Rev No: ${task.rev ?  task.rev:' NULL'}
                                 </p>
                                 <p class="project-type">${task.projects ? task.projects : 'No Project Assigned'}</p>
                             </div>
@@ -1272,52 +1272,70 @@ function formatTime(hoursDecimal) {
 }
 
 
-// Create and append the update modal dynamically
 document.addEventListener("DOMContentLoaded", function () {
     const modalHTML = `
        <div id="updateTimesheetModal" class="modal" style="display:none;">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Update Timesheet</h2>
-        <form id="updateTimesheetForm">
-            <input type="hidden" id="task_id">
+           <div class="modal-content">
+               <span class="close">&times;</span>
+               <h2>Update Timesheet</h2>
+               <form id="updateTimesheetForm">
+                   <input type="hidden" id="task_id">
 
-            <div class="form-group">
-                <label for="title">Title:</label>
-                <input type="text" id="title" name="title" required>
-            </div>
+                   <div class="form-group">
+                       <label for="dateforupdatetimesheet">Select Date:</label>
+                       <input type="date" id="dateforupdatetimesheet" name="date1" required>
+                   </div>
 
-            <div class="form-group">
-                <label for="projects">Projects:</label>
-                <input type="text" id="projects" name="projects">
-            </div>
+                   <div class="form-group">
+                       <label for="listforupdatetimesheet">Department:</label>
+                       <select id="listforupdatetimesheet" name="list"></select>
+                   </div>
 
-            <div class="form-group">
-                <label for="scope">Scope:</label>
-                <input type="text" id="scope" name="scope">
-            </div>
+                   <div class="form-group">
+                       <label for="projectsforupdatetimesheet">Project Type:</label>
+                       <select id="projectsforupdatetimesheet" name="projects"></select>
+                   </div>
 
-            <div class="form-group">
-                <label for="date1">Date:</label>
-                <input type="date" id="date1" name="date1" required>
-            </div>
+                   <div class="form-group">
+                       <label for="scopeforupdatetimesheet">Scope:</label>
+                       <select id="scopeforupdatetimesheet" name="scope"></select>
+                   </div>
 
-            <div class="form-group">
-                <label for="time">Time (hours):</label>
-                <input type="number" step="0.1" id="timeforupdatetimesheet" name="time" required>
-            </div>
+                   <div class="form-group">
+                       <label for="titleforupdatetimesheet">Task:</label>
+                       <select id="titleforupdatetimesheet" name="title"></select>
+                   </div>
 
-            <div class="form-group">
-                <label for="comments">Comments:</label>
-                <textarea id="commentsforupdatetimesheet" name="comments"></textarea>
-            </div>
+                   <div class="form-group">
+                       <label for="categoryforupdatetimesheet">Phase:</label>
+                       <select id="categoryforupdatetimesheet" name="category"></select>
+                   </div>
 
-            <div class="form-group">
-                <button type="submit">Update Timesheet</button>
-            </div>
-        </form>
-    </div>
-</div>
+                   <div class="form-group">
+                       <label for="task_statusforupdatetimesheet">Phase Status:</label>
+                       <select id="task_statusforupdatetimesheet" name="task_status">
+                           <option value="Completed">Completed</option>
+                           <option value="Pending">Pending</option>
+                           <option value="In Progress">In Progress</option>
+                       </select>
+                   </div>
+
+                   <div class="form-group">
+                       <label for="timeforupdatetimesheet">Hours:</label>
+                       <input type="number" step="0.15" id="timeforupdatetimesheet" name="time1" required>
+                   </div>
+
+                   <div class="form-group">
+                       <label for="commentsforupdatetimesheet">Comments:</label>
+                       <textarea id="commentsforupdatetimesheet" name="comments"></textarea>
+                   </div>
+
+                   <div class="form-group">
+                       <button type="submit">Update Timesheet</button>
+                   </div>
+               </form>
+           </div>
+       </div>
     `;
     document.body.insertAdjacentHTML("beforeend", modalHTML);
 
@@ -1340,41 +1358,43 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-// Click event listener for updating and deleting tasks
-document.getElementById("timesheetContent").addEventListener("click", function(event) {
-    if (event.target.classList.contains("comment_button")) {
-        const taskId = event.target.dataset.id;  
-        openUpdateTimesheetModal(taskId);
-    } else if (event.target.classList.contains("delete_button")) {
-        const taskId = event.target.dataset.id;
-        deleteTask(taskId);
-    }
-});
+// Store dropdown data globally
+let dropdownData = {};
 
-// Function to open update modal with prefilled data
+// Function to open update modal and populate dropdowns
 function openUpdateTimesheetModal(taskId) {
+    document.getElementById("updateTimesheetModal").style.display = "flex";
+
     fetch(`/get_task_details/?task_id=${taskId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
+            console.log("API Response:", data); // Debugging
+
             if (data.error) {
                 alert("Error fetching task details: " + data.error);
                 return;
             }
 
-            document.getElementById("task_id").value = taskId;
-            document.getElementById("title").value = data.title || "";
-            document.getElementById("projects").value = data.projects || "";
-            document.getElementById("scope").value = data.scope || "";
-            document.getElementById("date1").value = data.date1 || "";
-            document.getElementById("time").value = data.time || "";
-            document.getElementById("comments").value = data.comments || "";
+            if (!data.dropdowns) {
+                console.error("⚠ Data.dropdowns is missing!", data);
+                return;
+            }
 
-            document.getElementById("updateTimesheetModal").style.display = "block";
+            const task = data.task;
+            dropdownData = data.dropdowns; // Store dropdown data for filtering
+
+            document.getElementById("task_id").value = task.id;
+            document.getElementById("dateforupdatetimesheet").value = task.date1 || "";
+            document.getElementById("task_statusforupdatetimesheet").value = task.task_status || "Completed";
+            document.getElementById("timeforupdatetimesheet").value = task.time || "";
+            document.getElementById("commentsforupdatetimesheet").value = task.comments || "";
+
+            // Populate and preselect dropdown values
+            populateDropdown("listforupdatetimesheet", dropdownData.list, task.list);
+            populateDropdown("projectsforupdatetimesheet", dropdownData.projects, task.projects);
+            populateDropdown("scopeforupdatetimesheet", dropdownData.scope, task.scope);
+            populateDropdown("titleforupdatetimesheet", dropdownData.titles, task.title);
+            populateDropdown("categoryforupdatetimesheet", dropdownData.category, task.category);
         })
         .catch(error => {
             console.error("Error fetching task details:", error);
@@ -1382,18 +1402,32 @@ function openUpdateTimesheetModal(taskId) {
         });
 }
 
+// Function to populate dropdowns dynamically
+function populateDropdown(selectId, options, selectedValue) {
+    const selectElement = document.getElementById(selectId);
+    selectElement.innerHTML = `<option value="">Select</option>`;
+
+    if (!options || !Array.isArray(options)) {
+        console.error(`⚠ No valid options for ${selectId}`);
+        return;
+    }
+
+    options.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        if (selectedValue && selectedValue === value) {
+            option.selected = true;
+        }
+        selectElement.appendChild(option);
+    });
+
+    selectElement.dispatchEvent(new Event("change"));
+}
 
 // Function to update a task entry
 function updateTask() {
     const taskId = document.getElementById("task_id").value;
-
-    // 🚀 Capture the latest input values
-
-
-    // 🚀 Debugging: Log values before sending the request
-    console.log("Before Sending:");
-    console.log("Time Value from Input Field:", time);
-    console.log("Comment Value from Input Field:", comments);
 
     fetch(`/update_task/`, {
         method: "POST",
@@ -1403,19 +1437,19 @@ function updateTask() {
         },
         body: JSON.stringify({
             task_id: taskId,
-            list: document.getElementById("list") ? document.getElementById("list").value : "",
-            project_type: document.getElementById("projects").value,
-            scope: document.getElementById("scope").value,
-            task: document.getElementById("title").value,
-            phase: document.getElementById("phase") ? document.getElementById("phase").value : "",
-            date1: document.getElementById("date1").value,
-            time : document.getElementById("timeforupdatetimesheet").value,
-            comments : document.getElementById("commentsforupdatetimesheet").value,
+            date1: document.getElementById("dateforupdatetimesheet").value,
+            list: document.getElementById("listforupdatetimesheet").value,
+            projects: document.getElementById("projectsforupdatetimesheet").value,
+            scope: document.getElementById("scopeforupdatetimesheet").value,
+            title: document.getElementById("titleforupdatetimesheet").value,
+            category: document.getElementById("categoryforupdatetimesheet").value,
+            task_status: document.getElementById("task_statusforupdatetimesheet").value,
+            time: document.getElementById("timeforupdatetimesheet").value,
+            comments: document.getElementById("commentsforupdatetimesheet").value,
         })
     })
     .then(response => response.json())
     .then(data => {
-        console.log("Update Response:", data);  // Debugging backend response
         if (data.message) {
             alert("Timesheet updated successfully!");
             document.getElementById("updateTimesheetModal").style.display = "none";
@@ -1429,6 +1463,21 @@ function updateTask() {
         alert("An error occurred while updating the timesheet.");
     });
 }
+
+
+// Click event listener for opening the update modal
+document.getElementById("timesheetContent").addEventListener("click", function(event) {
+    if (event.target.classList.contains("comment_button")) {
+        const taskId = event.target.dataset.id;  
+        openUpdateTimesheetModal(taskId);
+    } else if (event.target.classList.contains("delete_button")) {
+        const taskId = event.target.dataset.id;
+        deleteTask(taskId);
+    }
+});
+
+
+
 
 // Function to delete a task entry (Unchanged as per request)
 function deleteTask(taskId) {
