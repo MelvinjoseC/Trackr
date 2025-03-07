@@ -20,74 +20,67 @@
 
 <body>
  
-
-    <div class="main-container">
+<div class="main-container">
         <!-- Sidebar -->
 
-        <div class="sidebar">
+    <div class="sidebar">
         </br>
         <img id="fusie" src="{% static 'images/img_19.png' %}" alt="Responsive image">
-       </br></br></br></br>
-          <img id="profile_pic" src="data:image/png;base64,{{ image_base64 }}" alt="Profile Image">
-            <h4 id="profile_name"> {{ name }}</h4>
-            <!-- <p>{{ employee_id }}</p> -->
-            <p id="profile_designation" align="center">{{ designation }}</p>
+        </br></br></br></br>
+        <img id="profile_pic" src="data:image/png;base64,{{ image_base64 }}" alt="Profile Image">
+        <h4 id="profile_name"> {{ name }}</h4>
+        <!-- <p>{{ employee_id }}</p> -->
+        <p id="profile_designation" align="center">{{ designation }}</p>
 
-</br></br></br>
-<!--             <a class="sidebar-link"><img src="{% static 'images/img_8.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title">Dashboard</span></a>-->
-<div id="attendance-modal" class="modal-overlay" style="display: none;">
-    <div class="modal-content">
-        <h2>Attendance</h2>
-        <p>Here is the attendance functionality or details.</p>
-        <button id="close-modal" class="modal-close">Close</button>
-    </div>
-</div>
+        </br></br></br>
 
-<!-- Attendance Button -->
-<div class="sidebar_buttons">
-    <a class="sidebar-link" id="task-button" 
-       data-default-img="{% static 'images/task_tracker.png' %}" 
-       data-active-img="{% static 'images/task_tracker1.png' %}">
-        <img src="{% static 'images/task_tracker.png' %}" alt="Task Tracker Icon"> TASK TRACKER
-    </a>
-    <a class="sidebar-link" id="attendance-button" href="{% url "calendar"%}"
-       data-default-img="{% static 'images/attendance.png' %}" 
-       data-active-img="{% static 'images/attendance1.png' %}">
-        <img src="{% static 'images/attendance.png' %}" alt="Attendance Icon"> ATTENDANCE
-    </a>
-    <a class="sidebar-link" id="leave-button" 
-       data-default-img="{% static 'images/leavepage.png' %}" 
-       data-active-img="{% static 'images/leavepage1.png' %}">
-        <img src="{% static 'images/leavepage.png' %}" alt="Leave Tracker Icon"> LEAVE TRACKER
-  
-    </a>
-    <a class="sidebar-link" id="notifications" 
-    href="{% url 'notifications_page' %}"
-    data-default-img="{% static 'images/leavepage.png' %}" 
-    data-active-img="{% static 'images/leavepage1.png' %}">
-    <img src="{% static 'images/leavepage.png' %}" alt="Leave Tracker Icon"> NOTIFICATIONS
- </a>
- 
- 
+        <div id="attendance-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <h2>Attendance</h2>
+                <p>Here is the attendance functionality or details.</p>
+                <button id="close-modal" class="modal-close">Close</button>
+            </div>
+        </div>
 
+        <!-- Attendance Button -->
+        <div class="sidebar_buttons">
+            <a class="sidebar-link" id="task-button" 
+            data-default-img="{% static 'images/task_tracker.png' %}" 
+            data-active-img="{% static 'images/task_tracker1.png' %}">
+                <img src="{% static 'images/task_tracker.png' %}" alt="Task Tracker Icon"> TASK TRACKER
+            </a>
+            <a class="sidebar-link" id="attendance-button" href="{% url "calendar"%}"
+            data-default-img="{% static 'images/attendance.png' %}" 
+            data-active-img="{% static 'images/attendance1.png' %}">
+                <img src="{% static 'images/attendance.png' %}" alt="Attendance Icon"> ATTENDANCE
+            </a>
+            <a class="sidebar-link" id="leave-button" 
+            data-default-img="{% static 'images/leavepage.png' %}" 
+            data-active-img="{% static 'images/leavepage1.png' %}">
+                <img src="{% static 'images/leavepage.png' %}" alt="Leave Tracker Icon"> LEAVE TRACKER
 
-    <a class="sidebar-link" id="project-button" 
-    href="{% url 'project_tracker' %}" 
-    data-default-img="{% static 'images/leavepage.png' %}" 
-    data-active-img="{% static 'images/leavepage1.png' %}" 
-    style="display: none;">
-    <img src="{% static 'images/leavepage.png' %}" alt="Leave Tracker Icon"> PROJECT TRACKER
-</a>
+            </a>
+            <a class="sidebar_link" id="notifications" 
+                href="{% url 'notifications_page' %}"
+                data-default-img="{% static 'images/leavepage.png' %}" 
+                data-active-img="{% static 'images/leavepage1.png' %}">
+                <img src="{% static 'images/leavepage.png' %}" alt="notifications Icon"> NOTIFICATIONS
+            </a>
 
- 
+            <a class="sidebar_link" id="project-button" 
+            href="{% url 'project_tracker' %}" 
+            data-default-img="{% static 'images/leavepage.png' %}" 
+            data-active-img="{% static 'images/leavepage1.png' %}" 
+            style="display: none;">
+            <img src="{% static 'images/leavepage.png' %}" alt="Project Tracker Icon"> PROJECT TRACKER
+            </a>
+        </div>
 
-
-</div>
-    <a  class="sign-out sidebar-link" id="signout-button"
-        data-default-img="{% static 'images/signout.png' %}"
-        data-active-img="{% static 'images/signout1.png' %}">
-        <img src="{% static 'images/signout.png' %}" alt="Sign Out Icon"> SIGN OUT
-    </a>
+        <a  class="sign-out sidebar-link" id="signout-button"
+            data-default-img="{% static 'images/signout.png' %}"
+            data-active-img="{% static 'images/signout1.png' %}">
+            <img src="{% static 'images/signout.png' %}" alt="Sign Out Icon"> SIGN OUT
+        </a>
     </div>
         
         <!-- Main Content -->
@@ -389,7 +382,7 @@
             <!-- Task Details Section -->
             <section class="task-card">
                 <h3 id="task_details">TASK DETAILS</h3>
-                <div class="task-placeholder">
+                <div class="task_placeholder">
                     <div class="info-box">
                         
                         <img src="{% static 'images/Vector.png' %}" alt="info icon" class="info-icon">
