@@ -1339,62 +1339,36 @@ document.addEventListener("DOMContentLoaded", function () {
     `;
     document.body.insertAdjacentHTML("beforeend", modalHTML);
 
-    const modal = document.getElementById("updateTimesheetModal");
-    const closeModal = document.querySelector(".close");
-
-    closeModal.addEventListener("click", function () {
-        modal.style.display = "none";
-    });
-
-    window.addEventListener("click", function (event) {
-        if (event.target === modal) {
-            modal.style.display = "none";
-        }
+    document.querySelector(".close").addEventListener("click", function () {
+        document.getElementById("updateTimesheetModal").style.display = "none";
     });
 
     document.getElementById("updateTimesheetForm").addEventListener("submit", function (event) {
         event.preventDefault();
         updateTask();
     });
+
+    document.getElementById("listforupdatetimesheet").addEventListener("change", filterProjects);
+    document.getElementById("projectsforupdatetimesheet").addEventListener("change", filterScopes);
+    document.getElementById("scopeforupdatetimesheet").addEventListener("change", filterTasks);
+    document.getElementById("titleforupdatetimesheet").addEventListener("change", filterPhases);
 });
 
 // Store dropdown data globally
 let dropdownData = {};
 
-// Function to open update modal and populate dropdowns
 function openUpdateTimesheetModal(taskId) {
     document.getElementById("updateTimesheetModal").style.display = "flex";
 
     fetch(`/get_task_details/?task_id=${taskId}`)
         .then(response => response.json())
         .then(data => {
-            console.log("API Response:", data); // Debugging
+            console.log("Dropdown Data:", data.dropdowns);
+            dropdownData = data.dropdowns;
 
-            if (data.error) {
-                alert("Error fetching task details: " + data.error);
-                return;
-            }
-
-            if (!data.dropdowns) {
-                console.error("⚠ Data.dropdowns is missing!", data);
-                return;
-            }
-
-            const task = data.task;
-            dropdownData = data.dropdowns; // Store dropdown data for filtering
-
-            document.getElementById("task_id").value = task.id;
-            document.getElementById("dateforupdatetimesheet").value = task.date1 || "";
-            document.getElementById("task_statusforupdatetimesheet").value = task.task_status || "Completed";
-            document.getElementById("timeforupdatetimesheet").value = task.time || "";
-            document.getElementById("commentsforupdatetimesheet").value = task.comments || "";
-
-            // Populate and preselect dropdown values
-            populateDropdown("listforupdatetimesheet", dropdownData.list, task.list);
-            populateDropdown("projectsforupdatetimesheet", dropdownData.projects, task.projects);
-            populateDropdown("scopeforupdatetimesheet", dropdownData.scope, task.scope);
-            populateDropdown("titleforupdatetimesheet", dropdownData.titles, task.title);
-            populateDropdown("categoryforupdatetimesheet", dropdownData.category, task.category);
+            document.getElementById("task_id").value = data.task.id;
+            populateDropdown("listforupdatetimesheet", dropdownData.list, data.task.list);
+            filterProjects(); // Start filtering chain
         })
         .catch(error => {
             console.error("Error fetching task details:", error);
@@ -1402,21 +1376,20 @@ function openUpdateTimesheetModal(taskId) {
         });
 }
 
-// Function to populate dropdowns dynamically
 function populateDropdown(selectId, options, selectedValue) {
     const selectElement = document.getElementById(selectId);
     selectElement.innerHTML = `<option value="">Select</option>`;
 
-    if (!options || !Array.isArray(options)) {
-        console.error(`⚠ No valid options for ${selectId}`);
+    if (!options || options.length === 0) {
+        console.warn(`No valid options for ${selectId}`);
         return;
     }
 
-    options.forEach(value => {
+    options.forEach(item => {
         const option = document.createElement("option");
-        option.value = value;
-        option.textContent = value;
-        if (selectedValue && selectedValue === value) {
+        option.value = item;
+        option.textContent = item;
+        if (selectedValue && selectedValue === item) {
             option.selected = true;
         }
         selectElement.appendChild(option);
@@ -1425,9 +1398,95 @@ function populateDropdown(selectId, options, selectedValue) {
     selectElement.dispatchEvent(new Event("change"));
 }
 
+// Filtering Functions
+function filterProjects() {
+    const selectedList = document.getElementById("listforupdatetimesheet").value;
+    console.log("Selected Department:", selectedList);
+
+    if (!selectedList) return;
+
+    if (!dropdownData.projects || dropdownData.projects.length === 0) {
+        console.warn("Projects array is empty in dropdownData!");
+        return;
+    }
+
+    const filteredProjects = dropdownData.projects
+        .filter(p => p.list === selectedList)
+        .map(p => p.name);
+
+    console.log("Filtered Projects:", filteredProjects);
+    populateDropdown("projectsforupdatetimesheet", filteredProjects, "");
+    filterScopes();
+}
+
+function filterScopes() {
+    const selectedProject = document.getElementById("projectsforupdatetimesheet").value;
+    console.log("Selected Project Type:", selectedProject);
+
+    if (!selectedProject) return;
+
+    if (!dropdownData.scope || dropdownData.scope.length === 0) {
+        console.warn("Scope array is empty in dropdownData!");
+        return;
+    }
+
+    const filteredScopes = dropdownData.scope
+        .filter(s => s.project === selectedProject)
+        .map(s => s.name);
+
+    console.log("Filtered Scopes:", filteredScopes);
+    populateDropdown("scopeforupdatetimesheet", filteredScopes, "");
+    filterTasks();
+}
+
+function filterTasks() {
+    const selectedScope = document.getElementById("scopeforupdatetimesheet").value;
+    console.log("Selected Scope:", selectedScope);
+
+    if (!selectedScope) return;
+
+    if (!dropdownData.titles || dropdownData.titles.length === 0) {
+        console.warn("Titles array is empty in dropdownData!");
+        return;
+    }
+
+    const filteredTitles = dropdownData.titles
+        .filter(t => t.scope === selectedScope)
+        .map(t => t.name);
+
+    console.log("Filtered Tasks:", filteredTitles);
+    populateDropdown("titleforupdatetimesheet", filteredTitles, "");
+    filterPhases();
+}
+
+function filterPhases() {
+    const selectedTask = document.getElementById("titleforupdatetimesheet").value;
+    console.log("Selected Task:", selectedTask);
+
+    if (!selectedTask) return;
+
+    if (!dropdownData.category || dropdownData.category.length === 0) {
+        console.warn("Category array is empty in dropdownData!");
+        return;
+    }
+
+    const filteredCategories = dropdownData.category
+        .filter(c => c.task === selectedTask)
+        .map(c => c.name);
+
+    console.log("Filtered Phases:", filteredCategories);
+    populateDropdown("categoryforupdatetimesheet", filteredCategories, "");
+}
+
 // Function to update a task entry
 function updateTask() {
     const taskId = document.getElementById("task_id").value;
+    let dateValue = document.getElementById("dateforupdatetimesheet").value.trim();
+
+    // If dateValue is empty, set it to NULL instead of an empty string
+    if (!dateValue) {
+        dateValue = null;
+    }
 
     fetch(`/update_task/`, {
         method: "POST",
@@ -1437,7 +1496,7 @@ function updateTask() {
         },
         body: JSON.stringify({
             task_id: taskId,
-            date1: document.getElementById("dateforupdatetimesheet").value,
+            date1: dateValue,  // Make sure it's NULL or a valid date
             list: document.getElementById("listforupdatetimesheet").value,
             projects: document.getElementById("projectsforupdatetimesheet").value,
             scope: document.getElementById("scopeforupdatetimesheet").value,
@@ -1450,18 +1509,15 @@ function updateTask() {
     })
     .then(response => response.json())
     .then(data => {
-        if (data.message) {
-            alert("Timesheet updated successfully!");
+        if (data.error) {
+            alert("Error: " + data.error);
+        } else {
+            alert(data.message || "Timesheet updated successfully.");
             document.getElementById("updateTimesheetModal").style.display = "none";
             location.reload();
-        } else {
-            alert("Error: " + data.error);
         }
     })
-    .catch(error => {
-        console.error("Error updating timesheet:", error);
-        alert("An error occurred while updating the timesheet.");
-    });
+    .catch(error => console.error("Error updating timesheet:", error));
 }
 
 

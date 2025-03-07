@@ -1221,6 +1221,7 @@ def check_admin_status(request):
 
     return JsonResponse({"is_admin": is_admin})
 
+import json
 from django.http import JsonResponse
 from django.db import connection
 
@@ -1231,7 +1232,7 @@ def get_task_details(request):
         return JsonResponse({"error": "Task ID is required"}, status=400)
 
     try:
-        # Fetch the task details based on task_id
+        # Fetch task details
         task_query = """
             SELECT id, title, projects, scope, date1, time, comments, list, category, task_status
             FROM tracker_project 
@@ -1240,28 +1241,42 @@ def get_task_details(request):
         with connection.cursor() as cursor:
             cursor.execute(task_query, [task_id])
             row = cursor.fetchone()
-            if not row:
-                return JsonResponse({"error": "Task not found"}, status=404)
+
+        if not row:
+            return JsonResponse({"error": "Task not found"}, status=404)
 
         columns = ["id", "title", "projects", "scope", "date1", "time", "comments", "list", "category", "task_status"]
         task = dict(zip(columns, row))
 
-        # Fetch all unique dropdown values
-        dropdown_query = """
-            SELECT DISTINCT list, projects, scope, title, category FROM tracker_project
-        """
-        with connection.cursor() as cursor:
-            cursor.execute(dropdown_query)
-            dropdowns = cursor.fetchall()
+        # Fetch dropdown values dynamically
+        dropdown_data = {}
 
-        # Ensure no field is undefined
-        dropdown_data = {
-            "list": list(set([row[0] for row in dropdowns if row[0]])),
-            "projects": list(set([row[1] for row in dropdowns if row[1]])),
-            "scope": list(set([row[2] for row in dropdowns if row[2]])),
-            "titles": list(set([row[3] for row in dropdowns if row[3]])),  # Titles added
-            "category": list(set([row[4] for row in dropdowns if row[4]]))
-        }
+        # Fetch department lists
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT DISTINCT list FROM tracker_project")
+            dropdown_data["list"] = [row[0] for row in cursor.fetchall() if row[0]]
+
+        # Fetch projects based on list
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT DISTINCT list, projects FROM tracker_project")
+            dropdown_data["projects"] = [{"list": row[0], "name": row[1]} for row in cursor.fetchall() if row[0] and row[1]]
+
+        # Fetch scopes based on projects
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT DISTINCT projects, scope FROM tracker_project")
+            dropdown_data["scope"] = [{"project": row[0], "name": row[1]} for row in cursor.fetchall() if row[0] and row[1]]
+
+        # Fetch tasks based on scopes
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT DISTINCT scope, title FROM tracker_project")
+            dropdown_data["titles"] = [{"scope": row[0], "name": row[1]} for row in cursor.fetchall() if row[0] and row[1]]
+
+        # Fetch categories based on tasks
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT DISTINCT title, category FROM tracker_project")
+            dropdown_data["category"] = [{"task": row[0], "name": row[1]} for row in cursor.fetchall() if row[0] and row[1]]
+
+        print("Dropdown Data (Backend):", json.dumps(dropdown_data, indent=4))  # Debug print
 
         return JsonResponse({"task": task, "dropdowns": dropdown_data}, status=200)
 
@@ -1270,6 +1285,10 @@ def get_task_details(request):
 
 
 
+import json
+from django.http import JsonResponse
+from django.db import connection, transaction
+from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt  # Remove in production
 def update_timesheet(request):
@@ -1277,28 +1296,46 @@ def update_timesheet(request):
         return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
 
     try:
+        # Parse JSON request body
         data = json.loads(request.body.decode("utf-8"))
 
+        # Extract fields from JSON
         task_id = data.get("task_id")
-        list_value = data.get("list", "")  # Changed variable name to avoid conflict with Python keyword
-        projects = data.get("projects", "")
-        scope = data.get("scope", "")
-        title = data.get("title", "")
-        category = data.get("category", "")  # Phase is mapped to category
-        task_status = data.get("task_status", "")
-        date1 = data.get("date1", "")
+        list_value = data.get("list", "").strip()  # Avoid conflict with Python keyword
+        projects = data.get("projects", "").strip()
+        scope = data.get("scope", "").strip()
+        title = data.get("title", "").strip()
+        category = data.get("category", "").strip()  # "Phase" is mapped to category
+        task_status = data.get("task_status", "").strip()
+        date1 = data.get("date1", "").strip()
         time = data.get("time", 0)
-        comments = data.get("comments", "")
+        comments = data.get("comments", "").strip()
 
+        # Debugging: Log received data
+        print("Received Data:", data)
+
+        # Ensure task_id is provided
         if not task_id:
             return JsonResponse({"error": "task_id parameter is required"}, status=400)
 
+        # Validate date1 - If empty, set it to NULL
+        if not date1:
+            date1 = None
+
+        # Ensure 'time' is a valid number (default to 0 if invalid)
+        try:
+            time = int(time)
+        except ValueError:
+            return JsonResponse({"error": "Invalid value for 'time'. It must be an integer."}, status=400)
+
+        # Ensure task exists
         select_query = "SELECT id FROM tracker_project WHERE id = %s"
         with connection.cursor() as cursor:
             cursor.execute(select_query, [task_id])
             if not cursor.fetchone():
                 return JsonResponse({"error": "Task not found"}, status=404)
 
+        # Update task details
         update_query = """
             UPDATE tracker_project 
             SET list = %s, projects = %s, scope = %s, title = %s, category = %s, 
@@ -1317,6 +1354,7 @@ def update_timesheet(request):
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON format"}, status=400)
     except Exception as e:
+        print("Error:", str(e))  # Debugging
         return JsonResponse({"error": str(e)}, status=500)
 
 
