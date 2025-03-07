@@ -1322,7 +1322,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                    <div class="form-group">
                        <label for="timeforupdatetimesheet">Hours:</label>
-                       <input type="number" step="0.15" id="timeforupdatetimesheet" name="time1" required>
+                       <input type="number" id="timeforupdatetimesheet" name="time1" required>
                    </div>
 
                    <div class="form-group">
