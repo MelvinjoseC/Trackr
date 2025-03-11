@@ -1375,4 +1375,71 @@ def delete_task(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+from django.http import JsonResponse
+from django.db import connection
 
+def delete_leave_application_view(request, leave_id):
+    global global_user_data  # Using global variable for user authentication
+
+    if not global_user_data:
+        return JsonResponse({"error": "User not logged in."}, status=401)  # Show as popup
+
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method. Use POST instead."}, status=405)
+
+    current_user_name = global_user_data["name"]  # Get logged-in user's name
+
+    with connection.cursor() as cursor:
+        # Check if leave exists and is "Pending"
+        cursor.execute("""
+            SELECT status FROM tracker_leaveapplication 
+            WHERE id = %s AND username = %s
+        """, [leave_id, current_user_name])
+
+        leave = cursor.fetchone()
+
+        if not leave:
+            return JsonResponse({"error": "Leave application not found or unauthorized."}, status=404)
+
+        if leave[0].lower() != "pending":  # Prevent deletion if leave is already approved/rejected
+            return JsonResponse({"error": "Only pending leave applications can be deleted."}, status=403)
+
+        # Delete leave if it's pending
+        cursor.execute("""
+            DELETE FROM tracker_leaveapplication
+            WHERE id = %s AND username = %s
+        """, [leave_id, current_user_name])
+
+        return JsonResponse({"success": "✅ Leave application deleted successfully."})
+
+
+
+from django.http import JsonResponse
+from django.db import connection
+
+# Global variable to store user data
+global_user_data = None  
+
+def edit_leave_application_view(request, leave_id):
+    global global_user_data  # Use global variable
+
+    if not global_user_data:  # Check if user data is available
+        return JsonResponse({"error": "User not logged in."}, status=401)
+
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method."}, status=405)
+
+    current_user_name = global_user_data["name"]  # Get logged-in user's name
+    data = request.POST
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            UPDATE tracker_leaveapplication
+            SET start_date = %s, end_date = %s, reason = %s, leave_type = %s, updated_at = NOW()
+            WHERE id = %s AND username = %s
+        """, [data.get("start_date"), data.get("end_date"), data.get("reason"), data.get("leave_type"), leave_id, current_user_name])
+
+        if cursor.rowcount == 0:
+            return JsonResponse({"error": "Leave application not found or unauthorized."}, status=404)
+
+    return JsonResponse({"success": "Leave application updated successfully."})

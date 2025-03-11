@@ -542,7 +542,30 @@
             <button type="button" class="btn btn-primary" id="approvals-btn" onclick="toggleButton()">APPROVALS</button>
         </div>
         <div class="leave-history-content">
-            <div id="leave-container" style="display: block;"></div> <!-- Initially visible -->
+            <div id="leave-container" style="display: block;">
+                <div id="edit-modal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-btn" onclick="closeModals()">&times;</button>
+                        <h2>Edit Leave Application</h2>
+                        <input type="hidden" id="edit-leave-id">
+                        <label>Start Date:</label>
+                        <input type="date" id="edit-start-date" required>
+                        <label>End Date:</label>
+                        <input type="date" id="edit-end-date" required>
+                        <label>Reason:</label>
+                        <textarea id="edit-reason" required></textarea>
+                        <label for="leave-type">Leave Type:</label>
+                        <select id="edit-leave-type" class="modal-select" required>
+                            <option value="Full Day">Full Day</option>
+                            <option value="Half Day">Half Day</option>
+                            <option value="Work From Home">Work From Home</option>
+                        </select>
+                        <button onclick="updateLeavedata()">Update Leave</button>
+                        <button class="close-btns" onclick="closeModals()"></button>
+                    </div>
+                </div>
+            </div> <!-- Initially visible -->
+            
             <div id="approval-container" style="display: none;"></div> <!-- Initially hidden -->
         </div>
     </div>

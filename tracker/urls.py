@@ -31,5 +31,7 @@ urlpatterns = [
     path("update_task/", views.update_timesheet, name="update_timesheet"),
     path("delete_task/", views.delete_task, name="delete_task"),
     path("get_task_details/", views.get_task_details, name="get_task_details"),
+    path("leave/edit/<int:leave_id>/", views.edit_leave_application_view, name="edit_leave"),
+    path("leave/delete/<int:leave_id>/", views.delete_leave_application_view, name="delete_leave"),
 ]
 

@@ -299,7 +299,7 @@ function formatDate(dateStr) {
 //REQUESTS
 
 document.addEventListener("DOMContentLoaded", function () {
-    fetch("/api/leave-applications/")  // Use the exact endpoint from urls.py
+    fetch("/api/leave-applications/")  // Fetch leave applications
         .then(response => response.json())
         .then(data => {
             const leaveContainer = document.getElementById("leave-container"); // Ensure this container exists in your HTML
@@ -307,6 +307,16 @@ document.addEventListener("DOMContentLoaded", function () {
             data.forEach(leave => {
                 const leaveRow = document.createElement("div");
                 leaveRow.classList.add("leave-row");
+
+                // Check if status is "Pending" for enabling the edit button
+                const isEditable = leave.status.toLowerCase() === "pending";
+                const editButtonHTML = isEditable 
+                    ? `<button class="action-btn edit-btn" data-id="${leave.id}" data-start="${leave.start_date}" data-end="${leave.end_date}" data-reason="${leave.reason}" data-type="${leave.leave_type}" data-status="${leave.status}">
+                        <img src="/static/images/blue_edit_button.png">
+                       </button>`
+                    : `<button class="action-btn edit-btn disabled" disabled>
+                        <img src="/static/images/blue_edit_button_disabled.png">
+                       </button>`; // Disabled edit button
 
                 leaveRow.innerHTML = `
                     <div class="leave-cell">
@@ -333,17 +343,132 @@ document.addEventListener("DOMContentLoaded", function () {
                         <div class="leave-value">${leave.approver}</div>
                     </div>
                     <div class="leave-cell actions">
-                        <button class="action-btn"><img id="leave_comment" src="/static/images/comment_button.png"></button>
-                        <button class="action-btn"><img id="leave_edit" src="/static/images/blue_edit_button.png"></button>
-                        <button class="action-btn"><img id="leave_delete" src="/static/images/delete_button.png"></button>
+                        <button class="action-btn comment-btn"><img src="/static/images/comment_button.png"></button>
+                        ${editButtonHTML} <!-- Only enabled if status is "Pending" -->
+                        <button class="action-btn delete-btn" data-id="${leave.id}"><img src="/static/images/delete_button.png"></button>
                     </div>
                 `;
 
                 leaveContainer.appendChild(leaveRow);
             });
+
+            // Attach event listeners for Edit and Delete buttons
+            document.querySelectorAll(".edit-btn:not(.disabled)").forEach(button => {
+                button.addEventListener("click", function () {
+                    const leaveId = this.getAttribute("data-id");
+                    const startDate = this.getAttribute("data-start");
+                    const endDate = this.getAttribute("data-end");
+                    const reason = this.getAttribute("data-reason");
+                    const leaveType = this.getAttribute("data-type");
+
+                    openEditModal(leaveId, startDate, endDate, reason, leaveType);
+                });
+            });
+
+            document.querySelectorAll(".delete-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                    const leaveId = this.getAttribute("data-id");
+                    deleteLeave(leaveId);
+                });
+            });
         })
         .catch(error => console.error("Error fetching leave applications:", error));
 });
+
+// Function to open the Edit Modal
+function openEditModal(leaveId, startDate, endDate, reason, leaveType) {
+    document.getElementById("edit-leave-id").value = leaveId;
+    document.getElementById("edit-start-date").value = startDate;
+    document.getElementById("edit-end-date").value = endDate;
+    document.getElementById("edit-reason").value = reason;
+    document.getElementById("edit-leave-type").value = leaveType;
+
+    document.getElementById("edit-modal").style.display = "block"; // Show modal
+}
+
+// Function to update leave application
+async function updateLeavedata() {
+    const leaveId = document.getElementById("edit-leave-id").value;
+    const startDate = document.getElementById("edit-start-date").value;
+    const endDate = document.getElementById("edit-end-date").value;
+    const reason = document.getElementById("edit-reason").value;
+    const leaveType = document.getElementById("edit-leave-type").value;
+
+    // Get CSRF token from cookies
+    function getCSRFToken() {
+        return document.cookie.split('; ').find(row => row.startsWith('csrftoken'))?.split('=')[1];
+    }
+
+    try {
+        const response = await fetch(`/leave/edit/${leaveId}/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": getCSRFToken(),  // Add CSRF token
+            },
+            body: new URLSearchParams({
+                start_date: startDate,
+                end_date: endDate,
+                reason: reason,
+                leave_type: leaveType
+            }),
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            alert("Leave updated successfully!");
+            document.getElementById("edit-modal").style.display = "none"; // Hide modal
+            location.reload(); // Refresh page to reflect changes
+        } else {
+            alert("Error: " + data.error);
+        }
+    } catch (error) {
+        alert("Network error! Please try again.");
+    }
+}
+
+
+// Function to delete leave application
+async function deleteLeave(leaveId) {
+    if (!confirm("Are you sure you want to delete this leave?")) {
+        return;
+    }
+
+    // Function to get CSRF token from cookies
+    function getCSRFToken() {
+        return document.cookie.split('; ').find(row => row.startsWith('csrftoken'))?.split('=')[1];
+    }
+
+    try {
+        const response = await fetch(`/leave/delete/${leaveId}/`, {
+            method: "POST", // Using POST instead of DELETE
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken(),  // Add CSRF Token
+            },
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert("✅ Leave application deleted successfully!");
+            location.reload();
+        } else {
+            alert("❌ " + data.error); // Show error in popup
+        }
+    } catch (error) {
+        alert("⚠️ Network error! Please try again.");
+    }
+}
+
+
+
+
+// Function to close the modal
+function closeModals() {
+    document.getElementById("edit-modal").style.display = "none";
+}
+
 
 
 // Helper function to calculate total leave days
