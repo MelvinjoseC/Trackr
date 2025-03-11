@@ -299,6 +299,7 @@ function populateTimesheet(tasks) {
     let totalTime = 0; // Initialize total time accumulator
 
     const filteredTasks = tasks.filter(task => task.assigned === currentUserName);
+    
     if (filteredTasks.length > 0) {
         filteredTasks.forEach(task => {
             totalTime += parseFloat(task.time) || 0; // Sum the task time in decimal hours
@@ -317,52 +318,69 @@ function populateTimesheet(tasks) {
                             </div>
                             <div class="details-bottom">
                                 <p class="task-meta">
-                                  
-                                    DWG NO: ${task.d_no ? task.d_no :' NULL '} ,  Rev No: ${task.rev ?  task.rev:' NULL'}
+                                    DWG NO: ${task.d_no ? task.d_no : 'NULL'} ,  Rev No: ${task.rev ? task.rev : 'NULL'}
                                 </p>
                                 <p class="project-type">${task.projects ? task.projects : 'No Project Assigned'}</p>
                             </div>
                         </div>
-                         <div class="button-set">
-                    <button class="comment_button" data-id="${task.id}">Edit</button>
-                    <button class="delete_button" data-id="${task.id}">Delete</button>
-                </div>
+                        <div class="button-set">
+                            <button class="comment_button" data-id="${task.id}">Edit</button>
+                            <button class="delete_button" data-id="${task.id}">Delete</button>
+                        </div>
                     </div>
                 </div>
             `;
 
-
             timesheetContent.appendChild(taskRow);
         });
 
-        // Create a new total time element
         totalTimeElement = document.createElement("div");
+        totalTimeElement.classList.add("bottom_row");
         totalTimeElement.innerHTML = `
-            <div class="bottom_row">
-                <div id="calendar_view">
-                    <button id="p_calendar">Switch to Calendar View</button>
-                </div>
-                
+            <div id="calendar_view">
+                <button id="p_calendar">Switch to Calendar View</button>
             </div>
         `;
         timesheetContent.appendChild(totalTimeElement);
-
-        // Ensure the calendar is placed inside the timesheet container correctly
+        
+        } else {
+            const noDataMessage = document.createElement("p");
+            noDataMessage.textContent = "No Data Found For Selected Date";
+            noDataMessage.id = "no_data_text";
+            timesheetContent.appendChild(noDataMessage);
+        }
+        
+        // Ensure the "Switch to Calendar View" button is always created
+        let switchToCalendarBtn = document.getElementById("p_calendar");
+        if (!switchToCalendarBtn) {
+            switchToCalendarBtn = document.createElement("button");
+            switchToCalendarBtn.id = "p_calendar";
+            switchToCalendarBtn.textContent = "Switch to Calendar View";
+        
+            const bottomRow = document.createElement("div");
+            bottomRow.classList.add("bottom_row");
+            bottomRow.appendChild(switchToCalendarBtn);
+        
+            timesheetContent.appendChild(bottomRow);
+        }
+        
+        // Ensure calendar is inside timesheetContent
         if (calendarContainer && !timesheetContent.contains(calendarContainer)) {
             timesheetContent.appendChild(calendarContainer);
         }
-
-        // Add event listener to dynamically created "Switch to Calendar View" button
-        document.getElementById("p_calendar").addEventListener("click", function () {
+        
+        // Add event listener to "Switch to Calendar View" button
+        switchToCalendarBtn.addEventListener("click", function () {
+            // Hide the "No Data Found" message if it exists
+            let noDataMessage = document.getElementById("no_data_text");
+            if (noDataMessage) {
+                noDataMessage.style.display = "none";
+            }
+        
             toggleTaskInfo();
             updateSwitchText(this);
         });
-    } else {
-        const noDataMessage = document.createElement("p");
-        noDataMessage.textContent = "No Data Found";
-        noDataMessage.id = "no_data_text";
-        timesheetContent.appendChild(noDataMessage);
-    }
+        
 }
 
 // Function to hide task-info and show calendar inside the timesheet container
@@ -392,12 +410,16 @@ function toggleTaskInfo() {
     }
 }
 
-
 // Function to update switch button text dynamically
 function updateSwitchText(element) {
     const calendarContainer = document.getElementById("calendarContainer");
-    const isCalendarVisible = calendarContainer.style.display === "block";
 
+    if (!calendarContainer) {
+        console.error("Error: Calendar container not found in updateSwitchText.");
+        return;
+    }
+
+    const isCalendarVisible = calendarContainer.style.display === "block";
     element.textContent = isCalendarVisible ? "Switch to Timesheet View" : "Switch to Calendar View";
 }
 
@@ -409,14 +431,17 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Attach event listener for the "Switch to Calendar View" button
-    document.addEventListener("DOMContentLoaded", function () {
-        document.getElementById("toggleViewButton").addEventListener("click", function () {
-            toggleTaskInfo();
-            updateSwitchText(this);
-        });
-    });
-    
+    // const toggleButton = document.getElementById("toggleViewButton");
+    // if (toggleButton) {
+    //     toggleButton.addEventListener("click", function () {
+    //         toggleTaskInfo();
+    //         updateSwitchText(this);
+    //     });
+    // } else {
+    //     console.error("Error: Toggle button not found.");
+    // }
 });
+
 
 
 document.getElementById("submitTimesheetButton").addEventListener("click", submitTimesheet);
