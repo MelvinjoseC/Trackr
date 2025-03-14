@@ -33,5 +33,10 @@ urlpatterns = [
     path("get_task_details/", views.get_task_details, name="get_task_details"),
     path("leave/edit/<int:leave_id>/", views.edit_leave_application_view, name="edit_leave"),
     path("leave/delete/<int:leave_id>/", views.delete_leave_application_view, name="delete_leave"),
+    path("attendance/", views.attendance_view, name="attendance_view_raw"),
+    path('edit_attendance/',views.edit_attendance_view, name="edit-attendance"),
+    path('get_attendance/', views.get_attendance, name="get-attendance"),
+    path('get_holidays/',views.get_holidays, name="get_holidays")
+
 ]
 

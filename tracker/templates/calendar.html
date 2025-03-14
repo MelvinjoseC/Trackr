@@ -14,55 +14,140 @@
 
 </head>
 <body>
- 
 
     <div class="main-container">
         <!-- Sidebar -->
-
         <div class="sidebar">
-        </br>
-        <img id="fusie" src="{% static 'images/img_19.png' %}" alt="Responsive image">
-       </br></br></br></br>
-          <img id="profile_pic" src="data:image/png;base64,{{ image_base64 }}" alt="Profile Image">
+            </br>
+            <img id="fusie" src="{% static 'images/img_19.png' %}" alt="Responsive image">
+           </br></br></br></br>
+            <img id="profile_pic" src="data:image/png;base64,{{ image_base64 }}" alt="Profile Image">
             <h4 id="profile_name"> {{ name }}</h4>
-            <!-- <p>{{ employee_id }}</p> -->
             <p id="profile_designation" align="center">{{ designation }}</p>
-
-</br></br></br>
-<!--             <a class="sidebar-link"><img src="{% static 'images/img_8.png' %}" width="40" height="40">&nbsp;&nbsp;<span class="sidebar-title">Dashboard</span></a>-->
-<div id="attendance-modal" class="modal-overlay" style="display: none;">
-    <div class="modal-content">
-        <h2>Attendance</h2>
-        <p>Here is the attendance functionality or details.</p>
-        <button id="close-modal" class="modal-close">Close</button>
+    
+            </br></br></br>
+    
+            <!-- Sidebar Buttons -->
+            <div class="sidebar_buttons">
+                <a href="{% url 'task_dashboard' %}" class="sidebar-link" id="task-button" 
+                   data-default-img="{% static 'images/task_tracker.png' %}" 
+                   data-active-img="{% static 'images/task_tracker1.png' %}">
+                    <img src="{% static 'images/task_tracker.png' %}" alt="Task Tracker Icon"> TASK TRACKER
+                </a>
+                <a class="sidebar-link" id="attendance-button" href="{% url 'calendar' %}"
+                   data-default-img="{% static 'images/attendance.png' %}" 
+                   data-active-img="{% static 'images/attendance1.png' %}">
+                    <img src="{% static 'images/attendance.png' %}" alt="Attendance Icon"> ATTENDANCE
+                </a>
+                <a class="sidebar-link" id="leave-button" 
+                   data-default-img="{% static 'images/leavepage.png' %}" 
+                   data-active-img="{% static 'images/leavepage1.png' %}">
+                    <img src="{% static 'images/leavepage.png' %}" alt="Leave Tracker Icon"> LEAVE TRACKER
+                </a>
+                
+                {% if is_admin %}
+                    <!-- ✅ Show Project Tracker for Admins only -->
+                    <a class="sidebar_link" id="project-button" 
+                        href="{% url 'project_tracker' %}" 
+                        data-default-img="{% static 'images/leavepage.png' %}" 
+                        data-active-img="{% static 'images/leavepage1.png' %}">
+                        <img src="{% static 'images/leavepage.png' %}" alt="Project Tracker Icon"> PROJECT TRACKER
+                    </a>
+                {% else %}
+                    <!-- ✅ Show Notifications for Normal Users -->
+                    <a class="sidebar_link" id="notifications" 
+                        href="{% url 'notifications_page' %}"
+                        data-default-img="{% static 'images/leavepage.png' %}" 
+                        data-active-img="{% static 'images/leavepage1.png' %}">
+                        <img src="{% static 'images/leavepage.png' %}" alt="Notifications Icon"> NOTIFICATIONS
+                    </a>
+                {% endif %}
+            </div>
+    
+            <!-- Sign Out Button -->
+            <a class="sign-out sidebar-link" id="signout-button"
+                data-default-img="{% static 'images/signout.png' %}"
+                data-active-img="{% static 'images/signout1.png' %}">
+                <img src="{% static 'images/signout.png' %}" alt="Sign Out Icon"> SIGN OUT
+            </a>
+        </div>
+   
+    <div id="attendance-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+    
+            <form>
+                <label for="attendance-date">DATE :</label>
+                <input type="date" id="attendance-date" value="{{ today_date }}">
+    
+                <label>PUNCH IN :</label>
+                <div class="time-input-group">
+                    <select id="punch-in-hour"></select>
+                    <select id="punch-in-minute"></select>
+                </div>
+    
+                <label>PUNCH OUT :</label>
+                <div class="time-input-group">
+                    <select id="punch-out-hour"></select>
+                    <select id="punch-out-minute"></select>
+                </div>
+    
+                <label>BREAK :</label>
+                <div class="time-input-group">
+                    <select id="break-hour"></select>
+                    <select id="break-minute"></select>
+                </div>
+    
+                <h3>TOTAL HOURS : <span id="total-hours">0</span></h3>
+    
+                <button id="cancel-btn">CANCEL</button>
+                <button id="submit-btn">SUBMIT</button>
+            </form>
+        </div>
     </div>
-</div>
-
-<!-- Attendance Button -->
-<div class="sidebar_buttons">
-    <a href="{% url "task_dashboard"%}" class="sidebar-link" id="task-button" 
-       data-default-img="{% static 'images/task_tracker.png' %}" 
-       data-active-img="{% static 'images/task_tracker1.png' %}">
-        <img src="{% static 'images/task_tracker.png' %}" alt="Task Tracker Icon"> TASK TRACKER
-    </a>
-    <a  class="sidebar-link" id="attendance-button" 
-       data-default-img="{% static 'images/attendance.png' %}" 
-       data-active-img="{% static 'images/attendance1.png' %}">
-        <img src="{% static 'images/attendance.png' %}" alt="Attendance Icon"> ATTENDANCE
-    </a>
-    <a class="sidebar-link" id="leave-button" 
-       data-default-img="{% static 'images/leavepage.png' %}" 
-       data-active-img="{% static 'images/leavepage1.png' %}">
-        <img src="{% static 'images/leavepage.png' %}" alt="Leave Tracker Icon"> LEAVE TRACKER
-    </a>
-</div>
-    <a  class="sign-out sidebar-link" id="signout-button"
-        data-default-img="{% static 'images/signout.png' %}"
-        data-active-img="{% static 'images/signout1.png' %}">
-        <img src="{% static 'images/signout.png' %}" alt="Sign Out Icon"> SIGN OUT
-    </a>
+    
+    
+    
+    <!-- Edit Attendance Modal -->
+    <div id="edit-attendance-modal" class="editmodal">
+        <div class="editmodal-content">
+            <span class="close-edit-modal">&times;</span>
+    
+            <h3>EDIT ATTENDANCE</h3>
+    
+            <form method="POST" action="{% url 'edit-attendance' %}">
+                {% csrf_token %}
+    
+                <label for="edit-attendance-date">DATE :</label>
+                <input type="date" id="edit-attendance-date" name="date">
+    
+                <label>PUNCH IN :</label>
+                <div class="time-input-group">
+                    <select id="edit-punch-in-hour" name="punch_in_hour"></select>
+                    <select id="edit-punch-in-minute" name="punch_in_minute"></select>
+                </div>
+    
+                <label>PUNCH OUT :</label>
+                <div class="time-input-group">
+                    <select id="edit-punch-out-hour" name="punch_out_hour"></select>
+                    <select id="edit-punch-out-minute" name="punch_out_minute"></select>
+                </div>
+    
+                <label>BREAK :</label>
+                <div class="time-input-group">
+                    <select id="edit-break-hour" name="break_hour"></select>
+                    <select id="edit-break-minute" name="break_minute"></select>
+                </div>
+    
+                <h3>TOTAL HOURS : <span id="edit-total-hours">0</span></h3>
+    
+                <button type="submit" id="edit-submit-btn">UPDATE</button>
+            </form>
+        </div>
     </div>
-        
+    
+
+
         <!-- Main Content -->
  <div class="content">
     <div id="first-box">
@@ -139,9 +224,9 @@
     
     <div class="calendar-container">
         <div class="calendar-header">
-            <button id="prevMonth" class="nav-btn"> <img src="{% static 'images/left-arrow.png' %}" alt="Previous Month"></button>
+            <button id="prevMonth" class="nav-btn"> <img src="{% static 'images/right-arrow.png' %}" alt="Previous Month"></button>
             <h3 id="currentMonth"></h3>
-            <button id="nextMonth" class="nav-btn"><img src="{% static 'images/right-arrow.png' %}" alt="Next Month"></button>
+            <button id="nextMonth" class="nav-btn"><img src="{% static 'images/left-arrow.png' %}" alt="Next Month"></button>
         </div>
     
         <div class="calendar">
@@ -162,22 +247,6 @@
             </div>
         </div>
     </div>
-    
-    
-    
-    
-    
-    
-    
-    
-
-
-
-
-
-
-
-    
 
 </div>
 <div class="right-sidebar">
@@ -194,32 +263,29 @@
         <!-- Monthly Hours Section -->
         <div class="monthly-hours">
             <p>Monthly Hours:</p>
-            <span class="hours"><span class="red-text">142.75</span> / 189 HOURS</span>
+            <span class="hours"><span class="red-text" >142.75</span> / 189 HOURS</span>
         </div>
 
         <!-- Attendance Buttons -->
-        <div class="attendance-buttons">
+        <div class="attendence-button">
             <!-- Edit Attendance Button with Image Icon -->
-            <button class="edit-btn">
+            <button id="open-edit-modal-btn" class="edit-btn">
                 <img src="{% static 'images/edit.png' %}" alt="Edit Icon" class="btn-icon">
                 Edit Attendance
             </button>
         
             <!-- Add Attendance Button with Image Icon -->
-            <button class="add-btn">
+            <button class="add-btn" id="open-modal-btn">
                 <img src="{% static 'images/add.png' %}" alt="Add Icon" class="btn-icon">
                 Add Attendance
             </button>
         </div>
-        
+      
     </div>
 </div>
 
     </div>
-
-
-    
-
+       
 <script>
 
 </script>

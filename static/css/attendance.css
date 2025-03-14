@@ -66,6 +66,7 @@ p#profile_designation {
     text-decoration: none;
     font-size: 1.4vh;
     font-weight: 300;
+    cursor: pointer;
     color: #FFFFFF;
     gap: 1vw;
 }
@@ -74,6 +75,23 @@ p#profile_designation {
     font-size: 1.4vh;
     font-weight: bold;
     color: #FFFFFF; /* Keep text white */
+}
+
+.sidebar_link {
+    display: inline-block; 
+    width: 100%; 
+    text-decoration: none;
+    font-size: 1.4vh;
+    font-weight: 300;
+    color: #FFFFFF;
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+.sidebar_link img {
+    vertical-align: middle;
+    margin-right: 0.8vw;
+    height: 2.1vh;
+    width: 1.1vw;
 }
 
 .sidebar .sign-out {
@@ -479,21 +497,6 @@ button#date_in_daily_timesheet{
     scrollbar-width: thin;
 } */
 
-/* Right Sidebar */
-.right-sidebar {
-    position: fixed;
-    top: 2%;
-    right: 0.5%;
-    height: 100vh;
-    border-radius: 10px;
-    background: #ECECEC;
-    bottom: 0;
-    z-index: 1000;
-    width: 14.5%;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5vh;
-}
 
 /* Team Status Container */
 #team-status {
@@ -594,23 +597,6 @@ button#date_in_daily_timesheet{
     width:16px;
     height:16px;
 }
-
-
-
-/* .right-sidebar h4 {
-    margin-bottom: 20px;
-    font-size: 1.2rem;
-    color: black;
-}
-
-#team-status{
-    background-color: #FFFFFF;
-    padding: 1vw;    
-    height: 80vh;
-    border-radius: 10px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-    box-sizing: border-box;
-} */
 
 /* Team Projects Section */
 .team-projects {
@@ -893,3 +879,342 @@ button#timeSheet_button {
 }
 
 
+/* Modal Styling */
+/* ================= MODAL STYLES ================== */
+
+/* Ensure modal is hidden initially */
+/* Fullscreen Overlay */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 2000; /* Ensure modal is above sidebar */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Dark overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px; /* Ensures spacing on mobile */
+}
+
+/* Modal Content */
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    width: 90%; /* Adjusts based on screen size */
+    max-width: 450px; /* Maximum width */
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    animation: fadeIn 0.3s ease-in-out; /* Smooth animation */
+}
+
+/* Fade In Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Close Button */
+.close {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 22px;
+    cursor: pointer;
+    color: #333;
+    transition: 0.3s;
+}
+
+.close:hover {
+    color: #ff4d4d;
+}
+
+/* Form Container */
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Label Styling */
+label {
+    font-size: 16px;
+    text-align: left;
+    color: #444;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Input & Select Fields */
+input[type="date"]{
+    width: 96%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
+
+select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
+
+/* Align Time Inputs */
+.time-input-group {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.time-input-group select {
+    width: 48%; /* Makes both dropdowns equal in size */
+}
+
+/* Total Hours */
+#total-hours {
+    font-weight: bold;
+    color: #222;
+}
+
+/* Button Styles */
+button {
+    width: 100%;
+    padding: 12px;
+    cursor: pointer;
+    border: none;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+#cancel-btn {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+#cancel-btn:hover {
+    background-color: #cc0000;
+}
+
+#submit-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#submit-btn:hover {
+    background-color: #388e3c;
+}
+
+/* Responsive Fixes */
+@media screen and (max-width: 480px) {
+    .modal-content {
+        width: 95%;
+        padding: 15px;
+    }
+
+    .time-input-group select {
+        width: 45%;
+    }
+
+    button {
+        font-size: 14px;
+    }
+}
+
+/* ================= RIGHT SIDEBAR STYLES ================== */
+
+.right-sidebar {
+    position: fixed;
+    top: 2%;
+    right: 0.5%;
+    height: 96vh; /* Prevents from touching bottom */
+    border-radius: 10px;
+    background: #ECECEC;
+    width: 14.5%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5vh;
+    z-index: 1000; /* Ensure sidebar stays below modal */
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Ensure Sidebar does NOT overlap modal */
+.modal-open .right-sidebar {
+    pointer-events: none; /* Prevent interactions */
+    opacity: 0.7; /* Dim effect */
+}
+
+/* Responsive Sidebar for Smaller Screens */
+@media screen and (max-width: 1024px) {
+    .right-sidebar {
+        width: 20%; /* Increase width for better usability */
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .right-sidebar {
+        width: 100%;
+        height: auto;
+        bottom: 0;
+        top: auto;
+        position: fixed;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+        align-items: center;
+        padding: 10px;
+        border-radius: 10px 10px 0 0;
+        background: #ECECEC;
+        z-index: 1000;
+    }
+}
+
+
+
+/* Responsive Sidebar Fixes */
+@media screen and (max-width: 480px) {
+    .right-sidebar {
+        width: 100%;
+        height: auto;
+        bottom: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-evenly;
+        padding: 10px;
+        background: #ECECEC;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .sidebar-link {
+        flex-direction: column;
+        font-size: 14px;
+        padding: 5px;
+    }
+
+    .sidebar-link img {
+        width: 25px;
+        height: 25px;
+    }
+}
+
+h3{
+    color: #16151C;
+}
+
+
+/* EDIT ATTENDANCE  */
+
+/* Ensure edit modal is hidden initially */
+.editmodal {
+    display: none; /* Hides the modal until it's triggered */
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+
+/* Edit Modal Content */
+.editmodal-content {
+    background-color: #fff;
+    padding: 20px;
+    width: 90%;
+    max-width: 450px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Fade In Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Close Button */
+.close-edit-modal {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 22px;
+    cursor: pointer;
+    color: #333;
+}
+
+.close-edit-modal:hover {
+    color: #ff4d4d;
+}
+
+/* Label Styling */
+.editmodal label {
+    font-size: 16px;
+    color: #444;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Input & Select Fields */
+.editmodal input[type="date"],
+.editmodal select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
+
+/* Align Time Inputs */
+.editmodal .time-input-group {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.editmodal .time-input-group select {
+    width: 48%;
+}
+
+/* Total Hours */
+#edit-total-hours {
+    font-weight: bold;
+    color: #222;
+}
+
+/* Button Styles */
+.editmodal button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+#edit-submit-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#edit-submit-btn:hover {
+    background-color: #388e3c;
+}

@@ -20,7 +20,7 @@
 
 <body>
  
-<div class="main-container">
+    <div class="main-container">
         <!-- Sidebar -->
 
     <div class="sidebar">
@@ -49,7 +49,7 @@
             data-active-img="{% static 'images/task_tracker1.png' %}">
                 <img src="{% static 'images/task_tracker.png' %}" alt="Task Tracker Icon"> TASK TRACKER
             </a>
-            <a class="sidebar-link" id="attendance-button" href="{% url "calendar"%}"
+            <a class="sidebar-link" id="attendance-button" href="{% url 'calendar' %}"
             data-default-img="{% static 'images/attendance.png' %}" 
             data-active-img="{% static 'images/attendance1.png' %}">
                 <img src="{% static 'images/attendance.png' %}" alt="Attendance Icon"> ATTENDANCE

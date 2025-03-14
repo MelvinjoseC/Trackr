@@ -73,7 +73,7 @@ def task_dashboard(request):
     # Default data
     user_id = global_user_data.get("employee_id", None)
     name = global_user_data.get("name", "Guest")
-    designation = "No Designation"
+    designation = global_user_data.get("designation", "NO DESIGNATION")
     image_base64 = None
 
     if user_id:
@@ -882,9 +882,52 @@ def check_task_status(request):
     )
 
 
+import base64
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.db import connection
+
+global_user_data = None  # Global variable for user data
+
 def attendance_calendar(request):
-    return render(request, "calendar.html")
-    return JsonResponse({"status": None, "message": "Invalid request method"}, status=405)
+    global global_user_data  
+
+    # ✅ Ensure user is logged in
+    if not global_user_data:
+        return redirect("login_page")  # Redirect to login if not logged in
+
+    # ✅ Fetch user details from global data
+    user_id = global_user_data.get("employee_id", None)
+    name = global_user_data.get("name", "Guest")
+    designation = global_user_data.get("designation", None)  # Try from global data
+    role = global_user_data.get("role", "").lower()  # Role should be 'admin' or 'user'
+    image_base64 = None
+
+    # ✅ If designation is not found in global data, fetch from DB
+    if user_id and not designation:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT designation, image FROM employee_details WHERE employee_id = %s", [user_id])
+            result = cursor.fetchone()
+            if result:
+                designation = result[0] if result[0] else "No Designation"  # Handle missing designation
+                image_base64 = base64.b64encode(result[1]).decode("utf-8") if result[1] else None
+
+    # ✅ Determine if user is admin
+    is_admin = role == "admin"
+
+    # ✅ If request is not GET, return JSON response
+    if request.method != "GET":
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+    # ✅ Render template with user details
+    return render(request, "calendar.html", {
+        "name": name,
+        "designation": designation or "No Designation",  # Ensure designation is always present
+        "image_base64": image_base64,
+        "employee_id": user_id,
+        "is_admin": is_admin,  # Pass admin status to template
+    })
+
 
 
 from django.http import JsonResponse
@@ -1443,3 +1486,278 @@ def edit_leave_application_view(request, leave_id):
             return JsonResponse({"error": "Leave application not found or unauthorized."}, status=404)
 
     return JsonResponse({"success": "Leave application updated successfully."})
+
+
+from django.http import JsonResponse
+from django.db import connection
+from datetime import datetime, timedelta
+
+global_user_data = None  # Store the logged-in user's details globally
+
+def attendance_view(request):
+    global global_user_data  # Retrieve logged-in user data
+
+    if request.method == "POST":
+        try:
+            if not global_user_data:
+                return JsonResponse({"error": "User not logged in."}, status=401)
+
+            # ✅ Get the logged-in user's details
+            current_user_name = global_user_data.get("name")
+            current_user_id = global_user_data.get("employee_id")
+
+            if not current_user_id:
+                return JsonResponse({"error": "User ID is missing."}, status=403)
+
+            # ✅ Fetch form data (sent from JavaScript)
+            attendance_date = request.POST.get("date", "").strip()
+            punch_in = request.POST.get("punch_in", "").strip()
+            punch_out = request.POST.get("punch_out", "").strip()
+            break_time = request.POST.get("break_time", "").strip()
+            is_compensated = request.POST.get("is_compensated", "").strip()
+
+            # ✅ Debugging: Log Received Data
+            print("📢 Received Data:", {
+                "date": attendance_date,
+                "punch_in": punch_in,
+                "punch_out": punch_out,
+                "break_time": break_time,
+                "is_compensated": is_compensated
+            })
+
+            # ✅ Validate required fields
+            if not all([attendance_date, punch_in, punch_out, break_time]):
+                return JsonResponse({"error": "All fields are required!"}, status=400)
+
+            # ✅ Convert input values to proper formats
+            try:
+                attendance_date = datetime.strptime(attendance_date, "%Y-%m-%d").date()
+                punch_in = datetime.strptime(punch_in, "%H:%M:%S").time()
+                punch_out = datetime.strptime(punch_out, "%H:%M:%S").time()
+                break_time = int(break_time)
+            except ValueError as e:
+                print("📢 Invalid format error:", str(e))  # ✅ Print to Django logs
+                return JsonResponse({"error": "Invalid date or time format"}, status=400)
+
+            # ✅ Handle overnight shifts
+            dt_punch_in = datetime.combine(attendance_date, punch_in)
+            dt_punch_out = datetime.combine(attendance_date, punch_out)
+
+            if dt_punch_out < dt_punch_in:
+                dt_punch_out += timedelta(days=1)
+
+            # ✅ Calculate work duration in hours
+            work_duration = dt_punch_out - dt_punch_in - timedelta(seconds=break_time)
+            work_hours = max(0, work_duration.total_seconds() / 3600.0)  # Convert to hours
+
+            # ✅ Insert into Database
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    INSERT INTO tasktracker.tracker_attendance 
+                    (date, punch_in, punch_out, break_time, worktime, user_id, is_compensated, redeemed, username)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, 0, %s)
+                    """,
+                    [attendance_date, punch_in, punch_out, break_time, work_hours, current_user_id, is_compensated, current_user_name],
+                )
+
+            print("✅ Attendance successfully added!")  # ✅ Debugging log
+
+            return JsonResponse({
+                "message": "Attendance added successfully!",
+                "username": current_user_name,
+                "work_hours": work_hours
+            })
+
+        except Exception as e:
+            print("📢 Django Error:", str(e))  # ✅ Log full error in Django console
+            return JsonResponse({"error": f"Something went wrong: {str(e)}"}, status=500)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+from django.http import JsonResponse
+from django.db import connection
+from datetime import datetime, timedelta
+
+global_user_data = None  # Global user data
+
+def get_attendance(request):
+    global global_user_data
+
+    if not global_user_data:
+        return JsonResponse({"error": "User not logged in."}, status=401)
+
+    user_id = global_user_data.get("employee_id")
+    date = request.GET.get("date", "").strip()
+
+    if not date:
+        return JsonResponse({"error": "Date parameter is required."}, status=400)
+
+    try:
+        date_obj = datetime.strptime(date, "%Y-%m-%d").date()
+    except ValueError:
+        return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD."}, status=400)
+
+    today = datetime.today().date()  # Get current date
+
+    # ✅ Fetch attendance record from the database
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT date, punch_in, punch_out, break_time, worktime
+            FROM tasktracker.tracker_attendance 
+            WHERE user_id = %s AND date = %s
+        """, [user_id, date_obj])
+
+        row = cursor.fetchone()
+
+    # ✅ If no record exists and the date is today, return empty data instead of an error
+    if not row:
+        if date_obj == today:
+            return JsonResponse({
+                "date": date_obj.strftime("%Y-%m-%d"),
+                "punch_in": None,
+                "punch_out": None,
+                "break_time": 0,
+                "worktime": 0.0,
+                "is_full_workday": False,
+                "total_monthly_hours": 0.0,
+                "total_weekly_hours": 0.0,
+                "expected_monthly_hours": 0.0,
+                "expected_weekly_hours": 0.0,
+                "is_holiday": False,
+                "is_weekend": False
+            })  # ✅ Avoids error when page loads
+
+        return JsonResponse({"error": "No attendance record found for this date."}, status=404)
+
+    # ✅ Calculate Monthly & Weekly Work Hours
+    first_day_of_month = date_obj.replace(day=1)
+    week_start = date_obj - timedelta(days=date_obj.weekday())  # Monday of the current week
+    week_end = week_start + timedelta(days=6)  # Sunday of the current week
+
+    with connection.cursor() as cursor:
+        # ✅ Fetch total worktime for the month
+        cursor.execute("""
+            SELECT SUM(worktime) FROM tasktracker.tracker_attendance 
+            WHERE user_id = %s AND date BETWEEN %s AND %s
+        """, [user_id, first_day_of_month, date_obj])
+        total_monthly_hours = cursor.fetchone()[0] or 0.0
+
+        # ✅ Fetch total worktime for the current week
+        cursor.execute("""
+            SELECT SUM(worktime) FROM tasktracker.tracker_attendance 
+            WHERE user_id = %s AND date BETWEEN %s AND %s
+        """, [user_id, week_start, week_end])
+        total_weekly_hours = cursor.fetchone()[0] or 0.0
+
+        # ✅ Fetch holidays in the current month (excluding weekends)
+        cursor.execute("""
+            SELECT COUNT(*) FROM tracker_holiday 
+            WHERE date BETWEEN %s AND %s AND WEEKDAY(date) < 5  -- Exclude Saturdays(5) & Sundays(6)
+        """, [first_day_of_month, date_obj])
+        holiday_count = cursor.fetchone()[0] or 0
+
+    # ✅ Compute Expected Work Hours
+    days_in_month = (date_obj.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)  # Last day of month
+    total_working_days = sum(1 for i in range(1, days_in_month.day + 1)
+                             if (first_day_of_month + timedelta(days=i - 1)).weekday() < 5)  # Count Mon-Fri
+
+    expected_monthly_hours = (total_working_days - holiday_count) * 9  # 9 hours per day
+    expected_weekly_hours = 45 - (holiday_count * 9)  # 9 hours per day in a 5-day week
+
+    # ✅ Check if the date is a holiday or a weekend
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT COUNT(*) FROM tracker_holiday WHERE date = %s
+        """, [date_obj])
+        is_holiday = cursor.fetchone()[0] > 0
+        is_weekend = date_obj.weekday() in [5, 6]  # Saturday (5) or Sunday (6)
+
+    # ✅ Process Attendance Data
+    worktime = float(row[4]) if row[4] is not None else 0.0
+    is_full_workday = worktime >= 9.0  # ✅ Check if worktime meets 9-hour workday
+
+    attendance_data = {
+        "date": row[0].strftime("%Y-%m-%d"),
+        "punch_in": str(row[1]),
+        "punch_out": str(row[2]),
+        "break_time": int(row[3]),  # Ensure break time is sent as an integer
+        "worktime": worktime,
+        "is_full_workday": is_full_workday,  # ✅ Boolean flag for 9-hour workday
+        "total_monthly_hours": total_monthly_hours,
+        "total_weekly_hours": total_weekly_hours,
+        "expected_monthly_hours": expected_monthly_hours,  # ✅ Expected work hours (reduced for holidays)
+        "expected_weekly_hours": expected_weekly_hours,  # ✅ Expected weekly work hours
+        "is_holiday": is_holiday,
+        "is_weekend": is_weekend
+    }
+    return JsonResponse(attendance_data)
+
+from django.http import JsonResponse
+from django.db import connection
+from datetime import datetime, timedelta
+
+global_user_data = None  # Store the logged-in user's details globally
+
+def edit_attendance_view(request):
+    global global_user_data  # Retrieve logged-in user data
+
+    if request.method == "POST":
+        try:
+            if not global_user_data:
+                return JsonResponse({"error": "User not logged in."})  # ✅ Status 200 prevents redirection
+
+            user_id = global_user_data.get("employee_id")
+
+            # ✅ Get form data
+            attendance_date = request.POST.get("date", "").strip()
+            punch_in = request.POST.get("punch_in", "").strip()
+            punch_out = request.POST.get("punch_out", "").strip()
+            break_time = request.POST.get("break_time", "").strip()
+            is_compensated = request.POST.get("is_compensated", "0").strip()  # ✅ Ensure it is always sent
+
+            missing_fields = [field for field, value in {
+                "punch_in": punch_in,
+                "punch_out": punch_out,
+                "break_time": break_time,
+                "is_compensated": is_compensated
+            }.items() if not value]
+
+            if missing_fields:
+                return JsonResponse({"error": f"Missing fields: {', '.join(missing_fields)}"})  # ✅ Prevents redirection
+
+            # ✅ Convert input values to correct formats
+            try:
+                attendance_date = datetime.strptime(attendance_date, "%Y-%m-%d").date()
+                punch_in = datetime.strptime(punch_in, "%H:%M:%S").time()
+                punch_out = datetime.strptime(punch_out, "%H:%M:%S").time()
+                break_time_seconds = int(break_time)  # Ensure break time is stored in seconds
+                is_compensated = int(is_compensated)  # Ensure it's a valid integer
+            except ValueError:
+                return JsonResponse({"error": "Invalid date/time format!"})  # ✅ Prevents redirection
+
+            # ✅ Calculate work duration
+            dt_punch_in = datetime.combine(attendance_date, punch_in)
+            dt_punch_out = datetime.combine(attendance_date, punch_out)
+
+            if dt_punch_out < dt_punch_in:
+                dt_punch_out += timedelta(days=1)  # Handle overnight shifts
+
+            work_duration = dt_punch_out - dt_punch_in - timedelta(seconds=break_time_seconds)
+            work_hours = max(0, work_duration.total_seconds() / 3600.0)  # Convert to hours
+
+            # ✅ Update attendance record in database
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    UPDATE tasktracker.tracker_attendance
+                    SET punch_in = %s, punch_out = %s, break_time = %s, worktime = %s, is_compensated = %s
+                    WHERE user_id = %s AND date = %s
+                """, [punch_in, punch_out, break_time_seconds, work_hours, is_compensated, user_id, attendance_date])
+
+            return JsonResponse({"message": "✅ Attendance updated successfully!", "work_hours": work_hours})
+
+        except Exception as e:
+            return JsonResponse({"error": "⚠️ Failed to update attendance. Please try again."})  # ✅ Prevents redirection
+
+    return JsonResponse({"error": "Invalid request method"})  # ✅ Status 200 prevents error page
