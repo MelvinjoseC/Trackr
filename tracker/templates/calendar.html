@@ -224,10 +224,15 @@
     
     <div class="calendar-container">
         <div class="calendar-header">
-            <button id="prevMonth" class="nav-btn"> <img src="{% static 'images/right-arrow.png' %}" alt="Previous Month"></button>
+            <button id="prevMonth" class="nav-btn">
+                <img src="{% static 'images/left-arrow.png' %}" alt="Previous Month">
+            </button>
             <h3 id="currentMonth"></h3>
-            <button id="nextMonth" class="nav-btn"><img src="{% static 'images/left-arrow.png' %}" alt="Next Month"></button>
+            <button id="nextMonth" class="nav-btn">
+                <img src="{% static 'images/right-arrow.png' %}" alt="Next Month">
+            </button>
         </div>
+        
     
         <div class="calendar">
             <!-- Weekday Labels -->

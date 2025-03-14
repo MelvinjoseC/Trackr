@@ -759,6 +759,10 @@ button#timeSheet_button {
     padding-top: 1vh;
 }
 
+.day-number{
+    font-weight: bold;
+}
+
 /* Calendar Day Cells */
 .day-block {
     display: flex;
@@ -767,12 +771,11 @@ button#timeSheet_button {
     justify-content: center;
     padding: 10px;
     height: 7vh;
-    font-size: 1.4vh;
+    font-size: 1.5vh;
     border-radius: 1.5vh;
     background: white;
     border: 1px solid #ddd;
     text-align: center;
-    font-weight: bold;
     position: relative; /* Allow precise positioning */
 }
 
@@ -782,7 +785,7 @@ button#timeSheet_button {
     top: 15px;
     left: 15px;
     font-size: 1.8vh;
-    font-weight: bold;
+    
 }
 
 /* Center User Input (In, Out, Break, etc.) */

@@ -1589,110 +1589,74 @@ def get_attendance(request):
         return JsonResponse({"error": "User not logged in."}, status=401)
 
     user_id = global_user_data.get("employee_id")
+
+    # Fetch attendance for a specific date
     date = request.GET.get("date", "").strip()
+    year = request.GET.get("year", "").strip()
+    month = request.GET.get("month", "").strip()
 
-    if not date:
-        return JsonResponse({"error": "Date parameter is required."}, status=400)
+    # Handle requests for monthly attendance
+    if year and month:
+        try:
+            year = int(year)
+            month = int(month)
+        except ValueError:
+            return JsonResponse({}, status=200)  # ✅ Return empty JSON instead of an error
 
-    try:
-        date_obj = datetime.strptime(date, "%Y-%m-%d").date()
-    except ValueError:
-        return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD."}, status=400)
+        first_day = datetime(year, month, 1).date()
+        last_day = (first_day.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
 
-    today = datetime.today().date()  # Get current date
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT date, punch_in, punch_out, break_time, worktime
+                FROM tasktracker.tracker_attendance 
+                WHERE user_id = %s AND date BETWEEN %s AND %s
+                ORDER BY date ASC
+            """, [user_id, first_day, last_day])
 
-    # ✅ Fetch attendance record from the database
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT date, punch_in, punch_out, break_time, worktime
-            FROM tasktracker.tracker_attendance 
-            WHERE user_id = %s AND date = %s
-        """, [user_id, date_obj])
+            records = cursor.fetchall()
 
-        row = cursor.fetchone()
+        attendance_data = []
+        for row in records:
+            attendance_data.append({
+                "date": row[0].strftime("%Y-%m-%d"),
+                "punch_in": str(row[1]),
+                "punch_out": str(row[2]),
+                "break_time": int(row[3]),  # Convert break_time to integer
+                "worktime": float(row[4]) if row[4] is not None else 0.0
+            })
 
-    # ✅ If no record exists and the date is today, return empty data instead of an error
-    if not row:
-        if date_obj == today:
+        return JsonResponse({"attendance": attendance_data}, status=200)
+
+    # Handle single date requests
+    if date:
+        try:
+            date_obj = datetime.strptime(date, "%Y-%m-%d").date()
+        except ValueError:
+            return JsonResponse({}, status=200)  # ✅ Return empty JSON instead of an error
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT date, punch_in, punch_out, break_time, worktime
+                FROM tasktracker.tracker_attendance 
+                WHERE user_id = %s AND date = %s
+            """, [user_id, date_obj])
+
+            row = cursor.fetchone()
+
+        if row:
             return JsonResponse({
-                "date": date_obj.strftime("%Y-%m-%d"),
-                "punch_in": None,
-                "punch_out": None,
-                "break_time": 0,
-                "worktime": 0.0,
-                "is_full_workday": False,
-                "total_monthly_hours": 0.0,
-                "total_weekly_hours": 0.0,
-                "expected_monthly_hours": 0.0,
-                "expected_weekly_hours": 0.0,
-                "is_holiday": False,
-                "is_weekend": False
-            })  # ✅ Avoids error when page loads
+                "date": row[0].strftime("%Y-%m-%d"),
+                "punch_in": str(row[1]),
+                "punch_out": str(row[2]),
+                "break_time": int(row[3]),  # Ensure break time is sent as an integer
+                "worktime": float(row[4]) if row[4] is not None else 0.0
+            }, status=200)
 
-        return JsonResponse({"error": "No attendance record found for this date."}, status=404)
+        return JsonResponse({}, status=200)  # ✅ Return empty JSON instead of an error
 
-    # ✅ Calculate Monthly & Weekly Work Hours
-    first_day_of_month = date_obj.replace(day=1)
-    week_start = date_obj - timedelta(days=date_obj.weekday())  # Monday of the current week
-    week_end = week_start + timedelta(days=6)  # Sunday of the current week
+    return JsonResponse({}, status=200)  # ✅ Return empty JSON instead of an error
 
-    with connection.cursor() as cursor:
-        # ✅ Fetch total worktime for the month
-        cursor.execute("""
-            SELECT SUM(worktime) FROM tasktracker.tracker_attendance 
-            WHERE user_id = %s AND date BETWEEN %s AND %s
-        """, [user_id, first_day_of_month, date_obj])
-        total_monthly_hours = cursor.fetchone()[0] or 0.0
-
-        # ✅ Fetch total worktime for the current week
-        cursor.execute("""
-            SELECT SUM(worktime) FROM tasktracker.tracker_attendance 
-            WHERE user_id = %s AND date BETWEEN %s AND %s
-        """, [user_id, week_start, week_end])
-        total_weekly_hours = cursor.fetchone()[0] or 0.0
-
-        # ✅ Fetch holidays in the current month (excluding weekends)
-        cursor.execute("""
-            SELECT COUNT(*) FROM tracker_holiday 
-            WHERE date BETWEEN %s AND %s AND WEEKDAY(date) < 5  -- Exclude Saturdays(5) & Sundays(6)
-        """, [first_day_of_month, date_obj])
-        holiday_count = cursor.fetchone()[0] or 0
-
-    # ✅ Compute Expected Work Hours
-    days_in_month = (date_obj.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)  # Last day of month
-    total_working_days = sum(1 for i in range(1, days_in_month.day + 1)
-                             if (first_day_of_month + timedelta(days=i - 1)).weekday() < 5)  # Count Mon-Fri
-
-    expected_monthly_hours = (total_working_days - holiday_count) * 9  # 9 hours per day
-    expected_weekly_hours = 45 - (holiday_count * 9)  # 9 hours per day in a 5-day week
-
-    # ✅ Check if the date is a holiday or a weekend
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT COUNT(*) FROM tracker_holiday WHERE date = %s
-        """, [date_obj])
-        is_holiday = cursor.fetchone()[0] > 0
-        is_weekend = date_obj.weekday() in [5, 6]  # Saturday (5) or Sunday (6)
-
-    # ✅ Process Attendance Data
-    worktime = float(row[4]) if row[4] is not None else 0.0
-    is_full_workday = worktime >= 9.0  # ✅ Check if worktime meets 9-hour workday
-
-    attendance_data = {
-        "date": row[0].strftime("%Y-%m-%d"),
-        "punch_in": str(row[1]),
-        "punch_out": str(row[2]),
-        "break_time": int(row[3]),  # Ensure break time is sent as an integer
-        "worktime": worktime,
-        "is_full_workday": is_full_workday,  # ✅ Boolean flag for 9-hour workday
-        "total_monthly_hours": total_monthly_hours,
-        "total_weekly_hours": total_weekly_hours,
-        "expected_monthly_hours": expected_monthly_hours,  # ✅ Expected work hours (reduced for holidays)
-        "expected_weekly_hours": expected_weekly_hours,  # ✅ Expected weekly work hours
-        "is_holiday": is_holiday,
-        "is_weekend": is_weekend
-    }
-    return JsonResponse(attendance_data)
 
 from django.http import JsonResponse
 from django.db import connection

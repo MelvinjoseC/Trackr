@@ -154,14 +154,13 @@ document.addEventListener("DOMContentLoaded", function () {
             generateCalendar(currentDate);
         });
     }
-    
+
     if (nextMonthBtn) {
         nextMonthBtn.addEventListener("click", function () {
             currentDate.setMonth(currentDate.getMonth() + 1);
             generateCalendar(currentDate);
         });
     }
-    
 
     function generateCalendar(date) {
         timesheetContent.innerHTML = ""; // Clear previous month
@@ -170,18 +169,18 @@ document.addEventListener("DOMContentLoaded", function () {
         const month = date.getMonth();
         currentMonthHeader.textContent = `${date.toLocaleString("default", { month: "long" }).toUpperCase()} ${year}`;
 
-        const firstDay = new Date(year, month, 1).getDay(); // Get the first weekday (0 = Sunday, 6 = Saturday)
-        const daysInMonth = new Date(year, month + 1, 0).getDate(); // Get total days in the current month
-        const totalCells = 42; // Always 6 rows (6 × 7 = 42)
+        const firstDay = new Date(year, month, 1).getDay(); // First weekday of month (0 = Sunday, 6 = Saturday)
+        const daysInMonth = new Date(year, month + 1, 0).getDate(); // Total days in month
+        const totalCells = 42; // 6 rows (6 × 7 = 42)
 
         let dayCount = 0;
 
         // Step 1: Fill Empty Blocks with Previous Month's Days
-        const prevMonthDays = new Date(year, month, 0).getDate(); // Get last day of previous month
-        for (let i = firstDay - 1; i >= 0; i--) { // Fill backwards
+        const prevMonthDays = new Date(year, month, 0).getDate();
+        for (let i = firstDay - 1; i >= 0; i--) {
             const prevBlock = document.createElement("div");
             prevBlock.classList.add("day-block", "prev-month");
-            prevBlock.innerHTML = `<span>${prevMonthDays - i}</span>`; // Get previous month's last few days
+            prevBlock.innerHTML = `<span>${prevMonthDays - i}</span>`;
             timesheetContent.appendChild(prevBlock);
             dayCount++;
         }
@@ -204,7 +203,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Step 3: Fill Next Month's Days to Complete 6 Rows
         let nextMonthDay = 1;
-        while (dayCount < totalCells) { // Ensure exactly 42 cells (6 rows × 7 columns)
+        while (dayCount < totalCells) {
             const nextBlock = document.createElement("div");
             nextBlock.classList.add("day-block", "next-month");
             nextBlock.innerHTML = `<span>${nextMonthDay}</span>`;
@@ -212,10 +211,54 @@ document.addEventListener("DOMContentLoaded", function () {
             nextMonthDay++;
             dayCount++;
         }
+
+        // Fetch and Populate Attendance Data
+        fetchAttendanceData(year, month);
     }
 
-    generateCalendar(currentDate); // **Initial Load**
+    function fetchAttendanceData(year, month) {
+        fetch(`/get_attendance/?year=${year}&month=${month + 1}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error("Error fetching attendance:", data.error);
+                    return;
+                }
+    
+                // Populate the calendar with the received data
+                data.attendance.forEach(record => {
+                    const day = new Date(record.date).getDate(); // Extract day number
+                    const dayBlock = Array.from(timesheetContent.children).find(block =>
+                        block.classList.contains("day-block") &&
+                        parseInt(block.innerText) === day
+                    );
+    
+                    if (dayBlock) {
+                        dayBlock.innerHTML = `
+                            <span class="day-number">${day}</span>
+                            <div class="attendance-details">
+                                <strong>${record.worktime.toFixed(2)}</strong>
+                                <div>IN - ${record.punch_in}</div>
+                                <div>OUT - ${record.punch_out}</div>
+                                <div>BREAK - ${formatBreakTime(record.break_time)}</div>
+                            </div>
+                        `;
+                    }
+                });
+            })
+            .catch(error => console.error("Error fetching attendance:", error));
+    }
+    
+
+    function formatBreakTime(seconds) {
+        let hours = Math.floor(seconds / 3600);
+        let minutes = Math.floor((seconds % 3600) / 60);
+        return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+    }
+
+    generateCalendar(currentDate); // Initial Load
 });
+
 
 
 
