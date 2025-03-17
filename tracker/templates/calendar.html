@@ -207,32 +207,37 @@
                 <span>LAST WEEK</span>
                 <span class="user-heading">ME</span>
             </div>
-            
+        
             <div class="week-metric">
                 <p>Average Hours/Day</p>
-                <span class="highlight-text1">08:40</span>
+                <span class="highlight-text1">--:--</span> <!-- Placeholder for dynamic update -->
             </div>
-            
+        
             <hr class="divider">
-            
+        
             <div class="week-metric">
                 <p>On Time Arrival</p>
-                <span class="highlight-text2">75%</span>
+                <span class="highlight-text2">--%</span> <!-- Placeholder for dynamic update -->
             </div>
         </div>
+        
     </div> 
     
     <div class="calendar-container">
         <div class="calendar-header">
+            <!-- Previous Month Button -->
             <button id="prevMonth" class="nav-btn">
-                <img src="{% static 'images/left-arrow.png' %}" alt="Previous Month">
+                <img src="{% static 'images/left-arrow.png' %}">
             </button>
-            <h3 id="currentMonth"></h3>
+    
+            <!-- Display Current Month -->
+            <h3 id="currentMonth" data-month="" data-year="">Loading...</h3>
+    
+            <!-- Next Month Button -->
             <button id="nextMonth" class="nav-btn">
-                <img src="{% static 'images/right-arrow.png' %}" alt="Next Month">
+                <img src="{% static 'images/right-arrow.png' %}">
             </button>
         </div>
-        
     
         <div class="calendar">
             <!-- Weekday Labels -->
@@ -268,8 +273,20 @@
         <!-- Monthly Hours Section -->
         <div class="monthly-hours">
             <p>Monthly Hours:</p>
-            <span class="hours"><span class="red-text" >142.75</span> / 189 HOURS</span>
+            <span class="hours">
+                <span id="total-monthly-hours" class="red-text">0.00</span> / <span id="expected-monthly-hours">0.00</span> HOURS
+            </span>
         </div>
+        
+        <div class="weekly-hours">
+            <p>Weekly Hours:</p>
+            <span class="hours">
+                <span id="total-weekly-hours" class="red-text">0.00</span> / 
+                <span id="expected-weekly-hours">0.00</span> HOURS
+            </span>
+        </div>
+        
+        
 
         <!-- Attendance Buttons -->
         <div class="attendence-button">

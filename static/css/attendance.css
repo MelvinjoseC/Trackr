@@ -702,25 +702,15 @@ button#timeSheet_button {
     border-top-left-radius: 1.5vh;
 }
 
-/* Navigation Buttons (Now Closer to Title) */
 .nav-btn {
     background: none;
     border: none;
-    /* font-size: 2vh; */
     cursor: pointer;
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-}
-
-/* Move Left Button to the Left of Title */
-#prevMonth {
-    left: 40%;
-}
-
-/* Move Right Button to the Right of Title */
-#nextMonth {
-    right: 40%;
+    width: 40px; /* Adjust size if needed */
+    height: 40px;
 }
 
 /* Weekday Labels (With Horizontal Divider) */

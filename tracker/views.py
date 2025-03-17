@@ -1725,3 +1725,122 @@ def edit_attendance_view(request):
             return JsonResponse({"error": "⚠️ Failed to update attendance. Please try again."})  # ✅ Prevents redirection
 
     return JsonResponse({"error": "Invalid request method"})  # ✅ Status 200 prevents error page
+
+
+from django.http import JsonResponse
+from django.db import connection
+from datetime import datetime, timedelta
+
+def get_monthly_weekly_attendance(request):
+    global global_user_data
+    if not global_user_data:
+        return JsonResponse({"error": "User not logged in."}, status=401)
+
+    user_id = global_user_data.get("employee_id")
+
+    # Get today's date
+    today = datetime.today()
+
+    # Get current week (Sunday to Saturday)
+    week_start = today - timedelta(days=today.weekday() + 1)  # Get Sunday of this week
+    week_end = week_start + timedelta(days=6)  # Get Saturday of this week
+
+    # Get first and last day of the current month
+    first_day_of_month = today.replace(day=1)
+    last_day_of_month = (first_day_of_month.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+
+    with connection.cursor() as cursor:
+        # Fetch total work time for the current month
+        cursor.execute("""
+            SELECT SUM(worktime) 
+            FROM tasktracker.tracker_attendance
+            WHERE user_id = %s AND date BETWEEN %s AND %s
+        """, [user_id, first_day_of_month, today])
+        total_monthly_hours = cursor.fetchone()[0] or 0.0
+
+        # Fetch total work time for the **current week only** (Sunday to Saturday)
+        cursor.execute("""
+            SELECT SUM(worktime) 
+            FROM tasktracker.tracker_attendance
+            WHERE user_id = %s AND date BETWEEN %s AND %s
+        """, [user_id, week_start, week_end])
+        total_weekly_hours = cursor.fetchone()[0] or 0.0
+
+        # Fetch holidays in the **current week only** (excluding weekends)
+        cursor.execute("""
+            SELECT COUNT(*) 
+            FROM tracker_holiday 
+            WHERE date BETWEEN %s AND %s AND WEEKDAY(date) < 5  -- Exclude weekends
+        """, [week_start, week_end])
+        holiday_count_week = cursor.fetchone()[0] or 0
+
+    # Compute Expected Monthly Hours
+    total_working_days = sum(1 for i in range(1, last_day_of_month.day + 1)
+                             if (first_day_of_month + timedelta(days=i - 1)).weekday() < 5)
+
+    expected_monthly_hours = (total_working_days - holiday_count_week) * 9  # 9 hours per workday
+
+    # Compute **expected weekly hours only for this week (Sunday to Saturday), excluding holidays**
+    total_week_working_days = sum(
+        1 for i in range(7)  
+        if (week_start + timedelta(days=i)).weekday() < 5  # Monday-Friday only
+    )
+
+    expected_weekly_hours = (total_week_working_days - holiday_count_week) * 9  # 9 hours per workday
+
+    return JsonResponse({
+        "total_monthly_hours": total_monthly_hours,
+        "total_weekly_hours": total_weekly_hours,
+        "expected_monthly_hours": expected_monthly_hours,
+        "expected_weekly_hours": max(expected_weekly_hours, 0)  # Prevents negative values
+    })
+
+
+from django.http import JsonResponse
+from django.db import connection
+from datetime import datetime, timedelta
+
+def get_last_week_metrics(request):
+    global global_user_data
+    if not global_user_data:
+        return JsonResponse({"error": "User not logged in."}, status=401)
+
+    user_id = global_user_data.get("employee_id")
+
+    # Get last week's date range (Monday to Sunday)
+    today = datetime.today()
+    last_week_start = today - timedelta(days=today.weekday() + 7)  # Previous Monday
+    last_week_end = last_week_start + timedelta(days=6)  # Previous Sunday
+
+    with connection.cursor() as cursor:
+        # Fetch total work hours and count working days in last week
+        cursor.execute("""
+            SELECT SUM(worktime), COUNT(DISTINCT date) 
+            FROM tasktracker.tracker_attendance
+            WHERE user_id = %s AND date BETWEEN %s AND %s
+        """, [user_id, last_week_start, last_week_end])
+        worktime_data = cursor.fetchone()
+        total_hours_last_week = worktime_data[0] or 0.0
+        total_working_days = worktime_data[1] or 1  # Avoid division by zero
+
+        # Calculate Average Hours per Day
+        average_hours_per_day = total_hours_last_week / total_working_days
+
+        # Fetch total on-time arrivals (Punch-in before or at 9 AM)
+        cursor.execute("""
+            SELECT COUNT(*) 
+            FROM tasktracker.tracker_attendance
+            WHERE user_id = %s 
+            AND date BETWEEN %s AND %s 
+            AND punch_in <= '09:00:00'
+        """, [user_id, last_week_start, last_week_end])
+        on_time_count = cursor.fetchone()[0] or 0
+
+        # Calculate On-Time Arrival Percentage
+        on_time_percentage = (on_time_count / total_working_days) * 100 if total_working_days > 0 else 0.0
+
+    return JsonResponse({
+        "average_hours_per_day": f"{int(average_hours_per_day):02}:{int((average_hours_per_day % 1) * 60):02}",  # Convert to HH:MM format
+        "on_time_percentage": round(on_time_percentage, 2)
+    })
+

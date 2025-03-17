@@ -169,6 +169,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const month = date.getMonth();
         currentMonthHeader.textContent = `${date.toLocaleString("default", { month: "long" }).toUpperCase()} ${year}`;
 
+        // Ensure the calendar updates attendance summary as well
+        fetchAttendanceSummary(`${year}-${String(month + 1).padStart(2, "0")}`);
+
         const firstDay = new Date(year, month, 1).getDay(); // First weekday of month (0 = Sunday, 6 = Saturday)
         const daysInMonth = new Date(year, month + 1, 0).getDate(); // Total days in month
         const totalCells = 42; // 6 rows (6 × 7 = 42)
@@ -189,6 +192,7 @@ document.addEventListener("DOMContentLoaded", function () {
         for (let day = 1; day <= daysInMonth; day++) {
             const block = document.createElement("div");
             block.classList.add("day-block");
+            block.dataset.date = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
             block.innerHTML = `<span>${day}</span>`;
 
             // Highlight Today's Date
@@ -227,17 +231,14 @@ document.addEventListener("DOMContentLoaded", function () {
     
                 // Populate the calendar with the received data
                 data.attendance.forEach(record => {
-                    const day = new Date(record.date).getDate(); // Extract day number
-                    const dayBlock = Array.from(timesheetContent.children).find(block =>
-                        block.classList.contains("day-block") &&
-                        parseInt(block.innerText) === day
-                    );
-    
+                    const formattedDate = `${year}-${String(month + 1).padStart(2, "0")}-${String(new Date(record.date).getDate()).padStart(2, "0")}`;
+                    const dayBlock = document.querySelector(`[data-date="${formattedDate}"]`);
+
                     if (dayBlock) {
                         dayBlock.innerHTML = `
-                            <span class="day-number">${day}</span>
+                            <span class="day-number">${new Date(record.date).getDate()}</span>
                             <div class="attendance-details">
-                                <strong>${record.worktime.toFixed(2)}</strong>
+                                <strong>${record.worktime.toFixed(2)} hrs</strong>
                                 <div>IN - ${record.punch_in}</div>
                                 <div>OUT - ${record.punch_out}</div>
                                 <div>BREAK - ${formatBreakTime(record.break_time)}</div>
@@ -248,7 +249,6 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .catch(error => console.error("Error fetching attendance:", error));
     }
-    
 
     function formatBreakTime(seconds) {
         let hours = Math.floor(seconds / 3600);
@@ -256,8 +256,39 @@ document.addEventListener("DOMContentLoaded", function () {
         return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
     }
 
+    function fetchAttendanceSummary(selectedMonth) {
+        let apiUrl = `/get_monthly_weekly_attendance/`;
+        
+        if (selectedMonth) {
+            apiUrl += `?month=${selectedMonth}`;
+        }
+
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(summaryData => {
+                if (summaryData.error) {
+                    console.error("Error fetching summary data:", summaryData.error);
+                    return;
+                }
+
+                // ✅ Ensure values are numbers and handle null values gracefully
+                const totalMonthly = parseFloat(summaryData.total_monthly_hours) || 0.00;
+                const expectedMonthly = parseFloat(summaryData.expected_monthly_hours) || 0.00;
+                const totalWeekly = parseFloat(summaryData.total_weekly_hours) || 0.00;
+                const expectedWeekly = parseFloat(summaryData.expected_weekly_hours) || 0.00;
+
+                // ✅ Update UI dynamically
+                document.getElementById("total-monthly-hours").innerText = `${totalMonthly.toFixed(2)}`;
+                document.getElementById("expected-monthly-hours").innerText = `${expectedMonthly.toFixed(2)}`;
+                document.getElementById("total-weekly-hours").innerText = `${totalWeekly.toFixed(2)}`;
+                document.getElementById("expected-weekly-hours").innerText = `${expectedWeekly.toFixed(2)}`;
+            })
+            .catch(error => console.error("Error fetching summary data:", error));
+    }
+
     generateCalendar(currentDate); // Initial Load
 });
+
 
 
 
@@ -592,51 +623,55 @@ document.addEventListener("DOMContentLoaded", function () {
 // TOTAL HOURS
 
 document.addEventListener("DOMContentLoaded", function () {
-    function fetchAttendanceData(date) {
-        fetch(`/get_attendance/?date=${date}`)
+    function fetchAttendanceSummary() {
+        fetch(`/get_monthly_weekly_attendance/`)
             .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert(data.error);
+            .then(summaryData => {
+                if (summaryData.error) {
+                    alert(summaryData.error);
                     return;
                 }
 
-                // ✅ Populate Attendance Data
-                document.getElementById("attendance-date").innerText = data.date;
-                document.getElementById("punch-in-time").innerText = data.punch_in || "N/A";
-                document.getElementById("punch-out-time").innerText = data.punch_out || "N/A";
-                document.getElementById("break-time").innerText = `${Math.floor(data.break_time / 3600)} hr ${Math.floor((data.break_time % 3600) / 60)} min`;
-                document.getElementById("worktime").innerText = `${data.worktime.toFixed(2)} hrs`;
+                // ✅ Ensure values are numbers and handle null values gracefully
+                const totalMonthly = parseFloat(summaryData.total_monthly_hours) || 0.00;
+                const expectedMonthly = parseFloat(summaryData.expected_monthly_hours) || 0.00;
+                const totalWeekly = parseFloat(summaryData.total_weekly_hours) || 0.00;
+                const expectedWeekly = parseFloat(summaryData.expected_weekly_hours) || 0.00;
 
-                // ✅ Show Monthly & Weekly Work Hours
-                document.getElementById("total-monthly-hours").innerText = `${data.total_monthly_hours.toFixed(2)} / ${data.expected_monthly_hours.toFixed(2)} hrs`;
-                document.getElementById("total-weekly-hours").innerText = `${data.total_weekly_hours.toFixed(2)} / ${data.expected_weekly_hours.toFixed(2)} hrs`;
-
-                // ✅ Highlight if Worktime is less than 9 hours
-                if (data.worktime < 9.0) {
-                    document.getElementById("worktime").classList.add("low-hours");
-                } else {
-                    document.getElementById("worktime").classList.remove("low-hours");
-                }
-
-                // ✅ Show Holiday or Weekend Status
-                let statusText = "Regular Workday";
-                if (data.is_holiday) statusText = "Holiday";
-                if (data.is_weekend) statusText = "Weekend";
-                document.getElementById("workday-status").innerText = statusText;
-
+                // ✅ Display Total & Expected Monthly/Weekly Work Hours
+                document.getElementById("total-monthly-hours").innerText = `${totalMonthly.toFixed(2)}`;
+                document.getElementById("expected-monthly-hours").innerText = `${expectedMonthly.toFixed(2)}`;
+                document.getElementById("total-weekly-hours").innerText = `${totalWeekly.toFixed(2)}`;
+                document.getElementById("expected-weekly-hours").innerText = `${expectedWeekly.toFixed(2)}`;
             })
-            .catch(error => console.error("Error fetching attendance:", error));
+            .catch(error => console.error("Error fetching summary data:", error));
     }
 
-    // ✅ Automatically Fetch Attendance for Today
-    const todayDate = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
-    fetchAttendanceData(todayDate);
+    // ✅ Fetch and Display Monthly & Weekly Work Hours on Page Load
+    fetchAttendanceSummary();
+});
 
-    // ✅ Allow User to Select Another Date
-    document.getElementById("attendance-date-picker").addEventListener("change", function () {
-        fetchAttendanceData(this.value);
-    });
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    function fetchLastWeekMetrics() {
+        fetch(`/get_last_week_metrics/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error("Error fetching last week metrics:", data.error);
+                    return;
+                }
+
+                // ✅ Update UI with last week's stats
+                document.querySelector(".highlight-text1").innerText = data.average_hours_per_day;
+                document.querySelector(".highlight-text2").innerText = `${data.on_time_percentage}%`;
+            })
+            .catch(error => console.error("Error fetching last week metrics:", error));
+    }
+
+    // ✅ Fetch and display last week's work stats on page load
+    fetchLastWeekMetrics();
 });
 
 
