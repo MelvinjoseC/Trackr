@@ -39,21 +39,14 @@
                    data-active-img="{% static 'images/attendance1.png' %}">
                     <img src="{% static 'images/attendance.png' %}" alt="Attendance Icon"> ATTENDANCE
                 </a>
-                <a class="sidebar-link" id="leave-button" 
-                   data-default-img="{% static 'images/leavepage.png' %}" 
-                   data-active-img="{% static 'images/leavepage1.png' %}">
-                    <img src="{% static 'images/leavepage.png' %}" alt="Leave Tracker Icon"> LEAVE TRACKER
-                </a>
+                <a class="sidebar-link" id="leave-button" href="{% url 'mainleavepage' %}"
+                data-default-img="{% static 'images/leavepage.png' %}" 
+                data-active-img="{% static 'images/leavepage1.png' %}">
+                 <img src="{% static 'images/leavepage.png' %}" alt="Leave Tracker Icon"> LEAVE TRACKER
+             </a>
+             
                 
                 {% if is_admin %}
-                    <!-- ✅ Show Project Tracker for Admins only -->
-                    <a class="sidebar_link" id="project-button" 
-                        href="{% url 'project_tracker' %}" 
-                        data-default-img="{% static 'images/leavepage.png' %}" 
-                        data-active-img="{% static 'images/leavepage1.png' %}">
-                        <img src="{% static 'images/leavepage.png' %}" alt="Project Tracker Icon"> PROJECT TRACKER
-                    </a>
-                {% else %}
                     <!-- ✅ Show Notifications for Normal Users -->
                     <a class="sidebar_link" id="notifications" 
                         href="{% url 'notifications_page' %}"
@@ -61,6 +54,15 @@
                         data-active-img="{% static 'images/leavepage1.png' %}">
                         <img src="{% static 'images/leavepage.png' %}" alt="Notifications Icon"> NOTIFICATIONS
                     </a>
+                {% else %}
+                <!-- ✅ Show Project Tracker for Admins only -->
+                <a class="sidebar_link" id="project-button" 
+                href="{% url 'project_tracker' %}" 
+                data-default-img="{% static 'images/leavepage.png' %}" 
+                data-active-img="{% static 'images/leavepage1.png' %}">
+                <img src="{% static 'images/leavepage.png' %}" alt="Project Tracker Icon"> PROJECT TRACKER
+            </a>
+                    
                 {% endif %}
             </div>
     

@@ -1,20 +1,39 @@
-document.getElementById('leave-button').addEventListener('click', function() {
-    // Hide content and right-sidebar
-    document.querySelector('.content').style.display = 'none';
-    document.querySelector('.right-sidebar').style.display = 'none';
-
-    // Show leave_tracker
-    document.querySelector('.leave_tracker').style.display = 'block';
+document.addEventListener("DOMContentLoaded", function () {
+    // ✅ Ensure Leave Page is Displayed
+    document.querySelector(".leave_tracker").style.display = "none";
 });
 
-document.getElementById('task-button').addEventListener('click', function() {
-    // Show content and right-sidebar
-    document.querySelector('.content').style.display = 'block';
-    document.querySelector('.right-sidebar').style.display = 'block';
 
-    // Hide leave_tracker
-    document.querySelector('.leave_tracker').style.display = 'none';
+document.addEventListener("DOMContentLoaded", function () {
+    // ✅ Check if there's a saved page in localStorage
+    const activePage = localStorage.getItem("activePage");
+
+    if (activePage === "leave") {
+        showLeavePage();  // Show Leave Tracker Page
+    } else {
+        showTaskPage();   // Show Task Tracker Page (Default)
+    }
+
+    // ✅ When clicking "Leave Tracker", store page state and show it
+    document.getElementById("leave-button").addEventListener("click", function () {
+        localStorage.setItem("activePage", "leave");
+        showLeavePage();
+    });
+
+    // ✅ When clicking "Task Tracker", store page state and show it
+    document.getElementById("task-button").addEventListener("click", function () {
+        localStorage.setItem("activePage", "task");
+        showTaskPage();
+    });
+    // ✅ When clicking "attendance Tracker", store page state and show it
+    document.getElementById("attendance-button").addEventListener("click", function () {
+        localStorage.setItem("activePage", "attendance");
+        showTaskPage();
+    });
+
+
 });
+
 
 document.addEventListener("DOMContentLoaded", function() {
     fetch("/generate-pie-chart/")

@@ -7,6 +7,9 @@ body {
     flex-wrap: wrap;
 }
 
+.leave_tracker {
+    display: block !important;
+}
 
 .header {
     background-color: #162447;

@@ -38,7 +38,8 @@ urlpatterns = [
     path('get_attendance/', views.get_attendance, name="get-attendance"),
     path('get_holidays/',views.get_holidays, name="get_holidays"),
     path('get_monthly_weekly_attendance/',views.get_monthly_weekly_attendance, name='get_monthly_weekly_attendance'),
-    path('get_last_week_metrics/',views.get_last_week_metrics, name="get_last_week_metrics")
+    path('get_last_week_metrics/',views.get_last_week_metrics, name="get_last_week_metrics"),
+    path("mainleavepage/", views.mainleavepage_view, name="mainleavepage"),
 
 ]
 

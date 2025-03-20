@@ -1059,6 +1059,93 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.db import connection
 from datetime import datetime
+import json
+from django.views.decorators.csrf import csrf_exempt
+
+# Global user data (Assuming this holds logged-in user info)
+global_user_data = None  
+
+def mainleavepage_view(request):
+    global global_user_data  
+
+     # ✅ Fetch user details from global data
+    user_id = global_user_data.get("employee_id", None)
+    name = global_user_data.get("name", "Guest")
+    designation = global_user_data.get("designation", None)  # Try from global data
+    role = global_user_data.get("role", "").lower()  # Role should be 'admin' or 'user'
+    image_base64 = None
+
+    # ✅ If designation is not found in global data, fetch from DB
+    if user_id and not designation:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT designation, image FROM employee_details WHERE employee_id = %s", [user_id])
+            result = cursor.fetchone()
+            if result:
+                designation = result[0] if result[0] else "No Designation"  # Handle missing designation
+                image_base64 = base64.b64encode(result[1]).decode("utf-8") if result[1] else None
+
+    today = datetime.today().date()
+    current_year = today.year
+
+    # ✅ Fetch leave statistics
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT 
+                SUM(CASE WHEN leave_type = 'Full Day' THEN DATEDIFF(end_date, start_date) + 1 ELSE 0 END) AS full_day_leaves,
+                SUM(CASE WHEN leave_type = 'Half Day' THEN 0.5 ELSE 0 END) AS half_day_leaves,
+                SUM(CASE WHEN leave_type = 'Work From Home' THEN 0 END) AS wfh_leaves,
+                SUM(CASE WHEN status = 'Rejected' THEN 0 ELSE DATEDIFF(end_date, start_date) + 1 END) AS total_leave_taken
+            FROM tracker_leaveapplication
+            WHERE username = %s
+        """, [name])
+        
+        row = cursor.fetchone()
+        leave_statistics = {
+            "balance_leaves": 15 - (row[3] if row else 0),
+            "full_day_leaves_taken": row[0] if row else 0,
+            "compensatory_leaves": 0,
+            "unpaid_leaves": 0,
+        }
+
+    # ✅ Fetch holidays
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT name, date 
+            FROM tracker_holiday 
+            WHERE YEAR(date) = %s AND DAYOFWEEK(date) != 7  
+            ORDER BY date ASC
+        """, [current_year])
+        holidays = [{"name": row[0], "date": row[1].strftime("%Y-%m-%d")} for row in cursor.fetchall()]
+
+    # ✅ Fetch leave applications
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id, start_date, end_date, reason, username, approver, leave_type, created_at, updated_at, status
+            FROM tracker_leaveapplication
+            WHERE username = %s
+        """, [name])
+        columns = [col[0] for col in cursor.description]
+        leave_applications = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+    # ✅ Check if user is admin
+    is_admin = role == "admin"
+
+    return render(request, "mainleavepage.html", {
+        "name": name,
+        "designation": designation,
+        "image_base64": image_base64,
+        "employee_id": user_id,
+        "is_admin": is_admin,
+        "leave_statistics": leave_statistics,
+        "holidays": holidays,
+        "leave_applications": leave_applications,
+    })
+
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.db import connection
+from datetime import datetime
 
 global_user_data = None  # Store the logged-in user's details globally
 

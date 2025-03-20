@@ -816,6 +816,34 @@ button#timeSheet_button {
     color: black;
 }
 
+#prevMonth {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#nextMonth {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.nav-container {
+    position: relative;
+    text-align: center;
+    width: 100%;
+}
+
+
+#currentMonth {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    flex-grow: 1;
+}
+
 /* Edited Days */
 .edited {
     background-color: #dae6fb;

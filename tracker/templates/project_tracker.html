@@ -9,8 +9,6 @@
 
     <link rel="stylesheet" href="{% static 'css/project_tracker.css' %}">
 
-    <script src="{% static 'js/project_tracker.js' %}"></script>
-
 </head>
 <body>
 <div class="full-container">
@@ -23,58 +21,7 @@
         <!-- <p>{{ employee_id }}</p> -->
         <p id="profile_designation" align="center">{{ designation }}</p>
 
-        </br></br></br>
-
-    <!-- Popup Modal for Creating a Project -->
-    <div id="createProjectModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeCreateProjectPopup()">&times;</span>
-            <h1>Create Project</h1>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Field</th>
-                        <th>Input</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Project Name</td>
-                        <td><input type="text" id="projectName" placeholder="Enter project name"></td>
-                    </tr>
-                    <tr>
-                        <td>Start Date</td>
-                        <td><input type="date" id="startDate"></td>
-                    </tr>
-                    <tr>
-                        <td>End Date</td>
-                        <td><input type="date" id="endDate"></td>
-                    </tr>
-                    <tr>
-                        <td>Scope</td>
-                        <td><input type="text" id="scope" placeholder="Enter Scope"></td>
-                    </tr>
-                    <tr>
-                        <td>Category</td>
-                        <td><input type="text" id="category" placeholder="Enter CATEGORY"></td>
-                    </tr>
-                    <tr>
-                        <td>Benchmark</td>
-                        <td><input type="number" id="Benchmark" placeholder="Enter project Benchmark"></td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Submit Button -->
-            <button class="submit-btn">Submit</button>
-        <div id="attendance-modal" class="modal-overlay" style="display: none;">
-            <div class="modal-content">
-                <h2>Attendance</h2>
-                <p>Here is the attendance functionality or details.</p>
-                <button id="close-modal" class="modal-close">Close</button>
-            </div>
-        </div>
+        </br></br></br>    
 
         <!-- Attendance Button -->
         <div class="sidebar_buttons">
@@ -216,14 +163,62 @@
                 </table>
             </div>
         </div>
-        
     </div>
     <script>
         function submitProjectForm() {
             alert("Project submitted successfully!");
         }
     </script>
+<!-- Popup Modal for Creating a Project -->
+<div id="createProjectModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeCreateProjectPopup()">&times;</span>
+        <h1>Create Project</h1>
 
+        <table>
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Input</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Project Name</td>
+                    <td><input type="text" id="projectName" placeholder="Enter project name"></td>
+                </tr>
+                <tr>
+                    <td>Start Date</td>
+                    <td><input type="date" id="startDate"></td>
+                </tr>
+                <tr>
+                    <td>End Date</td>
+                    <td><input type="date" id="endDate"></td>
+                </tr>
+                <tr>
+                    <td>Scope</td>
+                    <td><input type="text" id="scope" placeholder="Enter Scope"></td>
+                </tr>
+                <tr>
+                    <td>Category</td>
+                    <td><input type="text" id="category" placeholder="Enter CATEGORY"></td>
+                </tr>
+                <tr>
+                    <td>Benchmark</td>
+                    <td><input type="number" id="Benchmark" placeholder="Enter project Benchmark"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Submit Button -->
+        <button class="submit-btn">Submit</button>
+    <div id="attendance-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h2>Attendance</h2>
+            <p>Here is the attendance functionality or details.</p>
+            <button id="close-modal" class="modal-close">Close</button>
+        </div>
+    </div>
     <!-- ✅ Move JavaScript to the bottom -->
     <script src="{% static 'js/project_tracker.js' %}"></script>
 
