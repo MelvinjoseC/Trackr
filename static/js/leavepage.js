@@ -31,19 +31,61 @@ document.addEventListener("DOMContentLoaded", function () {
         showTaskPage();
     });
 
-
 });
 
-
-document.addEventListener("DOMContentLoaded", function() {
+// LEAVE CHART 
+document.addEventListener("DOMContentLoaded", function () {
     fetch("/generate-pie-chart/")
-    .then(response => response.json())
-    .then(data => {
-        let pieChartDiv = document.getElementById("pie_chart");
-        pieChartDiv.innerHTML = `<img src="${data.image_base64}" alt="Pie Chart" style="width: 100%; max-width: 18vw;">`;
-    })
-    .catch(error => console.error("Error loading pie chart:", error));
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error("Error fetching pie chart data:", data.error);
+                return;
+            }
+
+            const ctx = document.getElementById("leaveChart").getContext("2d");
+
+            new Chart(ctx, {
+                type: "doughnut",
+                data: {
+                    labels: ["Balance Leave Available", "Full Day Leave Taken", "Half Day Leave Taken", "Work from Home Taken"],
+                    datasets: [{
+                        data: [data.balance_leave, data.full_day_leave, data.half_day_leave, data.work_from_home],
+                        backgroundColor: ["#4B84E5", "#A6C8FA", "#CFE2FF", "#d7e3f5"]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,  // ✅ Allows manual resizing
+                    aspectRatio: 3,  // ✅ Adjust the ratio (Lower value makes it larger, higher makes it smaller)
+                    plugins: {
+                        legend: {
+                            display: false,
+                            position: "right",
+                            labels: {
+                                font: {
+                                    size: 14 // ✅ Adjusts legend text size
+                                }
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: 20 // ✅ Adds padding around the chart
+                    }
+                }
+            });
+            
+
+            // ✅ Update the balance leave number in UI
+            document.getElementById("balance-leaves").textContent = data.balance_leave;
+            document.getElementById("Fullday-leaves").textContent = data.full_day_leave;
+            document.getElementById("Halfday-leaves").textContent = data.half_day_leave;
+            document.getElementById("wfh").textContent = data.work_from_home;
+            
+        })
+        .catch(error => console.error("Error loading pie chart:", error));
 });
+
 
 document.addEventListener("DOMContentLoaded", function () {
     const applyBtn = document.querySelector(".apply-btn");
@@ -680,3 +722,162 @@ function toggleButton() {
     }
 }
 
+//COMPENSATION LEAVE BUTTON//
+
+document.addEventListener("DOMContentLoaded", function () {
+    // ✅ Fetch and Display Compensated Worktime for User
+    fetch("/api/compensated-worktime/")
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error("Error fetching compensated worktime:", data.error);
+                return;
+            }
+
+            const tableBody = document.querySelector("#compensatedWorktimeTable tbody");
+            tableBody.innerHTML = ""; // Clear previous data
+
+            if (data.compensated_worktime.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6">No compensated worktime available.</td></tr>`;
+                return;
+            }
+
+            data.compensated_worktime.forEach(record => {
+                let row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${formatDate(record.date)}</td>
+                    <td>${record.punch_in}</td>
+                    <td>${record.punch_out}</td>
+                    <td>${record.break_time} mins</td>
+                    <td>${record.worktime} hrs</td>
+                    <td><button class="comp-leave-btn" data-id="${record.id}">Add to Comp Leave</button></td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+
+            document.querySelectorAll(".comp-leave-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                    let worktimeId = this.getAttribute("data-id");
+                    requestCompLeave(worktimeId);
+                });
+            });
+        })
+        .catch(error => console.error("Error fetching compensated worktime:", error));
+});
+
+// ✅ Function to Request Comp Leave Approval
+function requestCompLeave(worktimeId) {
+    fetch("/api/request-comp-leave/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCsrfToken(),
+        },
+        body: JSON.stringify({ id: worktimeId }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert("Error: " + data.error);
+        } else {
+            alert("✅ Request submitted for approval!");
+            location.reload();
+        }
+    })
+    .catch(error => console.error("Error requesting comp leave:", error));
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    fetch("/api/comp-leave-approvals/")
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                console.error("Error fetching pending requests:", data.error);
+                return;
+            }
+
+            const tableBody = document.querySelector("#pending-comp-leave-table tbody");
+            if (!tableBody) {
+                console.error("❌ Table body not found! Ensure the ID #pending-comp-leave-table exists.");
+                return;
+            }
+
+            tableBody.innerHTML = ""; // Clear previous data
+
+            if (data.pending_requests.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="4">No pending requests.</td></tr>`;
+                return;
+            }
+
+            data.pending_requests.forEach(request => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${formatDate(request.date)}</td>
+                    <td>${request.username}</td>
+                    <td>${request.worktime} hrs</td>
+                    <td>
+                        <button class="approval-btn" data-id="${request.id}" data-action="approve">Approve</button>
+                        <button class="rejected-btn" data-id="${request.id}" data-action="reject">Reject</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+        })
+        .catch(error => console.error("❌ Error fetching comp leave approvals:", error));
+
+    // ✅ Attach event listeners using event delegation
+    document.querySelector("#pending-comp-leave-table").addEventListener("click", function (event) {
+        if (event.target.classList.contains("approval-btn") || event.target.classList.contains("rejected-btn")) {
+            let worktimeId = event.target.getAttribute("data-id");
+            let action = event.target.getAttribute("data-action");
+            updateCompLeave(worktimeId, action);
+        }
+    });
+});
+
+// ✅ Function to Approve or Reject Comp Leave Request
+function updateCompLeave(worktimeId, action) {
+    fetch("/api/update-comp-leave/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCsrfToken(),
+        },
+        body: JSON.stringify({ id: worktimeId, action: action }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert("Error: " + data.error);
+        } else {
+            alert(`✅ Successfully ${action}d request!`);
+            location.reload();
+        }
+    })
+    .catch(error => console.error("❌ Error updating comp leave:", error));
+}
+
+
+// ✅ Helper Function: Format Date (YYYY-MM-DD → DD/MM/YYYY)
+
+
+// ✅ Helper Function: Get CSRF Token from Cookies
+function getCsrfToken() {
+    let cookieValue = null;
+    let cookies = document.cookie ? document.cookie.split("; ") : [];
+    for (let cookie of cookies) {
+        let [key, value] = cookie.split("=");
+        if (key === "csrftoken") {
+            return decodeURIComponent(value);
+        }
+    }
+    return cookieValue;
+}

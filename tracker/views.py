@@ -707,55 +707,62 @@ def submit_timesheet(request):
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
 
+from django.http import JsonResponse
+from django.db import connection
+
+# Global User Data
+global_user_data = None
+
 def generate_pie_chart(request):
-    # Data for the pie chart
-    values = [2, 6, 8, 12]  # The numbers outside the chart
-    colors = [
-        "#EEF3FF",
-        "#DAE6FB",
-        "#A5BDF1",
-        "#6389DA",
-    ]  # Colors corresponding to values
+    global global_user_data
 
-    # Create figure
-    fig, ax = plt.subplots(figsize=(5, 5))
+    # ✅ Ensure user is logged in
+    if not global_user_data:
+        return JsonResponse({"error": "User not logged in."}, status=401)
 
-    # Generate pie chart without white separators
-    wedges, texts, autotexts = ax.pie(
-        values,
-        labels=values,
-        autopct="",
-        colors=colors,
-        startangle=140,
-        wedgeprops={"linewidth": 0},  # Removes white separator lines
-        pctdistance=0.85,
-    )
+    username = global_user_data.get("name")  # Get username from global user data
 
-    # Draw a circle in the center to make it a donut chart
-    center_circle = plt.Circle((0, 0), 0.60, fc="white")
-    fig.gca().add_artist(center_circle)
+    try:
+        # ✅ Fetch Leave Data
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    COUNT(CASE WHEN leave_type = 'Full Day' THEN 1 END) AS full_day,
+                    COUNT(CASE WHEN leave_type = 'Half Day' THEN 1 END) AS half_day,
+                    COUNT(CASE WHEN leave_type = 'Work From Home' THEN 1 END) AS wfh
+                FROM tasktracker.tracker_leaveapplication 
+                WHERE username = %s AND status = 'Approved'
+            """, [username])
+            leave_data = cursor.fetchone()
 
-    # Adjust labels (font size & color)
-    for text in texts:
-        text.set_fontsize(13)
-        text.set_color("#484848")  # Set font color
+        full_day_leave = leave_data[0] or 0
+        half_day_leave = leave_data[1] or 0
+        work_from_home = leave_data[2] or 0
 
-    # Set aspect ratio
-    ax.set_aspect("equal")
+        # ✅ Fetch Attendance Data (Redeemed Leaves)
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT COUNT(*) FROM tasktracker.tracker_attendance 
+                WHERE username = %s AND redeemed = 1
+            """, [username])
+            redeemed_days = cursor.fetchone()[0] or 0
 
-    # Save the figure into a BytesIO object instead of saving it to a file
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format="png", bbox_inches="tight")
-    buffer.seek(0)
+        # ✅ Calculate Total Working Days (Base 15 + Redeemed Leaves)
+        total_working_days = 15 + redeemed_days
 
-    # Encode the image to base64
-    image_base64 = base64.b64encode(buffer.getvalue()).decode()
+        # ✅ Calculate Balance Leave Available
+        balance_leave = total_working_days - (full_day_leave + (half_day_leave * 0.5))
 
-    # Close the plot to free memory
-    plt.close()
+        return JsonResponse({
+            "balance_leave": balance_leave,
+            "full_day_leave": full_day_leave,
+            "half_day_leave": half_day_leave,
+            "work_from_home": work_from_home,
+        })
 
-    # Return the base64 image as JSON
-    return JsonResponse({"image_base64": f"data:image/png;base64,{image_base64}"})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
 
 
 @csrf_exempt  # Use if you do not want to handle CSRF manually; otherwise, pass the token from the template
@@ -1916,7 +1923,7 @@ def get_last_week_metrics(request):
         # Fetch total on-time arrivals (Punch-in before or at 9 AM)
         cursor.execute("""
             SELECT COUNT(*) 
-            FROM tasktracker.tracker_attendance
+            FROM tasktracker.tracker_attendance 
             WHERE user_id = %s 
             AND date BETWEEN %s AND %s 
             AND punch_in <= '09:00:00'
@@ -1930,4 +1937,150 @@ def get_last_week_metrics(request):
         "average_hours_per_day": f"{int(average_hours_per_day):02}:{int((average_hours_per_day % 1) * 60):02}",  # Convert to HH:MM format
         "on_time_percentage": round(on_time_percentage, 2)
     })
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.db import connection
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+# Global user data
+global_user_data = None
+
+
+def get_compensated_worktime(request):
+    """Fetch compensated worktime records for the logged-in user."""
+    global global_user_data
+
+    if not global_user_data:
+        return JsonResponse({"error": "User not logged in."}, status=401)
+
+    username = global_user_data.get("name")  # Get username from global user data
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT id, date, punch_in, punch_out, break_time, worktime, user_id, is_compensated, redeemed, username
+                FROM tasktracker.tracker_attendance 
+                WHERE is_compensated = 1 AND username = %s
+                ORDER BY date DESC
+            """, [username])
+
+            columns = [col[0] for col in cursor.description]
+            data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        return JsonResponse({"compensated_worktime": data}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+def request_comp_leave(request):
+    """User submits a request for compensatory leave approval."""
+    global global_user_data
+
+    if not global_user_data:
+        return JsonResponse({"error": "User not logged in."}, status=401)
+
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        worktime_id = data.get("id")
+
+        if not worktime_id:
+            return JsonResponse({"error": "Missing worktime ID"}, status=400)
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE tasktracker.tracker_attendance 
+                SET is_compensated = 2  -- Mark as pending approval
+                WHERE id = %s
+            """, [worktime_id])
+
+        return JsonResponse({"message": "Request submitted for approval."}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+def get_pending_comp_leave_requests(request):
+    """Admin fetches pending compensatory leave requests."""
+    global global_user_data
+
+    if not global_user_data:
+        return JsonResponse({"error": "User not logged in."}, status=401)
+
+    is_admin = global_user_data.get("is_admin", True)
+    if not is_admin:
+        return JsonResponse({"error": "Forbidden: Only admins can view this."}, status=403)
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT id, date, username, worktime
+                FROM tasktracker.tracker_attendance 
+                WHERE is_compensated = 2
+            """)
+
+            columns = [col[0] for col in cursor.description]
+            data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        return JsonResponse({"pending_requests": data}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+from django.http import JsonResponse
+from django.db import connection, transaction
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@csrf_exempt
+def update_comp_leave_status(request):
+    """Admin approves or rejects a compensatory leave request."""
+    global global_user_data
+
+    if not global_user_data:
+        return JsonResponse({"error": "User not logged in."}, status=401)
+
+    is_admin = global_user_data.get("is_admin", True)
+    if not is_admin:
+        return JsonResponse({"error": "Forbidden: Only admins can approve/reject."}, status=403)
+
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        record_id = data.get("id")
+        action = data.get("action")  # "approve" or "reject"
+
+        if not record_id or action not in ["approve", "reject"]:
+            return JsonResponse({"error": "Invalid request data."}, status=400)
+
+        with connection.cursor() as cursor:
+            if action == "approve":
+                cursor.execute("""
+                    UPDATE tasktracker.tracker_attendance
+                    SET is_compensated = 0, redeemed = 1
+                    WHERE id = %s
+                """, [record_id])
+            elif action == "reject":
+                cursor.execute("""
+                    UPDATE tasktracker.tracker_attendance
+                    SET is_compensated = 1
+                    WHERE id = %s
+                """, [record_id])
+
+        # ✅ Ensure transaction commits to the database
+        transaction.commit()
+
+        return JsonResponse({"message": f"Comp Leave {action}d successfully."}, status=200)
+
+    except Exception as e:
+        transaction.rollback()  # Rollback if there is an error
+        return JsonResponse({"error": str(e)}, status=500)
 

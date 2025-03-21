@@ -42,8 +42,112 @@ body {
     margin: auto;
     box-sizing: border-box;
     flex-wrap: wrap;
+}
+
+/* ✅ Ensure the chart container resizes properly */
+/* LEAVE STATISTICS STYLING */
 
 
+.pie-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.chart-container {
+    width: 210px;
+    height: 210px;
+}
+
+#leaveChart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.legend {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.legend-header {
+    display: flex;
+    align-items: center;
+    font-size: 22px;
+    font-weight: bold;
+    color: #1a53ff;
+}
+
+.legend-number {
+    font-size: 38px;
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.legend-title {
+    font-size: 14px;
+    font-weight: normal;
+    color: black;
+}
+
+.legend-items {
+    margin-top: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.legend-color {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.legend-text {
+    font-size: 14px;
+    color: black;
+}
+
+.legend-footer {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.legend-footer a {
+    color: blue;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .pie-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .chart-container {
+        width: 140px;
+        height: 140px;
+    }
+
+    .legend-header {
+        font-size: 18px;
+    }
+
+    .legend-number {
+        font-size: 32px;
+    }
+
+    .legend-title {
+        font-size: 12px;
+    }
 }
 
 

@@ -6,6 +6,9 @@ function closeCreateProjectPopup() {
     document.getElementById("createProjectModal").style.display = "none";
 }
 
+function submitProjectForm() {
+    alert("Project submitted successfully!");
+}
 // ✅ Ensure JavaScript runs only after DOM is fully loaded
 document.addEventListener("DOMContentLoaded", function () {
     let submitButton = document.querySelector(".submit-btn");

@@ -40,6 +40,9 @@ urlpatterns = [
     path('get_monthly_weekly_attendance/',views.get_monthly_weekly_attendance, name='get_monthly_weekly_attendance'),
     path('get_last_week_metrics/',views.get_last_week_metrics, name="get_last_week_metrics"),
     path("mainleavepage/", views.mainleavepage_view, name="mainleavepage"),
-
+    path("api/compensated-worktime/", views.get_compensated_worktime, name="compensated_worktime"),
+    path("api/request-comp-leave/", views.request_comp_leave, name="request_comp_leave"),
+    path("api/comp-leave-approvals/", views.get_pending_comp_leave_requests, name="comp_leave_approvals"),
+    path("api/update-comp-leave/", views.update_comp_leave_status, name="update_comp_leave_status"),
 ]
 

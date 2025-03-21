@@ -80,7 +80,9 @@
             <div class="leave-statistics">
                 <h2 id="ls_hd">LEAVE STATISTICS FOR THE YEAR 2025</h2>
                 <div class="pie-container">
-                    <canvas id="leaveChart"></canvas>
+                    <div class="chart-container">
+                        <canvas id="leaveChart"></canvas>
+                    </div>
                     <div class="legend">
                         <div class="legend-header">
                             <span class="legend-number" id="balance-leaves">0</span>
@@ -88,28 +90,33 @@
                         </div>
                         <div class="legend-items">
                             <div class="legend-item">
-                                <span class="legend-color" style="background-color: #4B84E5;"></span>
-                                <span class="legend-text">Balance Leave Available</span>
+                                <span class="legend-color"  style="background-color: #4B84E5;"></span>
+                                <span class="legend-text" >Balance Leave Available</span>
+                                <!-- <span class="legend-numbers" id="balance-leaves">0</span> -->
                             </div>
                             <div class="legend-item">
-                                <span class="legend-color" style="background-color: #A6C8FA;"></span>
-                                <span class="legend-text">Full Day Leave Taken: <span id="full-day-leaves">0</span></span>
+                                <span class="legend-color"  style="background-color: #A6C8FA;"></span>
+                                <span class="legend-text" >Full Day Leave Taken</span>
+                                <!-- <span class="legend-numbers" id="Fullday-leaves">0</span> -->
                             </div>
                             <div class="legend-item">
-                                <span class="legend-color" style="background-color: #CFE2FF;"></span>
-                                <span class="legend-text">Compensatory Leaves: <span id="compensatory-leaves">0</span></span>
+                                <span class="legend-color"  style="background-color: #CFE2FF;"></span>
+                                <span class="legend-text"  >Half Day Leave Taken</span>
+                                <!-- <span class="legend-numbers" id="Halfday-leaves">0</span> -->
                             </div>
                             <div class="legend-item">
-                                <span class="legend-color" style="background-color: #d3d3d3;"></span>
-                                <span class="legend-text">Unpaid Leaves: <span id="unpaid-leaves">0</span></span>
+                                <span class="legend-color"  style="background-color: #d7e3f5"></span>
+                                <span class="legend-text">Work from Home Taken</span>
+                                <!-- <span class="legend-numbers" id="wfh">0</span> -->
                             </div>
-                        </div>
-                        <div class="legend-footer">
-                            <a href="/company-leave-policy/">Know More About Company Leave Policy</a>
                         </div>
                     </div>
                 </div>
-            </div>            
+                <div class="legend-footer">
+                    <a href="/company-leave-policy/">Know More About Company Leave Policy</a>
+                </div>
+            </div>
+                       
             <div class="upcoming-holidays">
                 <h2 id="uh_hd">UPCOMING HOLIDAYS FOR THE YEAR 2025</h2>
                 <div class="holiday-table" id="holiday-container">
@@ -193,6 +200,7 @@
             <span>Past Leave History</span>
             <img id="filter_button" src="{% static 'images/filter_button.png' %}">
             <button type="button" class="btn btn-primary" id="approvals-btn" onclick="toggleButton()">APPROVALS</button>
+            <button type="button" class="btn btn-primary" id="compleave-btn" >COMP LEAVE BALANCE</button>
         </div>
         <div class="leave-history-content">
             <div id="leave-container" style="display: block;">
@@ -223,6 +231,39 @@
         </div>
     </div>
     </div>
+    <div class="compensated-worktime-section">
+        <h2>Compensated Worktime</h2>
+        <table id="compensatedWorktimeTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Punch In</th>
+                    <th>Punch Out</th>
+                    <th>Break Time</th>
+                    <th>Work Time</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data inserted dynamically -->
+            </tbody>
+        </table>
+    </div>
+    <table id="pending-comp-leave-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Username</th>
+                <th>Worktime</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be populated here -->
+        </tbody>
+    </table>
+    
+     
 </body>
        
 <script>
