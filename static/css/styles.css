@@ -694,3 +694,42 @@ body {
 .holiday-table::-webkit-scrollbar-track {
     background: #f0f0f0;
 }
+
+.compensated-worktime-section {
+    transition: all 0.3s ease-in-out;
+    width: 100%;
+}
+
+.compensated-worktime-section {
+    display: none;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+table {
+    width: 98%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+table th, table td {
+    border: 1px solid #9e8d8d;
+    padding: 8px;
+    text-align: left;
+}
+
+button#compleave-btn {
+    float: right;
+    margin-right: 20px;
+    padding: 8px 15px;
+    background: #4B84E5;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+button#compleave-btn:hover {
+    background: #3570c1;
+}

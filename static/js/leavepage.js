@@ -673,7 +673,6 @@ document.addEventListener("DOMContentLoaded", function () {
     
 });
 
-
 document.addEventListener("DOMContentLoaded", function () {
     fetch('/api/check-admin-status/', {
         method: 'GET',
@@ -685,16 +684,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const approvalButton = document.getElementById("approvals-btn");
 
-        if (data.is_admin) {
-            console.log("✅ User is admin, showing button");
-            approvalButton.style.display = "block";  // ✅ Show button for admins
+        if (data.is_admin || data.is_md) {  // ✅ Allow if Admin OR MD
+            console.log("✅ User is Admin or MD, showing button");
+            approvalButton.style.display = "block";  // ✅ Show button for Admins & MDs
         } else {
-            console.log("❌ User is NOT admin, hiding button");
-            approvalButton.style.display = "none";   // ❌ Hide button for non-admins
+            console.log("❌ User is NOT authorized, hiding button");
+            approvalButton.style.display = "none";   // ❌ Hide button for others
         }
     })
-    .catch(error => console.error("❌ Error fetching admin status:", error));
+    .catch(error => console.error("❌ Error fetching admin/MD status:", error));
 });
+
 
 
 // ✅ Now define toggleButton AFTER loadApprovals
@@ -749,7 +749,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <td>${formatDate(record.date)}</td>
                     <td>${record.punch_in}</td>
                     <td>${record.punch_out}</td>
-                    <td>${record.break_time} mins</td>
+                   <td>${convertToHoursMinutes(record.break_time)}</td>
                     <td>${record.worktime} hrs</td>
                     <td><button class="comp-leave-btn" data-id="${record.id}">Add to Comp Leave</button></td>
                 `;
@@ -766,6 +766,22 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(error => console.error("Error fetching compensated worktime:", error));
 });
+
+function convertToHoursMinutes(totalMinutes) {
+    if (totalMinutes < 60) {
+        return `${totalMinutes} min`; // If less than 60, only display minutes
+    }
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    
+    let formattedTime = hours > 0 ? `${hours} hr` : "";
+    if (minutes > 0) {
+        formattedTime += ` ${minutes} min`;
+    }
+    
+    return formattedTime.trim(); // Remove extra spaces
+}
+
 
 // ✅ Function to Request Comp Leave Approval
 function requestCompLeave(worktimeId) {
@@ -881,3 +897,29 @@ function getCsrfToken() {
     }
     return cookieValue;
 }
+
+
+
+// COMPLEAVE BUTTON
+document.addEventListener("DOMContentLoaded", function () {
+    const compLeaveBtn = document.getElementById("compleave-btn");
+    const leaveHistorySection = document.querySelector(".leave-history-content");
+    const compWorktimeSection = document.querySelector(".compensated-worktime-section");
+
+    // Initially hide the compensated worktime section
+    compWorktimeSection.style.display = "none";
+
+    compLeaveBtn.addEventListener("click", function () {
+        if (leaveHistorySection.style.display !== "none") {
+            // Hide leave history and show compensated worktime section
+            leaveHistorySection.style.display = "none";
+            compWorktimeSection.style.display = "block";
+            compLeaveBtn.textContent = "GO BACK";
+        } else {
+            // Show leave history and hide compensated worktime section
+            leaveHistorySection.style.display = "block";
+            compWorktimeSection.style.display = "none";
+            compLeaveBtn.textContent = "COMP LEAVE BALANCE";
+        }
+    });
+});

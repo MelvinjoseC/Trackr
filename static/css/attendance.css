@@ -502,7 +502,7 @@ button#date_in_daily_timesheet{
 #team-status {
     background-color: #FFFFFF;
     padding: 1vw;
-    height: 87.2vh;
+    height: 96.8vh;
     border-radius: 10px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
@@ -697,7 +697,7 @@ button#timeSheet_button {
     font-weight: bold;
     position: relative; /* Allow buttons to be positioned near the title */
     background-color: white;
-    height: 5vh;
+    height: 7vh;
     border-top-right-radius: 1.5vh;
     border-top-left-radius: 1.5vh;
 }
@@ -747,6 +747,7 @@ button#timeSheet_button {
     grid-template-rows: repeat(6, auto); /* Fixed 6 rows */
     gap: 0.5vh;
     padding-top: 1vh;
+    height: 64vh;
 }
 
 .day-number{
@@ -760,7 +761,7 @@ button#timeSheet_button {
     align-items: center;
     justify-content: center;
     padding: 10px;
-    height: 7vh;
+    height: 7.5vh;
     font-size: 1.5vh;
     border-radius: 1.5vh;
     background: white;

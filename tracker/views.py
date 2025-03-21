@@ -1067,6 +1067,7 @@ from django.http import JsonResponse
 from django.db import connection
 from datetime import datetime
 import json
+import base64
 from django.views.decorators.csrf import csrf_exempt
 
 # Global user data (Assuming this holds logged-in user info)
@@ -1075,7 +1076,10 @@ global_user_data = None
 def mainleavepage_view(request):
     global global_user_data  
 
-     # ✅ Fetch user details from global data
+    if not global_user_data:
+        return JsonResponse({"error": "User not logged in."}, status=401)
+
+    # ✅ Fetch user details from global data
     user_id = global_user_data.get("employee_id", None)
     name = global_user_data.get("name", "Guest")
     designation = global_user_data.get("designation", None)  # Try from global data
@@ -1093,26 +1097,6 @@ def mainleavepage_view(request):
 
     today = datetime.today().date()
     current_year = today.year
-
-    # ✅ Fetch leave statistics
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT 
-                SUM(CASE WHEN leave_type = 'Full Day' THEN DATEDIFF(end_date, start_date) + 1 ELSE 0 END) AS full_day_leaves,
-                SUM(CASE WHEN leave_type = 'Half Day' THEN 0.5 ELSE 0 END) AS half_day_leaves,
-                SUM(CASE WHEN leave_type = 'Work From Home' THEN 0 END) AS wfh_leaves,
-                SUM(CASE WHEN status = 'Rejected' THEN 0 ELSE DATEDIFF(end_date, start_date) + 1 END) AS total_leave_taken
-            FROM tracker_leaveapplication
-            WHERE username = %s
-        """, [name])
-        
-        row = cursor.fetchone()
-        leave_statistics = {
-            "balance_leaves": 15 - (row[3] if row else 0),
-            "full_day_leaves_taken": row[0] if row else 0,
-            "compensatory_leaves": 0,
-            "unpaid_leaves": 0,
-        }
 
     # ✅ Fetch holidays
     with connection.cursor() as cursor:
@@ -1137,16 +1121,28 @@ def mainleavepage_view(request):
     # ✅ Check if user is admin
     is_admin = role == "admin"
 
+    # ✅ Check if user is MD (from employee_details.authentication)
+    is_md = False
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT authentication FROM tasktracker.employee_details
+            WHERE name = %s
+        """, [name])
+        auth_result = cursor.fetchone()
+        if auth_result and auth_result[0].strip().upper() == "MD":
+            is_md = True
+
     return render(request, "mainleavepage.html", {
         "name": name,
         "designation": designation,
         "image_base64": image_base64,
         "employee_id": user_id,
         "is_admin": is_admin,
-        "leave_statistics": leave_statistics,
+        "is_md": is_md,
         "holidays": holidays,
         "leave_applications": leave_applications,
     })
+
 
 
 from django.shortcuts import render
@@ -1347,16 +1343,29 @@ def update_leave_status(request):
         return JsonResponse({"error": f"Internal Server Error: {str(e)}"}, status=500)
 
 
-from django.http import JsonResponse
 
 def check_admin_status(request):
     global global_user_data
-    # Check if the logged-in user is an admin
-    is_admin = EmployeeDetails.objects.filter(
-        name=global_user_data["name"], authentication__iexact="admin"
-    ).exists()
 
-    return JsonResponse({"is_admin": is_admin})
+    if not global_user_data:
+        return JsonResponse({"error": "User not logged in."}, status=401)
+
+    username = global_user_data.get("name")  # Get logged-in username
+
+    # ✅ Fetch authentication field for the user
+    auth_result = EmployeeDetails.objects.filter(name=username).values_list("authentication", flat=True).first()
+    
+    # ✅ Ensure auth_result is a string and remove spaces
+    auth_result = str(auth_result).strip().lower() if auth_result else ""
+
+    print(f"🔍 DEBUG: {username}'s authentication value -> {auth_result}")
+
+    # ✅ Check if the user is Admin or MD
+    is_admin = auth_result == "admin"
+    is_md = auth_result == "md"
+
+    return JsonResponse({"is_admin": is_admin, "is_md": is_md})
+
 
 import json
 from django.http import JsonResponse
@@ -2005,16 +2014,35 @@ def request_comp_leave(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 
+from django.http import JsonResponse
+from django.db import connection, transaction
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+# Global user data
+global_user_data = None
+
 def get_pending_comp_leave_requests(request):
-    """Admin fetches pending compensatory leave requests."""
+    """MD fetches pending compensatory leave requests."""
     global global_user_data
 
     if not global_user_data:
         return JsonResponse({"error": "User not logged in."}, status=401)
 
-    is_admin = global_user_data.get("is_admin", True)
-    if not is_admin:
-        return JsonResponse({"error": "Forbidden: Only admins can view this."}, status=403)
+    username = global_user_data.get("name")
+    is_md = False
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT authentication FROM tasktracker.employee_details
+            WHERE name = %s LIMIT 1
+        """, [username])
+        result = cursor.fetchone()
+        if result and result[0] == "MD":
+            is_md = True
+
+    if not is_md:
+        return JsonResponse({"error": "Forbidden: Only MD can view this."}, status=403)
 
     try:
         with connection.cursor() as cursor:
@@ -2033,22 +2061,28 @@ def get_pending_comp_leave_requests(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 
-from django.http import JsonResponse
-from django.db import connection, transaction
-from django.views.decorators.csrf import csrf_exempt
-import json
-
 @csrf_exempt
 def update_comp_leave_status(request):
-    """Admin approves or rejects a compensatory leave request."""
+    """MD approves or rejects a compensatory leave request."""
     global global_user_data
 
     if not global_user_data:
         return JsonResponse({"error": "User not logged in."}, status=401)
 
-    is_admin = global_user_data.get("is_admin", True)
-    if not is_admin:
-        return JsonResponse({"error": "Forbidden: Only admins can approve/reject."}, status=403)
+    username = global_user_data.get("name")
+    is_md = False
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT authentication FROM tasktracker.employee_details
+            WHERE name = %s LIMIT 1
+        """, [username])
+        result = cursor.fetchone()
+        if result and result[0] == "MD":
+            is_md = True
+
+    if not is_md:
+        return JsonResponse({"error": "Forbidden: Only MD can approve/reject."}, status=403)
 
     if request.method != "POST":
         return JsonResponse({"error": "Method Not Allowed"}, status=405)
@@ -2075,12 +2109,11 @@ def update_comp_leave_status(request):
                     WHERE id = %s
                 """, [record_id])
 
-        # ✅ Ensure transaction commits to the database
         transaction.commit()
 
         return JsonResponse({"message": f"Comp Leave {action}d successfully."}, status=200)
 
     except Exception as e:
-        transaction.rollback()  # Rollback if there is an error
+        transaction.rollback()
         return JsonResponse({"error": str(e)}, status=500)
 
