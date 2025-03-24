@@ -44,5 +44,6 @@ urlpatterns = [
     path("api/request-comp-leave/", views.request_comp_leave, name="request_comp_leave"),
     path("api/comp-leave-approvals/", views.get_pending_comp_leave_requests, name="comp_leave_approvals"),
     path("api/update-comp-leave/", views.update_comp_leave_status, name="update_comp_leave_status"),
+    path("delete_attendance/", views.delete_attendance_view, name="delete_attendance"),
 ]
 

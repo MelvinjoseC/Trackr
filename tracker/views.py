@@ -1830,6 +1830,47 @@ def edit_attendance_view(request):
     return JsonResponse({"error": "Invalid request method"})  # ✅ Status 200 prevents error page
 
 
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from datetime import datetime
+from django.db import connection
+
+@csrf_exempt
+def delete_attendance_view(request):
+    global global_user_data
+
+    if request.method == "POST":
+        try:
+            if not global_user_data:
+                return JsonResponse({"error": "User not logged in."})
+
+            user_id = global_user_data.get("employee_id")
+            attendance_date = request.POST.get("date", "").strip()
+
+            if not attendance_date:
+                return JsonResponse({"error": "Date is required."})
+
+            try:
+                attendance_date = datetime.strptime(attendance_date, "%Y-%m-%d").date()
+            except ValueError:
+                return JsonResponse({"error": "Invalid date format."})
+
+            # ✅ Delete attendance record
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    DELETE FROM tasktracker.tracker_attendance
+                    WHERE user_id = %s AND date = %s
+                """, [user_id, attendance_date])
+
+            return JsonResponse({"message": "Attendance deleted successfully."})
+
+        except Exception as e:
+            return JsonResponse({"error": "⚠️ Failed to delete attendance."})
+
+    return JsonResponse({"error": "Invalid request method."})
+
+
+
 from django.http import JsonResponse
 from django.db import connection
 from datetime import datetime, timedelta

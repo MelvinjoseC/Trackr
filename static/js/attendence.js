@@ -619,6 +619,203 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });  
 
+// GRAPH FOR ATTENDANCE
+
+
+let monthlyChart, weeklyChart;
+
+function renderAttendanceCharts(monthlyWorked, monthlyExpected, weeklyWorked, weeklyExpected) {
+    const monthlyCtx = document.getElementById("monthlyHoursChart").getContext("2d");
+    const weeklyCtx = document.getElementById("weeklyHoursChart").getContext("2d");
+
+    const monthlyData = [monthlyWorked, Math.max(monthlyExpected - monthlyWorked, 0)];
+    const weeklyData = [weeklyWorked, Math.max(weeklyExpected - weeklyWorked, 0)];
+
+    if (monthlyChart) {
+        monthlyChart.data.datasets[0].data = monthlyData;
+        monthlyChart.update();
+    } else {
+        monthlyChart = new Chart(monthlyCtx, {
+            type: "doughnut",
+            data: {
+                labels: ["Worked", "Remaining"],
+                datasets: [{
+                    data: monthlyData,
+                    backgroundColor: ["#7E57C2", "#D1C4E9"]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: "bottom" },
+                    title: {
+                        display: true,
+                        
+                    }
+                }
+            }
+        });
+    }
+
+    if (weeklyChart) {
+        weeklyChart.data.datasets[0].data = weeklyData;
+        weeklyChart.update();
+    } else {
+        weeklyChart = new Chart(weeklyCtx, {
+            type: "doughnut",
+            data: {
+                labels: ["Worked", "Remaining"],
+                datasets: [{
+                    data: weeklyData,
+                    backgroundColor: ["#42A5F5", "#BBDEFB"]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: "bottom" },
+                    title: {
+                        display: true,
+                       
+                    }
+                }
+            }
+        });
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    function fetchAttendanceSummary() {
+        fetch(`/get_monthly_weekly_attendance/`)
+            .then(response => response.json())
+            .then(summaryData => {
+                if (summaryData.error) {
+                    alert(summaryData.error);
+                    return;
+                }
+
+                const totalMonthly = parseFloat(summaryData.total_monthly_hours) || 0.00;
+                const expectedMonthly = parseFloat(summaryData.expected_monthly_hours) || 0.00;
+                const totalWeekly = parseFloat(summaryData.total_weekly_hours) || 0.00;
+                const expectedWeekly = parseFloat(summaryData.expected_weekly_hours) || 0.00;
+
+                // ✅ Update values in the DOM
+                document.getElementById("total-monthly-hours").innerText = totalMonthly.toFixed(2);
+                document.getElementById("expected-monthly-hours").innerText = expectedMonthly.toFixed(2);
+                document.getElementById("total-weekly-hours").innerText = totalWeekly.toFixed(2);
+                document.getElementById("expected-weekly-hours").innerText = expectedWeekly.toFixed(2);
+
+                // ✅ Draw/update charts using the same data
+                renderAttendanceCharts(totalMonthly, expectedMonthly, totalWeekly, expectedWeekly);
+            })
+            .catch(error => console.error("Error fetching summary data:", error));
+    }
+
+    // Fetch on load
+    fetchAttendanceSummary();
+});
+
+
+
+
+
+
+//DELETE ATTENDANCE
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const deleteModal = document.getElementById("delete-attendance-modal");
+    const openDeleteBtn = document.getElementById("delete-attendance-btn");
+    const closeDeleteBtn = document.querySelector(".close-delete-modal");
+    const cancelDeleteBtn = document.getElementById("cancel-delete-btn");
+    const confirmDeleteBtn = document.getElementById("confirm-delete-btn");
+    const dateInput = document.getElementById("delete-attendance-date");
+    const infoDiv = document.getElementById("delete-attendance-info");
+
+    // ✅ Show modal
+    openDeleteBtn.addEventListener("click", () => {
+        infoDiv.innerHTML = "";
+        dateInput.value = "";
+        deleteModal.style.display = "flex";
+    });
+
+    // ✅ Close modal
+    closeDeleteBtn.addEventListener("click", () => {
+        deleteModal.style.display = "none";
+    });
+    cancelDeleteBtn.addEventListener("click", () => {
+        deleteModal.style.display = "none";
+    });
+
+    // ✅ Fetch attendance details on date change
+    dateInput.addEventListener("change", function () {
+        let date = this.value;
+        if (!date) return;
+
+        fetch(`/get_attendance/?date=${date}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                infoDiv.innerHTML = `<p style="color:red;">${data.error}</p>`;
+                confirmDeleteBtn.disabled = true;
+            } else {
+                infoDiv.innerHTML = `
+                    <p><strong>Punch In:</strong> ${data.punch_in}</p>
+                    <p><strong>Punch Out:</strong> ${data.punch_out}</p>
+                    <p><strong>Break Time:</strong> ${(data.break_time / 60).toFixed(0)} mins</p>
+                    <p><strong>Total Hours:</strong> ${data.worktime}</p>
+                `;
+                confirmDeleteBtn.disabled = false;
+            }
+        })
+        .catch(error => {
+            infoDiv.innerHTML = `<p style="color:red;">Error fetching data.</p>`;
+            confirmDeleteBtn.disabled = true;
+        });
+    });
+
+    // ✅ Confirm delete
+    confirmDeleteBtn.addEventListener("click", function () {
+        let date = dateInput.value;
+        if (!date) {
+            alert("Please select a date.");
+            return;
+        }
+
+        let formData = new FormData();
+        formData.append("date", date);
+
+        fetch("/delete_attendance/", {
+            method: "POST",
+            body: formData,
+            headers: { "X-CSRFToken": getCSRFToken() }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                alert("✅ Attendance deleted successfully.");
+                location.reload();
+            }
+        })
+        .catch(error => {
+            alert("⚠️ Failed to delete attendance.");
+        });
+    });
+
+    // ✅ CSRF Token getter
+    function getCSRFToken() {
+        return document.cookie.split("; ").find(row => row.startsWith("csrftoken="))?.split("=")[1] || "";
+    }
+});
+
+
+
+
+
 
 // TOTAL HOURS
 

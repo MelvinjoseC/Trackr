@@ -51,7 +51,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     labels: ["Balance Leave Available", "Full Day Leave Taken", "Half Day Leave Taken", "Work from Home Taken"],
                     datasets: [{
                         data: [data.balance_leave, data.full_day_leave, data.half_day_leave, data.work_from_home],
-                        backgroundColor: ["#4B84E5", "#A6C8FA", "#CFE2FF", "#d7e3f5"]
+                        backgroundColor: ["#9B59B6", "#BB8FCE", "#D2B4DE", "#E8DAEF"]
+
                     }]
                 },
                 options: {

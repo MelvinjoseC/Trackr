@@ -11,6 +11,7 @@
     <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
 <body>
@@ -262,50 +263,82 @@
 
 </div>
 <div class="right-sidebar">
-    <div id="team-status">
+    <!-- <div id="team-status"> -->
         <!-- Info Message -->
-        <div class="info-section">
+        <!-- <div class="info-section">
             <span class="info-icon">
                 <img src="{% static 'images/vector.png' %}" alt="Info Icon">
             </span>
             <p>Select a day to view personal attendance statistics</p>
         </div>
-        
-
+         -->
+    </br>
         <!-- Monthly Hours Section -->
-        <div class="monthly-hours">
-            <p>Monthly Hours:</p>
-            <span class="hours">
-                <span id="total-monthly-hours" class="red-text">0.00</span> / <span id="expected-monthly-hours">0.00</span> HOURS
-            </span>
-        </div>
-        
-        <div class="weekly-hours">
-            <p>Weekly Hours:</p>
-            <span class="hours">
-                <span id="total-weekly-hours" class="red-text">0.00</span> / 
-                <span id="expected-weekly-hours">0.00</span> HOURS
-            </span>
-        </div>
-        
-        
+        <div class="chart-section">
+            <h3 align="center">Monthly Hours</h3>
+            <div class="chart-box">
+              <canvas id="monthlyHoursChart"></canvas>
+            </div>
+            <div class="label">
+              <span id="total-monthly-hours" class="red-text">0</span> /
+              <span id="expected-monthly-hours">0</span> HOURS
+            </div>
+        </br>
+            <h3 align="center">Weekly Hours</h3>
+            <div class="chart-box">
+              <canvas id="weeklyHoursChart"></canvas>
+            </div>
+            <div class="label">
+              <span id="total-weekly-hours" class="red-text">0</span> /
+              <span id="expected-weekly-hours">0</span> HOURS
+            </div>
+          </div>
 
+
+        
+                <!-- Delete Attendance Modal -->
+        <div id="delete-attendance-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <span class="close-delete-modal" style="float: right; cursor: pointer;">&times;</span>
+                <h2>Delete Attendance</h2>
+
+                <label for="delete-attendance-date">Select Date:</label>
+                <input type="date" id="delete-attendance-date">
+
+                <div id="delete-attendance-info" style="margin-top: 15px;"></div>
+
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button id="confirm-delete-btn" class="confirm-btn">Confirm Delete</button>
+                    <button id="cancel-delete-btn" class="cancel-btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+    </br></br>
         <!-- Attendance Buttons -->
         <div class="attendence-button">
-            <!-- Edit Attendance Button with Image Icon -->
-            <button id="open-edit-modal-btn" class="edit-btn">
+           <!-- Add Attendance Button with Image Icon -->
+           <button class="add-btn" id="open-modal-btn">
+            <img src="{% static 'images/add.png' %}" alt="Add Icon" class="btn-icon">
+            Add Attendance
+        </button>
+        </br>
+             <!-- Edit Attendance Button with Image Icon -->
+             <button id="open-edit-modal-btn" class="edit-btn">
                 <img src="{% static 'images/edit.png' %}" alt="Edit Icon" class="btn-icon">
                 Edit Attendance
             </button>
-        
-            <!-- Add Attendance Button with Image Icon -->
-            <button class="add-btn" id="open-modal-btn">
-                <img src="{% static 'images/add.png' %}" alt="Add Icon" class="btn-icon">
-                Add Attendance
+        </br>
+            <!-- DELETE Attendance Button with Image Icon -->
+            <button class="delete-btn" id="delete-attendance-btn">
+                <img src="{% static 'images/delete_button.png' %}" alt="Delete Icon" class="btn-icon">
+                Delete Attendance
             </button>
+            
+
         </div>
       
-    </div>
+    <!-- </div> -->
 </div>
 
     </div>
@@ -313,6 +346,7 @@
 <script>
 
 </script>
+
     <script src="{% static 'js/attendence.js' %}"></script>
     <script src="{% static 'js/task_dashbord.js' %}"></script>
     <script src="{% static 'js/leavepage.js' %}"></script>

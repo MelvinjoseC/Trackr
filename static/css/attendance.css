@@ -5,6 +5,7 @@ body {
     background-color: #ECECEC;
     padding: 0;
     flex-wrap: wrap;
+    text-transform: uppercase;
 }
 
 /* Main Container */
@@ -509,7 +510,7 @@ button#date_in_daily_timesheet{
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    align-items: center;
+
 }
 
 /* Info Section */
@@ -545,13 +546,44 @@ button#date_in_daily_timesheet{
     color: #16151C;
     margin-bottom: 10px;
 }
+/* Monthly Hours Section */
+.weekly-hours {
+    text-align: center;
+    font-size: 1.4vh;
+    color: #16151C;
+    margin-bottom: 10px;
+}
+
+.chart-section {
+    font-family: sans-serif;
+}
+
+.chart-box {
+    width: 100%;
+    max-width: 300px;
+    height: 200px;
+    margin: 0 auto;
+    position: relative;
+}
+
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+}
 
 .hours {
     font-size: 1.4vh;
 }
 
+.label {
+    text-align: center;
+    margin-top: 10px;
+}
+
 .red-text {
     color: red;
+    font-weight: bold;
 }
 
 /* Attendance Buttons */
@@ -579,6 +611,79 @@ button#date_in_daily_timesheet{
     gap:8px;
 }
 
+.delete-btn{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 5px;
+    font-size: 1.4vh;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    width: 9.5vw;
+    height: 4.5vh;
+    margin-left: 1.4vw;
+    gap:8px;
+}
+
+/* Edit Attendance Button */
+.delete-btn {
+    background-color: #c0c0c0;
+    color: #333;
+    /* border: 1px solid #ccc; */
+}
+
+/* Centered Modal Overlay */
+#delete-attendance-modal.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4); /* semi-transparent black */
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Modal Box */
+#delete-attendance-modal .modal-content {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.25);
+    width: 300px;
+    text-align: center;
+    position: relative;
+}
+
+/* Close Button */
+.close-delete-modal {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 20px;
+}
+
+/* Buttons */
+.confirm-btn, .cancel-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.confirm-btn {
+    background-color: #d9534f; /* red */
+    color: white;
+}
+
+.cancel-btn {
+    background-color: #f0f0f0;
+}
+
 /* Edit Attendance Button */
 .edit-btn {
     background-color: #E0E8F2;
@@ -588,7 +693,7 @@ button#date_in_daily_timesheet{
 
 /* Add Attendance Button */
 .add-btn {
-    background-color: #333DAE;
+    background-color: #646ed8;
     color: white;
 }
 
@@ -1058,15 +1163,21 @@ button {
     position: fixed;
     top: 2%;
     right: 0.5%;
-    height: 96vh; /* Prevents from touching bottom */
     border-radius: 10px;
-    background: #ECECEC;
+    background-color: #FFFFFF;
     width: 14.5%;
     display: flex;
     flex-direction: column;
     gap: 0.5vh;
     z-index: 1000; /* Ensure sidebar stays below modal */
     transition: opacity 0.3s ease-in-out;
+    padding: 1vw;
+    height: 96.8vh;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    
+
+
 }
 
 /* Ensure Sidebar does NOT overlap modal */
