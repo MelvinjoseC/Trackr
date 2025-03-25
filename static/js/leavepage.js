@@ -370,16 +370,23 @@ document.addEventListener("DOMContentLoaded", function () {
                 const leaveRow = document.createElement("div");
                 leaveRow.classList.add("leave-row");
 
-                const isEditable = leave.status.toLowerCase() === "pending";
-                const editButtonHTML = isEditable 
-                    ? `<button class="action-btn edit-btn" data-id="${leave.id}" data-start="${leave.start_date}" data-end="${leave.end_date}" data-reason="${leave.reason}" data-type="${leave.leave_type}" data-status="${leave.status}">
-                            <img src="/static/images/blue_edit_button.png">
-                       </button>`
-                    : `<button class="action-btn edit-btn disabled" disabled>
+                // Convert the start date to check if it's in the past
+                const startDate = new Date(leave.start_date);
+                const today = new Date();
+
+                // Check if start date is in the past
+                const isPastDate = startDate < today;
+
+                // Change button HTML based on whether the start date is in the past
+                const editButtonHTML = isPastDate 
+                    ? `<button class="action-btn edit-btn disabled" disabled>
                             <img src="/static/images/blue_edit_button_disabled.png">
+                       </button>` 
+                    : `<button class="action-btn edit-btn" data-id="${leave.id}" data-start="${leave.start_date}" data-end="${leave.end_date}" data-reason="${leave.reason}" data-type="${leave.leave_type}" data-status="${leave.status}">
+                            <img src="/static/images/blue_edit_button.png">
                        </button>`;
 
-                leaveRow.innerHTML = `
+                leaveRow.innerHTML = `  
                     <div class="leave-cell">
                         <div class="leave-date">${formatDate(leave.start_date)} - ${formatDate(leave.end_date)}</div>
                         <div class="leave-duration">${calculateDays(leave.start_date, leave.end_date)} days</div>
@@ -409,7 +416,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         <button class="action-btn delete-btn" data-id="${leave.id}"><img src="/static/images/delete_button.png"></button>
                     </div>
                 `;
-
                 leaveContainer.appendChild(leaveRow);
             });
 
@@ -436,7 +442,6 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(error => console.error("Error fetching leave applications:", error));
 });
 
-
 // Function to open the Edit Modal
 function openEditModal(leaveId, startDate, endDate, reason, leaveType) {
     document.getElementById("edit-leave-id").value = leaveId;
@@ -459,6 +464,15 @@ async function updateLeavedata() {
     // Get CSRF token from cookies
     function getCSRFToken() {
         return document.cookie.split('; ').find(row => row.startsWith('csrftoken'))?.split('=')[1];
+    }
+
+    // Check if the start date is in the past
+    const startDateObj = new Date(startDate);
+    const today = new Date();
+
+    if (startDateObj < today) {
+        alert("You cannot update leave applications to a past date.");
+        return; // Do not proceed if the start date is in the past
     }
 
     try {
@@ -488,6 +502,7 @@ async function updateLeavedata() {
         alert("Network error! Please try again.");
     }
 }
+
 
 
 // Function to delete leave application

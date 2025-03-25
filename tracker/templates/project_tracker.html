@@ -74,40 +74,50 @@
                 <!-- Title Section -->
                 <div class="form-title-box">
                     <h3 class="form-title">CREATE PROJECT</h3>
+                    
                 </div>
             
                 <!-- Form Section -->
                 <div class="form-table">
                     <table>
+                        <thead>
+                            <!-- <tr>
+                                <th>Field</th>
+                                <th>Input</th>
+                            </tr>
+                        </thead> -->
                         <tbody>
                             <tr>
-                                <td>PROJECT NAME</td>
-                                <td><input type="text" id="projectName"></td>
+                                <td>Project Name</td>
+                                <td><input type="text" id="projectName" placeholder="Enter project name"></td>
                             </tr>
                             <tr>
-                                <td>START DATE</td>
+                                <td>Start Date</td>
                                 <td><input type="date" id="startDate"></td>
                             </tr>
                             <tr>
-                                <td>END DATE</td>
+                                <td>End Date</td>
                                 <td><input type="date" id="endDate"></td>
                             </tr>
                             <tr>
-                                <td>SCOPE</td>
-                                <td><input type="number" id="budget"></td>
+                                <td>Scope</td>
+                                <td><input type="text" id="scope" placeholder="Enter Scope"></td>
                             </tr>
                             <tr>
-                                <td>BENCHMARK</td>
-                                <td><input type="text" id="description"></td>
+                                <td>Category</td>
+                                <td><input type="text" id="category" placeholder="Enter CATEGORY"></td>
+                            </tr>
+                            <tr>
+                                <td>Benchmark</td>
+                                <td><input type="number" id="Benchmark" placeholder="Enter project Benchmark"></td>
                             </tr>
                         </tbody>
                     </table>
-            
-                    <!-- Submit and Cancel Buttons -->
-                    <div class="button-container">
-                        <button class="submit-btn" onclick="submitProjectForm()">Create</button>
-                        <button class="cancel-btn">Cancel</button>
-                    </div>
+                </br>
+                    <!-- Submit Button -->
+                     <div align="right"><button class="submit-btn">Submit</button>
+                        <button class="cancel-btn">Cancel</button></div>
+                    
                 </div>
             </div>
         
@@ -170,48 +180,12 @@
     </div>
     
 <!-- Popup Modal for Creating a Project -->
-<div id="createProjectModal" class="modal">
+<!-- <div id="createProjectModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeCreateProjectPopup()">&times;</span>
-        <h1>Create Project</h1>
+        <h1>Create Project</h1> -->
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Field</th>
-                    <th>Input</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Project Name</td>
-                    <td><input type="text" id="projectName" placeholder="Enter project name"></td>
-                </tr>
-                <tr>
-                    <td>Start Date</td>
-                    <td><input type="date" id="startDate"></td>
-                </tr>
-                <tr>
-                    <td>End Date</td>
-                    <td><input type="date" id="endDate"></td>
-                </tr>
-                <tr>
-                    <td>Scope</td>
-                    <td><input type="text" id="scope" placeholder="Enter Scope"></td>
-                </tr>
-                <tr>
-                    <td>Category</td>
-                    <td><input type="text" id="category" placeholder="Enter CATEGORY"></td>
-                </tr>
-                <tr>
-                    <td>Benchmark</td>
-                    <td><input type="number" id="Benchmark" placeholder="Enter project Benchmark"></td>
-                </tr>
-            </tbody>
-        </table>
-
-        <!-- Submit Button -->
-        <button class="submit-btn">Submit</button>
+        
     <div id="attendance-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <h2>Attendance</h2>

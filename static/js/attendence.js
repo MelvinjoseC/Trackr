@@ -761,13 +761,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 infoDiv.innerHTML = `<p style="color:red;">${data.error}</p>`;
                 confirmDeleteBtn.disabled = true;
             } else {
-                infoDiv.innerHTML = `
-                    <p><strong>Punch In:</strong> ${data.punch_in}</p>
-                    <p><strong>Punch Out:</strong> ${data.punch_out}</p>
-                    <p><strong>Break Time:</strong> ${(data.break_time / 60).toFixed(0)} mins</p>
-                    <p><strong>Total Hours:</strong> ${data.worktime}</p>
-                `;
-                confirmDeleteBtn.disabled = false;
+                if (Object.keys(data).length === 0) {
+                    // No data for the selected date
+                    alert("No data for selected date");
+                    infoDiv.innerHTML = "";
+                    confirmDeleteBtn.disabled = true;
+                } else {
+                    // Data exists for the selected date
+                    infoDiv.innerHTML = `
+                        <p><strong>Punch In:</strong> ${data.punch_in}</p>
+                        <p><strong>Punch Out:</strong> ${data.punch_out}</p>
+                        <p><strong>Break Time:</strong> ${(data.break_time / 60).toFixed(0)} mins</p>
+                        <p><strong>Total Hours:</strong> ${data.worktime}</p>
+                    `;
+                    confirmDeleteBtn.disabled = false;
+                }
             }
         })
         .catch(error => {

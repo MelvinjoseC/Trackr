@@ -1632,6 +1632,7 @@ def delete_task(request):
 
 from django.http import JsonResponse
 from django.db import connection
+from datetime import datetime
 
 def delete_leave_application_view(request, leave_id):
     global global_user_data  # Using global variable for user authentication
@@ -1645,9 +1646,10 @@ def delete_leave_application_view(request, leave_id):
     current_user_name = global_user_data["name"]  # Get logged-in user's name
 
     with connection.cursor() as cursor:
-        # Check if leave exists and is "Pending"
+        # Fetch the leave details including the start date and status
         cursor.execute("""
-            SELECT status FROM tracker_leaveapplication 
+            SELECT start_date, status 
+            FROM tracker_leaveapplication 
             WHERE id = %s AND username = %s
         """, [leave_id, current_user_name])
 
@@ -1656,10 +1658,18 @@ def delete_leave_application_view(request, leave_id):
         if not leave:
             return JsonResponse({"error": "Leave application not found or unauthorized."}, status=404)
 
-        if leave[0].lower() != "pending":  # Prevent deletion if leave is already approved/rejected
-            return JsonResponse({"error": "Only pending leave applications can be deleted."}, status=403)
+        start_date = leave[0]  # The start_date is fetched as a datetime.date object
+        status = leave[1].lower()
 
-        # Delete leave if it's pending
+        # If start_date is already a datetime.date object, no need to convert
+        if isinstance(start_date, datetime):
+            start_date = start_date.date()  # In case it's a datetime, convert to date
+
+        # Check if the start date is in the past
+        if start_date < datetime.today().date():
+            return JsonResponse({"error": "You cannot delete leave applications with a start date in the past."}, status=403)
+
+        # If the leave has a future start date or is today, delete it
         cursor.execute("""
             DELETE FROM tracker_leaveapplication
             WHERE id = %s AND username = %s
@@ -1669,8 +1679,10 @@ def delete_leave_application_view(request, leave_id):
 
 
 
+
 from django.http import JsonResponse
 from django.db import connection
+from datetime import datetime
 
 # Global variable to store user data
 global_user_data = None  
@@ -1687,6 +1699,17 @@ def edit_leave_application_view(request, leave_id):
     current_user_name = global_user_data["name"]  # Get logged-in user's name
     data = request.POST
 
+    # Convert the provided start_date to a datetime object
+    try:
+        start_date = datetime.strptime(data.get("start_date"), "%Y-%m-%d").date()
+    except ValueError:
+        return JsonResponse({"error": "Invalid start date format."}, status=400)
+
+    # Check if the start date is in the past
+    if start_date < datetime.today().date():
+        return JsonResponse({"error": "You cannot update the leave application to a past date."}, status=403)
+
+    # Perform the update
     with connection.cursor() as cursor:
         cursor.execute("""
             UPDATE tracker_leaveapplication
@@ -1698,6 +1721,7 @@ def edit_leave_application_view(request, leave_id):
             return JsonResponse({"error": "Leave application not found or unauthorized."}, status=404)
 
     return JsonResponse({"success": "Leave application updated successfully."})
+
 
 
 from django.http import JsonResponse
