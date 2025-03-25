@@ -919,22 +919,30 @@ def attendance_calendar(request):
                 designation = result[0] if result[0] else "No Designation"  # Handle missing designation
                 image_base64 = base64.b64encode(result[1]).decode("utf-8") if result[1] else None
 
-    # ✅ Determine if user is admin
-    is_admin = role == "admin"
+    # ✅ Check if user is Admin or MD
+    is_admin_or_md = False
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT authentication FROM employee_details WHERE name = %s
+        """, [name])
+        auth_result = cursor.fetchone()
+
+        if auth_result:
+            auth_value = str(auth_result[0]).strip().lower()
+            is_admin_or_md = (auth_value == "admin" or auth_value == "md")
 
     # ✅ If request is not GET, return JSON response
     if request.method != "GET":
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
-    # ✅ Render template with user details
+    # ✅ Render template with user details and check for Admin or MD
     return render(request, "calendar.html", {
         "name": name,
         "designation": designation or "No Designation",  # Ensure designation is always present
         "image_base64": image_base64,
         "employee_id": user_id,
-        "is_admin": is_admin,  # Pass admin status to template
+        "is_admin_or_md": is_admin_or_md,  # Pass Admin or MD status to template
     })
-
 
 
 from django.http import JsonResponse
@@ -1083,7 +1091,7 @@ def mainleavepage_view(request):
     user_id = global_user_data.get("employee_id", None)
     name = global_user_data.get("name", "Guest")
     designation = global_user_data.get("designation", None)  # Try from global data
-    role = global_user_data.get("role", "").lower()  # Role should be 'admin' or 'user'
+    # role = global_user_data.get("authentication", "").lower()  # Role should be 'admin' or 'user'
     image_base64 = None
 
     # ✅ If designation is not found in global data, fetch from DB
@@ -1118,20 +1126,25 @@ def mainleavepage_view(request):
         columns = [col[0] for col in cursor.description]
         leave_applications = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-    # ✅ Check if user is admin
-    is_admin = role == "admin"
-
-    # ✅ Check if user is MD (from employee_details.authentication)
+    # ✅ Check if user is admin or MD by calling the `check_admin_status` method logic
+    auth_result = None
+    is_admin = False
     is_md = False
+
+    # Fetch the authentication value from the database for the logged-in user
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT authentication FROM tasktracker.employee_details
-            WHERE name = %s
+            SELECT authentication FROM employee_details WHERE name = %s
         """, [name])
         auth_result = cursor.fetchone()
-        if auth_result and auth_result[0].strip().upper() == "MD":
-            is_md = True
 
+    # If authentication result exists, check if the user is admin or MD
+    if auth_result:
+        auth_value = str(auth_result[0]).strip().lower()
+        is_admin = auth_value == "admin"
+        is_md = auth_value == "md"
+
+    # Return the context to the template
     return render(request, "mainleavepage.html", {
         "name": name,
         "designation": designation,

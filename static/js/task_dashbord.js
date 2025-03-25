@@ -844,8 +844,9 @@ function populateDropdowns_updatetask(tasks) {
 
 
 
-let golbalfetchdata
-let currentUserName
+let golbalfetchdata;
+let currentUserName;
+
 // Fetch data and populate dropdowns
 document.addEventListener("DOMContentLoaded", () => {
     fetch("/api/task_dashboard/")
@@ -861,13 +862,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
             currentUserName = document.getElementById('profile_name').textContent.trim();
 
-            // Check if the current user is an admin
-            const isAdmin = golbalfetchdata.employee_details.some(
-                employee => employee.name === currentUserName && employee.authentication === 'admin'
+            // Check if the current user is an admin or MD
+            const isAdminOrMd = golbalfetchdata.employee_details.some(
+                employee => employee.name === currentUserName && (employee.authentication === 'admin' || employee.authentication === 'MD')
             );
 
-            // Show/hide buttons based on admin status
-            if (isAdmin) {
+            // Show/hide buttons based on admin or MD status
+            if (isAdminOrMd) {
                 document.getElementById('savetask_creatask').style.display = 'block';
                 document.getElementById('project-button').style.display = 'block';
                 document.getElementById('aproover_creattask').style.display = 'none';
@@ -890,6 +891,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error fetching tasks:", error);
         });
 });
+
 
 // Handle tab switching for Running, Revisions, and Others
 document.querySelectorAll('.tab').forEach(tab => {

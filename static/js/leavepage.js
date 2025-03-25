@@ -904,27 +904,50 @@ function getCsrfToken() {
 
 // COMPLEAVE BUTTON
 document.addEventListener("DOMContentLoaded", function () {
-    const compLeaveBtn = document.getElementById("compleave-btn");
-    const leaveHistorySection = document.querySelector(".leave-history-content");
-    const compWorktimeSection = document.querySelector(".compensated-worktime-section");
-    const approvalsBtn = document.getElementById("approvals-btn"); // ✅ Reference to the approvals button
+    // Fetch user status (Admin or MD) from the backend
+    fetch('/api/check-admin-status/', {
+        method: 'GET',
+        credentials: 'include', // Ensures authentication session is sent
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("🔍 API Response:", data); // Debugging: Check API response
 
-    // Initially hide the compensated worktime section
-    compWorktimeSection.style.display = "none";
+        const approvalButton = document.getElementById("approvals-btn");
+        const compLeaveBtn = document.getElementById("compleave-btn");
+        const leaveHistorySection = document.querySelector(".leave-history-content");
+        const compWorktimeSection = document.querySelector(".compensated-worktime-section");
 
-    compLeaveBtn.addEventListener("click", function () {
-        if (leaveHistorySection.style.display !== "none") {
-            // Hide leave history and approvals button, show compensated worktime section
-            leaveHistorySection.style.display = "none";
-            compWorktimeSection.style.display = "block";
-            approvalsBtn.style.display = "none"; // ✅ Hide approvals button
-            compLeaveBtn.textContent = "GO BACK";
-        } else {
-            // Show leave history and approvals button, hide compensated worktime section
-            leaveHistorySection.style.display = "block";
-            compWorktimeSection.style.display = "none";
-            approvalsBtn.style.display = "block"; // ✅ Show approvals button
-            compLeaveBtn.textContent = "COMP LEAVE BALANCE";
-        }
-    });
+        // Initially show approval button for Admin/MD and Compensate Leave Balance for all
+        approvalButton.style.display = (data.is_admin || data.is_md) ? "block" : "none";
+        compWorktimeSection.style.display = "none";  // Initially hide the worktime section
+
+        // Ensure the Compensate Leave button is always visible
+        compLeaveBtn.style.display = "block";
+
+        compLeaveBtn.addEventListener("click", function () {
+            if (leaveHistorySection.style.display !== "none") {
+                // Hide leave history section and show worktime section
+                leaveHistorySection.style.display = "none";
+                compWorktimeSection.style.display = "block";
+                compLeaveBtn.textContent = "GO BACK"; // Change button text
+
+                // Hide approvals button
+                approvalButton.style.display = "none";
+            } else {
+                // Show leave history section and hide worktime section
+                leaveHistorySection.style.display = "block";
+                compWorktimeSection.style.display = "none";
+                compLeaveBtn.textContent = "COMP LEAVE BALANCE"; // Reset button text
+
+                // Show approvals button if user is Admin or MD
+                if (data.is_admin || data.is_md) {
+                    approvalButton.style.display = "block";
+                } else {
+                    approvalButton.style.display = "none";
+                }
+            }
+        });
+    })
+    .catch(error => console.error("❌ Error fetching admin/MD status:", error));
 });

@@ -12,6 +12,7 @@ class ProjectTacker(models.Model):
 
     class Meta:
         db_table = 'project_tacker'  # Matches the DB table name
+        
 class TrackerTasks(models.Model):
     task_id = models.AutoField(primary_key=True)
     d_no = models.IntegerField(null=True, blank=True)

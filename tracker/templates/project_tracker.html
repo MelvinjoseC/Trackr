@@ -64,6 +64,9 @@
     </div>
 
     <div class="project-form-container">
+        <button type="button" class="btn btn-secondary">MONTHLY ANALYSIS</button>
+        <button type="button" class="btn btn-secondary">MONTHLY PROJECT ANALYSIS</button>
+        <button type="button" class="btn btn-secondary">WEEKLY PROJECT ANALYSIS</button>
         <div class="form-set">
             <div class="form-container">
                 <!-- Title Section -->
@@ -113,7 +116,7 @@
                     <button id="nextMonth"><img id="arrow_right" src="{% static 'images/arrow_right.png' %}"></button>
                 </div>
                 <div class="calendar-days">
-                    <div>Su</div> <div>Mo</div> <div>Tu</div> <div>We</div> <div>Th</div> <div>Fr</div> <div>Sa</div>
+                    <div>Sun</div> <div>Mon</div> <div>Tue</div> <div>Wed</div> <div>Thu</div> <div>Fri</div> <div>Sat</div>
                 </div>
                 <div id="calendarDates" class="calendar-dates"></div>
             </div>
@@ -213,6 +216,7 @@
             <p>Here is the attendance functionality or details.</p>
             <button id="close-modal" class="modal-close">Close</button>
         </div>
+    </div>
     </div>
     <!-- ✅ Move JavaScript to the bottom -->
     <script src="{% static 'js/project_tracker.js' %}"></script>

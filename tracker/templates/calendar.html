@@ -47,23 +47,22 @@
              </a>
              
                 
-                {% if is_admin %}
-                    <!-- ✅ Show Notifications for Normal Users -->
-                    <a class="sidebar_link" id="notifications" 
-                        href="{% url 'notifications_page' %}"
-                        data-default-img="{% static 'images/leavepage.png' %}" 
-                        data-active-img="{% static 'images/leavepage1.png' %}">
-                        <img src="{% static 'images/leavepage.png' %}" alt="Notifications Icon"> NOTIFICATIONS
-                    </a>
-                {% else %}
+                {% if is_admin_or_md  %}
                 <!-- ✅ Show Project Tracker for Admins only -->
                 <a class="sidebar_link" id="project-button" 
                 href="{% url 'project_tracker' %}" 
                 data-default-img="{% static 'images/leavepage.png' %}" 
                 data-active-img="{% static 'images/leavepage1.png' %}">
                 <img src="{% static 'images/leavepage.png' %}" alt="Project Tracker Icon"> PROJECT TRACKER
-            </a>
-                    
+            </a>            
+                {% else %}
+                <!-- ✅ Show Notifications for Normal Users -->
+                <a class="sidebar_link" id="notifications" 
+                href="{% url 'notifications_page' %}"
+                data-default-img="{% static 'images/leavepage.png' %}" 
+                data-active-img="{% static 'images/leavepage1.png' %}">
+                <img src="{% static 'images/leavepage.png' %}" alt="Notifications Icon"> NOTIFICATIONS
+            </a>      
                 {% endif %}
             </div>
     
