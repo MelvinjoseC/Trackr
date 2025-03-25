@@ -361,24 +361,23 @@ function formatDate(dateStr) {
 //REQUESTS
 
 document.addEventListener("DOMContentLoaded", function () {
-    fetch("/api/leave-applications/")  // Fetch leave applications
+    fetch("/api/leave-applications/")
         .then(response => response.json())
         .then(data => {
-            const leaveContainer = document.getElementById("leave-container"); // Ensure this container exists in your HTML
+            const leaveContainer = document.getElementById("leave-container");
             
-            data.forEach(leave => {
+            data.leave_applications.forEach(leave => {
                 const leaveRow = document.createElement("div");
                 leaveRow.classList.add("leave-row");
 
-                // Check if status is "Pending" for enabling the edit button
                 const isEditable = leave.status.toLowerCase() === "pending";
                 const editButtonHTML = isEditable 
                     ? `<button class="action-btn edit-btn" data-id="${leave.id}" data-start="${leave.start_date}" data-end="${leave.end_date}" data-reason="${leave.reason}" data-type="${leave.leave_type}" data-status="${leave.status}">
-                        <img src="/static/images/blue_edit_button.png">
+                            <img src="/static/images/blue_edit_button.png">
                        </button>`
                     : `<button class="action-btn edit-btn disabled" disabled>
-                        <img src="/static/images/blue_edit_button_disabled.png">
-                       </button>`; // Disabled edit button
+                            <img src="/static/images/blue_edit_button_disabled.png">
+                       </button>`;
 
                 leaveRow.innerHTML = `
                     <div class="leave-cell">
@@ -390,7 +389,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     </div>
                     <div class="leave-cell">
                         <div class="leave-label">Leave Type</div>
-                        <div class="leave-value">${leave.leave_type}</div>
+                        <div class="leave-value">${leave.leave_payment_type || "Unpaid Leave"}</div>
                     </div>
                     <div class="leave-cell">
                         <div class="leave-label">Requested On</div>
@@ -402,11 +401,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     </div>
                     <div class="leave-cell">
                         <div class="leave-label">Approved By</div>
-                        <div class="leave-value">${leave.approver}</div>
+                        <div class="leave-value">${leave.approver || "-"}</div>
                     </div>
                     <div class="leave-cell actions">
                         <button class="action-btn comment-btn"><img src="/static/images/comment_button.png"></button>
-                        ${editButtonHTML} <!-- Only enabled if status is "Pending" -->
+                        ${editButtonHTML}
                         <button class="action-btn delete-btn" data-id="${leave.id}"><img src="/static/images/delete_button.png"></button>
                     </div>
                 `;
@@ -414,7 +413,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 leaveContainer.appendChild(leaveRow);
             });
 
-            // Attach event listeners for Edit and Delete buttons
+            // Event Listeners
             document.querySelectorAll(".edit-btn:not(.disabled)").forEach(button => {
                 button.addEventListener("click", function () {
                     const leaveId = this.getAttribute("data-id");
@@ -436,6 +435,7 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(error => console.error("Error fetching leave applications:", error));
 });
+
 
 // Function to open the Edit Modal
 function openEditModal(leaveId, startDate, endDate, reason, leaveType) {
@@ -598,7 +598,7 @@ document.addEventListener("DOMContentLoaded", function () {
         
                     data.forEach(leave => {
                         const leaveRow = document.createElement("div");
-                        leaveRow.classList.add("leave-row");
+                        leaveRow.classList.add("leave-rows");
         
                         leaveRow.innerHTML = `
                             <div class="leave-cell">

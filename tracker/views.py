@@ -1240,26 +1240,77 @@ def get_holidays(request):
 from django.http import JsonResponse
 from django.db import connection
 
-# Define a global variable
 global_user_data = None
+
 def leave_application_view(request):
-    global global_user_data  # Declare the global variable
+    global global_user_data
     if not global_user_data:
         return JsonResponse({"error": "User not logged in."}, status=401)
 
-    current_user_name = global_user_data["name"]  # Get logged-in user's name
+    current_user_name = global_user_data["name"]
 
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT id, start_date, end_date, reason, username, approver, leave_type, created_at, updated_at, status
-            FROM tracker_leaveapplication
-            WHERE username = %s
-        """, [current_user_name])  # Filter by logged-in user's username
+    try:
+        # ✅ Fetch Leave Counts by Type (Approved)
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    COUNT(CASE WHEN leave_type = 'Full Day' THEN 1 END) AS full_day,
+                    COUNT(CASE WHEN leave_type = 'Half Day' THEN 1 END) AS half_day,
+                    COUNT(CASE WHEN leave_type = 'Work From Home' THEN 1 END) AS wfh
+                FROM tasktracker.tracker_leaveapplication 
+                WHERE username = %s AND status = 'Approved'
+            """, [current_user_name])
+            leave_data = cursor.fetchone()
 
-        columns = [col[0] for col in cursor.description]
-        data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        full_day_leave = leave_data[0] or 0
+        half_day_leave = leave_data[1] or 0
+        work_from_home = leave_data[2] or 0
 
-    return JsonResponse(data, safe=False)
+        # ✅ Fetch Redeemed Days from Attendance
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT COUNT(*) 
+                FROM tasktracker.tracker_attendance 
+                WHERE username = %s AND redeemed = 1
+            """, [current_user_name])
+            redeemed_days = cursor.fetchone()[0] or 0
+
+        # ✅ Calculate Balance Leave
+        total_working_days = 15 + redeemed_days
+        balance_leave = total_working_days - (full_day_leave + (half_day_leave * 0.5))
+
+        # ✅ Fetch Leave Applications List
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT id, start_date, end_date, reason, username, approver, 
+                       leave_type, created_at, updated_at, status
+                FROM tracker_leaveapplication
+                WHERE username = %s
+            """, [current_user_name])
+            columns = [col[0] for col in cursor.description]
+            leave_records = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        # ✅ Add "Paid"/"Unpaid" Label Based on balance_leave
+        labeled_leaves = []
+        for leave in leave_records:
+            if balance_leave > 0:
+                leave["leave_payment_type"] = "Paid Leave"
+                balance_leave -= 1  # deduct 1 day per leave counted as paid
+            else:
+                leave["leave_payment_type"] = "Unpaid Leave"
+            labeled_leaves.append(leave)
+
+        return JsonResponse({
+            "leave_applications": labeled_leaves,
+            "balance_leave": balance_leave,
+            "full_day_leave": full_day_leave,
+            "half_day_leave": half_day_leave,
+            "work_from_home": work_from_home,
+            "redeemed_days": redeemed_days,
+        })
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 from django.http import JsonResponse

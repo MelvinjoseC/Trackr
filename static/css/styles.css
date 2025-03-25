@@ -734,3 +734,91 @@ button#compleave-btn {
 button#compleave-btn:hover {
     background: #3570c1;
 }
+
+/* FOR COMPENSATE APPROVE REJECT  */
+
+.approval-btn,
+.rejected-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Approve Button */
+.approval-btn {
+    background-color: #4CAF50; /* green */
+    color: white;
+}
+
+.approval-btn:hover {
+    background-color: #43a047;
+    transform: scale(1.03);
+}
+
+/* Reject Button */
+.rejected-btn {
+    background-color: #f44336; /* red */
+    color: white;
+}
+
+.rejected-btn:hover {
+    background-color: #e53935;
+    transform: scale(1.03);
+}
+
+
+/* FOR LEAVE APPROVALS */
+
+
+.approve-btn,
+.reject-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Approve Button Style */
+.approve-btn {
+    background-color: #4CAF50; /* Green */
+}
+
+.approve-btn:hover {
+    background-color: #43a047;
+    transform: scale(1.03);
+}
+
+/* Reject Button Style */
+.reject-btn {
+    background-color: #f44336; /* Red */
+}
+
+.reject-btn:hover {
+    background-color: #e53935;
+    transform: scale(1.03);
+}
+
+.comp-leave-btn{
+    background-color: #4ea0cf; /* Green */
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
