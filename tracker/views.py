@@ -765,23 +765,68 @@ def generate_pie_chart(request):
 
 
 
-@csrf_exempt  # Use if you do not want to handle CSRF manually; otherwise, pass the token from the template
+import base64
+from django.shortcuts import render, redirect
+from django.db import connection
+from django.http import JsonResponse
+
+global_user_data = None  # Global variable for user data
+
 def project_tracker(request):
     global global_user_data
 
-    # Fetch the row from ProjectTacker where name matches global_user_data['name']
+    # ✅ Ensure user is logged in
+    if not global_user_data:
+        return redirect("login_page")  # Redirect to login if not logged in
+
+    # ✅ Fetch user details from global data
+    user_id = global_user_data.get("employee_id", None)
+    name = global_user_data.get("name", "Guest")
+    designation = global_user_data.get("designation", None)  # Try from global data
+    role = global_user_data.get("role", "").lower()  # Role should be 'admin' or 'user'
+    image_base64 = None
+
+    # ✅ If designation is not found in global data, fetch from DB
+    if user_id and not designation:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT designation, image FROM employee_details WHERE employee_id = %s", [user_id])
+            result = cursor.fetchone()
+            if result:
+                designation = result[0] if result[0] else "No Designation"  # Handle missing designation
+                image_base64 = base64.b64encode(result[1]).decode("utf-8") if result[1] else None
+
+    # ✅ Check if user is Admin or MD
+    is_admin_or_md = False
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT authentication FROM employee_details WHERE employee_id = %s
+        """, [user_id])
+        auth_result = cursor.fetchone()
+
+        if auth_result:
+            auth_value = str(auth_result[0]).strip().lower()
+            is_admin_or_md = (auth_value == "admin" or auth_value == "md")
+
+    # ✅ Fetch the row from ProjectTacker where name matches global_user_data['name']
     project_data = ProjectTacker.objects.filter(name=global_user_data["name"]).first()
 
     # If project_data exists, load the to_aproove JSON as a Python dictionary
     to_approve_data = project_data.to_aproove if project_data else []
 
+    # ✅ Pass data to the template
     context = {
         "user_data": global_user_data,
         "project_data": project_data,
         "to_approve_data": to_approve_data,  # Pass JSON data to the template
+        "is_admin_or_md": is_admin_or_md,   # Pass Admin or MD status to the template
+        "name": name,
+        "designation": designation,
+        "image_base64": image_base64,
+        "employee_id": user_id,
     }
 
     return render(request, "project_tracker.html", context)
+
 
 
 @csrf_exempt  # Required if CSRF protection is enabled

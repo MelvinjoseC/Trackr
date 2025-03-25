@@ -40,20 +40,22 @@
                 <img src="{% static 'images/leavepage.png' %}" alt="Leave Tracker Icon"> LEAVE TRACKER
 
             </a>
+            {% if is_admin_or_md %}
+            <a class="sidebar_link" id="project-button" 
+            href="{% url 'project_tracker' %}" 
+            data-default-img="{% static 'images/leavepage.png' %}" 
+            data-active-img="{% static 'images/leavepage1.png' %}" >
+            <img src="{% static 'images/leavepage.png' %}" alt="Project Tracker Icon"> PROJECT TRACKER
+            </a>
+            {% else %}
             <a class="sidebar_link" id="notifications" 
                 href="{% url 'notifications_page' %}"
                 data-default-img="{% static 'images/leavepage.png' %}" 
                 data-active-img="{% static 'images/leavepage1.png' %}">
                 <img src="{% static 'images/leavepage.png' %}" alt="notifications Icon"> NOTIFICATIONS
             </a>
-
-            <a class="sidebar_link" id="project-button" 
-            href="{% url 'project_tracker' %}" 
-            data-default-img="{% static 'images/leavepage.png' %}" 
-            data-active-img="{% static 'images/leavepage1.png' %}" 
-            style="display: none;">
-            <img src="{% static 'images/leavepage.png' %}" alt="Project Tracker Icon"> PROJECT TRACKER
-            </a>
+            {% endif %}
+            
         </div>
 
         <a  class="sign-out sidebar-link" id="signout-button"
