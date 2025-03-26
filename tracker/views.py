@@ -1,3 +1,4 @@
+import calendar
 from datetime import datetime
 from django.shortcuts import render
 from django.db import connection
@@ -2291,3 +2292,84 @@ def update_comp_leave_status(request):
         transaction.rollback()
         return JsonResponse({"error": str(e)}, status=500)
 
+
+from django.shortcuts import render
+from django.db import connection
+from datetime import datetime
+
+def monthly_attendance_view(request):
+    current_month = datetime.now().month
+    current_year = datetime.now().year
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT 
+                ed.name,
+                SUM(a.worktime) OVER (PARTITION BY ed.employee_id) AS total_worktime,
+                a.date,
+                a.worktime AS daily_worktime
+            FROM employee_details ed
+            JOIN tracker_attendance a ON ed.employee_id = a.employee_id
+            WHERE EXTRACT(MONTH FROM a.date) = %s
+              AND EXTRACT(YEAR FROM a.date) = %s
+            ORDER BY ed.name, a.date;
+        """, [current_month, current_year])
+        
+        rows = cursor.fetchall()
+
+    attendance_data = [
+        {
+            'name': row[0],
+            'total_worktime': row[1],
+            'date': row[2],
+            'daily_worktime': row[3]
+        } for row in rows
+    ]
+
+    return render(request, "project_tracker.html", {'attendance_data': attendance_data})
+
+from django.http import JsonResponse
+from django.db import connection
+
+def get_employee_names(request):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT employee_id, name FROM employee_details ORDER BY name")
+        rows = cursor.fetchall()
+
+    employees = [{'id': row[0], 'name': row[1]} for row in rows]
+    return JsonResponse({'employees': employees})
+
+
+from django.http import JsonResponse
+from django.db import connection
+
+def get_user_worktime(request):
+    try:
+        employee_id = request.GET.get('employee_id')
+        if not employee_id:
+            return JsonResponse({'error': 'Missing employee_id'}, status=400)
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    a.date,
+                    a.worktime,
+                    SUM(a.worktime) OVER () AS total_worktime
+                FROM tracker_attendance a
+                WHERE a.user_id = %s
+                ORDER BY a.date
+            """, [employee_id])
+            rows = cursor.fetchall()
+
+        worktime_data = [
+            {
+                'date': row[0],
+                'daily_worktime': row[1],
+                'total_worktime': row[2]
+            } for row in rows
+        ]
+
+        return JsonResponse({'worktime': worktime_data})
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

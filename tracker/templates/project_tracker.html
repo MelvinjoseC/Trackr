@@ -8,6 +8,7 @@
     <title>Project Tracker</title>
 
     <link rel="stylesheet" href="{% static 'css/project_tracker.css' %}">
+    <link rel="stylesheet" href="{% static 'css/monthlyanalysis.css' %}"> 
 
 </head>
 <body>
@@ -65,8 +66,8 @@
         </a>
     </div>
 
-    <div class="project-form-container">
-        <button type="button" class="btn btn-secondary">MONTHLY ANALYSIS</button>
+    <div id="project-form-container">
+        <button id="toggle-btn" type="button" class="btn btn-secondary">MONTHLY ANALYSIS</button>
         <button type="button" class="btn btn-secondary">MONTHLY PROJECT ANALYSIS</button>
         <button type="button" class="btn btn-secondary">WEEKLY PROJECT ANALYSIS</button>
         <div class="form-set">
@@ -185,17 +186,43 @@
         <span class="close-btn" onclick="closeCreateProjectPopup()">&times;</span>
         <h1>Create Project</h1> -->
 
-        
+<!--         
     <div id="attendance-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <h2>Attendance</h2>
             <p>Here is the attendance functionality or details.</p>
             <button id="close-modal" class="modal-close">Close</button>
+        </div> -->
+    <!-- </div> -->
+     <div id="monthly-analysis" style="display: none;">
+         <!-- Your monthly analysis calendar goes here -->
+         <button id="back-btn" type="button" class="btn btn-outline-secondary" style="margin-bottom: 15px;">
+            ← GO BACK
+          </button> 
+        <h1 align="center">MONTHLY ANALYSIS</h1>
+        <div class="header">
+            <select id="employee-select" class="dropdown">
+              <option value="">-- Select Employee --</option>
+            </select>
+        
+            <div class="nav" >
+              <button id="prev-month">&#8592;</button>
+              <h2 id="month-year"></h2>
+              <button id="next-month">&#8594;</button>
+            </div>
+          
+          <div id="total-worktime-display" style="font-size: 18px; font-weight: 600; margin-bottom: 15px;"></div>
         </div>
+          <div class="calendar" id="calendar"></div>
+
+    
     </div>
     </div>
+
+    
     <!-- ✅ Move JavaScript to the bottom -->
     <script src="{% static 'js/project_tracker.js' %}"></script>
+    <script src="{% static 'js/monthlyanalysis.js' %}"></script>
 
 </body>
 </html>

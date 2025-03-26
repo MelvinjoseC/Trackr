@@ -26,6 +26,8 @@ body {
     box-sizing: border-box;
     background-color: #ECECEC;
     width: 84%;
+    margin-top: 2%;
+
 }
 
 .form-title-box {
@@ -533,3 +535,7 @@ span.date-highlight {
 .reject-btn:hover {
     background-color: #8a8a8a;
 }
+
+
+
+ 

@@ -1,0 +1,81 @@
+/* Simple calendar styling */
+ 
+#monthly-analysis {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-top: 30px;
+    transition: all 0.3s ease;
+    width: 1580px;
+    height: 850px;
+    margin-left: 20px;
+  }
+  
+ 
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 480px; /* 👈 Add this line to create space between elements */
+    margin-bottom: 30px;
+  }
+  
+  .dropdown {
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 1px solid #000000;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  .calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 15px;
+    
+  }
+  .day {
+    background: #e8f1fd;
+    border-radius: 12px;
+    padding: 10px;
+    min-height: 80px;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  }
+  .day:hover {
+    background-color: #d3e7ff;
+  }
+  .day .date {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+  .day .worktime {
+    font-size: 24px;
+    color: #000000;
+    margin-left: 50px;
+    font-weight: bold;
+}
+  .nav {
+    display: flex;
+
+
+  }
+  button {
+    padding: 5px 10px;
+    font-size: 18px;
+    border: none;
+    background-color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    transition: background 0.2s ease;
+  }
+  button:hover {
+    background-color: #e0e0e0;
+  }
+  h2 {
+    margin: 0;
+    font-size: 20px;
+  }

@@ -45,5 +45,8 @@ urlpatterns = [
     path("api/comp-leave-approvals/", views.get_pending_comp_leave_requests, name="comp_leave_approvals"),
     path("api/update-comp-leave/", views.update_comp_leave_status, name="update_comp_leave_status"),
     path("delete_attendance/", views.delete_attendance_view, name="delete_attendance"),
+    path('monthly-attendance/', views.monthly_attendance_view, name='monthly_attendance'),  # URL for the monthly attendance view
+    path('attendance/get-users/', views.get_employee_names, name='get_employee_names'),
+    path('attendance/get-user-worktime/', views.get_user_worktime, name='get_user_worktime'),
 ]
 
