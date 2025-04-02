@@ -2373,3 +2373,64 @@ def get_user_worktime(request):
     
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.db import connection
+from datetime import datetime
+
+def monthly_project_analysis(request):
+    project_name = request.GET.get('project_name', None)
+    
+    query = """
+        SELECT projects, category, date1, time
+        FROM tracker_project
+    """
+    params = []
+
+    if project_name:
+        query += " WHERE projects = %s"
+        params.append(project_name)
+    
+    with connection.cursor() as cursor:
+        cursor.execute(query, params)
+        rows = cursor.fetchall()
+
+    project_data = [
+        {'projects': row[0], 'category': row[1], 'date1': row[2], 'time': row[3]}
+        for row in rows
+    ]
+
+    return JsonResponse({'projects': project_data})
+
+from django.http import JsonResponse
+from django.db import connection
+
+def get_project_categories(request):
+    project_name = request.GET.get('project_name', None)
+
+    if not project_name:
+        return JsonResponse({'error': 'No project name provided'}, status=400)
+
+    try:
+        # Execute the raw SQL query to fetch the categories related to the selected project
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT DISTINCT category
+                FROM tracker_project
+                WHERE projects = %s
+            """, [project_name])
+            
+            rows = cursor.fetchall()
+
+        # Prepare the data to return the categories
+        categories = [row[0] for row in rows]
+
+        if categories:
+            return JsonResponse({'categories': categories})
+        else:
+            return JsonResponse({'categories': []})  # Return empty if no categories are found
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

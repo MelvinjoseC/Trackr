@@ -8,7 +8,9 @@
     <title>Project Tracker</title>
 
     <link rel="stylesheet" href="{% static 'css/project_tracker.css' %}">
-    <link rel="stylesheet" href="{% static 'css/monthlyanalysis.css' %}"> 
+    <link rel="stylesheet" href="{% static 'css/monthlyanalysis.css' %}">
+    <link rel="stylesheet" href="{% static 'css/monthlyprojectanalysis.css' %}">
+     
 
 </head>
 <body>
@@ -65,10 +67,10 @@
             <img src="{% static 'images/signout.png' %}" alt="Sign Out Icon"> SIGN OUT
         </a>
     </div>
-
+&emsp;
     <div id="project-form-container">
         <button id="toggle-btn" type="button" class="btn btn-secondary">MONTHLY ANALYSIS</button>
-        <button type="button" class="btn btn-secondary">MONTHLY PROJECT ANALYSIS</button>
+        <button id="toggle-btn2" type="button" class="btn btn-secondary">MONTHLY PROJECT ANALYSIS</button>
         <button type="button" class="btn btn-secondary">WEEKLY PROJECT ANALYSIS</button>
         <div class="form-set">
             <div class="form-container">
@@ -214,15 +216,72 @@
           <div id="total-worktime-display" style="font-size: 18px; font-weight: 600; margin-bottom: 15px;"></div>
         </div>
           <div class="calendar" id="calendar"></div>
-
+          <div id="right-sidebar1" class="sidebar">
+        </div>
+    </div>
+    <div id="monthlyprojectanalysis" style="display: none;">
+        <!-- Go Back Button -->
+        <button id="go-back-btn" type="button" class="btn btn-outline-secondary">
+            ← GO BACK
+        </button>
+        <h2 align="center">MONTHLY PROJECT ANALYSIS</h2>
+        <div id="Selectoptionheader">
+        
     
+        <!-- Project Dropdown -->
+        <div class="select-project">
+            <label for="project-select">SELECT PROJECT</label>
+            <select id="project-select" class="dropdown">
+                <option value="">-- Select Project --</option>
+                <!-- Projects will be populated here dynamically -->
+            </select>
+       
+    
+        <!-- Category Dropdown -->
+        <div class="select-category">
+            <label for="category-select">SELECT CATEGORY</label>
+            <select id="category-select" class="dropdown">
+                <option value="">-- Select Category --</option>
+                <!-- Categories will be populated here dynamically -->
+            </select>
+        </div> </div>
+
+        <!-- Total Project Worktime -->
+        <div id="total-time-display">
+            <h3>Total Project Time:</h3>
+            <span id="total-time">0 hrs</span>
+        </div>
+        <div id="total-phase-time-display" style="display: none;">
+            <h3>Total Phase Time:</h3>
+            <span id="total-phase-time">0 hrs</span>
+        </div>
     </div>
+    
+        
+    <div  class="nav1">
+        <button id="prev-months">&#8592;</button>
+        <h2 id="currentMonth"></h2>
+        <button id="next-months">&#8594;</button>
     </div>
+</br>
+    
+        <!-- Calendar Display -->
+        <div id="calendar12" class="calendar-grid">
+        </div>
+        <div id="right-sidebar" class="sidebar">
+
+            
+                    </div>
+        
+        
+    </div>
+    
+    
 
     
     <!-- ✅ Move JavaScript to the bottom -->
     <script src="{% static 'js/project_tracker.js' %}"></script>
     <script src="{% static 'js/monthlyanalysis.js' %}"></script>
-
+    <script src="{% static 'js/monthlyprojectanalysis.js' %}"></script>
 </body>
 </html>

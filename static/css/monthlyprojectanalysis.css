@@ -1,0 +1,137 @@
+/* General container */
+#monthlyprojectanalysis {
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    width: 66%;
+    height: 92%;
+    margin-left: 16px;
+    margin-top: 20px;
+    
+}
+
+
+
+
+/* Calendar Header Styles */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+/* Month Navigation (Left and Right Arrows) */
+.month-navigation {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+
+#month-year {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Total Project Worktime */
+.total-time {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    text-align: right;
+    padding-right: 20px;
+}
+
+/* Styling for Project and Category Dropdowns */
+.select-project, .select-category {
+    display: flex;
+    flex-direction: column;
+    margin-right: 20px;
+}
+
+.select-project label, .select-category label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.select-project select, .select-category select {
+    padding: 5px;
+    font-size: 14px;
+    width: 200px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+
+/* Go Back Button */
+#go-back-btn {
+    margin-top: 20px;
+}
+
+/* Calendar Grid */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    grid-template-rows: repeat(6, auto); /* Fixed 6 rows */
+    padding-top: 1vh;
+    height: 64vh;
+}
+
+.day-cell {
+    background: #e8f1fd;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 8px;
+    min-height: 60px;
+}
+
+.day-cell:hover {
+    background-color: #d3e7ff;
+}
+
+/* Calendar Navigation Styling */
+.nav1 {
+    margin-left: 550px;
+    display: flex;
+}
+
+#Selectoptionheader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Ensures the layout of the header and dropdowns is aligned */
+#Selectoptionheader .select-project, #Selectoptionheader .select-category {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+}
+
+#right-sidebar {
+    width: 300px;
+    background: #f8f9fa;
+    padding: 20px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    background: #fff;
+    border-radius: 8px;
+    height: 92%;
+    margin-left: 16px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

@@ -7,16 +7,17 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     margin-top: 30px;
     transition: all 0.3s ease;
-    width: 1580px;
+    width: 1220px;
     height: 850px;
     margin-left: 20px;
+    align-content: center;
   }
   
  
   .header {
     display: flex;
     align-items: center;
-    gap: 480px; /* 👈 Add this line to create space between elements */
+    gap: 300px; /* 👈 Add this line to create space between elements */
     margin-bottom: 30px;
   }
   
@@ -30,9 +31,11 @@
   }
   .calendar {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 15px;
-    
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(6, auto); /* Fixed 6 rows */
+    gap: 0.5vh;
+    padding-top: 1vh;
+    height: 64vh;
   }
   .day {
     background: #e8f1fd;
@@ -50,16 +53,16 @@
     font-weight: 600;
     font-size: 15px;
     margin-bottom: 6px;
+    background: none;
   }
   .day .worktime {
-    font-size: 24px;
+    font-size: 20px;
     color: #000000;
     margin-left: 50px;
     font-weight: bold;
 }
   .nav {
     display: flex;
-
 
   }
   button {
@@ -79,3 +82,22 @@
     margin: 0;
     font-size: 20px;
   }
+  
+
+  #right-sidebar1 {
+    width: 300px;
+    background: #f8f9fa;
+    padding: 20px;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    background: #fff;
+    border-radius: 8px;
+    height: 90%;
+    margin-left: 16px;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

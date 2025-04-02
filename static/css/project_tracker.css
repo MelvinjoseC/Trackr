@@ -134,6 +134,7 @@ input[type="date"] {
     text-align: center;
     border-radius: 10px;
     background-color: #FFFFFF;
+    height: 34.5vh;
 }
 
 .calendar_header {
@@ -194,7 +195,7 @@ img#calendar-check {
 .calendar-dates {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 0.3vw;
+    gap: 1vw;
 }
 
 .current-month {
@@ -421,13 +422,14 @@ p#profile_designation {
 .search-history {
     display: flex;
     flex-direction: column;
-    margin-top: 1.5vh;
-    width: 84vw;
+    margin-top: 6.5vh;
+    width: 85.5vw;
     height: 44vh;
     border-radius: 10px;
     overflow-y: auto;
     scrollbar-width: thin;
     position: relative;
+    
 }
 
 .search-history table {

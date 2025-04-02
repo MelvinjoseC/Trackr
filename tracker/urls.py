@@ -48,5 +48,7 @@ urlpatterns = [
     path('monthly-attendance/', views.monthly_attendance_view, name='monthly_attendance'),  # URL for the monthly attendance view
     path('attendance/get-users/', views.get_employee_names, name='get_employee_names'),
     path('attendance/get-user-worktime/', views.get_user_worktime, name='get_user_worktime'),
+    path('attendance/monthly-project-analysis/', views.monthly_project_analysis, name='monthly_project_analysis'),
+    path('attendance/project-categories/', views.get_project_categories, name='get_project_categories'),
 ]
 
