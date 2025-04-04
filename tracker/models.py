@@ -51,6 +51,9 @@ class TrackerTasks(models.Model):
     mail_no = models.CharField(max_length=50, null=True, blank=True)
     ref_no = models.CharField(max_length=50, null=True, blank=True)
     list = models.CharField(max_length=50, null=True, blank=True)
+    date1 = models.DateField(null=True, blank=True)
+    time = models.IntegerField(null=True, blank=True)
+    comments = models.CharField(max_length=1000, null=True, blank=True)
     class Meta:
         db_table = 'tracker_project'  # Custom table name
 
@@ -75,3 +78,66 @@ class EmployeeDetails(models.Model):
 
     class Meta:
         db_table = 'employee_details'  # Custom table name
+
+
+from django.db import models
+
+class LeaveApplication(models.Model):
+    id = models.AutoField(primary_key=True)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    reason = models.CharField(max_length=255)
+    username = models.CharField(max_length=100)
+    approver = models.CharField(max_length=100)
+    leave_type = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=50)
+
+    class Meta:
+        db_table = 'tracker_leaveapplication'  # Custom table name
+
+    def __str__(self):
+        return f"Leave Application {self.id} - {self.username}"
+
+from django.db import models
+
+class Attendance(models.Model):
+    # The `id` field is auto-generated as a BIGINT and is the primary key
+    id = models.BigAutoField(primary_key=True)  # BIGINT AUTO_INCREMENT field
+    
+    date = models.DateField()  # Date of attendance
+    punch_in = models.TimeField()  # Time for punch-in
+    punch_out = models.TimeField()  # Time for punch-out
+    break_time = models.FloatField()  # Break time in seconds (FLOAT type in the table)
+    worktime = models.DecimalField(max_digits=5, decimal_places=2)  # Total work time in hours
+    user_id = models.IntegerField()  # Integer type for user_id
+    
+    # Use IntegerField for compensation and redeemed flags, where 0 represents False and 1 represents True
+    is_compensated = models.IntegerField(default=0)  # Compensation status (0 = False, 1 = True)
+    redeemed = models.IntegerField(default=0)  # Whether the attendance is redeemed (0 = False, 1 = True)
+    
+    username = models.CharField(max_length=45)  # VARCHAR(45) for username
+    
+    class Meta:
+        db_table = 'tracker_attendance'  # Custom table name as per the database
+
+    def __str__(self):
+        return f"Attendance for {self.username} on {self.date}"
+
+
+from django.db import models
+
+class Holiday(models.Model):
+    id = models.AutoField(primary_key=True)  # Explicitly defining the ID field
+    name = models.CharField(max_length=255)  # Name of the holiday
+    date = models.DateField()  # Date of the holiday
+
+    class Meta:
+        db_table = 'tracker_holiday'  # Custom table name
+
+    def __str__(self):
+        return f"{self.name} on {self.date}"
+
+
+

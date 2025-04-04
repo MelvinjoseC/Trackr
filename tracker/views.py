@@ -20,9 +20,12 @@ import base64
 from django.http import JsonResponse
 
 
+from django.http import JsonResponse
+from .models import EmployeeDetails  # Import the EmployeeDetails model
+import json
+
 # Define a global variable
 global_user_data = None
-
 
 def login(request):
     global global_user_data  # Declare the global variable
@@ -37,24 +40,18 @@ def login(request):
                 {"success": False, "message": "Invalid request format."}
             )
 
-        # Check the credentials in the database
-        user = None
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT employee_id, name FROM employee_details WHERE name = %s AND password = %s",
-                [username, password],
-            )
-            user = cursor.fetchone()
+        # Use Django ORM to check the credentials in the database
+        user = EmployeeDetails.objects.filter(name=username, password=password).first()
 
         if user:
-            # Store employee_id and name in a single variable (as a dictionary)
+            # Store employee_id and name in a global variable
             global_user_data = {
-                "employee_id": user[0],
-                "name": user[1],
+                "employee_id": user.employee_id,
+                "name": user.name,
             }
 
             # Save user ID in the session for further authentication
-            request.session["user_id"] = user[0]
+            request.session["user_id"] = user.employee_id
             return JsonResponse({"success": True, "redirect_url": "/task_dashboard/"})
         else:
             return JsonResponse(
@@ -68,6 +65,13 @@ def get_admins(request):
     admin_list = [{"id": admin.employee_id, "name": admin.name} for admin in admins]
     return JsonResponse({"admins": admin_list})
 
+from django.shortcuts import render
+from .models import EmployeeDetails  # Import the EmployeeDetails model
+import base64
+
+# Assuming global_user_data is set earlier
+global_user_data = None
+
 def task_dashboard(request):
     global global_user_data  # Assuming you're using a global variable for user data
 
@@ -78,20 +82,21 @@ def task_dashboard(request):
     image_base64 = None
 
     if user_id:
-        # Fetch designation and image from the database
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT designation, image FROM employee_details WHERE employee_id = %s",
-                [user_id],
-            )
-            result = cursor.fetchone()
-            if result:
-                designation = result[0]
-                image_data = result[1]
-                if image_data:
-                    # Convert binary image data to Base64
-                    image_base64 = base64.b64encode(image_data).decode("utf-8")
+        # Use Django ORM to fetch designation and image from the database
+        try:
+            employee = EmployeeDetails.objects.get(employee_id=user_id)
 
+            # Update designation
+            designation = employee.designation
+
+            # If the image exists, convert it to Base64
+            if employee.image:
+                image_base64 = base64.b64encode(employee.image).decode("utf-8")
+
+        except EmployeeDetails.DoesNotExist:
+            # Handle the case where the employee does not exist
+            designation = "Employee not found"
+    
     # Pass data to the template
     return render(
         request,
@@ -103,6 +108,7 @@ def task_dashboard(request):
             "employee_id": user_id,  # Pass employee_id to the template
         },
     )
+
 
 
 def convert_bytes_safe(data):
@@ -709,7 +715,8 @@ def submit_timesheet(request):
 
 
 from django.http import JsonResponse
-from django.db import connection
+from django.db.models import Count, F
+from .models import LeaveApplication, Attendance
 
 # Global User Data
 global_user_data = None
@@ -724,29 +731,33 @@ def generate_pie_chart(request):
     username = global_user_data.get("name")  # Get username from global user data
 
     try:
-        # ✅ Fetch Leave Data
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT 
-                    COUNT(CASE WHEN leave_type = 'Full Day' THEN 1 END) AS full_day,
-                    COUNT(CASE WHEN leave_type = 'Half Day' THEN 1 END) AS half_day,
-                    COUNT(CASE WHEN leave_type = 'Work From Home' THEN 1 END) AS wfh
-                FROM tasktracker.tracker_leaveapplication 
-                WHERE username = %s AND status = 'Approved'
-            """, [username])
-            leave_data = cursor.fetchone()
+        # ✅ Fetch Leave Data using ORM
+        leave_data = LeaveApplication.objects.filter(
+            username=username, status='Approved'
+        ).values(
+            'leave_type'
+        ).annotate(
+            count=Count('id')
+        )
 
-        full_day_leave = leave_data[0] or 0
-        half_day_leave = leave_data[1] or 0
-        work_from_home = leave_data[2] or 0
+        # Initialize leave counts
+        full_day_leave = 0
+        half_day_leave = 0
+        work_from_home = 0
 
-        # ✅ Fetch Attendance Data (Redeemed Leaves)
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT COUNT(*) FROM tasktracker.tracker_attendance 
-                WHERE username = %s AND redeemed = 1
-            """, [username])
-            redeemed_days = cursor.fetchone()[0] or 0
+        # Distribute leave counts based on leave_type
+        for entry in leave_data:
+            if entry['leave_type'] == 'Full Day':
+                full_day_leave = entry['count']
+            elif entry['leave_type'] == 'Half Day':
+                half_day_leave = entry['count']
+            elif entry['leave_type'] == 'Work From Home':
+                work_from_home = entry['count']
+
+        # ✅ Fetch Attendance Data (Redeemed Leaves) using ORM
+        redeemed_days = Attendance.objects.filter(
+            username=username, redeemed=1
+        ).count()
 
         # ✅ Calculate Total Working Days (Base 15 + Redeemed Leaves)
         total_working_days = 15 + redeemed_days
@@ -763,6 +774,7 @@ def generate_pie_chart(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
 
 
 
@@ -1118,11 +1130,11 @@ def create_project_view(request):
 
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.db import connection
+from django.db import models
 from datetime import datetime
-import json
+from django.core.files.storage import default_storage
+from .models import EmployeeDetails, Holiday, LeaveApplication
 import base64
-from django.views.decorators.csrf import csrf_exempt
 
 # Global user data (Assuming this holds logged-in user info)
 global_user_data = None  
@@ -1137,40 +1149,41 @@ def mainleavepage_view(request):
     user_id = global_user_data.get("employee_id", None)
     name = global_user_data.get("name", "Guest")
     designation = global_user_data.get("designation", None)  # Try from global data
-    # role = global_user_data.get("authentication", "").lower()  # Role should be 'admin' or 'user'
     image_base64 = None
 
     # ✅ If designation is not found in global data, fetch from DB
     if user_id and not designation:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT designation, image FROM employee_details WHERE employee_id = %s", [user_id])
-            result = cursor.fetchone()
-            if result:
-                designation = result[0] if result[0] else "No Designation"  # Handle missing designation
-                image_base64 = base64.b64encode(result[1]).decode("utf-8") if result[1] else None
+        try:
+            employee = EmployeeDetails.objects.get(employee_id=user_id)
+            designation = employee.designation if employee.designation else "No Designation"
+            
+            # Check if image exists and is not None
+            if employee.image:
+                # Check if it's a file path or a bytes object
+                if isinstance(employee.image, bytes):
+                    image_base64 = base64.b64encode(employee.image).decode("utf-8")
+                else:
+                    # If it's an ImageField, get the file path and read it
+                    with default_storage.open(employee.image.name, 'rb') as image_file:
+                        image_base64 = base64.b64encode(image_file.read()).decode("utf-8")
+        except EmployeeDetails.DoesNotExist:
+            designation = "No Designation"
+            image_base64 = None
 
     today = datetime.today().date()
     current_year = today.year
 
     # ✅ Fetch holidays
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT name, date 
-            FROM tracker_holiday 
-            WHERE YEAR(date) = %s AND DAYOFWEEK(date) != 7  
-            ORDER BY date ASC
-        """, [current_year])
-        holidays = [{"name": row[0], "date": row[1].strftime("%Y-%m-%d")} for row in cursor.fetchall()]
+    holidays = Holiday.objects.filter(date__year=current_year).exclude(date__week_day=7).order_by('date')
+
+    # Convert holidays to desired format
+    holidays = [{"name": holiday.name, "date": holiday.date.strftime("%Y-%m-%d")} for holiday in holidays]
 
     # ✅ Fetch leave applications
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT id, start_date, end_date, reason, username, approver, leave_type, created_at, updated_at, status
-            FROM tracker_leaveapplication
-            WHERE username = %s
-        """, [name])
-        columns = [col[0] for col in cursor.description]
-        leave_applications = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    leave_applications = LeaveApplication.objects.filter(username=name).values(
+        'id', 'start_date', 'end_date', 'reason', 'username', 'approver', 'leave_type', 
+        'created_at', 'updated_at', 'status'
+    )
 
     # ✅ Check if user is admin or MD by calling the `check_admin_status` method logic
     auth_result = None
@@ -1178,17 +1191,15 @@ def mainleavepage_view(request):
     is_md = False
 
     # Fetch the authentication value from the database for the logged-in user
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT authentication FROM employee_details WHERE name = %s
-        """, [name])
-        auth_result = cursor.fetchone()
-
-    # If authentication result exists, check if the user is admin or MD
-    if auth_result:
-        auth_value = str(auth_result[0]).strip().lower()
-        is_admin = auth_value == "admin"
-        is_md = auth_value == "md"
+    try:
+        employee = EmployeeDetails.objects.get(name=name)
+        if employee.authentication:
+            auth_value = employee.authentication.strip().lower()
+            is_admin = auth_value == "admin"
+            is_md = auth_value == "md"
+    except EmployeeDetails.DoesNotExist:
+        is_admin = False
+        is_md = False
 
     # Return the context to the template
     return render(request, "mainleavepage.html", {
@@ -1206,8 +1217,8 @@ def mainleavepage_view(request):
 
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.db import connection
 from datetime import datetime
+from .models import LeaveApplication  # Assuming the model is in the same app
 
 global_user_data = None  # Store the logged-in user's details globally
 
@@ -1239,20 +1250,24 @@ def apply_leave_view(request):
             if not all([start_date, end_date, leave_type, reason, approver]):
                 return JsonResponse({"error": "All fields are required!"}, status=400)
 
-            created_at = updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            # ✅ Create a new leave application using Django ORM
+            leave_application = LeaveApplication(
+                start_date=start_date,
+                end_date=end_date,
+                reason=reason,
+                username=current_user_name,
+                approver=approver,
+                leave_type=leave_type,
+                status=status
+            )
 
-            # ✅ Insert leave request into the database
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO tracker_leaveapplication 
-                    (start_date, end_date, reason, username, approver, leave_type, created_at, updated_at, status) 
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, [start_date, end_date, reason, current_user_name, approver, leave_type, created_at, updated_at, status])
+            # ✅ Save the leave application to the database
+            leave_application.save()
 
             return JsonResponse({"message": "Leave request submitted successfully!"})
 
         except Exception as e:
-            print("Database Error:", e)
+            print("Error:", e)
             return JsonResponse({"error": "Something went wrong. Please try again later."}, status=500)
 
 
@@ -1297,7 +1312,7 @@ def get_holidays(request):
 
 
 from django.http import JsonResponse
-from django.db import connection
+from .models import LeaveApplication, Attendance
 
 global_user_data = None
 
@@ -1309,52 +1324,42 @@ def leave_application_view(request):
     current_user_name = global_user_data["name"]
 
     try:
-        # ✅ Fetch Leave Counts by Type (Approved)
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT 
-                    COUNT(CASE WHEN leave_type = 'Full Day' THEN 1 END) AS full_day,
-                    COUNT(CASE WHEN leave_type = 'Half Day' THEN 1 END) AS half_day,
-                    COUNT(CASE WHEN leave_type = 'Work From Home' THEN 1 END) AS wfh
-                FROM tasktracker.tracker_leaveapplication 
-                WHERE username = %s AND status = 'Approved'
-            """, [current_user_name])
-            leave_data = cursor.fetchone()
+        # ✅ Fetch Leave Counts by Type (Approved) using Django ORM
+        leave_data = LeaveApplication.objects.filter(username=current_user_name, status='Approved').values('leave_type').annotate(count=models.Count('id'))
 
-        full_day_leave = leave_data[0] or 0
-        half_day_leave = leave_data[1] or 0
-        work_from_home = leave_data[2] or 0
+        # Initialize leave counts
+        full_day_leave = 0
+        half_day_leave = 0
+        work_from_home = 0
 
-        # ✅ Fetch Redeemed Days from Attendance
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT COUNT(*) 
-                FROM tasktracker.tracker_attendance 
-                WHERE username = %s AND redeemed = 1
-            """, [current_user_name])
-            redeemed_days = cursor.fetchone()[0] or 0
+        # Distribute leave counts based on leave_type
+        for entry in leave_data:
+            if entry['leave_type'] == 'Full Day':
+                full_day_leave = entry['count']
+            elif entry['leave_type'] == 'Half Day':
+                half_day_leave = entry['count']
+            elif entry['leave_type'] == 'Work From Home':
+                work_from_home = entry['count']
+
+        # ✅ Fetch Redeemed Days from Attendance using Django ORM
+        redeemed_days = Attendance.objects.filter(username=current_user_name, redeemed=True).count()
 
         # ✅ Calculate Balance Leave
         total_working_days = 15 + redeemed_days
         balance_leave = total_working_days - (full_day_leave + (half_day_leave * 0.5))
 
-        # ✅ Fetch Leave Applications List
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT id, start_date, end_date, reason, username, approver, 
-                       leave_type, created_at, updated_at, status
-                FROM tracker_leaveapplication
-                WHERE username = %s
-            """, [current_user_name])
-            columns = [col[0] for col in cursor.description]
-            leave_records = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        # ✅ Fetch Leave Applications List using Django ORM
+        leave_records = LeaveApplication.objects.filter(username=current_user_name).values(
+            'id', 'start_date', 'end_date', 'reason', 'username', 'approver',
+            'leave_type', 'created_at', 'updated_at', 'status'
+        )
 
         # ✅ Add "Paid"/"Unpaid" Label Based on balance_leave
         labeled_leaves = []
         for leave in leave_records:
             if balance_leave > 0:
                 leave["leave_payment_type"] = "Paid Leave"
-                balance_leave -= 1  # deduct 1 day per leave counted as paid
+                balance_leave -= 1  # Deduct 1 day per leave counted as paid
             else:
                 leave["leave_payment_type"] = "Unpaid Leave"
             labeled_leaves.append(leave)
@@ -1372,11 +1377,11 @@ def leave_application_view(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 
+
 from django.http import JsonResponse
-from django.db import connection
+from .models import EmployeeDetails, LeaveApplication  # Import the models
 
 global_user_data = None  # Assume this holds the logged-in user's data
-
 
 def leave_approvals_view(request):
     global global_user_data
@@ -1391,16 +1396,14 @@ def leave_approvals_view(request):
     if not is_admin:
         return JsonResponse({"error": "Forbidden: Only admins can access this."}, status=403)
 
-    # Fetch only pending leave approvals
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT id, start_date, end_date, reason, username, approver, leave_type, created_at, updated_at, status
-            FROM tracker_leaveapplication
-            WHERE status = 'Pending'
-        """)  
+    # Fetch only pending leave approvals using Django ORM
+    pending_leaves = LeaveApplication.objects.filter(status='Pending').values(
+        'id', 'start_date', 'end_date', 'reason', 'username', 'approver', 
+        'leave_type', 'created_at', 'updated_at', 'status'
+    )
 
-        columns = [col[0] for col in cursor.description]
-        data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    # Convert the queryset to a list of dictionaries
+    data = list(pending_leaves)
 
     return JsonResponse(data, safe=False)
 
@@ -1408,12 +1411,12 @@ def leave_approvals_view(request):
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.db import connection
+from .models import LeaveApplication  # Import the LeaveApplication model
 import json
 
-@csrf_exempt  # ✅ Temporarily bypass CSRF for debugging (Remove this in production)
+@csrf_exempt  # Temporarily bypass CSRF for debugging (Remove in production)
 def update_leave_status(request):
-    print("🔍 CSRF Token Received:", request.META.get("HTTP_X_CSRFTOKEN"))  # ✅ Debugging
+    print("🔍 CSRF Token Received:", request.META.get("HTTP_X_CSRFTOKEN"))  # Debugging
 
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request method. Only POST is allowed."}, status=405)
@@ -1423,33 +1426,29 @@ def update_leave_status(request):
         leave_id = data.get("id")
         new_status = data.get("status")
 
-        print("🔍 Received Data:", data)  # ✅ Debugging
+        print("🔍 Received Data:", data)  # Debugging
 
         # Validate input data
         if leave_id is None or new_status is None:
             return JsonResponse({"error": "Missing required fields: 'id' and 'status' are needed."}, status=400)
 
-       
+        # ✅ Update the leave status using the model
+        try:
+            leave_application = LeaveApplication.objects.get(id=leave_id)
+            leave_application.status = new_status
+            leave_application.save()  # Save the updated status to the database
 
-        # Update the database
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                UPDATE tracker_leaveapplication
-                SET status = %s
-                WHERE id = %s
-                """,
-                [new_status, leave_id]
-            )
+            print(f"✅ Leave ID {leave_id} updated to {new_status}")  # Debugging
+            return JsonResponse({"message": f"Leave status successfully updated to {new_status}."})
 
-        print(f"✅ Leave ID {leave_id} updated to {new_status}")  # ✅ Debugging
-        return JsonResponse({"message": f"Leave status successfully updated to {new_status}."})
+        except LeaveApplication.DoesNotExist:
+            return JsonResponse({"error": "Leave application not found."}, status=404)
 
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON data. Ensure the request body is properly formatted."}, status=400)
 
     except Exception as e:
-        print("❌ Unexpected Error:", str(e))  # ✅ Debugging
+        print("❌ Unexpected Error:", str(e))  # Debugging
         return JsonResponse({"error": f"Internal Server Error: {str(e)}"}, status=500)
 
 
@@ -1632,8 +1631,8 @@ def delete_task(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 from django.http import JsonResponse
-from django.db import connection
 from datetime import datetime
+from .models import LeaveApplication  # Import the LeaveApplication model
 
 def delete_leave_application_view(request, leave_id):
     global global_user_data  # Using global variable for user authentication
@@ -1646,44 +1645,33 @@ def delete_leave_application_view(request, leave_id):
 
     current_user_name = global_user_data["name"]  # Get logged-in user's name
 
-    with connection.cursor() as cursor:
-        # Fetch the leave details including the start date and status
-        cursor.execute("""
-            SELECT start_date, status 
-            FROM tracker_leaveapplication 
-            WHERE id = %s AND username = %s
-        """, [leave_id, current_user_name])
+    try:
+        # Fetch the leave application using Django ORM
+        leave = LeaveApplication.objects.get(id=leave_id, username=current_user_name)
 
-        leave = cursor.fetchone()
-
-        if not leave:
-            return JsonResponse({"error": "Leave application not found or unauthorized."}, status=404)
-
-        start_date = leave[0]  # The start_date is fetched as a datetime.date object
-        status = leave[1].lower()
-
-        # If start_date is already a datetime.date object, no need to convert
-        if isinstance(start_date, datetime):
-            start_date = start_date.date()  # In case it's a datetime, convert to date
+        start_date = leave.start_date
+        status = leave.status.lower()
 
         # Check if the start date is in the past
         if start_date < datetime.today().date():
             return JsonResponse({"error": "You cannot delete leave applications with a start date in the past."}, status=403)
 
-        # If the leave has a future start date or is today, delete it
-        cursor.execute("""
-            DELETE FROM tracker_leaveapplication
-            WHERE id = %s AND username = %s
-        """, [leave_id, current_user_name])
+        # Delete the leave application
+        leave.delete()
 
         return JsonResponse({"success": "✅ Leave application deleted successfully."})
 
+    except LeaveApplication.DoesNotExist:
+        return JsonResponse({"error": "Leave application not found or unauthorized."}, status=404)
+
+    except Exception as e:
+        return JsonResponse({"error": f"Internal Server Error: {str(e)}"}, status=500)
 
 
 
 from django.http import JsonResponse
-from django.db import connection
 from datetime import datetime
+from .models import LeaveApplication  # Import the LeaveApplication model
 
 # Global variable to store user data
 global_user_data = None  
@@ -1710,24 +1698,33 @@ def edit_leave_application_view(request, leave_id):
     if start_date < datetime.today().date():
         return JsonResponse({"error": "You cannot update the leave application to a past date."}, status=403)
 
-    # Perform the update
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            UPDATE tracker_leaveapplication
-            SET start_date = %s, end_date = %s, reason = %s, leave_type = %s, updated_at = NOW()
-            WHERE id = %s AND username = %s
-        """, [data.get("start_date"), data.get("end_date"), data.get("reason"), data.get("leave_type"), leave_id, current_user_name])
+    try:
+        # Fetch the leave application object
+        leave_application = LeaveApplication.objects.get(id=leave_id, username=current_user_name)
 
-        if cursor.rowcount == 0:
-            return JsonResponse({"error": "Leave application not found or unauthorized."}, status=404)
+        # Update the fields
+        leave_application.start_date = start_date
+        leave_application.end_date = data.get("end_date")
+        leave_application.reason = data.get("reason")
+        leave_application.leave_type = data.get("leave_type")
+        leave_application.updated_at = datetime.now()  # Update the timestamp
 
-    return JsonResponse({"success": "Leave application updated successfully."})
+        # Save the updated leave application to the database
+        leave_application.save()
+
+        return JsonResponse({"success": "Leave application updated successfully."})
+
+    except LeaveApplication.DoesNotExist:
+        return JsonResponse({"error": "Leave application not found or unauthorized."}, status=404)
+
+    except Exception as e:
+        return JsonResponse({"error": f"Internal Server Error: {str(e)}"}, status=500)
 
 
 
 from django.http import JsonResponse
-from django.db import connection
 from datetime import datetime, timedelta
+from .models import Attendance, Holiday  # Import the Attendance and Holiday models
 
 global_user_data = None  # Store the logged-in user's details globally
 
@@ -1751,7 +1748,6 @@ def attendance_view(request):
             punch_in = request.POST.get("punch_in", "").strip()
             punch_out = request.POST.get("punch_out", "").strip()
             break_time = request.POST.get("break_time", "").strip()
-            is_compensated = request.POST.get("is_compensated", "").strip()
 
             # ✅ Debugging: Log Received Data
             print("📢 Received Data:", {
@@ -1759,7 +1755,6 @@ def attendance_view(request):
                 "punch_in": punch_in,
                 "punch_out": punch_out,
                 "break_time": break_time,
-                "is_compensated": is_compensated
             })
 
             # ✅ Validate required fields
@@ -1776,6 +1771,18 @@ def attendance_view(request):
                 print("📢 Invalid format error:", str(e))  # ✅ Print to Django logs
                 return JsonResponse({"error": "Invalid date or time format"}, status=400)
 
+            # ✅ Check if the date is a weekend (Saturday or Sunday) or a holiday
+            is_weekend_or_holiday = False
+            # Check if it's a weekend (Saturday or Sunday)
+            if attendance_date.weekday() == 5 or attendance_date.weekday() == 6:  # 5: Saturday, 6: Sunday
+                is_weekend_or_holiday = True
+            # Check if it's a holiday
+            elif Holiday.objects.filter(date=attendance_date).exists():
+                is_weekend_or_holiday = True
+
+            # ✅ Set the `is_compensated` flag based on weekend or holiday check
+            is_compensated = 1 if is_weekend_or_holiday else 0
+
             # ✅ Handle overnight shifts
             dt_punch_in = datetime.combine(attendance_date, punch_in)
             dt_punch_out = datetime.combine(attendance_date, punch_out)
@@ -1787,23 +1794,26 @@ def attendance_view(request):
             work_duration = dt_punch_out - dt_punch_in - timedelta(seconds=break_time)
             work_hours = max(0, work_duration.total_seconds() / 3600.0)  # Convert to hours
 
-            # ✅ Insert into Database
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    """
-                    INSERT INTO tasktracker.tracker_attendance 
-                    (date, punch_in, punch_out, break_time, worktime, user_id, is_compensated, redeemed, username)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, 0, %s)
-                    """,
-                    [attendance_date, punch_in, punch_out, break_time, work_hours, current_user_id, is_compensated, current_user_name],
-                )
+            # ✅ Create and save the attendance entry using Django ORM
+            attendance = Attendance(
+                date=attendance_date,
+                punch_in=punch_in,
+                punch_out=punch_out,
+                break_time=break_time,
+                worktime=work_hours,
+                user_id=current_user_id,
+                is_compensated=is_compensated,  # Set compensation status
+                username=current_user_name,
+            )
+            attendance.save()
 
             print("✅ Attendance successfully added!")  # ✅ Debugging log
 
             return JsonResponse({
                 "message": "Attendance added successfully!",
                 "username": current_user_name,
-                "work_hours": work_hours
+                "work_hours": work_hours,
+                "is_compensated": is_compensated,  # Include compensation status in response
             })
 
         except Exception as e:
@@ -1814,8 +1824,8 @@ def attendance_view(request):
 
 
 from django.http import JsonResponse
-from django.db import connection
 from datetime import datetime, timedelta
+from .models import Attendance  # Import the Attendance model
 
 global_user_data = None  # Global user data
 
@@ -1843,25 +1853,22 @@ def get_attendance(request):
         first_day = datetime(year, month, 1).date()
         last_day = (first_day.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
 
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT date, punch_in, punch_out, break_time, worktime
-                FROM tasktracker.tracker_attendance 
-                WHERE user_id = %s AND date BETWEEN %s AND %s
-                ORDER BY date ASC
-            """, [user_id, first_day, last_day])
+        # Query using Django ORM
+        attendance_records = Attendance.objects.filter(
+            user_id=user_id,
+            date__range=[first_day, last_day]
+        ).order_by('date')
 
-            records = cursor.fetchall()
-
-        attendance_data = []
-        for row in records:
-            attendance_data.append({
-                "date": row[0].strftime("%Y-%m-%d"),
-                "punch_in": str(row[1]),
-                "punch_out": str(row[2]),
-                "break_time": int(row[3]),  # Convert break_time to integer
-                "worktime": float(row[4]) if row[4] is not None else 0.0
-            })
+        attendance_data = [
+            {
+                "date": record.date.strftime("%Y-%m-%d"),
+                "punch_in": str(record.punch_in),
+                "punch_out": str(record.punch_out),
+                "break_time": int(record.break_time),  # Convert break_time to integer
+                "worktime": float(record.worktime) if record.worktime is not None else 0.0
+            }
+            for record in attendance_records
+        ]
 
         return JsonResponse({"attendance": attendance_data}, status=200)
 
@@ -1872,22 +1879,19 @@ def get_attendance(request):
         except ValueError:
             return JsonResponse({}, status=200)  # ✅ Return empty JSON instead of an error
 
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT date, punch_in, punch_out, break_time, worktime
-                FROM tasktracker.tracker_attendance 
-                WHERE user_id = %s AND date = %s
-            """, [user_id, date_obj])
+        # Query using Django ORM
+        attendance_record = Attendance.objects.filter(
+            user_id=user_id,
+            date=date_obj
+        ).first()
 
-            row = cursor.fetchone()
-
-        if row:
+        if attendance_record:
             return JsonResponse({
-                "date": row[0].strftime("%Y-%m-%d"),
-                "punch_in": str(row[1]),
-                "punch_out": str(row[2]),
-                "break_time": int(row[3]),  # Ensure break time is sent as an integer
-                "worktime": float(row[4]) if row[4] is not None else 0.0
+                "date": attendance_record.date.strftime("%Y-%m-%d"),
+                "punch_in": str(attendance_record.punch_in),
+                "punch_out": str(attendance_record.punch_out),
+                "break_time": int(attendance_record.break_time),
+                "worktime": float(attendance_record.worktime) if attendance_record.worktime is not None else 0.0
             }, status=200)
 
         return JsonResponse({}, status=200)  # ✅ Return empty JSON instead of an error
@@ -1896,10 +1900,10 @@ def get_attendance(request):
 
 
 from django.http import JsonResponse
-from django.db import connection
 from datetime import datetime, timedelta
+from .models import Attendance  # Import the Attendance model
 
-global_user_data = None  # Store the logged-in user's details globally
+global_user_data = None  # Global user data
 
 def edit_attendance_view(request):
     global global_user_data  # Retrieve logged-in user data
@@ -1907,7 +1911,7 @@ def edit_attendance_view(request):
     if request.method == "POST":
         try:
             if not global_user_data:
-                return JsonResponse({"error": "User not logged in."})  # ✅ Status 200 prevents redirection
+                return JsonResponse({"error": "User not logged in."}, status=401)  # ✅ Status 200 prevents redirection
 
             user_id = global_user_data.get("employee_id")
 
@@ -1926,7 +1930,7 @@ def edit_attendance_view(request):
             }.items() if not value]
 
             if missing_fields:
-                return JsonResponse({"error": f"Missing fields: {', '.join(missing_fields)}"})  # ✅ Prevents redirection
+                return JsonResponse({"error": f"Missing fields: {', '.join(missing_fields)}"}, status=400)  # ✅ Prevents redirection
 
             # ✅ Convert input values to correct formats
             try:
@@ -1936,7 +1940,7 @@ def edit_attendance_view(request):
                 break_time_seconds = int(break_time)  # Ensure break time is stored in seconds
                 is_compensated = int(is_compensated)  # Ensure it's a valid integer
             except ValueError:
-                return JsonResponse({"error": "Invalid date/time format!"})  # ✅ Prevents redirection
+                return JsonResponse({"error": "Invalid date/time format!"}, status=400)  # ✅ Prevents redirection
 
             # ✅ Calculate work duration
             dt_punch_in = datetime.combine(attendance_date, punch_in)
@@ -1948,26 +1952,35 @@ def edit_attendance_view(request):
             work_duration = dt_punch_out - dt_punch_in - timedelta(seconds=break_time_seconds)
             work_hours = max(0, work_duration.total_seconds() / 3600.0)  # Convert to hours
 
-            # ✅ Update attendance record in database
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    UPDATE tasktracker.tracker_attendance
-                    SET punch_in = %s, punch_out = %s, break_time = %s, worktime = %s, is_compensated = %s
-                    WHERE user_id = %s AND date = %s
-                """, [punch_in, punch_out, break_time_seconds, work_hours, is_compensated, user_id, attendance_date])
+            # ✅ Update attendance record in database using Django ORM
+            attendance = Attendance.objects.filter(user_id=user_id, date=attendance_date).first()
 
-            return JsonResponse({"message": "✅ Attendance updated successfully!", "work_hours": work_hours})
+            if not attendance:
+                return JsonResponse({"error": "Attendance record not found."}, status=404)
+
+            # Update fields
+            attendance.punch_in = punch_in
+            attendance.punch_out = punch_out
+            attendance.break_time = break_time_seconds
+            attendance.worktime = work_hours
+            attendance.is_compensated = bool(is_compensated)
+
+            # Save the updated record
+            attendance.save()
+
+            return JsonResponse({"message": "✅ Attendance updated successfully!", "work_hours": work_hours}, status=200)
 
         except Exception as e:
-            return JsonResponse({"error": "⚠️ Failed to update attendance. Please try again."})  # ✅ Prevents redirection
+            return JsonResponse({"error": f"⚠️ Failed to update attendance. Please try again."}, status=500)  # ✅ Prevents redirection
 
-    return JsonResponse({"error": "Invalid request method"})  # ✅ Status 200 prevents error page
-
+    return JsonResponse({"error": "Invalid request method"}, status=405)  # ✅ Status 200 prevents error page
 
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from datetime import datetime
-from django.db import connection
+from .models import Attendance  # Import the Attendance model
+
+global_user_data = None  # Global user data
 
 @csrf_exempt
 def delete_attendance_view(request):
@@ -1976,38 +1989,42 @@ def delete_attendance_view(request):
     if request.method == "POST":
         try:
             if not global_user_data:
-                return JsonResponse({"error": "User not logged in."})
+                return JsonResponse({"error": "User not logged in."}, status=401)
 
             user_id = global_user_data.get("employee_id")
             attendance_date = request.POST.get("date", "").strip()
 
             if not attendance_date:
-                return JsonResponse({"error": "Date is required."})
+                return JsonResponse({"error": "Date is required."}, status=400)
 
             try:
                 attendance_date = datetime.strptime(attendance_date, "%Y-%m-%d").date()
             except ValueError:
-                return JsonResponse({"error": "Invalid date format."})
+                return JsonResponse({"error": "Invalid date format."}, status=400)
 
-            # ✅ Delete attendance record
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    DELETE FROM tasktracker.tracker_attendance
-                    WHERE user_id = %s AND date = %s
-                """, [user_id, attendance_date])
+            # ✅ Delete the attendance record using Django ORM
+            attendance = Attendance.objects.filter(user_id=user_id, date=attendance_date).first()
 
-            return JsonResponse({"message": "Attendance deleted successfully."})
+            if not attendance:
+                return JsonResponse({"error": "Attendance record not found."}, status=404)
+
+            # Delete the attendance record
+            attendance.delete()
+
+            return JsonResponse({"message": "Attendance deleted successfully."}, status=200)
 
         except Exception as e:
-            return JsonResponse({"error": "⚠️ Failed to delete attendance."})
+            return JsonResponse({"error": f"⚠️ Failed to delete attendance. Error: {str(e)}"}, status=500)
 
-    return JsonResponse({"error": "Invalid request method."})
+    return JsonResponse({"error": "Invalid request method."}, status=405)
 
 
 
 from django.http import JsonResponse
-from django.db import connection
 from datetime import datetime, timedelta
+from .models import Attendance, Holiday  # Assuming you have the Attendance and Holiday models
+
+global_user_data = None  # Global user data
 
 def get_monthly_weekly_attendance(request):
     global global_user_data
@@ -2027,41 +2044,35 @@ def get_monthly_weekly_attendance(request):
     first_day_of_month = today.replace(day=1)
     last_day_of_month = (first_day_of_month.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
 
-    with connection.cursor() as cursor:
-        # Fetch total work time for the current month
-        cursor.execute("""
-            SELECT SUM(worktime) 
-            FROM tasktracker.tracker_attendance
-            WHERE user_id = %s AND date BETWEEN %s AND %s
-        """, [user_id, first_day_of_month, today])
-        total_monthly_hours = cursor.fetchone()[0] or 0.0
+    # Fetch total work time for the current month using Django ORM
+    total_monthly_hours = Attendance.objects.filter(
+        user_id=user_id,
+        date__range=[first_day_of_month, last_day_of_month]
+    ).aggregate(total_worktime=models.Sum('worktime'))['total_worktime'] or 0.0
 
-        # Fetch total work time for the **current week only** (Sunday to Saturday)
-        cursor.execute("""
-            SELECT SUM(worktime) 
-            FROM tasktracker.tracker_attendance
-            WHERE user_id = %s AND date BETWEEN %s AND %s
-        """, [user_id, week_start, week_end])
-        total_weekly_hours = cursor.fetchone()[0] or 0.0
+    # Fetch total work time for the current week using Django ORM
+    total_weekly_hours = Attendance.objects.filter(
+        user_id=user_id,
+        date__range=[week_start, week_end]
+    ).aggregate(total_worktime=models.Sum('worktime'))['total_worktime'] or 0.0
 
-        # Fetch holidays in the **current week only** (excluding weekends)
-        cursor.execute("""
-            SELECT COUNT(*) 
-            FROM tracker_holiday 
-            WHERE date BETWEEN %s AND %s AND WEEKDAY(date) < 5  -- Exclude weekends
-        """, [week_start, week_end])
-        holiday_count_week = cursor.fetchone()[0] or 0
+    # Fetch holidays in the current week (excluding weekends) using Django ORM
+    holiday_count_week = Holiday.objects.filter(
+        date__range=[week_start, week_end]
+    ).exclude(date__week_day__in=[6, 7]).count()  # Excluding weekends (Saturday and Sunday)
 
     # Compute Expected Monthly Hours
-    total_working_days = sum(1 for i in range(1, last_day_of_month.day + 1)
-                             if (first_day_of_month + timedelta(days=i - 1)).weekday() < 5)
+    total_working_days = sum(
+        1 for i in range(1, last_day_of_month.day + 1)
+        if (first_day_of_month + timedelta(days=i - 1)).weekday() < 5
+    )
 
     expected_monthly_hours = (total_working_days - holiday_count_week) * 9  # 9 hours per workday
 
-    # Compute **expected weekly hours only for this week (Sunday to Saturday), excluding holidays**
+    # Compute Expected Weekly Hours for this week (Sunday to Saturday), excluding holidays
     total_week_working_days = sum(
-        1 for i in range(7)  
-        if (week_start + timedelta(days=i)).weekday() < 5  # Monday-Friday only
+        1 for i in range(7)
+        if (week_start + timedelta(days=i)).weekday() < 5  # Monday to Friday only
     )
 
     expected_weekly_hours = (total_week_working_days - holiday_count_week) * 9  # 9 hours per workday
@@ -2075,8 +2086,10 @@ def get_monthly_weekly_attendance(request):
 
 
 from django.http import JsonResponse
-from django.db import connection
 from datetime import datetime, timedelta
+from .models import Attendance  # Import the Attendance model
+
+global_user_data = None  # Global user data
 
 def get_last_week_metrics(request):
     global global_user_data
@@ -2090,47 +2103,38 @@ def get_last_week_metrics(request):
     last_week_start = today - timedelta(days=today.weekday() + 7)  # Previous Monday
     last_week_end = last_week_start + timedelta(days=6)  # Previous Sunday
 
-    with connection.cursor() as cursor:
-        # Fetch total work hours and count working days in last week
-        cursor.execute("""
-            SELECT SUM(worktime), COUNT(DISTINCT date) 
-            FROM tasktracker.tracker_attendance
-            WHERE user_id = %s AND date BETWEEN %s AND %s
-        """, [user_id, last_week_start, last_week_end])
-        worktime_data = cursor.fetchone()
-        total_hours_last_week = worktime_data[0] or 0.0
-        total_working_days = worktime_data[1] or 1  # Avoid division by zero
+    # Fetch total work hours and count working days in last week using Django ORM
+    worktime_data = Attendance.objects.filter(
+        user_id=user_id,
+        date__range=[last_week_start, last_week_end]
+    ).aggregate(total_worktime=models.Sum('worktime'), total_days=models.Count('date', distinct=True))
 
-        # Calculate Average Hours per Day
-        average_hours_per_day = total_hours_last_week / total_working_days
+    total_hours_last_week = worktime_data['total_worktime'] or 0.0
+    total_working_days = worktime_data['total_days'] or 1  # Avoid division by zero
 
-        # Fetch total on-time arrivals (Punch-in before or at 9 AM)
-        cursor.execute("""
-            SELECT COUNT(*) 
-            FROM tasktracker.tracker_attendance 
-            WHERE user_id = %s 
-            AND date BETWEEN %s AND %s 
-            AND punch_in <= '09:00:00'
-        """, [user_id, last_week_start, last_week_end])
-        on_time_count = cursor.fetchone()[0] or 0
+    # Calculate Average Hours per Day
+    average_hours_per_day = total_hours_last_week / total_working_days
 
-        # Calculate On-Time Arrival Percentage
-        on_time_percentage = (on_time_count / total_working_days) * 100 if total_working_days > 0 else 0.0
+    # Fetch total on-time arrivals (Punch-in before or at 9 AM)
+    on_time_count = Attendance.objects.filter(
+        user_id=user_id,
+        date__range=[last_week_start, last_week_end],
+        punch_in__lte="09:00:00"
+    ).count()
+
+    # Calculate On-Time Arrival Percentage
+    on_time_percentage = (on_time_count / total_working_days) * 100 if total_working_days > 0 else 0.0
 
     return JsonResponse({
         "average_hours_per_day": f"{int(average_hours_per_day):02}:{int((average_hours_per_day % 1) * 60):02}",  # Convert to HH:MM format
         "on_time_percentage": round(on_time_percentage, 2)
     })
 
-from django.shortcuts import render
+
 from django.http import JsonResponse
-from django.db import connection
-from django.views.decorators.csrf import csrf_exempt
-import json
+from .models import Attendance  # Import the Attendance model
 
-# Global user data
-global_user_data = None
-
+global_user_data = None  # Global user data
 
 def get_compensated_worktime(request):
     """Fetch compensated worktime records for the logged-in user."""
@@ -2142,22 +2146,40 @@ def get_compensated_worktime(request):
     username = global_user_data.get("name")  # Get username from global user data
 
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT id, date, punch_in, punch_out, break_time, worktime, user_id, is_compensated, redeemed, username
-                FROM tasktracker.tracker_attendance 
-                WHERE is_compensated = 1 AND username = %s
-                ORDER BY date DESC
-            """, [username])
+        # Fetch compensated worktime records using Django ORM
+        compensated_worktime_records = Attendance.objects.filter(
+            is_compensated=True,
+            username=username
+        ).order_by('-date')  # Order by date descending
 
-            columns = [col[0] for col in cursor.description]
-            data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        # Prepare the data to be returned as JSON
+        compensated_worktime_data = [
+            {
+                "id": record.id,
+                "date": record.date.strftime("%Y-%m-%d"),
+                "punch_in": str(record.punch_in),
+                "punch_out": str(record.punch_out),
+                "break_time": int(record.break_time),
+                "worktime": float(record.worktime) if record.worktime is not None else 0.0,
+                "user_id": record.user_id,
+                "is_compensated": record.is_compensated,
+                "redeemed": record.redeemed,
+                "username": record.username
+            }
+            for record in compensated_worktime_records
+        ]
 
-        return JsonResponse({"compensated_worktime": data}, status=200)
+        return JsonResponse({"compensated_worktime": compensated_worktime_data}, status=200)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
+
+from django.http import JsonResponse
+from .models import Attendance  # Import the Attendance model
+import json
+
+global_user_data = None  # Global user data
 
 def request_comp_leave(request):
     """User submits a request for compensatory leave approval."""
@@ -2176,26 +2198,28 @@ def request_comp_leave(request):
         if not worktime_id:
             return JsonResponse({"error": "Missing worktime ID"}, status=400)
 
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                UPDATE tasktracker.tracker_attendance 
-                SET is_compensated = 2  -- Mark as pending approval
-                WHERE id = %s
-            """, [worktime_id])
+        # Fetch the attendance record with the given worktime_id using Django ORM
+        attendance = Attendance.objects.filter(id=worktime_id).first()
+
+        if not attendance:
+            return JsonResponse({"error": "Attendance record not found."}, status=404)
+
+        # Mark the compensatory leave request as pending approval (set is_compensated to 2)
+        # Using is_compensated as an integer field (0 = not compensated, 2 = pending approval)
+        attendance.is_compensated = 2
+        attendance.save()  # Save the updated record
 
         return JsonResponse({"message": "Request submitted for approval."}, status=200)
 
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"error": f"Failed to update attendance. Error: {str(e)}"}, status=500)
 
 
 from django.http import JsonResponse
-from django.db import connection, transaction
-from django.views.decorators.csrf import csrf_exempt
+from .models import Attendance, EmployeeDetails  # Import the models
 import json
 
-# Global user data
-global_user_data = None
+global_user_data = None  # Global user data
 
 def get_pending_comp_leave_requests(request):
     """MD fetches pending compensatory leave requests."""
@@ -2207,34 +2231,37 @@ def get_pending_comp_leave_requests(request):
     username = global_user_data.get("name")
     is_md = False
 
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT authentication FROM tasktracker.employee_details
-            WHERE name = %s LIMIT 1
-        """, [username])
-        result = cursor.fetchone()
-        if result and result[0] == "MD":
+    # Check if the user is MD using Django ORM
+    try:
+        employee = EmployeeDetails.objects.filter(name=username).first()
+        if employee and employee.authentication == "MD":
             is_md = True
+    except EmployeeDetails.DoesNotExist:
+        pass
 
     if not is_md:
         return JsonResponse({"error": "Forbidden: Only MD can view this."}, status=403)
 
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT id, date, username, worktime
-                FROM tasktracker.tracker_attendance 
-                WHERE is_compensated = 2
-            """)
+        # Fetch pending compensatory leave requests using Django ORM
+        pending_requests = Attendance.objects.filter(is_compensated=2).values(
+            'id', 'date', 'username', 'worktime'
+        )
 
-            columns = [col[0] for col in cursor.description]
-            data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        # Return the data as a list of dictionaries
+        pending_requests_data = list(pending_requests)
 
-        return JsonResponse({"pending_requests": data}, status=200)
+        return JsonResponse({"pending_requests": pending_requests_data}, status=200)
 
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
 
+from django.http import JsonResponse
+from django.db import transaction
+from .models import Attendance, EmployeeDetails  # Import the models
+import json
+
+global_user_data = None  # Global user data
 
 @csrf_exempt
 def update_comp_leave_status(request):
@@ -2247,14 +2274,13 @@ def update_comp_leave_status(request):
     username = global_user_data.get("name")
     is_md = False
 
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT authentication FROM tasktracker.employee_details
-            WHERE name = %s LIMIT 1
-        """, [username])
-        result = cursor.fetchone()
-        if result and result[0] == "MD":
+    try:
+        # Check if the logged-in user is an MD using Django ORM
+        employee = EmployeeDetails.objects.filter(name=username).first()
+        if employee and employee.authentication == "MD":
             is_md = True
+    except EmployeeDetails.DoesNotExist:
+        pass
 
     if not is_md:
         return JsonResponse({"error": "Forbidden: Only MD can approve/reject."}, status=403)
@@ -2270,78 +2296,87 @@ def update_comp_leave_status(request):
         if not record_id or action not in ["approve", "reject"]:
             return JsonResponse({"error": "Invalid request data."}, status=400)
 
-        with connection.cursor() as cursor:
-            if action == "approve":
-                cursor.execute("""
-                    UPDATE tasktracker.tracker_attendance
-                    SET is_compensated = 0, redeemed = 1
-                    WHERE id = %s
-                """, [record_id])
-            elif action == "reject":
-                cursor.execute("""
-                    UPDATE tasktracker.tracker_attendance
-                    SET is_compensated = 1
-                    WHERE id = %s
-                """, [record_id])
+        # Fetch the attendance record using Django ORM
+        attendance = Attendance.objects.filter(id=record_id).first()
 
+        if not attendance:
+            return JsonResponse({"error": "Attendance record not found."}, status=404)
+
+        # Update the attendance record based on the action (approve/reject)
+        if action == "approve":
+            attendance.is_compensated = 0  # Set is_compensated to 1 for approved
+            attendance.redeemed = 1  # Set redeemed to 1 for approved
+        elif action == "reject":
+            attendance.is_compensated = 1  # Set is_compensated to 0 for rejected
+            attendance.redeemed = 0 # Set redeemed to 0 for approved
+        # Save the updated record
+        attendance.save()
+
+        # Commit the transaction
         transaction.commit()
 
         return JsonResponse({"message": f"Comp Leave {action}d successfully."}, status=200)
 
     except Exception as e:
+        # Rollback in case of error
         transaction.rollback()
         return JsonResponse({"error": str(e)}, status=500)
 
 
+
 from django.shortcuts import render
-from django.db import connection
 from datetime import datetime
+from django.db.models import Sum
+from .models import EmployeeDetails, Attendance  # Import models
 
 def monthly_attendance_view(request):
+    # Get the current month and year
     current_month = datetime.now().month
     current_year = datetime.now().year
 
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT 
-                ed.name,
-                SUM(a.worktime) OVER (PARTITION BY ed.employee_id) AS total_worktime,
-                a.date,
-                a.worktime AS daily_worktime
-            FROM employee_details ed
-            JOIN tracker_attendance a ON ed.employee_id = a.employee_id
-            WHERE EXTRACT(MONTH FROM a.date) = %s
-              AND EXTRACT(YEAR FROM a.date) = %s
-            ORDER BY ed.name, a.date;
-        """, [current_month, current_year])
-        
-        rows = cursor.fetchall()
+    # Fetch the attendance data for the current month and year using Django ORM
+    attendance_data = (
+        EmployeeDetails.objects
+        .filter(
+            attendance__date__month=current_month,
+            attendance__date__year=current_year
+        )
+        .annotate(
+            total_worktime=Sum('attendance__worktime')  # Calculate the total worktime per employee
+        )
+        .values('name', 'total_worktime', 'attendance__date', 'attendance__worktime')
+        .order_by('name', 'attendance__date')
+    )
 
-    attendance_data = [
+    # Format the data to match the previous structure
+    attendance_data_list = [
         {
-            'name': row[0],
-            'total_worktime': row[1],
-            'date': row[2],
-            'daily_worktime': row[3]
-        } for row in rows
+            'name': data['name'],
+            'total_worktime': data['total_worktime'],
+            'date': data['attendance__date'],
+            'daily_worktime': data['attendance__worktime']
+        }
+        for data in attendance_data
     ]
 
-    return render(request, "project_tracker.html", {'attendance_data': attendance_data})
+    return render(request, "project_tracker.html", {'attendance_data': attendance_data_list})
 
 from django.http import JsonResponse
-from django.db import connection
+from .models import EmployeeDetails  # Import the EmployeeDetails model
 
 def get_employee_names(request):
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT employee_id, name FROM employee_details ORDER BY name")
-        rows = cursor.fetchall()
+    # Fetch employee names and ids from EmployeeDetails using Django ORM
+    employees = EmployeeDetails.objects.all().order_by('name').values('employee_id', 'name')
 
-    employees = [{'id': row[0], 'name': row[1]} for row in rows]
-    return JsonResponse({'employees': employees})
+    # Prepare the data to be returned in JSON format
+    employee_data = [{'id': employee['employee_id'], 'name': employee['name']} for employee in employees]
+
+    return JsonResponse({'employees': employee_data})
 
 
 from django.http import JsonResponse
-from django.db import connection
+from django.db.models import Sum
+from .models import Attendance  # Import the Attendance model
 
 def get_user_worktime(request):
     try:
@@ -2349,63 +2384,63 @@ def get_user_worktime(request):
         if not employee_id:
             return JsonResponse({'error': 'Missing employee_id'}, status=400)
 
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT 
-                    a.date,
-                    a.worktime,
-                    SUM(a.worktime) OVER () AS total_worktime
-                FROM tracker_attendance a
-                WHERE a.user_id = %s
-                ORDER BY a.date
-            """, [employee_id])
-            rows = cursor.fetchall()
+        # Fetch the attendance records for the specific employee using Django ORM
+        worktime_data = (
+            Attendance.objects
+            .filter(user_id=employee_id)  # Filter by the user_id
+            .values('date', 'worktime')  # Select the necessary fields: date and worktime
+            .annotate(total_worktime=Sum('worktime'))  # Calculate total worktime for the employee
+            .order_by('date')  # Order by date
+        )
 
-        worktime_data = [
+        # Format the data to match the desired output structure
+        worktime_data_list = [
             {
-                'date': row[0],
-                'daily_worktime': row[1],
-                'total_worktime': row[2]
-            } for row in rows
+                'date': entry['date'],
+                'daily_worktime': entry['worktime'],
+                'total_worktime': entry['total_worktime']
+            }
+            for entry in worktime_data
         ]
 
-        return JsonResponse({'worktime': worktime_data})
-    
+        return JsonResponse({'worktime': worktime_data_list})
+
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
 
-from django.shortcuts import render
 from django.http import JsonResponse
-from django.db import connection
-from datetime import datetime
+from .models import TrackerTasks  # Import the TrackerTasks model
 
 def monthly_project_analysis(request):
     project_name = request.GET.get('project_name', None)
-    
-    query = """
-        SELECT projects, category, date1, time
-        FROM tracker_project
-    """
-    params = []
 
+    # Start the queryset to fetch data from TrackerTasks model
+    project_query = TrackerTasks.objects.all()
+
+    # Apply filtering if project_name is provided
     if project_name:
-        query += " WHERE projects = %s"
-        params.append(project_name)
-    
-    with connection.cursor() as cursor:
-        cursor.execute(query, params)
-        rows = cursor.fetchall()
+        project_query = project_query.filter(projects=project_name)
 
-    project_data = [
-        {'projects': row[0], 'category': row[1], 'date1': row[2], 'time': row[3]}
-        for row in rows
+    # Fetch the relevant fields and annotate results
+    project_data = project_query.values('projects', 'category', 'date1', 'time').order_by('projects', 'date1')
+
+    # Convert the queryset to a list of dictionaries
+    project_data_list = [
+        {
+            'projects': item['projects'],
+            'category': item['category'],
+            'date1': item['date1'],
+            'time': item['time']
+        }
+        for item in project_data
     ]
 
-    return JsonResponse({'projects': project_data})
+    return JsonResponse({'projects': project_data_list})
+
 
 from django.http import JsonResponse
-from django.db import connection
+from .models import TrackerTasks  # Import the TrackerTasks model
 
 def get_project_categories(request):
     project_name = request.GET.get('project_name', None)
@@ -2414,23 +2449,19 @@ def get_project_categories(request):
         return JsonResponse({'error': 'No project name provided'}, status=400)
 
     try:
-        # Execute the raw SQL query to fetch the categories related to the selected project
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT DISTINCT category
-                FROM tracker_project
-                WHERE projects = %s
-            """, [project_name])
-            
-            rows = cursor.fetchall()
+        # Use Django ORM to get the distinct categories for the given project name
+        categories = (
+            TrackerTasks.objects
+            .filter(projects=project_name)  # Filter by project name
+            .values('category')  # Select the category field
+            .distinct()  # Get distinct categories
+        )
 
-        # Prepare the data to return the categories
-        categories = [row[0] for row in rows]
+        # Extract the category names from the queryset
+        category_list = [category['category'] for category in categories]
 
-        if categories:
-            return JsonResponse({'categories': categories})
-        else:
-            return JsonResponse({'categories': []})  # Return empty if no categories are found
+        # Return the categories in a JsonResponse
+        return JsonResponse({'categories': category_list})
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

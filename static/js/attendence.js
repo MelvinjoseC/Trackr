@@ -422,55 +422,77 @@ function checkCompensation(date, callback) {
 
 
     // ✅ Submit Attendance Data
-    document.getElementById("submit-btn")?.addEventListener("click", function () {
-        let attendanceDateElement = document.getElementById("attendance-date");
-        if (!attendanceDateElement) {
-            alert("Error: Attendance date is missing.");
+document.getElementById("submit-btn")?.addEventListener("click", function () {
+    let attendanceDateElement = document.getElementById("attendance-date");
+    if (!attendanceDateElement) {
+        alert("Error: Attendance date is missing.");
+        return;
+    }
+
+    let attendanceDate = attendanceDateElement.value;
+
+    // Check if the date is valid
+    if (!attendanceDate) {
+        alert("Error: Please provide a valid attendance date.");
+        return;
+    }
+
+    // Check if the user is eligible for compensation based on date (holiday or weekend)
+    checkCompensation(attendanceDate, function (isCompensated) {
+        let compensatedFlag = isCompensated ? 1 : 0; // Mark as compensated if holiday or weekend
+
+        // Fetch time-related data (Punch-in, Punch-out, Break time)
+        let punchInHour = document.getElementById("punch-in-hour")?.value || "00";
+        let punchInMinute = document.getElementById("punch-in-minute")?.value || "00";
+        let punchOutHour = document.getElementById("punch-out-hour")?.value || "00";
+        let punchOutMinute = document.getElementById("punch-out-minute")?.value || "00";
+        let breakHour = document.getElementById("break-hour")?.value || "00";
+        let breakMinute = document.getElementById("break-minute")?.value || "00";
+
+        // Convert break time into seconds
+        let breakTimeInSeconds = (parseInt(breakHour) * 3600) + (parseInt(breakMinute) * 60);
+
+        // Create a new FormData object to hold the form data
+        let formData = new FormData();
+        formData.append("date", attendanceDate);
+        formData.append("punch_in", `${punchInHour}:${punchInMinute}:00`);
+        formData.append("punch_out", `${punchOutHour}:${punchOutMinute}:00`);
+        formData.append("break_time", breakTimeInSeconds);
+        formData.append("is_compensated", compensatedFlag);
+
+        // Get CSRF token
+        let csrfToken = getCSRFToken();
+        if (!csrfToken) {
+            alert("CSRF token missing!");
             return;
         }
-    
-        let attendanceDate = attendanceDateElement.value;
-    
-        checkCompensation(attendanceDate, function (isCompensated) {
-            let compensatedFlag = isCompensated ? 1 : 0; // ✅ Mark as compensated if holiday or weekend
-    
-            let punchInHour = document.getElementById("punch-in-hour")?.value || "00";
-            let punchInMinute = document.getElementById("punch-in-minute")?.value || "00";
-            let punchOutHour = document.getElementById("punch-out-hour")?.value || "00";
-            let punchOutMinute = document.getElementById("punch-out-minute")?.value || "00";
-            let breakHour = document.getElementById("break-hour")?.value || "00";
-            let breakMinute = document.getElementById("break-minute")?.value || "00";
-    
-            let breakTimeInSeconds = (parseInt(breakHour) * 3600) + (parseInt(breakMinute) * 60);
-    
-            let formData = new FormData();
-            formData.append("date", attendanceDate);
-            formData.append("punch_in", `${punchInHour}:${punchInMinute}:00`);
-            formData.append("punch_out", `${punchOutHour}:${punchOutMinute}:00`);
-            formData.append("break_time", breakTimeInSeconds);
-            formData.append("is_compensated", compensatedFlag);
-    
-            let csrfToken = getCSRFToken();
-            if (!csrfToken) {
-                alert("CSRF token missing!");
-                return;
-            }
 
-    
-            fetch("/attendance/", {
-                method: "POST",
-                body: formData,
-                headers: { "X-CSRFToken": csrfToken },
-            })
-            .then(response => {
-                console.log("📢 Response received:", response);
-                return response.json(); // Parse JSON
-            })
-            alert("✅ Attendance submitted successfully!");
-            
+        // Make the POST request to submit the form data
+        fetch("/attendance/", {
+            method: "POST",
+            body: formData,
+            headers: { "X-CSRFToken": csrfToken },
+        })
+        .then(response => {
+            console.log("📢 Response received:", response);
+            return response.json(); // Parse JSON response
+        })
+        .then(data => {
+            // Handle the response (success or error)
+            if (data.error) {
+                alert(`Error: ${data.error}`);
+            } else {
+                alert("✅ Attendance submitted successfully!");
+            }
+        })
+        .catch(error => {
+            console.error("❌ Error submitting attendance:", error);
+            alert("An error occurred while submitting the attendance.");
         });
     });
-    
+});
+
+
     
 
     // ✅ Function to fetch CSRF token from cookies
