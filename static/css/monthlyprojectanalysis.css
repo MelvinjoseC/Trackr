@@ -47,12 +47,20 @@
     text-align: right;
     padding-right: 20px;
 }
+.select-project{
+    display: flex;
+    justify-content: space-between; /* Align items in one row */
+    gap: 15px; /* Adds space between the items */
+    margin-bottom: 20px;
+
+}
 
 /* Styling for Project and Category Dropdowns */
-.select-project, .select-category {
+.select-category {
     display: flex;
-    flex-direction: column;
     margin-right: 20px;
+    justify-content: space-between; /* Align items in one row */
+    gap: 15px; /* Adds space between the items */
 }
 
 .select-project label, .select-category label {

@@ -50,5 +50,6 @@ urlpatterns = [
     path('attendance/get-user-worktime/', views.get_user_worktime, name='get_user_worktime'),
     path('attendance/monthly-project-analysis/', views.monthly_project_analysis, name='monthly_project_analysis'),
     path('attendance/project-categories/', views.get_project_categories, name='get_project_categories'),
+    path('get_project_data/', views.get_project_data, name='get_project_data'),
 ]
 

@@ -2465,3 +2465,120 @@ def get_project_categories(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+
+from django.http import JsonResponse
+from .models import TrackerTasks
+from datetime import datetime, timedelta
+
+def get_week_date_range(week_offset):
+    """
+    Helper function to get the date range for the given week offset.
+    week_offset: 0 for CW (current week), -1 for W6 (previous week), etc.
+    """
+    today = datetime.today()
+    start_of_week = today - timedelta(days=today.weekday())  # Monday of the current week
+
+    # Calculate the start and end of the target week
+    week_start = start_of_week + timedelta(weeks=week_offset)
+    week_end = week_start + timedelta(days=6)
+
+    return week_start.date(), week_end.date()
+from django.http import JsonResponse
+from .models import TrackerTasks
+from datetime import datetime, timedelta
+
+def get_week_date_range(week_offset):
+    """
+    Helper function to get the date range for the given week offset.
+    week_offset: 0 for CW (current week), -1 for W6 (previous week), etc.
+    """
+    today = datetime.today()
+    start_of_week = today - timedelta(days=today.weekday())  # Monday of the current week
+
+    # Calculate the start and end of the target week
+    week_start = start_of_week + timedelta(weeks=week_offset)
+    week_end = week_start + timedelta(days=6)
+
+    return week_start.date(), week_end.date()
+
+def get_project_data(request):
+    department = request.GET.get('department', None)  # Use 'list' here for department
+    project_name = request.GET.get('project_name', None)
+    category = request.GET.get('category', None)
+    week_offset = int(request.GET.get('week_offset', 0))  # Week offset: 0 for CW, -1 for W6, etc.
+
+    # Get the date range for the selected week
+    week_start, week_end = get_week_date_range(week_offset)
+
+    # Start the queryset to fetch data from TrackerTasks model
+    project_query = TrackerTasks.objects.all()
+
+    # Apply filtering if department is provided
+    if department:
+        project_query = project_query.filter(list=department)  # Use 'list' field for department
+    
+    # Apply filtering if project_name is provided
+    if project_name:
+        project_query = project_query.filter(projects=project_name)
+
+    # Apply filtering if category is provided
+    if category:
+        project_query = project_query.filter(category=category)
+    
+    # Apply filtering for the week based on the date range
+    project_query = project_query.filter(date1__range=[week_start, week_end])
+
+    # Fetch the relevant fields and annotate results
+    project_data = project_query.values('projects', 'category', 'date1', 'time', 'list').order_by('projects', 'date1')
+
+    # Convert the queryset to a list of dictionaries
+    project_data_list = [
+        {
+            'projects': item['projects'],
+            'category': item['category'],
+            'date1': item['date1'],
+            'time': item['time'],
+            'department': item['list']
+        }
+        for item in project_data
+    ]
+    
+    # Get available departments for the department dropdown
+    departments = TrackerTasks.objects.values('list').distinct()
+    department_list = [department['list'] for department in departments]
+
+    # Get available projects for the project dropdown based on the selected department
+    if department:
+        projects = TrackerTasks.objects.filter(list=department).values('projects').distinct()
+        project_list = [project['projects'] for project in projects]
+    else:
+        project_list = []
+
+    # Get available categories for the category dropdown based on the selected project
+    if project_name:
+        categories = TrackerTasks.objects.filter(projects=project_name).values('category').distinct()
+        category_list = [category['category'] for category in categories]
+    else:
+        category_list = []
+
+    # Available weeks (CW, W6, W5, etc.)
+    week_list = [
+        {'label': 'CW', 'value': 0},
+        {'label': 'W6', 'value': -1},
+        {'label': 'W5', 'value': -2},
+        {'label': 'W4', 'value': -3},
+        {'label': 'W3', 'value': -4},
+        {'label': 'W2', 'value': -5},
+        {'label': 'W1', 'value': -6},
+    ]
+
+    # Return the response with department, project, category, week data, and the filtered project data
+    return JsonResponse({
+        'departments': department_list,
+        'projects': project_list,
+        'categories': category_list,
+        'weeks': week_list,
+        'project_data': project_data_list
+    })

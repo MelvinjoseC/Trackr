@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{% static 'css/project_tracker.css' %}">
     <link rel="stylesheet" href="{% static 'css/monthlyanalysis.css' %}">
     <link rel="stylesheet" href="{% static 'css/monthlyprojectanalysis.css' %}">
+    <link rel="stylesheet" href="{% static 'css/weeklyanalysis.css' %}">
      
 
 </head>
@@ -71,7 +72,7 @@
     <div id="project-form-container">
         <button id="toggle-btn" type="button" class="btn btn-secondary">MONTHLY ANALYSIS</button>
         <button id="toggle-btn2" type="button" class="btn btn-secondary">MONTHLY PROJECT ANALYSIS</button>
-        <button type="button" class="btn btn-secondary">WEEKLY PROJECT ANALYSIS</button>
+        <button id="toggle-btnweekly" type="button" class="btn btn-secondary">WEEKLY PROJECT ANALYSIS</button>
         <div class="form-set">
             <div class="form-container">
                 <!-- Title Section -->
@@ -179,109 +180,128 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
+        </div> 
     
-<!-- Popup Modal for Creating a Project -->
-<!-- <div id="createProjectModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closeCreateProjectPopup()">&times;</span>
-        <h1>Create Project</h1> -->
+     
+ </div>
+ <div id="monthly-analysis" style="display: none;">
+    <!-- Your monthly analysis calendar goes here -->
+    <button id="back-btn" type="button" class="btn btn-outline-secondary" style="margin-bottom: 15px;">
+       ← GO BACK
+     </button> 
+   <h1 align="center">MONTHLY ANALYSIS</h1>
+   <div class="header">
+       <select id="employee-select" class="dropdown">
+         <option value="">-- Select Employee --</option>
+       </select>
+   
+       <div class="nav" >
+         <button id="prev-month">&#8592;</button>
+         <h2 id="month-year"></h2>
+         <button id="next-month">&#8594;</button>
+       </div>
+     
+     <div id="total-worktime-display" style="font-size: 18px; font-weight: 600; margin-bottom: 15px;"></div>
+   </div>
+     <div class="calendar" id="calendar"></div>
+     <div id="right-sidebar1" class="sidebar">
+   </div>
+</div>
+<div id="monthlyprojectanalysis" style="display: none;">
+   <!-- Go Back Button -->
+   <button id="go-back-btn" type="button" class="btn btn-outline-secondary">
+       ← GO BACK
+   </button>
+   <h2 align="center">MONTHLY PROJECT ANALYSIS</h2>
+   <div id="Selectoptionheader">
+   
 
-<!--         
-    <div id="attendance-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <h2>Attendance</h2>
-            <p>Here is the attendance functionality or details.</p>
-            <button id="close-modal" class="modal-close">Close</button>
-        </div> -->
-    <!-- </div> -->
-     <div id="monthly-analysis" style="display: none;">
-         <!-- Your monthly analysis calendar goes here -->
-         <button id="back-btn" type="button" class="btn btn-outline-secondary" style="margin-bottom: 15px;">
-            ← GO BACK
-          </button> 
-        <h1 align="center">MONTHLY ANALYSIS</h1>
-        <div class="header">
-            <select id="employee-select" class="dropdown">
-              <option value="">-- Select Employee --</option>
-            </select>
-        
-            <div class="nav" >
-              <button id="prev-month">&#8592;</button>
-              <h2 id="month-year"></h2>
-              <button id="next-month">&#8594;</button>
-            </div>
-          
-          <div id="total-worktime-display" style="font-size: 18px; font-weight: 600; margin-bottom: 15px;"></div>
-        </div>
-          <div class="calendar" id="calendar"></div>
-          <div id="right-sidebar1" class="sidebar">
-        </div>
-    </div>
-    <div id="monthlyprojectanalysis" style="display: none;">
-        <!-- Go Back Button -->
-        <button id="go-back-btn" type="button" class="btn btn-outline-secondary">
-            ← GO BACK
-        </button>
-        <h2 align="center">MONTHLY PROJECT ANALYSIS</h2>
-        <div id="Selectoptionheader">
-        
-    
-        <!-- Project Dropdown -->
-        <div class="select-project">
-            <label for="project-select">SELECT PROJECT</label>
-            <select id="project-select" class="dropdown">
-                <option value="">-- Select Project --</option>
-                <!-- Projects will be populated here dynamically -->
-            </select>
-       
-    
-        <!-- Category Dropdown -->
-        <div class="select-category">
-            <label for="category-select">SELECT CATEGORY</label>
-            <select id="category-select" class="dropdown">
-                <option value="">-- Select Category --</option>
-                <!-- Categories will be populated here dynamically -->
-            </select>
-        </div> </div>
+   <!-- Project Dropdown -->
+   <div class="select-project">
+       <label for="project-select">SELECT PROJECT</label>
+       <select id="project-select" class="dropdown">
+           <option value="">-- Select Project --</option>
+           <!-- Projects will be populated here dynamically -->
+       </select>
+  
 
-        <!-- Total Project Worktime -->
-        <div id="total-time-display">
-            <h3>Total Project Time:</h3>
-            <span id="total-time">0 hrs</span>
-        </div>
-        <div id="total-phase-time-display" style="display: none;">
-            <h3>Total Phase Time:</h3>
-            <span id="total-phase-time">0 hrs</span>
-        </div>
-    </div>
-    
-        
-    <div  class="nav1">
-        <button id="prev-months">&#8592;</button>
-        <h2 id="currentMonth"></h2>
-        <button id="next-months">&#8594;</button>
-    </div>
+   <!-- Category Dropdown -->
+   <div class="select-category">
+       <label for="category-select">SELECT CATEGORY</label>
+       <select id="category-select" class="dropdown">
+           <option value="">-- Select Category --</option>
+           <!-- Categories will be populated here dynamically -->
+       </select>
+   </div> </div>
+
+   <!-- Total Project Worktime -->
+   <div id="total-time-display">
+       <h3>Total Project Time:</h3>
+       <span id="total-time">0 hrs</span>
+   </div>
+   <div id="total-phase-time-display" style="display: none;">
+       <h3>Total Phase Time:</h3>
+       <span id="total-phase-time">0 hrs</span>
+   </div>
+</div>
+
+   
+<div  class="nav1">
+   <button id="prev-months">&#8592;</button>
+   <h2 id="currentMonth"></h2>
+   <button id="next-months">&#8594;</button>
+</div>
 </br>
-    
-        <!-- Calendar Display -->
-        <div id="calendar12" class="calendar-grid">
+
+   <!-- Calendar Display -->
+   <div id="calendar12" class="calendar-grid">
+   </div>
+   <div id="right-sidebar" class="sidebar">       
+   </div>
+   
+   
+</div>
+ <div id="weeklyproject-analysis" style="display: none;">
+    <button id="go-back-btnz" type="button" class="btn btn-outline-secondary">
+        ← GO BACK
+    </button>
+</br></br>
+    <div class="week-selection">
+       
+        <div>
+            <label for="departmentDropdown">Department:</label>
+            <select id="departmentDropdown">
+                <option value="">Select Department</option>
+            </select>
         </div>
-        <div id="right-sidebar" class="sidebar">
-
-            
-                    </div>
-        
-        
+        <div>
+            <label for="projectDropdown">Project:</label>
+            <select id="projectDropdown">
+                <option value="">Select Project</option>
+            </select>
+        </div>
+        <div>
+            <label for="categoryDropdown">Category:</label>
+            <select id="categoryDropdown">
+                <option value="">Select Category</option>
+            </select>
+        </div>
+        <div>
+            <label for="weekDropdown">Week:</label>
+            <select id="weekDropdown">
+                <option value="">Select Week</option>
+            </select>
+        </div>
     </div>
-    
-    
 
-    
+    <div id="projectDataContainer">
+        <!-- Project data will be displayed here -->        
+    </div>
+</div>    
     <!-- ✅ Move JavaScript to the bottom -->
     <script src="{% static 'js/project_tracker.js' %}"></script>
     <script src="{% static 'js/monthlyanalysis.js' %}"></script>
     <script src="{% static 'js/monthlyprojectanalysis.js' %}"></script>
+    <script src="{% static 'js/weeklypoject analysis.js' %}"></script>
 </body>
 </html>

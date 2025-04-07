@@ -1,0 +1,134 @@
+#weeklyproject-analysis {
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    width: 82%;
+    height: 92%;
+    margin-left: 16px;
+    margin-top: 20px;
+}
+
+#weeklyproject-analysis div {
+    margin-bottom: 20px;
+}
+
+/* Flexbox to align the dropdowns in a row */
+.week-selection {
+    display: flex;
+    justify-content: space-between; /* Align items in one row */
+    gap: 15px; /* Adds space between the items */
+    margin-bottom: 20px;
+}
+
+#weeklyproject-analysis label {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* Styling for select elements */
+#weeklyproject-analysis select {
+    width: 200px; /* Adjust width as per your preference */
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    color: #333;
+}
+
+#weeklyproject-analysis select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+#weeklyproject-analysis select option {
+    padding: 10px;
+}
+
+#projectDataContainer {
+    margin-top: 30px;
+}
+
+/* Styling for project data container */
+.project-item {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.project-item p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.project-item strong {
+    color: #007bff;
+}
+
+#projectDataContainer .project-item:last-child {
+    margin-bottom: 0;
+}
+/* Go Back Button */
+#go-back-btnz {
+    margin-top: 20px;
+}
+
+
+.week-time-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 30px;
+}
+
+.week-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.week-btn {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 10px 15px;
+    margin: 0 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.week-btn.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.week-btn:hover {
+    background-color: #e7e7e7;
+}
+
+.total-time-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.time-btn {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 10px 15px;
+    margin: 0 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.time-btn:hover {
+    background-color: #e7e7e7;
+}
+
+.time-btn:focus {
+    outline: none;
+}
