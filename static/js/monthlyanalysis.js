@@ -69,22 +69,25 @@ select.addEventListener("change", () => {
   const year = current.getFullYear();
 
   fetch(`/attendance/get-user-worktime/?employee_id=${empId}`)
-    .then(res => res.json())
-    .then(data => {
-      const datesWithWorktime = {};
-      let total = 0;
+  .then(res => res.json())
+  .then(data => {
+    const datesWithWorktime = {};
+    let total = 0;
 
-      data.worktime.forEach(entry => {
-        const d = new Date(entry.date);
-        if (d.getMonth() + 1 === month && d.getFullYear() === year) {
-          datesWithWorktime[entry.date] = entry.daily_worktime;
-          total = entry.total_worktime; // same for all entries
-        }
-      });
-
-      totalDisplay.textContent = `Total Worktime: ${total} hrs`;
-      updateCalendar(datesWithWorktime);
+    data.worktime.forEach(entry => {
+      const d = new Date(entry.date);
+      if (d.getMonth() + 1 === month && d.getFullYear() === year) {
+        const daily = parseFloat(entry.daily_worktime) || 0;
+        datesWithWorktime[entry.date] = daily;
+        total += daily;
+      }
     });
+
+    totalDisplay.textContent = `Total Worktime: ${total.toFixed(2)} hrs`;
+    updateCalendar(datesWithWorktime);
+  })
+  .catch(err => console.error('Error fetching worktime:', err));
+
 });
 
 updateCalendar();

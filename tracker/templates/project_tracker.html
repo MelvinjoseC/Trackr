@@ -6,7 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Tracker</title>
-
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
     <link rel="stylesheet" href="{% static 'css/project_tracker.css' %}">
     <link rel="stylesheet" href="{% static 'css/monthlyanalysis.css' %}">
     <link rel="stylesheet" href="{% static 'css/monthlyprojectanalysis.css' %}">
@@ -267,7 +268,12 @@
     </button>
 </br></br>
     <div class="week-selection">
-       
+        <div>
+            <label for="weekDropdown">Week:</label>
+            <select id="weekDropdown">
+                <option value="">Select Week</option>
+            </select>
+        </div>
         <div>
             <label for="departmentDropdown">Department:</label>
             <select id="departmentDropdown">
@@ -286,12 +292,7 @@
                 <option value="">Select Category</option>
             </select>
         </div>
-        <div>
-            <label for="weekDropdown">Week:</label>
-            <select id="weekDropdown">
-                <option value="">Select Week</option>
-            </select>
-        </div>
+        
     </div>
 
     <div id="projectDataContainer">
