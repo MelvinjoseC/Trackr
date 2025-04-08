@@ -2291,7 +2291,8 @@ img#filter_button {
     max-height: 200px; /* Adjust as needed */
     overflow-y: auto;
     padding-right: 20px;
-    border: 1px solid #ccc;
+    border: 1px solid #ffffff;
+    background-color: #F6F6F6;
     
     /* Custom scrollbar */
     scrollbar-width: thin; /* For Firefox */

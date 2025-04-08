@@ -127,7 +127,7 @@ def convert_bytes_safe(data):
         return [convert_bytes_safe(item) for item in data]
     return data
 
-
+from .models import TrackerTasks
 def task_dashboard_api(request):
     # Initialize lists to store tasks and employee details
     task_list = []
@@ -153,10 +153,9 @@ def task_dashboard_api(request):
             task_list = [dict(zip(task_columns, task)) for task in tasks]
 
             # Fetch all employee details
-            cursor.execute("SELECT * FROM employee_details")
-            employee_columns = [col[0] for col in cursor.description]
-            employees = cursor.fetchall()
-            employee_details = [dict(zip(employee_columns, emp)) for emp in employees]
+            employees = EmployeeDetails.objects.all()
+            employee_columns = [field.name for field in EmployeeDetails._meta.fields]
+            employee_details = [dict(zip(employee_columns, [getattr(emp, field) for field in employee_columns])) for emp in employees]
             employee_details = convert_bytes_safe(employee_details)
 
     except Exception as e:
@@ -302,7 +301,7 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
                 SELECT 
                     id, title, scope, date, time, assigned, category, projects, 
                     list, rev, comments, benchmark, d_no, mail_no, ref_no, created, updated, verification_status, task_status,
-                FROM tasktracker.tracker_monthlycalendar
+                FROM tasktracker.tracker_project
                 WHERE date = %s
             """,
                 [selected_date],
@@ -1273,8 +1272,8 @@ def apply_leave_view(request):
 
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.db import connection
 from datetime import datetime
+from .models import Holiday  # Import the existing Holiday model
 
 def get_holidays(request):
     """Fetch upcoming holidays only for the current year, excluding Saturdays."""
@@ -1282,32 +1281,26 @@ def get_holidays(request):
         today = datetime.today().date()
         current_year = today.year  # Get current year dynamically
 
-        with connection.cursor() as cursor:
-            # ✅ Get holidays for the current year, excluding Saturdays
-            cursor.execute("""
-                SELECT name, date 
-                FROM tracker_holiday 
-                WHERE YEAR(date) = %s AND DAYOFWEEK(date) != 7  
-                ORDER BY date ASC
-            """, [current_year])
-            holidays = cursor.fetchall()
+        # Query the Holiday model to get holidays for the current year, excluding Saturdays
+        holidays = Holiday.objects.filter(date__year=current_year).exclude(date__week_day=7).order_by('date')
 
         # Convert holidays to JSON format with status
         holiday_list = []
-        for row in holidays:
-            holiday_date = row[1]
+        for holiday in holidays:
+            holiday_date = holiday.date
             status = "past" if holiday_date < today else "upcoming"
 
             holiday_list.append({
-                "name": row[0],
+                "name": holiday.name,
                 "date": holiday_date.strftime("%Y-%m-%d"),
-                "status": status  # ✅ Add status for styling in JS
+                "status": status  # Add status for styling in JS
             })
 
         return JsonResponse({"holidays": holiday_list})
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
 
 
 

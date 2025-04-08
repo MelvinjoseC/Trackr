@@ -255,7 +255,6 @@ function handleButtonClick(event) {
         const formattedTaskDate = taskDate ? new Date(taskDate).toISOString().split('T')[0] : null;
 
         console.log("Task Date:", formattedTaskDate);
-
         // Match task date with selected date
         return formattedTaskDate && formattedTaskDate === selectedFormattedDate;
     });
@@ -1101,10 +1100,10 @@ setTimeout(() => {
         type: 'pie',
         data: {
             labels: ["Discussion", "Designing", "Calculating", "Modeling", "Checking"],
-            datasets: [{ data: [19, 12, 24, 15, 30], backgroundColor: ["#98FB98", "#87CEFA", "#FFB6C1", "#FFD700", "#FFA07A"] }]
+            datasets: [{ data: [19, 12, 24, 15, 30], backgroundColor: ["#1E90FF", "#4682B4", "#5F9EA0", "#87CEFA", "#B0E0E6"] }]
         }
     });
-}, 500);
+}, 300);
 
 
 
