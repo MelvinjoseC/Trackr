@@ -48,8 +48,10 @@ urlpatterns = [
     path('monthly-attendance/', views.monthly_attendance_view, name='monthly_attendance'),  # URL for the monthly attendance view
     path('attendance/get-users/', views.get_employee_names, name='get_employee_names'),
     path('attendance/get-user-worktime/', views.get_user_worktime, name='get_user_worktime'),
+    path('attendance/get-attendance-details/', views.get_attendance_details, name='get_attendance_details'),
     path('attendance/monthly-project-analysis/', views.monthly_project_analysis, name='monthly_project_analysis'),
     path('attendance/project-categories/', views.get_project_categories, name='get_project_categories'),
     path('get_project_data/', views.get_project_data, name='get_project_data'),
+    path('attendance/get-task-details-for-sidebar/', views.get_task_details_for_sidebar, name='get_task_details_for_sidebar'),
 ]
 

@@ -124,6 +124,32 @@
     display: flex;
     justify-content: center;
 }
+/* Weekday Labels (With Horizontal Divider) */
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-top: 2px solid #ddd; /* Horizontal divider */
+    background: white;
+    height:5vh;
+  }
+  
+  /* Each Weekday Label */
+  .day-label {
+    text-align: center;
+    padding: 10px;
+    position: relative;
+  }
+  
+  /* Vertical Divider Between Days */
+  .day-label:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 20%;
+    bottom: 20%;
+    width: 2px;
+    background: #ddd;
+  }
 
 #right-sidebar {
     width: 300px;
@@ -142,4 +168,29 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    /* Add a scrollbar when content overflows */
+    overflow-y: auto;  /* Enable vertical scrolling */
+    max-height: 100%;  /* Ensure it doesn't exceed the available space */
+}
+
+/* Optional: style the scrollbar */
+#right-sidebar::-webkit-scrollbar {
+    width: 8px;
+}
+
+#right-sidebar::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+#right-sidebar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+/* Add this CSS to ensure <hr> is styled properly */
+hr {
+    border: 1px solid #000000;  /* You can adjust the color as needed */
+    margin: 10px 0;           /* Adds space above and below the line */
+    width: 100%; 
+    color: #000000;             /* Make sure it takes full width */
 }

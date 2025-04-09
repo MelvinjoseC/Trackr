@@ -12,8 +12,9 @@ class ProjectTacker(models.Model):
 
     class Meta:
         db_table = 'project_tacker'  # Matches the DB table name
+
 class TrackerTasks(models.Model):
-    task_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     d_no = models.IntegerField(null=True, blank=True)
     title = models.CharField(max_length=255)
     projects = models.CharField(max_length=255)
@@ -26,16 +27,16 @@ class TrackerTasks(models.Model):
         choices=[('Low', 'Low'), ('Medium', 'Medium'), ('High', 'High')],
         default='Medium'
     )
-    start_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
-    group_assigned = models.CharField(max_length=255, null=True, blank=True)
-    assignee = models.CharField(max_length=255, null=True, blank=True)
+    start = models.DateField(null=True, blank=True)
+    end = models.DateField(null=True, blank=True)
+    group = models.CharField(max_length=255, null=True, blank=True)
+    assigned = models.CharField(max_length=255, null=True, blank=True)
     checker = models.CharField(max_length=255, null=True, blank=True)
-    qc_3_checker = models.CharField(max_length=255, null=True, blank=True)
+    qc3_checker = models.CharField(max_length=255, null=True, blank=True)
     review_3d = models.TextField(null=True, blank=True)
-    qc_1_status = models.CharField(max_length=50, null=True, blank=True)
-    qc_2_status = models.CharField(max_length=50, null=True, blank=True)
-    qc_3_status = models.CharField(max_length=50, null=True, blank=True)
+    qc1 = models.CharField(max_length=50, null=True, blank=True)
+    qc2 = models.CharField(max_length=50, null=True, blank=True)
+    qc3 = models.CharField(max_length=50, null=True, blank=True)
     verification_status = models.BooleanField(default=False)
     phase_1_benchmark = models.CharField(max_length=50, null=True, blank=True)
     phase_2_benchmark = models.CharField(max_length=50, null=True, blank=True)

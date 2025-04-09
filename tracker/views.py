@@ -2400,6 +2400,31 @@ def get_user_worktime(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+from django.http import JsonResponse
+from .models import Attendance  # Assuming you have an Attendance model
+
+def get_attendance_details(request):
+    try:
+        employee_id = request.GET.get('employee_id')
+        date = request.GET.get('date')  # Format: YYYY-MM-DD
+        
+        if not employee_id or not date:
+            return JsonResponse({'error': 'Missing employee_id or date'}, status=400)
+
+        # Fetch the attendance record for the specific employee and date
+        attendance = Attendance.objects.filter(
+            user_id=employee_id,
+            date=date
+        ).values('punch_in', 'punch_out', 'break_time', 'worktime')
+
+        if not attendance:
+            return JsonResponse({'error': 'No attendance found for this date'}, status=404)
+
+        # Return the data as JSON
+        return JsonResponse({'attendance': attendance[0]})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 from django.http import JsonResponse
@@ -2575,3 +2600,44 @@ def get_project_data(request):
         'weeks': week_list,
         'project_data': project_data_list
     })
+
+
+from django.http import JsonResponse
+from .models import TrackerTasks
+from datetime import datetime
+
+def get_task_details_for_sidebar(request):
+    # Fetch the date from the request
+    selected_date = request.GET.get('date')
+
+    if not selected_date:
+        return JsonResponse({'error': 'date is required'}, status=400)
+
+    try:
+        # Ensure the date format is correct
+        selected_date = datetime.strptime(selected_date, '%Y-%m-%d').date()
+
+        # Query tasks by date (assuming date1 is the field that holds the task date)
+        tasks = TrackerTasks.objects.filter(date1=selected_date)
+
+        if not tasks:
+            return JsonResponse({'error': 'No tasks found for this date'}, status=404)
+
+        # Prepare task data to return in JSON format, including the assignee field (assigned)
+        task_data = [{
+            'title': task.title,
+            'projects': task.projects,
+            'scope': task.scope,
+            'category': task.category,
+            'time': task.time,
+            'comments': task.comments,
+            'task_benchmark': task.task_benchmark,
+            'assigned': task.assigned  # Correctly using 'assigned' field
+        } for task in tasks]
+
+        return JsonResponse({'tasks': task_data})
+
+    except ValueError:
+        return JsonResponse({'error': 'Invalid date format, expected YYYY-MM-DD'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)

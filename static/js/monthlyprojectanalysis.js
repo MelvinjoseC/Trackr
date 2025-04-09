@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const totalPhaseTimeDisplay = document.getElementById("total-phase-time");
     const totalTimeDisplayContainer = document.getElementById("total-time-display");
     const totalPhaseTimeContainer = document.getElementById("total-phase-time-display");
+    const rightSidebar = document.getElementById("right-sidebar"); // Sidebar container for task details
 
     let current = new Date();
 
@@ -34,19 +35,54 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    // Function to update the calendar with project data
-    function updateCalendar(projectName, category = '') {
+    // Function to fetch task details and display them in the right sidebar
+    function loadTaskDetails(date) {
+        fetch(`/attendance/get-task-details-for-sidebar/?date=${date}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    rightSidebar.innerHTML = `<div>Error: ${data.error}</div>`;
+                    return;
+                }
+
+                if (data.tasks.length === 0) {
+                    rightSidebar.innerHTML = "<div>No tasks found for this date</div>";
+                    return;
+                }
+
+                // Populate the right sidebar with task details
+                rightSidebar.innerHTML = data.tasks.map(task => `
+                    <h3>${task.title}</h3>
+                    <p><strong>Project:</strong> ${task.projects}</p>
+                    <p><strong>Scope:</strong> ${task.scope}</p>
+                    <p><strong>Category:</strong> ${task.category}</p>
+                    <p><strong>Time:</strong> ${task.time} hrs</p>
+                    <p><strong>Comments:</strong> ${task.comments}</p>
+                    <p><strong>Assigned:</strong> ${task.assigned}</p>
+                    <p><strong>Task Benchmark:</strong> ${task.task_benchmark}</p>
+                    
+                    <hr>
+                `).join("");
+            })
+            .catch(error => {
+                console.error("Error fetching task details:", error);
+                rightSidebar.innerHTML = "<div>Error loading task data.</div>";
+            });
+    }
+
+    // Function to update the calendar with project data (with default display before selecting project)
+    function updateCalendar(projectName = '', category = '') {
         calendar.innerHTML = "";
         const currentMonth = current.getMonth();
         const currentYear = current.getFullYear();
 
-        // Fetch data for the selected project and category from the backend
+        // Fetch all project data, without filtering by project or category initially
         fetch(`/attendance/monthly-project-analysis/?project_name=${projectName}&category=${category}`)
             .then(response => response.json())
             .then(data => {
                 let totalTime = 0;
                 let totalPhaseTime = 0;
-                const datesWithTime = {};
+                const datesWithTime = {}; // Store total work time for each date
 
                 // Iterate through the project data
                 data.projects.forEach(project => {
@@ -56,13 +92,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     const time = parseFloat(project.time) || 0;
 
+                    // Only consider tasks for the selected project and category
                     if (projectMonth === currentMonth && projectYear === currentYear) {
-                        const dateStr = projectDate.toLocaleDateString("en-CA");
-                        datesWithTime[dateStr] = time;
-                        totalTime += time;  // Sum the total time for the current month
+                        if (project.projects === projectName || projectName === '') {  // Show all if no project selected
+                            if (!category || project.category === category) {
+                                const dateStr = projectDate.toLocaleDateString("en-CA"); // Format the date to match YYYY-MM-DD
 
-                        if (category && project.category === category) {
-                            totalPhaseTime += time;  // Sum the phase time for the selected category
+                                // Add task time to the corresponding date
+                                if (!datesWithTime[dateStr]) {
+                                    datesWithTime[dateStr] = 0;
+                                }
+                                datesWithTime[dateStr] += time;
+
+                                totalTime += time;  // Sum the total time for the current month
+
+                                if (category && project.category === category) {
+                                    totalPhaseTime += time;  // Sum the phase time for the selected category
+                                }
+                            }
                         }
                     }
                 });
@@ -95,11 +142,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     div.className = "day-cell";
                     div.innerHTML = `<div>${day}</div>`;
 
-                    if (category && datesWithTime[dateStr]) {
-                        div.innerHTML += `<div>${datesWithTime[dateStr]} hrs</div>`;
-                    } else if (!category && datesWithTime[dateStr]) {
-                        div.innerHTML += `<div>${datesWithTime[dateStr]} hrs</div>`;
+                    // Add total work time for the day if available
+                    if (datesWithTime[dateStr]) {
+                        div.innerHTML += `<div>${datesWithTime[dateStr].toFixed(2)} hrs</div>`;
                     }
+
+                    // Add event listener for clicking the day
+                    div.addEventListener("click", () => loadTaskDetails(dateStr)); // Pass the date to loadTaskDetails
 
                     calendar.appendChild(div);
                 }
@@ -181,13 +230,11 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Initial load
+    // Initial load (before project and scope are selected)
     loadProjects();
     updateMonthYear();
-    updateCalendar(projectSelect.value);
+    updateCalendar();  // Initial call with no project or category selected
 });
-
-
 
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -211,8 +258,4 @@ document.addEventListener("DOMContentLoaded", function () {
       analysisContainer.style.display = "none"; // Hide project analysis
       toggleButton.style.display = "inline-block"; // Show the button again when you go back
     });
-  });
-  
-
-
-  
+});
