@@ -77,8 +77,9 @@
         <div class="form-set">
             <div class="form-container">
                 <!-- Title Section -->
+                 <div id="updatecontainer">
                 <div class="form-title-box">
-                    <h3 class="form-title">CREATE PROJECT</h3>
+                    <h3 class="form-title">CREATE PROJECT<button id="UPDATE_PROJECTSTATUS">PROJECT CLOSURE</button></h3>
                     
                 </div>
             
@@ -126,6 +127,33 @@
                 </div>
             </div>
         
+            <!-- The form container that will be shown/hidden inside the form-title-box -->
+            <div id="updateFormContainer">
+                <!-- Go Back Button -->
+                <button id="goBackBtn">Go Back</button>
+                <h2>Project Status Update</h2>
+                <form method="POST" id="updateStatusForm">
+                    {% csrf_token %}
+
+                    <label for="projects">Project Name:</label>
+                    <select name="projects" id="projects">
+                        <option value="">Select Project</option>
+                        <!-- Project options will be populated dynamically -->
+                    </select>
+
+                    <label for="project_status">Project Status:</label>
+                    <select name="project_status" id="project_status">
+                        <option value="Completed">Completed</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Paused">Paused</option>
+                    </select>
+
+                    <button type="submit" id="submit_button1">Update Status</button>
+                </form>
+            </div>
+
+            <div id="message"></div>
+                </div>
             <div class="calendar-form">
                 <div class="calendar_header">
                     <button id="prevMonth"><img id="arrow_left" src="{% static 'images/arrow_left.png' %}"></button>
@@ -251,12 +279,12 @@
 
    <!-- Total Project Worktime -->
    <div id="total-time-display">
-       <h3>Total Project Time:</h3>
-       <span id="total-time">0 hrs</span>
-   </div>
+    <h4>Approved Hours : <span id="task-benchmark-time">0 hrs</span></h4>
+    <h4>Total Project Hours : <span id="total-time">0 hrs</span> </h4>
+    </div>
    <div id="total-phase-time-display" style="display: none;">
-       <h3>Total Phase Time:</h3>
-       <span id="total-phase-time">0 hrs</span>
+       <h3>Total Category Time : <span id="total-phase-time">0 hrs</span></h3>
+       
    </div>
 </div>
 

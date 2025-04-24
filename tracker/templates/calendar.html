@@ -64,8 +64,13 @@
                 <img src="{% static 'images/leavepage.png' %}" alt="Notifications Icon"> NOTIFICATIONS
             </a>      
                 {% endif %}
+                <a class="sidebar-link" id="team-button" href="{% url 'team_dashboard' %}"
+                data-default-img="{% static 'images/leavepage.png' %}" 
+                data-active-img="{% static 'images/leavepage1.png' %}">
+                <img src="{% static 'images/leavepage.png' %}" alt="Leave Tracker Icon"> TEAM DASHBOARD
+            </a>
             </div>
-    
+            
             <!-- Sign Out Button -->
             <a class="sign-out sidebar-link" id="signout-button"
                 data-default-img="{% static 'images/signout.png' %}"

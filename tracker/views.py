@@ -2015,7 +2015,7 @@ def delete_attendance_view(request):
 
 from django.http import JsonResponse
 from datetime import datetime, timedelta
-from .models import Attendance, Holiday  # Assuming you have the Attendance and Holiday models
+from .models import Attendance, Holiday, LeaveApplication  # Assuming you have the Attendance, Holiday, and LeaveApplication models
 
 global_user_data = None  # Global user data
 
@@ -2037,6 +2037,64 @@ def get_monthly_weekly_attendance(request):
     first_day_of_month = today.replace(day=1)
     last_day_of_month = (first_day_of_month.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
 
+    # Calculate total working days in the month (Monday to Friday)
+    total_working_days_month = sum(
+        1 for i in range(1, last_day_of_month.day + 1)
+        if (first_day_of_month + timedelta(days=i - 1)).weekday() < 5
+    )
+
+    # Calculate total working days in the week (Monday to Friday)
+    total_working_days_week = sum(
+        1 for i in range(7)
+        if (week_start + timedelta(days=i)).weekday() < 5  # Monday to Friday only
+    )
+
+    # Fetch holidays in the current month (excluding weekends)
+    holiday_count_month = Holiday.objects.filter(
+        date__range=[first_day_of_month, last_day_of_month]
+    ).exclude(date__week_day__in=[6, 7]).count()  # Excluding weekends (Saturday and Sunday)
+
+    # Fetch holidays in the current week (excluding weekends)
+    holiday_count_week = Holiday.objects.filter(
+        date__range=[week_start, week_end]
+    ).exclude(date__week_day__in=[6, 7]).count()  # Excluding weekends (Saturday and Sunday)
+
+    # Fetch leave applications for the current week (excluding weekends)
+    leave_applications_week = LeaveApplication.objects.filter(
+        username=user_id,
+        start_date__gte=week_start,
+        end_date__lte=week_end,
+        status='Approved'
+    )
+
+    # Fetch leave applications for the current month (excluding weekends)
+    leave_applications_month = LeaveApplication.objects.filter(
+        username=user_id,
+        start_date__gte=first_day_of_month,
+        end_date__lte=last_day_of_month,
+        status='Approved'
+    )
+
+    # Calculate leave days taken for the current week (ignoring full/half day)
+    leave_taken_week = len(leave_applications_week)
+
+    # Calculate leave days taken for the current month (ignoring full/half day)
+    leave_taken_month = len(leave_applications_month)
+
+    # **Expected Monthly Hours Calculation**
+    # Total working days in the month minus holidays
+    expected_monthly_working_days = total_working_days_month - holiday_count_month
+    # Subtract 9 hours for each leave taken
+    leave_deduction_month = leave_taken_month * 9
+    expected_monthly_hours = expected_monthly_working_days * 9 - leave_deduction_month  # 9 hours per workday
+
+    # **Expected Weekly Hours Calculation**
+    # Total working days in the week minus holidays
+    expected_weekly_working_days = total_working_days_week - holiday_count_week
+    # Subtract 9 hours for each leave taken
+    leave_deduction_week = leave_taken_week * 9
+    expected_weekly_hours = expected_weekly_working_days * 9 - leave_deduction_week  # 9 hours per workday
+
     # Fetch total work time for the current month using Django ORM
     total_monthly_hours = Attendance.objects.filter(
         user_id=user_id,
@@ -2049,33 +2107,13 @@ def get_monthly_weekly_attendance(request):
         date__range=[week_start, week_end]
     ).aggregate(total_worktime=models.Sum('worktime'))['total_worktime'] or 0.0
 
-    # Fetch holidays in the current week (excluding weekends) using Django ORM
-    holiday_count_week = Holiday.objects.filter(
-        date__range=[week_start, week_end]
-    ).exclude(date__week_day__in=[6, 7]).count()  # Excluding weekends (Saturday and Sunday)
-
-    # Compute Expected Monthly Hours
-    total_working_days = sum(
-        1 for i in range(1, last_day_of_month.day + 1)
-        if (first_day_of_month + timedelta(days=i - 1)).weekday() < 5
-    )
-
-    expected_monthly_hours = (total_working_days - holiday_count_week) * 9  # 9 hours per workday
-
-    # Compute Expected Weekly Hours for this week (Sunday to Saturday), excluding holidays
-    total_week_working_days = sum(
-        1 for i in range(7)
-        if (week_start + timedelta(days=i)).weekday() < 5  # Monday to Friday only
-    )
-
-    expected_weekly_hours = (total_week_working_days - holiday_count_week) * 9  # 9 hours per workday
-
     return JsonResponse({
         "total_monthly_hours": total_monthly_hours,
         "total_weekly_hours": total_weekly_hours,
         "expected_monthly_hours": expected_monthly_hours,
         "expected_weekly_hours": max(expected_weekly_hours, 0)  # Prevents negative values
     })
+
 
 
 from django.http import JsonResponse
@@ -2440,8 +2478,8 @@ def monthly_project_analysis(request):
     if project_name:
         project_query = project_query.filter(projects=project_name)
 
-    # Fetch the relevant fields and annotate results
-    project_data = project_query.values('projects', 'category', 'date1', 'time').order_by('projects', 'date1')
+    # Fetch the relevant fields including task_benchmark
+    project_data = project_query.values('projects', 'category', 'date1', 'time', 'task_benchmark', 'title').order_by('projects', 'date1')
 
     # Convert the queryset to a list of dictionaries
     project_data_list = [
@@ -2449,12 +2487,15 @@ def monthly_project_analysis(request):
             'projects': item['projects'],
             'category': item['category'],
             'date1': item['date1'],
-            'time': item['time']
+            'time': item['time'],
+            'task_benchmark': item['task_benchmark'],
+            'title':item['title'],
         }
         for item in project_data
     ]
 
     return JsonResponse({'projects': project_data_list})
+
 
 
 from django.http import JsonResponse
@@ -2641,3 +2682,99 @@ def get_task_details_for_sidebar(request):
         return JsonResponse({'error': 'Invalid date format, expected YYYY-MM-DD'}, status=400)
     except Exception as e:
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
+
+
+from django.shortcuts import render
+from .models import EmployeeDetails  # Assuming EmployeeDetails model exists
+import base64
+
+# Assuming global_user_data is a global variable
+global_user_data = None
+
+def team_dashboard(request):
+    global global_user_data  # Access the global variable for user data
+
+    # Default data if global_user_data is not set
+    user_id = global_user_data.get("employee_id", None) if global_user_data else None
+    name = global_user_data.get("name", "Guest") if global_user_data else "Guest"
+    designation = global_user_data.get("designation", "No Designation") if global_user_data else "No Designation"
+    image_base64 = None  # Initialize empty image
+
+    if user_id:
+        try:
+            # Fetch the employee data from the database
+            employee = EmployeeDetails.objects.get(employee_id=user_id)
+
+            # Update the designation from the employee data
+            designation = employee.designation
+
+            # If an image exists, convert it to base64
+            if employee.image:
+                image_base64 = base64.b64encode(employee.image).decode("utf-8")
+
+        except EmployeeDetails.DoesNotExist:
+            # Handle the case when the employee doesn't exist
+            designation = "Employee not found"
+
+    # Now pass the data to the template
+    return render(
+        request,
+        "team_dashboard.html",  # Your team dashboard template
+        {
+            "name": name,
+            "designation": designation,
+            "image_base64": image_base64,  # Send base64 encoded image
+            "employee_id": user_id,  # Pass employee_id to template
+        },
+    )
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from .models import TrackerTasks
+
+# Assuming global_user_data is a global variable
+global_user_data = None
+
+def get_project_data(request):
+    # Fetch distinct project names from the TrackerTasks model
+    projects = TrackerTasks.objects.values('projects').distinct()
+
+    # Convert queryset to list of project names
+    projects = [project['projects'] for project in projects]
+
+    # Return the data as JSON
+    return JsonResponse({
+        'projects': projects
+    })
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from .models import TrackerTasks
+from .forms import ProjectStatusUpdateForm
+
+# Assuming global_user_data is a global variable
+global_user_data = None
+
+def update_project_status(request):
+    if request.method == 'POST':
+        form = ProjectStatusUpdateForm(request.POST)
+        if form.is_valid():
+            # Get the selected data from the form
+            project_name = form.cleaned_data['projects']
+            project_status = form.cleaned_data['project_status']
+
+            # Update only the selected project's status
+            tasks = TrackerTasks.objects.filter(projects=project_name)
+
+            # If tasks exist, update their project_status
+            if tasks.exists():
+                tasks.update(project_status=project_status)
+                return JsonResponse({"success": "Project status updated successfully"}, status=200)
+            else:
+                return JsonResponse({"error": "Project not found"}, status=404)
+
+    else:
+        # Display the form initially (GET request)
+        form = ProjectStatusUpdateForm()
+
+    return render(request, 'project_tracker.html', {'form': form})

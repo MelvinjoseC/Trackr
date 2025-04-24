@@ -55,6 +55,7 @@ class TrackerTasks(models.Model):
     date1 = models.DateField(null=True, blank=True)
     time = models.IntegerField(null=True, blank=True)
     comments = models.CharField(max_length=1000, null=True, blank=True)
+    project_status = models.CharField(max_length=50, null=True, blank=True)
     class Meta:
         db_table = 'tracker_project'  # Custom table name
 

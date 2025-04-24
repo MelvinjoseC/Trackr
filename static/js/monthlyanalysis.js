@@ -56,19 +56,29 @@ function updateCalendar(datesWithWorktime = {}, employeeId) {
   const lastDay = new Date(year, month + 1, 0);
   const startDay = firstDay.getDay();
 
+  // Calculate the total number of cells needed for the grid (42 cells)
+  const totalCells = 42;  // 7 columns * 6 rows = 42 cells
+  const totalDays = lastDay.getDate();
+  const remainingCells = totalCells - (startDay + totalDays);  // Empty cells after the last day
+
+  // Set month and year in the display
   monthYear.textContent = current.toLocaleString('default', { month: 'long', year: 'numeric' });
 
+  // Add empty cells before the first day of the month
   for (let i = 0; i < startDay; i++) {
     const empty = document.createElement("div");
+    empty.className = "day empty-cell"; // Add styling for empty cells if needed
     calendar.appendChild(empty);
   }
 
-  for (let day = 1; day <= lastDay.getDate(); day++) {
+  // Add actual days in the calendar
+  for (let day = 1; day <= totalDays; day++) {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const div = document.createElement("div");
     div.className = "day";
     div.innerHTML = `<div class="date">${day}</div>`;
 
+    // Add total work time for the day if available
     if (datesWithWorktime[dateStr]) {
       div.innerHTML += `<div class="worktime">${datesWithWorktime[dateStr]} hrs</div>`;
     }
@@ -77,6 +87,13 @@ function updateCalendar(datesWithWorktime = {}, employeeId) {
     div.addEventListener("click", () => handleDateClick(dateStr, employeeId));
 
     calendar.appendChild(div);
+  }
+
+  // Add empty cells after the last day of the month to complete the 42 cells
+  for (let i = 0; i < remainingCells; i++) {
+    const empty = document.createElement("div");
+    empty.className = "day empty-cell"; // Add styling for empty cells if needed
+    calendar.appendChild(empty);
   }
 }
 

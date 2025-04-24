@@ -1,15 +1,30 @@
+// Function to open the Create Project Popup
 function openCreateProjectPopup() {
-    document.getElementById("createProjectModal").style.display = "flex";
+    const createProjectModal = document.getElementById("createProjectModal");
+    if (createProjectModal) {
+        createProjectModal.style.display = "flex";
+    } else {
+        console.error("createProjectModal element not found.");
+    }
 }
 
+// Function to close the Create Project Popup
 function closeCreateProjectPopup() {
-    document.getElementById("createProjectModal").style.display = "none";
+    const createProjectModal = document.getElementById("createProjectModal");
+    if (createProjectModal) {
+        createProjectModal.style.display = "none";
+    } else {
+        console.error("createProjectModal element not found.");
+    }
 }
 
+
+// Function to submit the project form (you can modify this as needed)
 function submitProjectForm() {
     alert("Project submitted successfully!");
 }
-// ✅ Ensure JavaScript runs only after DOM is fully loaded
+
+// Ensure JavaScript runs only after DOM is fully loaded
 document.addEventListener("DOMContentLoaded", function () {
     let submitButton = document.querySelector(".submit-btn");
 
@@ -17,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
         submitButton.addEventListener("click", function (event) {
             event.preventDefault();
 
-            // ✅ Get form inputs
+            // Get form inputs
             let projectName = document.getElementById("projectName").value.trim();
             let startDate = document.getElementById("startDate").value;
             let endDate = document.getElementById("endDate").value;
@@ -25,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
             let category = document.getElementById("category").value.trim();
             let benchmark = document.getElementById("Benchmark").value.trim();
 
-            // ✅ Ensure fields are filled
+            // Ensure fields are filled
             if (!projectName || !startDate || !endDate || !scope || !category || !benchmark) {
                 alert("All fields are required!");
                 return;
@@ -56,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(data => {
                 if (data.message) {
                     alert(data.message);
-                    document.getElementById("projectForm").reset(); // ✅ Clear the form
+                    document.getElementById("projectForm").reset(); // Clear the form
                     closeCreateProjectPopup();
                     location.reload();
                 } else {
@@ -65,7 +80,6 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .catch(error => {
                 console.error("Submission Error:", error);
-                alert("An error occurred. Please check your internet connection or try again.");
             })
             .finally(() => {
                 submitButton.disabled = false;
@@ -75,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// ✅ Fix `handleTaskAction` function
+// Function to handle task action (related to task management)
 function handleTaskAction(action, projectName) {
     fetch('/task_action/', {
         method: 'POST',
@@ -102,7 +116,7 @@ function handleTaskAction(action, projectName) {
     });
 }
 
-// ✅ Fix CSRF Token Retrieval
+// Function to get CSRF Token (for security in POST requests)
 function getCsrfToken() {
     let cookieValue = null;
     let cookies = document.cookie ? document.cookie.split('; ') : [];
@@ -115,7 +129,162 @@ function getCsrfToken() {
     }
     return cookieValue;
 }
+// Ensure JavaScript runs only after DOM is fully loaded
+document.addEventListener("DOMContentLoaded", function () {
+    const submitButton1 = document.getElementById("submit1");
 
+    if (submitButton1) {
+        submitButton1.addEventListener("click", function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Get form inputs
+            let projectName = document.getElementById("projects").value.trim();
+            let scope = document.getElementById("scope").value.trim();
+            let category = document.getElementById("category").value.trim();
+            let projectStatus = document.getElementById("project_status").value.trim();
+
+            // Ensure fields are filled
+            if (!projectName || !scope || !category || !projectStatus) {
+                alert("All fields are required!");
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append("projects", projectName);
+            formData.append("scope", scope);
+            formData.append("category", category);
+            formData.append("project_status", projectStatus);
+
+            submitButton1.disabled = true;
+            submitButton1.textContent = "Submitting...";
+
+            // Send the form data to the backend to update the project status
+            fetch("/update_project_status/", {
+                method: "POST",
+                body: formData,
+                headers: { "X-CSRFToken": getCsrfToken() }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Project status updated successfully!");
+                    document.getElementById("updateStatusForm").reset(); // Clear the form
+                    closeCreateProjectPopup(); // Close the popup
+                    location.reload(); // Reload the page to see the changes
+                } else {
+                    alert("Error: " + (data.error || "Unknown error"));
+                }
+            })
+            .catch(error => {
+                console.error("Submission Error:", error);
+            })
+            .finally(() => {
+                submitButton1.disabled = false;
+                submitButton1.textContent = "Submit";
+            });
+        });
+    }});
+    document.addEventListener("DOMContentLoaded", function () {
+        const submitButton1 = document.getElementById("submit_button1");
+        const updateProjectStatusBtn = document.getElementById("UPDATE_PROJECTSTATUS");
+        const updateFormContainer = document.getElementById("updateFormContainer");
+        const formTitleBox = document.getElementById("updatecontainer"); // Corrected to match the form title box
+        const goBackBtn = document.getElementById("goBackBtn");
+    
+        // Fetch project data (projects) from the backend
+        fetch('/get-project-data/')
+            .then(response => response.json())
+            .then(data => {
+                // Populate the Project Name dropdown
+                const projectSelect = document.getElementById("projects");
+                data.projects.forEach(project => {
+                    let option = document.createElement("option");
+                    option.value = project;
+                    option.textContent = project;
+                    projectSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching project data:", error);
+            });
+    
+        // Handle form submission when the "Update Status" button is clicked
+        submitButton1.addEventListener("click", function (event) {
+            event.preventDefault(); // Prevent the default form submission
+    
+            // Get selected project name and project status
+            let projectName = document.getElementById("projects").value.trim();
+            let projectStatus = document.getElementById("project_status").value.trim();
+    
+            // Ensure fields are filled
+            if (!projectName || !projectStatus) {
+                alert("Both Project Name and Status are required!");
+                return;
+            }
+    
+            let formData = new FormData();
+            formData.append("projects", projectName);
+            formData.append("project_status", projectStatus);
+    
+            submitButton1.disabled = true;
+            submitButton1.textContent = "Submitting...";
+    
+            // Send the form data to the backend to update the project status
+            fetch("/update_project_status/", {
+                method: "POST",
+                body: formData,
+                headers: { "X-CSRFToken": getCsrfToken() }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Project status updated successfully!");
+                    document.getElementById("updateStatusForm").reset(); // Clear the form
+                    closeCreateProjectPopup(); // Close the popup
+                    location.reload(); // Reload the page to see the changes
+                } else {
+                    alert("Error: " + (data.error || "Unknown error"));
+                }
+            })
+            .catch(error => {
+                console.error("Submission Error:", error);
+                alert("An error occurred. Please check your internet connection or try again.");
+            })
+            .finally(() => {
+                submitButton1.disabled = false;
+                submitButton1.textContent = "Submit";
+            });
+        });
+    
+        // When the "PROJECT CLOSURE" button is clicked, hide the form title box and show the form inside the form-title-box
+        updateProjectStatusBtn.addEventListener("click", function() {
+            formTitleBox.style.display = "none"; // Hide the form title box
+            updateFormContainer.style.display = "block"; // Show the form inside the form-title-box
+        });
+    
+        // When the "Go Back" button is clicked, hide the form and show the form title box again
+        goBackBtn.addEventListener("click", function() {
+            formTitleBox.style.display = "block"; // Show the form title box
+            updateFormContainer.style.display = "none"; // Hide the form
+        });
+    });
+    
+    // Function to get CSRF Token (for security in POST requests)
+    function getCsrfToken() {
+        let cookieValue = null;
+        let cookies = document.cookie ? document.cookie.split('; ') : [];
+    
+        for (let cookie of cookies) {
+            let [key, value] = cookie.split('=');
+            if (key === 'csrftoken') {
+                return decodeURIComponent(value);
+            }
+        }
+        return cookieValue;
+    }
+    
+
+// Calendar Rendering Code (unchanged from previous)
 document.addEventListener("DOMContentLoaded", function () {
     const monthYear = document.getElementById("monthYear");
     const calendarDates = document.getElementById("calendarDates");
@@ -188,4 +357,3 @@ document.addEventListener("DOMContentLoaded", function () {
 
     renderCalendar();
 });
-

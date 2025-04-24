@@ -7,12 +7,8 @@
     width: 66%;
     height: 92%;
     margin-left: 16px;
-    margin-top: 20px;
-    
+    margin-top: 20px; 
 }
-
-
-
 
 /* Calendar Header Styles */
 .calendar-header {
@@ -85,21 +81,34 @@
 /* Calendar Grid */
 .calendar-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
-    grid-template-rows: repeat(6, auto); /* Fixed 6 rows */
+    grid-template-columns: repeat(7, 1fr);  /* 7 columns */
+    grid-template-rows: repeat(6, 1fr);     /* 6 rows */
+    gap: 10px;  /* This will create the gap between cells */
     padding-top: 1vh;
-    height: 64vh;
+    height: 60vh;
 }
 
-.day-cell {
+
+/* Day Cell Style */
+.calendar-grid .day-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background: #e8f1fd;
-    padding: 10px;
+    height: 80%; /* Ensures the day cell takes full height of the grid */
     text-align: center;
+    flex-direction: column;  /* Align contents vertically */
+    padding: 10px;  /* Adds space inside the cell */
+    border-radius: 8px;  /* Adds rounded corners */
+    gap: 18px;  /* Adds a gap between elements inside the cell */
     font-weight: bold;
-    border-radius: 8px;
-    min-height: 60px;
 }
+/* Empty Cell Style (for padding before and after the month) */
+.calendar .empty-cell1 {
+    background-color: #b4b4b4; /* Light gray background for empty cells */
+
+  }
+  
 
 .day-cell:hover {
     background-color: #d3e7ff;

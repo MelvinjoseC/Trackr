@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/attendance.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            </br>
+            <img id="fusie" src="{% static 'images/img_19.png' %}" alt="Responsive image">
+           </br></br></br></br>
+            <img id="profile_pic" src="data:image/png;base64,{{ image_base64 }}" alt="Profile Image">
+            <h4 id="profile_name"> {{ name }}</h4>
+            <p id="profile_designation" align="center">{{ designation }}</p>
+    
+            </br></br></br>
+    
+            <!-- Sidebar Buttons -->
+            <div class="sidebar_buttons">
+                <a href="{% url 'task_dashboard' %}" class="sidebar-link" id="task-button" 
+                   data-default-img="{% static 'images/task_tracker.png' %}" 
+                   data-active-img="{% static 'images/task_tracker1.png' %}">
+                    <img src="{% static 'images/task_tracker.png' %}" alt="Task Tracker Icon"> TASK TRACKER
+                </a>
+                <a class="sidebar-link" id="attendance-button" href="{% url 'calendar' %}"
+                   data-default-img="{% static 'images/attendance.png' %}" 
+                   data-active-img="{% static 'images/attendance1.png' %}">
+                    <img src="{% static 'images/attendance.png' %}" alt="Attendance Icon"> ATTENDANCE
+                </a>
+                <a class="sidebar-link" id="leave-button" href="{% url 'mainleavepage' %}"
+                data-default-img="{% static 'images/leavepage.png' %}" 
+                data-active-img="{% static 'images/leavepage1.png' %}">
+                 <img src="{% static 'images/leavepage.png' %}" alt="Leave Tracker Icon"> LEAVE TRACKER
+             </a>
+             
+                
+                {% if is_admin_or_md  %}
+                <!-- ✅ Show Project Tracker for Admins only -->
+                <a class="sidebar_link" id="project-button" 
+                href="{% url 'project_tracker' %}" 
+                data-default-img="{% static 'images/leavepage.png' %}" 
+                data-active-img="{% static 'images/leavepage1.png' %}">
+                <img src="{% static 'images/leavepage.png' %}" alt="Project Tracker Icon"> PROJECT TRACKER
+            </a>            
+                {% else %}
+                <!-- ✅ Show Notifications for Normal Users -->
+                <a class="sidebar_link" id="notifications" 
+                href="{% url 'notifications_page' %}"
+                data-default-img="{% static 'images/leavepage.png' %}" 
+                data-active-img="{% static 'images/leavepage1.png' %}">
+                <img src="{% static 'images/leavepage.png' %}" alt="Notifications Icon"> NOTIFICATIONS
+            </a>      
+                {% endif %}
+                <a class="sidebar-link" id="team-button" href="{% url 'team_dashboard' %}"
+                data-default-img="{% static 'images/leavepage.png' %}" 
+                data-active-img="{% static 'images/leavepage1.png' %}">
+                <img src="{% static 'images/leavepage.png' %}" alt="Leave Tracker Icon"> TEAM DASHBOARD
+            </a>
+            </div>
+            
+            <!-- Sign Out Button -->
+            <a class="sign-out sidebar-link" id="signout-button"
+                data-default-img="{% static 'images/signout.png' %}"
+                data-active-img="{% static 'images/signout1.png' %}">
+                <img src="{% static 'images/signout.png' %}" alt="Sign Out Icon"> SIGN OUT
+            </a>
+        </div>
+    <h1>Welcome to the Team Dashboard</h1>
+    <!-- Empty view: You can add content here later -->
+</body>
+
+<script src="{% static 'js/attendence.js' %}"></script>
+<script src="{% static 'js/task_dashbord.js' %}"></script>
+<script src="{% static 'js/leavepage.js' %}"></script>
+</html>

@@ -17,7 +17,7 @@
   .header {
     display: flex;
     align-items: center;
-    gap: 300px; /* 👈 Add this line to create space between elements */
+    gap: 290px; /* 👈 Add this line to create space between elements */
     margin-bottom: 30px;
   }
   
@@ -29,45 +29,65 @@
     background-color: #fff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
-  .calendar {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 1.5vh;
-    padding-top: 1vh;
-    height: 64vh;
+  /* Calendar Grid */
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr); /* 7 columns */
+  gap: 1.5vh;  /* Adds space between day cells */
+  padding-top: 1vh;
+  height: 64vh;  /* Adjust the height as needed */
+  width: 100%;
 }
 
+/* Day Cell Style */
 .calendar .day {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    font-size: 1rem;
-    border-radius: 8px;
-    background-color: #f5f5f5;
-    cursor: pointer;
+  display: flex;
+  flex-direction: column; /* Align the date and worktime vertically */
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  border-radius: 8px;
+  background-color: #e3f4fc;
+  cursor: pointer;
+  position: relative;
+  padding: 8px;
+  box-sizing: border-box;
 }
 
+/* Day Number */
 .calendar .day .date {
-    font-weight: bold;
+  font-weight: bold;
+  margin-bottom: 6px;  /* Space between date and worktime */
 }
 
+/* Hover Effect for Day Cells */
 .calendar .day:hover {
-    background-color: #e0e0e0; /* Add hover effect */
+  background-color: #ceddf0;  /* Hover effect */
 }
-hr {
-  border: 1px solid #000000;  /* You can adjust the color as needed */
-  margin: 10px 0;           /* Adds space above and below the line */
-  width: 100%; 
-  color: #000000;             /* Make sure it takes full width */
+
+/* Work Time (for each day) */
+.calendar .day .worktime {
+  font-size: 13px;
+  color: #000000;
+  font-weight: bold;
+  margin-top: 4px;  /* Space between the date and work time */
+  text-align: center;
 }
+
+/* Empty Cell Style (for padding before and after the month) */
+.calendar .empty-cell {
+  background-color: #f0f0f0; /* Light gray background for empty cells */
+  border-radius: 8px;
+  height: 100%;
+}
+
 /* Weekday Labels (With Horizontal Divider) */
 .weekdays {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, 1fr); /* 7 columns for weekdays */
   border-top: 2px solid #ddd; /* Horizontal divider */
   background: white;
-  height:5vh;
+  height: 5vh;
 }
 
 /* Each Weekday Label */
@@ -75,6 +95,7 @@ hr {
   text-align: center;
   padding: 10px;
   position: relative;
+  font-weight: bold;
 }
 
 /* Vertical Divider Between Days */
@@ -87,21 +108,19 @@ hr {
   width: 2px;
   background: #ddd;
 }
-  .day:hover {
-    background-color: #ceddf0;
-  }
-  .day .date {
-    font-weight: 600;
-    font-size: 15px;
-    margin-bottom: 6px;
-    background: none;
-  }
-  .day .worktime {
-    font-size: 20px;
-    color: #000000;
-    margin-left: 50px;
-    font-weight: bold;
+
+/* Divider Line */
+hr {
+  border: 1px solid #000000; /* Divider line color */
+  margin: 10px 0;  /* Adds space above and below the line */
+  width: 100%;
+  color: #000000;
 }
+.day .worktime {
+  color: #000000;
+  font-weight: bold;
+}
+
   .nav {
     display: flex;
 

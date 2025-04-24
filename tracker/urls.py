@@ -53,5 +53,8 @@ urlpatterns = [
     path('attendance/project-categories/', views.get_project_categories, name='get_project_categories'),
     path('get_project_data/', views.get_project_data, name='get_project_data'),
     path('attendance/get-task-details-for-sidebar/', views.get_task_details_for_sidebar, name='get_task_details_for_sidebar'),
+    path('team_dashboard/', views.team_dashboard, name='team_dashboard'),  # Add the route for team dashboard
+    path('update_project_status/', views.update_project_status, name='update_project_status'),
+    path('get-project-data/', views.get_project_data, name='get_project_data'),
 ]
 
