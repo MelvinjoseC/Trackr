@@ -1402,27 +1402,27 @@ function openUpdateTimesheetModal(taskId) {
         });
 }
 
-function populateDropdown(selectId, options, selectedValue) {
-    const selectElement = document.getElementById(selectId);
-    selectElement.innerHTML = `<option value="">Select</option>`;
+// function populateDropdowns(selectId, options, selectedValue) {
+//     const selectElement = document.getElementById(selectId);
+//     selectElement.innerHTML = `<option value="">Select</option>`;
 
-    if (!options || options.length === 0) {
-        console.warn(`No valid options for ${selectId}`);
-        return;
-    }
+//     if (!options || options.length === 0) {
+//         console.warn(`No valid options for ${selectId}`);
+//         return;
+//     }
 
-    options.forEach(item => {
-        const option = document.createElement("option");
-        option.value = item;
-        option.textContent = item;
-        if (selectedValue && selectedValue === item) {
-            option.selected = true;
-        }
-        selectElement.appendChild(option);
-    });
+//     options.forEach(item => {
+//         const option = document.createElement("option");
+//         option.value = item;
+//         option.textContent = item;
+//         if (selectedValue && selectedValue === item) {
+//             option.selected = true;
+//         }
+//         selectElement.appendChild(option);
+//     });
 
-    selectElement.dispatchEvent(new Event("change"));
-}
+//     selectElement.dispatchEvent(new Event("change"));
+// }
 
 // Filtering Functions
 function filterProjects() {

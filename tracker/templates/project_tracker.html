@@ -155,7 +155,49 @@
             <div id="message"></div>
                 </div>
             <div class="calendar-form">
-                <div class="calendar_header">
+                
+                
+                <form id="teamForm">
+                    <h2>Add Team Ranking</h2>
+                    <label for="team_name_dropdown">Select Team:</label>
+                    <select name="team_name" id="team_name_dropdown" required>   
+                        <option value="">-- Select Team Name --</option>
+                    </select>
+                    <br>
+                    <label for="team_member_dropdown">Select Team Member:</label>
+                    <select id="team_member_dropdown" name="team_member" required>
+                        <option value="">-- Select Member --</option>
+                    </select><br>
+                    <div class="rating-block">
+                        <label>Speed of Execution:</label>
+                        <div class="star-rating" data-name="speed_of_execution"></div>
+                      </div>
+                      
+                      <div class="rating-block">
+                        <label>Complaints:</label>
+                        <div class="star-rating" data-name="complaints_of_check_list"></div>
+                      </div>
+                      
+                      <div class="rating-block">
+                        <label>Task Ownership:</label>
+                        <div class="star-rating" data-name="task_ownership"></div>
+                      </div>
+                      
+                      <div class="rating-block">
+                        <label>Understanding Task:</label>
+                        <div class="star-rating" data-name="understanding_task"></div>
+                      </div>
+                      
+                      <div class="rating-block">
+                        <label>Quality of Work:</label>
+                        <div class="star-rating" data-name="quality_of_work"></div>
+                      </div>
+                      
+                    <button type="submit">Add</button>
+                    
+                </form>
+                <button id="viewRankingButton">Rank lists</button>
+                <!-- <div class="calendar_header">
                     <button id="prevMonth"><img id="arrow_left" src="{% static 'images/arrow_left.png' %}"></button>
                     <h2 id="monthYear"></h2>
                     <button id="nextMonth"><img id="arrow_right" src="{% static 'images/arrow_right.png' %}"></button>
@@ -163,11 +205,30 @@
                 <div class="calendar-days">
                     <div>Sun</div> <div>Mon</div> <div>Tue</div> <div>Wed</div> <div>Thu</div> <div>Fri</div> <div>Sat</div>
                 </div>
-                <div id="calendarDates" class="calendar-dates"></div>
+                <div id="calendarDates" class="calendar-dates"></div> -->
             </div>
         </div>
         
+        
         <div class="search-container">
+            <div id="rank" style="display: none;">
+                <button id="backToSearch">Back</button>
+                <h2 align="center">Employee Ranking List</h2>
+                <table border="1" id="rankingTable">
+                    <thead>
+                        <tr>
+                            <th>Team Name</th>
+                            <th>Team Member</th>
+                            <th>Date</th>
+                            <th>Speed of Execution</th>
+                            <th>Complaints of checklist</th>
+                            <th>Task Ownership</th>
+                            <th>Understanding Task</th>
+                            <th>Quality of work</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table></div>
             <div class="search-history">
                 <table>
                     <thead>
@@ -213,6 +274,7 @@
     
      
  </div>
+ 
  <div id="monthly-analysis" style="display: none;">
     <!-- Your monthly analysis calendar goes here -->
     <button id="back-btn" type="button" class="btn btn-outline-secondary" style="margin-bottom: 15px;">
@@ -348,8 +410,10 @@
     <div id="projectDataContainer">
         <!-- Project data will be displayed here -->        
     </div>
+
 </div>    
     <!-- ✅ Move JavaScript to the bottom -->
+    <script src="{% static 'js/team_ranking.js' %}"></script>
     <script src="{% static 'js/project_tracker.js' %}"></script>
     <script src="{% static 'js/monthlyanalysis.js' %}"></script>
     <script src="{% static 'js/monthlyprojectanalysis.js' %}"></script>

@@ -2,6 +2,7 @@ body {
     font-family: Roboto;
     background-color: #ECECEC;
     margin: 0;
+    text-transform: uppercase;
 }
 
 .full-container {
@@ -142,6 +143,7 @@ input[type="date"] {
     border-radius: 10px;
     background-color: #FFFFFF;
     height: 34.5vh;
+    width: 34.5vh;;
 }
 
 .calendar_header {
@@ -424,13 +426,15 @@ p#profile_designation {
     height: 44vh;
     background: white;
     border-radius: 10px;
+    margin-top: 6.5vh;
+    width: 83.5vw;
 }
 
 .search-history {
     display: flex;
     flex-direction: column;
     margin-top: 6.5vh;
-    width: 85.5vw;
+    width: 83.5vw;
     height: 44vh;
     border-radius: 10px;
     overflow-y: auto;
@@ -626,4 +630,57 @@ span.date-highlight {
     color: #4CAF50; /* Green color for success */
 }
 
- 
+#rankingTable {
+    width: 97%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    background-color: #fff;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    margin-left: 15px;
+}
+
+#rankingTable thead {
+    background-color: #f4f4f4;
+}
+
+#rankingTable th,
+#rankingTable td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 14px;
+}
+
+#rankingTable th {
+    font-weight: bold;
+    color: #333;
+}
+
+#rankingTable td span {
+    font-size: 18px;
+    letter-spacing: 2px;
+}
+
+
+.star-rating {
+    display: inline-block;
+    cursor: pointer;
+    font-size: 24px;
+    user-select: none;
+}
+
+.star-rating .star {
+    color: #ccc;
+    margin-right: 5px;
+    transition: color 0.2s ease;
+}
+
+.rating-block {
+    margin: 10px 0;
+}
+
+
+.teamForm{
+    margin-top: 10%;
+}

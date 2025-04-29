@@ -77,6 +77,7 @@ class EmployeeDetails(models.Model):
     password = models.CharField(max_length=255)
     authentication = models.CharField(max_length=50)
     approval = models.JSONField(null=True, blank=True)  # Added approval field as JSON
+    team_name = models.CharField(max_length=50)
 
     class Meta:
         db_table = 'employee_details'  # Custom table name
@@ -141,5 +142,19 @@ class Holiday(models.Model):
     def __str__(self):
         return f"{self.name} on {self.date}"
 
+from django.db import models
+from django.utils.timezone import now
 
+class TeamRanking(models.Model):
+    teamid = models.AutoField(primary_key=True)
+    team_name = models.CharField(max_length=100)
+    team_member = models.TextField()
+    date = models.DateField(default=now)  # Auto set to current date
+    speed_of_execution = models.IntegerField()
+    complaints_of_check_list = models.IntegerField()
+    task_ownership = models.IntegerField()
+    understanding_task = models.IntegerField()
+    quality_of_work = models.IntegerField()
 
+    def __str__(self):
+        return f"{self.team_name} - {self.date}"

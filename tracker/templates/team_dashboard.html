@@ -8,10 +8,11 @@
     <title>Attendance</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/attendance.css' %}">
+    <link rel="stylesheet" href="{% static 'css/teamdashboard.css' %}">
     <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
 
 </head>
 <body>
@@ -78,11 +79,16 @@
                 <img src="{% static 'images/signout.png' %}" alt="Sign Out Icon"> SIGN OUT
             </a>
         </div>
-    <h1>Welcome to the Team Dashboard</h1>
-    <!-- Empty view: You can add content here later -->
+        <div><h1>Welcome to the Team Dashboard</h1>
+            <canvas id="teamBarChart" width="300px" height="100px" style="background: rgb(255, 255, 255);"></canvas>
+        </div>
+        
+
+   
 </body>
 
 <script src="{% static 'js/attendence.js' %}"></script>
 <script src="{% static 'js/task_dashbord.js' %}"></script>
 <script src="{% static 'js/leavepage.js' %}"></script>
+<script src="{% static 'js/team_dashboard.js' %}"></script>
 </html>

@@ -2735,7 +2735,7 @@ from .models import TrackerTasks
 # Assuming global_user_data is a global variable
 global_user_data = None
 
-def get_project_data(request):
+def get_projects_data(request):
     # Fetch distinct project names from the TrackerTasks model
     projects = TrackerTasks.objects.values('projects').distinct()
 
@@ -2778,3 +2778,41 @@ def update_project_status(request):
         form = ProjectStatusUpdateForm()
 
     return render(request, 'project_tracker.html', {'form': form})
+
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from .models import TeamRanking
+import json
+from django.views.decorators.csrf import csrf_exempt
+
+def team_ranking_page(request):
+    return render(request, 'project_tracker.html')
+
+@csrf_exempt
+def add_team_ranking(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        TeamRanking.objects.create(
+            team_name=data['team_name'],
+            team_member=data['team_member'],
+            speed_of_execution=data['speed_of_execution'],
+            complaints_of_check_list=data['complaints_of_check_list'],
+            task_ownership=data['task_ownership'],
+            understanding_task=data['understanding_task'],
+            quality_of_work=data['quality_of_work'],
+        )
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'invalid request'}, status=400)
+
+def get_team_rankings(request):
+    team_data = list(TeamRanking.objects.values())
+    return JsonResponse(team_data, safe=False)
+
+
+from django.http import JsonResponse
+from .models import TeamRanking
+
+def get_team_names(request):
+    team_data = TeamRanking.objects.values('team_name', 'team_member').distinct()
+    return JsonResponse(list(team_data), safe=False)

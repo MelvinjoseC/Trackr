@@ -55,6 +55,10 @@ urlpatterns = [
     path('attendance/get-task-details-for-sidebar/', views.get_task_details_for_sidebar, name='get_task_details_for_sidebar'),
     path('team_dashboard/', views.team_dashboard, name='team_dashboard'),  # Add the route for team dashboard
     path('update_project_status/', views.update_project_status, name='update_project_status'),
-    path('get-project-data/', views.get_project_data, name='get_project_data'),
+    path('get-projects-data/', views.get_projects_data, name='get_project_data'),
+    path('team-ranking/', views.team_ranking_page, name='team_ranking_page'),
+    path('add-team-ranking/', views.add_team_ranking, name='add_team_ranking'),
+    path('get-team-rankings/', views.get_team_rankings, name='get_team_rankings'),
+    path('get-team-names/', views.get_team_names, name='get_team_names'),
 ]
 
