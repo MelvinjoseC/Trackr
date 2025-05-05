@@ -74,6 +74,11 @@
             style="display: none;">
             <img src="{% static 'images/leavepage.png' %}" alt="Project Tracker Icon"> PROJECT TRACKER
             </a>
+            <a class="sidebar-link" id="team-button" href="{% url 'team_dashboard' %}"
+                data-default-img="{% static 'images/leavepage.png' %}" 
+                data-active-img="{% static 'images/leavepage1.png' %}">
+                <img src="{% static 'images/leavepage.png' %}" alt="Leave Tracker Icon"> TEAM DASHBOARD
+            </a>
         </div>
 
         <a  class="sign-out sidebar-link" id="signout-button"
@@ -436,7 +441,6 @@
             </button>
         </div>
 
-        <p>HYWIND SCOTLAND MAIN COMPONENT EXCHANGE</p>
 
         <!-- Dropdowns (Populated via API) -->
         <div class="dropdown-row">
