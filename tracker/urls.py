@@ -51,7 +51,7 @@ urlpatterns = [
     path('attendance/get-attendance-details/', views.get_attendance_details, name='get_attendance_details'),
     path('attendance/monthly-project-analysis/', views.monthly_project_analysis, name='monthly_project_analysis'),
     path('attendance/project-categories/', views.get_project_categories, name='get_project_categories'),
-    path('get_project_data/', views.get_project_data, name='get_project_data'),
+    path('get_project_data/', views.get_project_datas, name='get_project_data'),
     path('attendance/get-task-details-for-sidebar/', views.get_task_details_for_sidebar, name='get_task_details_for_sidebar'),
     path('team_dashboard/', views.team_dashboard, name='team_dashboard'),  # Add the route for team dashboard
     path('update_project_status/', views.update_project_status, name='update_project_status'),
@@ -60,5 +60,13 @@ urlpatterns = [
     path('add-team-ranking/', views.add_team_ranking, name='add_team_ranking'),
     path('get-team-rankings/', views.get_team_rankings, name='get_team_rankings'),
     path('get-team-names/', views.get_team_names, name='get_team_names'),
+    path('get-team-chart-data/', views.get_team_chart_data, name='get_team_chart_data'),
+    path('get-team-data/', views.get_team_data, name='get_team_data'),
+    path('get-projects/<team>/', views.get_projects, name='get_projects'),
+    path('get-task-data/<team>/<project>/', views.get_task_data, name='get_task_data'),
+    path('get-team-chart-data/', views.get_team_chart_data, name='get_team_chart_data'),
+    path('get-projects/<team>/', views.get_project, name='get_projects'),
+    path('get-project-data/<team>/<project>/', views.get_project_data, name='get_project_data'),
+    path('get-task-data/<team>/<project>/', views.get_task_data, name='get_task_data'),
 ]
 

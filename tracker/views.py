@@ -300,7 +300,7 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
                 """
                 SELECT 
                     id, title, scope, date, time, assigned, category, projects, 
-                    list, rev, comments, benchmark, d_no, mail_no, ref_no, created, updated, verification_status, task_status,
+                    list, rev, comments, benchmark, d_no, mail_no, ref_no, created, updated, verification_status, task_status, team, 
                 FROM tasktracker.tracker_project
                 WHERE date = %s
             """,
@@ -328,6 +328,7 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
                     "updated": row[16],
                     "verification_status": row[17],
                     "task_status": row[18],
+                    "team":row[19],
                 }
                 for row in rows
             ]
@@ -366,8 +367,8 @@ def create_task(request):
             # SQL query to insert data into tracker_project
             query = """
                 INSERT INTO tracker_project
-                (title, `list`, projects, scope, priority, assigned, checker, qc3_checker, category, start, end, verification_status, task_status, d_no, rev)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                (title, `list`, projects, scope, priority, assigned, checker, qc3_checker, category, start, end, verification_status, task_status, d_no, rev, team)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)
             """
             params = (
                 data.get("title", ""),  # Provide default empty string if None
@@ -385,6 +386,7 @@ def create_task(request):
                 data.get("task_status", ""),
                 data.get("d_no", ""),
                 data.get("rev_no", ""),
+                data.get("team", ""),
             )
 
             # Execute the query safely
@@ -456,6 +458,7 @@ def aproove_task(request):
 
             # Convert dates to strings for JSON serialization
             task_details = {
+                "team": data.get("team"),
                 "task_title": task_title,
                 "project": data.get("project"),
                 "scope": data.get("scope"),
@@ -2562,7 +2565,7 @@ def get_week_date_range(week_offset):
 
     return week_start.date(), week_end.date()
 
-def get_project_data(request):
+def get_project_datas(request):
     department = request.GET.get('department', None)  # Use 'list' here for department
     project_name = request.GET.get('project_name', None)
     category = request.GET.get('category', None)
@@ -2685,7 +2688,7 @@ def get_task_details_for_sidebar(request):
 
 
 from django.shortcuts import render
-from .models import EmployeeDetails  # Assuming EmployeeDetails model exists
+from .models import TrackerTasks, EmployeeDetails  # Your model import
 import base64
 
 # Assuming global_user_data is a global variable
@@ -2700,21 +2703,39 @@ def team_dashboard(request):
     designation = global_user_data.get("designation", "No Designation") if global_user_data else "No Designation"
     image_base64 = None  # Initialize empty image
 
+    # Fetch TrackerTasks data
+    tracker_data = []
+
     if user_id:
         try:
-            # Fetch the employee data from the database
+            # Fetch employee details if available
             employee = EmployeeDetails.objects.get(employee_id=user_id)
-
-            # Update the designation from the employee data
-            designation = employee.designation
-
-            # If an image exists, convert it to base64
+            designation = employee.designation  # Override with the value from DB
+            
+            # Convert image to base64 if it exists
             if employee.image:
-                image_base64 = base64.b64encode(employee.image).decode("utf-8")
+                image_base64 = base64.b64encode(employee.image).decode('utf-8')
 
+            # Get all tasks related to the user's team or their assignment
+            tasks = TrackerTasks.objects.filter(assigned=name)  # Assuming 'assigned' stores employee name
+            for task in tasks:
+                tracker_data.append({
+                    "team": task.team,
+                    "task_benchmark": task.task_benchmark,  # APPROVED HOURS
+                    "time": task.time,  # Total Worktime
+                    "projects": task.projects,
+                    "project_status": task.project_status,
+                    "title": task.title,
+                    "task_status": task.task_status,
+                    "priority": task.priority,
+                    "start": task.start,
+                    "end": task.end,
+                })
+        
         except EmployeeDetails.DoesNotExist:
-            # Handle the case when the employee doesn't exist
-            designation = "Employee not found"
+            designation = "Employee Not Found"
+        except TrackerTasks.DoesNotExist:
+            tracker_data = []
 
     # Now pass the data to the template
     return render(
@@ -2725,8 +2746,269 @@ def team_dashboard(request):
             "designation": designation,
             "image_base64": image_base64,  # Send base64 encoded image
             "employee_id": user_id,  # Pass employee_id to template
+            "tracker_data": tracker_data,  # Pass tracker task data to template
         },
     )
+from django.http import JsonResponse
+from .models import TrackerTasks
+from django.db.models import Sum
+
+def get_team_chart_data(request):
+    # Fetch all tasks from the database
+    team_data = TrackerTasks.objects.values(
+        'team',
+        'projects',
+        'scope',
+        'category',
+        'title',
+        'rev',
+        'task_benchmark'
+    ).order_by('team')
+
+    # Dictionary to accumulate approved hours and worktime
+    approved_hours_dict = {}
+    total_worktime_dict = {}
+
+    # Loop through the data to manually filter duplicates for Approved Hours
+    unique_combinations = set()
+    for entry in team_data:
+        key = (entry['team'], entry['projects'], entry['scope'], entry['category'], entry['title'], entry['rev'])
+        
+        # Check if the combination already exists
+        if key not in unique_combinations:
+            unique_combinations.add(key)  # Mark this combination as counted
+            
+            # Initialize the dictionary if team not present
+            if entry['team'] not in approved_hours_dict:
+                approved_hours_dict[entry['team']] = 0
+            
+            # Add the benchmark value only if it's unique
+            approved_hours_dict[entry['team']] += float(entry['task_benchmark'] or 0)
+    
+    # Calculate Total Worktime by filtering just the Team
+    worktime_data = TrackerTasks.objects.values('team').annotate(
+        total_worktime=Sum('time')
+    ).order_by('team')
+
+    # Populate the dictionary with worktime values
+    for entry in worktime_data:
+        total_worktime_dict[entry['team']] = entry['total_worktime']
+
+    # Prepare data for JSON response
+    data = {
+        "teams": list(approved_hours_dict.keys()),
+        "approvedHours": list(approved_hours_dict.values()),
+        "totalWorktime": [total_worktime_dict.get(team, 0) for team in approved_hours_dict.keys()]
+    }
+    
+    return JsonResponse(data)
+
+from django.http import JsonResponse
+from .models import TrackerTasks
+
+def get_team_data(request):
+    teams = TrackerTasks.objects.values('team').distinct()
+    team_names = [team['team'] for team in teams]
+    return JsonResponse({"teams": team_names})
+
+def get_projects(request, team):
+    projects = TrackerTasks.objects.filter(team=team).values('projects').distinct()
+    project_names = [project['projects'] for project in projects]
+    return JsonResponse({"projects": project_names})
+
+from django.http import JsonResponse
+from .models import TrackerTasks
+from django.db.models import Sum
+
+def get_task_data(request, team, project):
+    # Decode team and project if needed (e.g., if they contain special characters)
+    # team = urllib.parse.unquote(team)
+    # project = urllib.parse.unquote(project)
+
+    # Query tasks based on team and project
+    tasks = TrackerTasks.objects.filter(team=team, projects=project).values('title').distinct()
+    
+    approved_hours = []
+    total_worktime = []
+    task_titles = []
+    
+    for task in tasks:
+        task_titles.append(task['title'])
+        
+        # Calculate total approved hours for each task
+        approved_hours_sum = TrackerTasks.objects.filter(
+            team=team, projects=project, title=task['title']
+        ).aggregate(Sum('task_benchmark'))['task_benchmark__sum'] or 0
+        approved_hours.append(approved_hours_sum)
+        
+        # Calculate total worktime for each task
+        total_worktime_sum = TrackerTasks.objects.filter(
+            team=team, projects=project, title=task['title']
+        ).aggregate(Sum('time'))['time__sum'] or 0
+        total_worktime.append(total_worktime_sum)
+    
+    return JsonResponse({
+        "tasks": task_titles,
+        "approvedHours": approved_hours,
+        "totalWorktime": total_worktime
+    })
+
+from django.http import JsonResponse
+from .models import TrackerTasks
+from django.db.models import Sum
+
+def get_team_chart_data(request):
+    # Fetch all tasks from the database
+    team_data = TrackerTasks.objects.values(
+        'team',
+        'projects',
+        'scope',
+        'category',
+        'title',
+        'rev',
+        'd_no',  # Include d_no in the values
+        'task_benchmark'
+    ).order_by('team')
+
+    # Dictionary to accumulate approved hours and worktime
+    approved_hours_dict = {}
+    total_worktime_dict = {}
+
+    # Loop through the data to manually filter duplicates for Approved Hours
+    unique_combinations = set()
+    for entry in team_data:
+        # Create a unique key based on the combination of team, project, scope, category, title, rev, and d_no
+        key = (entry['team'], entry['projects'], entry['scope'], 
+               entry['category'], entry['title'], entry['rev'], entry['d_no'])
+        
+        # Check if the combination already exists
+        if key not in unique_combinations:
+            unique_combinations.add(key)  # Mark this combination as counted
+            
+            # Initialize the dictionary if team is not present
+            if entry['team'] not in approved_hours_dict:
+                approved_hours_dict[entry['team']] = 0
+            
+            # Add the benchmark value (approved hours) for the unique combination
+            approved_hours_dict[entry['team']] += float(entry['task_benchmark'] or 0)
+    
+    # Calculate Total Worktime by filtering just the Team
+    worktime_data = TrackerTasks.objects.values('team').annotate(
+        total_worktime=Sum('time')
+    ).order_by('team')
+
+    # Populate the dictionary with worktime values
+    for entry in worktime_data:
+        total_worktime_dict[entry['team']] = entry['total_worktime']
+
+    # Prepare data for JSON response
+    data = {
+        "teams": list(approved_hours_dict.keys()),
+        "approvedHours": list(approved_hours_dict.values()),
+        "totalWorktime": [total_worktime_dict.get(team, 0) for team in approved_hours_dict.keys()]
+    }
+
+    return JsonResponse(data)
+
+
+def get_project(request, team):
+    projects = TrackerTasks.objects.filter(team=team).values('projects').distinct()
+    project_names = [project['projects'] for project in projects]
+    return JsonResponse({"projects": project_names})
+
+
+from django.http import JsonResponse
+from .models import TrackerTasks
+from django.db.models import Sum
+
+def get_task_data(request, team, project):
+    # Fetch all tasks for the specified team and project, grouped by the combination of team, project, scope, category, title, rev, and d_no (as string)
+    tasks = TrackerTasks.objects.filter(team=team, projects=project).values(
+        'team', 'projects', 'scope', 'category', 'title', 'rev', 'd_no'
+    ).distinct()
+
+    approved_hours = []
+    total_worktime = []
+    task_titles = []
+
+    for task in tasks:
+        task_titles.append(task['title'])
+
+        # Calculate total approved hours for this task combination (unique combination)
+        approved_hours_sum = TrackerTasks.objects.filter(
+            team=team, projects=project, title=task['title'], rev=task['rev'], d_no=task['d_no']
+        ).aggregate(Sum('task_benchmark'))['task_benchmark__sum'] or 0
+        approved_hours.append(approved_hours_sum)
+
+        # Calculate total worktime for this task combination (unique combination)
+        total_worktime_sum = TrackerTasks.objects.filter(
+            team=team, projects=project, title=task['title'], rev=task['rev'], d_no=task['d_no']
+        ).aggregate(Sum('time'))['time__sum'] or 0
+        total_worktime.append(total_worktime_sum)
+
+    return JsonResponse({
+        "tasks": task_titles,
+        "approvedHours": approved_hours,
+        "totalWorktime": total_worktime
+    })
+
+
+
+from django.http import JsonResponse
+from .models import TrackerTasks
+from django.db.models import Sum
+
+def get_project_data(request, team, project):
+    # Fetch all tasks for the specified team and project with the relevant fields
+    team_data = TrackerTasks.objects.filter(team=team, projects=project).values(
+        'team',
+        'projects',
+        'scope',
+        'category',
+        'title',
+        'rev',
+        'd_no',
+        'task_benchmark',
+        'time'
+    ).order_by('team')
+
+    # Dictionary to accumulate approved hours and worktime
+    approved_hours_dict = {}
+    total_worktime_dict = {}
+
+    # Set to track unique combinations of team, project, scope, category, title, rev, and d_no
+    unique_combinations = set()
+
+    # Loop through the data to manually filter duplicates for Approved Hours and Total Worktime
+    for entry in team_data:
+        # Create a unique key based on the combination of team, project, scope, category, title, rev, and d_no
+        key = (entry['team'], entry['projects'], entry['scope'], 
+               entry['category'], entry['title'], entry['rev'], entry['d_no'])
+
+        # If the combination has not been processed before, sum the values
+        if key not in unique_combinations:
+            unique_combinations.add(key)  # Mark this combination as counted
+
+            # Initialize the dictionary if team not present
+            if entry['team'] not in approved_hours_dict:
+                approved_hours_dict[entry['team']] = 0
+            if entry['team'] not in total_worktime_dict:
+                total_worktime_dict[entry['team']] = 0
+
+            # Add the benchmark value (Approved Hours) and the time (Worktime)
+            approved_hours_dict[entry['team']] += float(entry['task_benchmark'] or 0)
+            total_worktime_dict[entry['team']] += float(entry['time'] or 0)
+
+    # Prepare the data for JSON response
+    data = {
+        "projects": [project],  # Since we are filtering for one project
+        "approvedHours": [approved_hours_dict.get(team, 0) for team in approved_hours_dict.keys()],
+        "totalWorktime": [total_worktime_dict.get(team, 0) for team in approved_hours_dict.keys()]
+    }
+
+    return JsonResponse(data)
+
+
 
 from django.shortcuts import render
 from django.http import JsonResponse

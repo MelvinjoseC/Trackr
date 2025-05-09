@@ -11,6 +11,7 @@
     <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
 </head>
 <body>
 
@@ -76,9 +77,30 @@
                 <img src="{% static 'images/signout.png' %}" alt="Sign Out Icon"> SIGN OUT
             </a>
         </div>
-        <div><h1>Welcome to the Team Dashboard</h1>
+        <div>
+            <h1>Welcome to the Team Dashboard</h1>
+        
+            <!-- Dropdown for selecting team -->
+            <label for="teamSelect">Select Team:</label>
+            <select id="teamSelect" onchange="loadProjects()">
+                <option value="">Select Team</option>
+                <!-- Team options will be populated dynamically -->
+            </select>
+        
+            <!-- Dropdown for selecting project (initially disabled) -->
+            <label for="projectSelect">Select Project:</label>
+            <select id="projectSelect" onchange="loadTasks()" disabled>
+                <option value="">Select Project</option>
+                <!-- Project options will be populated dynamically -->
+            </select>
+        
+            <!-- Canvas for displaying the chart -->
             <canvas id="teamBarChart" width="300px" height="100px" style="background: rgb(255, 255, 255);"></canvas>
         </div>
+        
+        
+        
+        
         
 
    

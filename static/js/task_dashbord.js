@@ -72,6 +72,7 @@ document.getElementById("okButton").addEventListener("click", function (e) {
     // Collect form data
     const taskData = {
         approver_name: document.getElementById('aproover_creattask').textContent,  // Selected approver name
+        team: document.getElementById("teamcreatetask").value,
         title: document.getElementById("taskTitlecreatetask").value,
         list: document.getElementById("id_listcreatetask").value,
         project: document.getElementById("id_projectcreatetask").value,
@@ -625,28 +626,21 @@ setInterval(updateClock, 1000);
 updateClock();
 // Fetch and display tasks when the page loads
 
-// Function to populate dropdowns
 function populateDropdowns(tasks) {
     let selectedProject = "";
     let selectedList = "";
 
-    // Helper function to populate a dropdown with unique options
     function populateDropdown(dropdownId, field, filterTasks = tasks) {
         const dropdown = document.getElementById(dropdownId);
         
         if (dropdown) {
-            // Clear existing options and add a default option
             dropdown.innerHTML = '<option value="">Select</option>';
-
-            // Track unique values using a Set
             const uniqueOptions = new Set();
 
-            // Populate the dropdown based on the filtered tasks
             filterTasks.forEach(task => {
                 const value = task[field];
                 if (value && !uniqueOptions.has(value)) {
-                    uniqueOptions.add(value);  // Add value to the Set
-
+                    uniqueOptions.add(value);
                     const option = document.createElement("option");
                     option.value = value;
                     option.textContent = value;
@@ -658,13 +652,6 @@ function populateDropdowns(tasks) {
         }
     }
 
-
-    
-    // Populate form fields based on selected task data
-
- 
-
-    // Filter and populate dependent dropdowns dynamically
     function handleDependentDropdowns() {
         const filteredTasks = tasks.filter(task =>
             (!selectedList || task.list === selectedList)
@@ -677,27 +664,71 @@ function populateDropdowns(tasks) {
         populateDropdown("id_task_statuscreatetask", "task_status", filteredTasks);
     }
 
-    // Handle change event for list dropdown to filter projects
     document.getElementById("id_listcreatetask").addEventListener("change", function() {
         selectedList = this.value;
-
-        // Filter projects based on the selected list
         const filteredProjects = tasks.filter(task => task.list === selectedList);
         populateDropdown("id_projectcreatetask", "projects", filteredProjects);
-
-        handleDependentDropdowns();  // Refresh dependent dropdowns
+        handleDependentDropdowns();
     });
 
-    // Handle change events for project dropdown
     document.getElementById("id_projectcreatetask").addEventListener("change", function() {
         selectedProject = this.value;
-        handleDependentDropdowns();  // Refresh dependent dropdowns
+        handleDependentDropdowns();
     });
 
-    // Initially populate list and project dropdowns
+    // 👇 Add this to populate team dropdown
+    populateDropdown("teamcreatetask", "team");
+
     populateDropdown("id_listcreatetask", "list");
     populateDropdown("id_projectcreatetask", "projects");
 }
+// === TEAM LOCK FEATURE ===
+const teamDropdown = document.getElementById("teamcreatetask");
+const lockBtn = document.getElementById("lockTeamBtn");
+
+// Load locked team from localStorage if available
+const lockedTeam = localStorage.getItem("locked_team");
+
+if (lockedTeam) {
+    // Check if the option exists in the dropdown
+    const optionExists = Array.from(teamDropdown.options).some(option => option.value === lockedTeam);
+
+    if (optionExists) {
+        teamDropdown.value = lockedTeam;
+    } else {
+        // If the option does not exist, add it temporarily
+        const newOption = document.createElement("option");
+        newOption.value = lockedTeam;
+        newOption.textContent = lockedTeam;
+        teamDropdown.appendChild(newOption);
+        teamDropdown.value = lockedTeam;
+    }
+
+    teamDropdown.disabled = true;
+    lockBtn.textContent = "🔓 Unlock";
+}
+
+// Lock/Unlock logic
+lockBtn.addEventListener("click", function (event) {
+    event.preventDefault(); // Prevent form submission or page reload
+
+    if (teamDropdown.disabled) {
+        // Unlock the dropdown
+        teamDropdown.disabled = false;
+        lockBtn.textContent = "🔒 Lock";
+        localStorage.removeItem("locked_team");
+    } else {
+        // Lock the dropdown and save the value if it's selected
+        const selectedTeam = teamDropdown.value;
+        if (selectedTeam) {
+            teamDropdown.disabled = true;
+            lockBtn.textContent = "🔓 Unlock";
+            localStorage.setItem("locked_team", selectedTeam);
+        } else {
+            alert("Please select a team before locking.");
+        }
+    }
+});
 
 
 function populateDropdowns_updatetask(tasks) {
@@ -970,6 +1001,7 @@ document.getElementById("savetask_creatask").addEventListener("click", function 
     e.preventDefault(); // Prevent default behavior (if inside a form)
     // Collect form data
     const taskData = {
+        team: document.getElementById("teamcreatetask").value,
         title: document.getElementById("taskTitlecreatetask").value,
         list: document.getElementById("id_listcreatetask").value,
         project: document.getElementById("id_projectcreatetask").value,

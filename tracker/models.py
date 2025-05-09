@@ -15,7 +15,7 @@ class ProjectTacker(models.Model):
 
 class TrackerTasks(models.Model):
     id = models.AutoField(primary_key=True)
-    d_no = models.IntegerField(null=True, blank=True)
+    d_no = models.CharField(null=True, blank=True, max_length=50)
     title = models.CharField(max_length=255)
     projects = models.CharField(max_length=255)
     scope = models.TextField(null=True, blank=True)

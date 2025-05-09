@@ -23,3 +23,12 @@ h1 {
     margin-top: 20px;
     color: #333;
 }
+
+#teamSelect{
+    margin-left: 106px;
+    max-width: 1880px;
+}
+#projectSelect{
+    margin-left: 106px;
+    max-width: 1880px;
+}
