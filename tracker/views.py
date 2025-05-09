@@ -367,8 +367,8 @@ def create_task(request):
             # SQL query to insert data into tracker_project
             query = """
                 INSERT INTO tracker_project
-                (title, `list`, projects, scope, priority, assigned, checker, qc3_checker, category, start, end, verification_status, task_status, d_no, rev, team)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)
+                (title, `list`, projects, scope, priority, assigned, checker, qc3_checker, category, start, end, verification_status, task_status, d_no, rev, team, task_benchmark)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s)
             """
             params = (
                 data.get("title", ""),  # Provide default empty string if None
@@ -387,6 +387,7 @@ def create_task(request):
                 data.get("d_no", ""),
                 data.get("rev_no", ""),
                 data.get("team", ""),
+                data.get("task_benchmark", ""),
             )
 
             # Execute the query safely
@@ -463,6 +464,7 @@ def aproove_task(request):
                 "project": data.get("project"),
                 "scope": data.get("scope"),
                 "priority": data.get("priority"),
+                "task_benchmark":data.get("task_benchmark"),
                 "assigned_to": data.get("assigned_to"),
                 "checker": data.get("checker"),
                 "qc_3_checker": data.get("qc_3_checker"),
