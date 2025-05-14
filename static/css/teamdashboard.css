@@ -10,18 +10,23 @@
     max-height: 513px;
     margin-left: 106px;
 }
+    
 
 /* Optional body styling for better page look */
 body {
     background-color: #f5f7fa;
-    font-family: 'Arial', sans-serif;
 }
 
 h1 {
     text-align: center;
     font-size: 28px;
     margin-top: 20px;
-    color: #333;
+    color: #000000;
+}
+
+label{
+    margin-left: 106px;
+    max-width: 1880px;
 }
 
 #teamSelect{
@@ -32,3 +37,81 @@ h1 {
     margin-left: 106px;
     max-width: 1880px;
 }
+
+/* Worktime Table Styling */
+.worktime-table {
+    width: 108%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.worktime-table thead th {
+    background-color: #004080;
+    color: white;
+    padding: 12px 15px;
+    text-align: left;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.worktime-table tbody td {
+    border-bottom: 1px solid #dddddd;
+    padding: 10px 15px;
+    font-size: 13px;
+    text-align: left;
+}
+
+.worktime-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.worktime-table tbody tr:hover {
+    background-color: #f1f1f1;
+    cursor: pointer;
+}
+
+.worktime-table tbody tr:first-child {
+    background-color: #d4edda !important;
+    font-weight: bold;
+}
+
+.worktime-table tbody tr:last-child {
+    background-color: #f8d7da !important;
+    font-weight: bold;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .worktime-table thead {
+        display: none;
+    }
+    
+    .worktime-table tr {
+        display: block;
+        margin-bottom: 10px;
+    }
+    
+    .worktime-table td {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid #dddddd;
+        padding: 8px;
+    }
+
+    .worktime-table td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #004080;
+    }
+}
+
+#user-worktime-table-container {
+    display: block !important;
+    visibility: visible !important;
+    height: auto !important;
+    margin-left: 106px;
+}
+

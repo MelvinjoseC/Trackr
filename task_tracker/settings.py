@@ -157,3 +157,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGOUT_REDIRECT_URL = 'logout'
 LOGIN_REDIRECT_URL = 'task_dashboard'
+
+
+# settings.py
+
+# Email configuration for sending emails through SMTP (using Gmail as an example)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Or use your SMTP server
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'varshithat2001@gmail.com'  # Your email address
+EMAIL_HOST_PASSWORD = 'T3EY5YWEYUE6THHSR'  # Your email password
+DEFAULT_FROM_EMAIL = 'varshithat2001@gmail.com'  # The from address for sending emails

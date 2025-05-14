@@ -53,7 +53,7 @@ class TrackerTasks(models.Model):
     ref_no = models.CharField(max_length=50, null=True, blank=True)
     list = models.CharField(max_length=50, null=True, blank=True)
     date1 = models.DateField(null=True, blank=True)
-    time = models.IntegerField(null=True, blank=True)
+    time = models.FloatField(null=True, blank=True)
     comments = models.CharField(max_length=1000, null=True, blank=True)
     project_status = models.CharField(max_length=50, null=True, blank=True)
     team = models.CharField(max_length=50, null=True, blank=True)

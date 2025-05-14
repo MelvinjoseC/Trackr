@@ -630,6 +630,8 @@ span.date-highlight {
     color: #4CAF50; /* Green color for success */
 }
 
+/* RANKING USERS */
+
 #rankingTable {
     width: 97%;
     border-collapse: collapse;

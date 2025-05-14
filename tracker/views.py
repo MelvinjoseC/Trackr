@@ -2923,15 +2923,20 @@ from django.http import JsonResponse
 from .models import TrackerTasks
 from django.db.models import Sum
 
-def get_task_data(request, team, project):
+def get_task_datas(request, team, project):
     # Fetch all tasks for the specified team and project, grouped by the combination of team, project, scope, category, title, rev, and d_no (as string)
     tasks = TrackerTasks.objects.filter(team=team, projects=project).values(
         'team', 'projects', 'scope', 'category', 'title', 'rev', 'd_no'
     ).distinct()
 
+    print("🟢 Tasks found:", list(tasks))
+
     approved_hours = []
     total_worktime = []
     task_titles = []
+
+    # New: User worktime dictionary
+    user_worktimes = {}
 
     for task in tasks:
         task_titles.append(task['title'])
@@ -2948,10 +2953,29 @@ def get_task_data(request, team, project):
         ).aggregate(Sum('time'))['time__sum'] or 0
         total_worktime.append(total_worktime_sum)
 
+    # New: Aggregate total worktime per user for the selected project
+    user_data = TrackerTasks.objects.filter(team=team, projects=project).values('assigned').annotate(
+        total_worktime=Sum('time')
+    )
+
+    print("🟢 User Data Found:", list(user_data))  # << This should show user details
+
+    # Fill the user_worktimes dictionary
+    for entry in user_data:
+        username = entry['assigned']
+        worktime = entry['total_worktime']
+        
+        # Only add to the dictionary if worktime is not None
+        if worktime is not None:
+            user_worktimes[username] = worktime
+
+    print("🟢 Final user worktimes:", user_worktimes)  # << This should show the final dictionary
+
     return JsonResponse({
         "tasks": task_titles,
         "approvedHours": approved_hours,
-        "totalWorktime": total_worktime
+        "totalWorktime": total_worktime,
+        "userWorktimes": user_worktimes
     })
 
 
@@ -2978,28 +3002,31 @@ def get_project_data(request, team, project):
     approved_hours_dict = {}
     total_worktime_dict = {}
 
-    # Set to track unique combinations of team, project, scope, category, title, rev, and d_no
+    # Set to track unique combinations for Approved Hours only
     unique_combinations = set()
 
-    # Loop through the data to manually filter duplicates for Approved Hours and Total Worktime
+    # Loop through the data
     for entry in team_data:
-        # Create a unique key based on the combination of team, project, scope, category, title, rev, and d_no
+        # Create a unique key for Approved Hours only (scope, category, title, rev, d_no)
         key = (entry['team'], entry['projects'], entry['scope'], 
                entry['category'], entry['title'], entry['rev'], entry['d_no'])
 
-        # If the combination has not been processed before, sum the values
+        # Filter only approved hours with unique key
         if key not in unique_combinations:
             unique_combinations.add(key)  # Mark this combination as counted
 
             # Initialize the dictionary if team not present
             if entry['team'] not in approved_hours_dict:
                 approved_hours_dict[entry['team']] = 0
-            if entry['team'] not in total_worktime_dict:
-                total_worktime_dict[entry['team']] = 0
 
-            # Add the benchmark value (Approved Hours) and the time (Worktime)
+            # Add the benchmark value (Approved Hours)
             approved_hours_dict[entry['team']] += float(entry['task_benchmark'] or 0)
-            total_worktime_dict[entry['team']] += float(entry['time'] or 0)
+
+        # Total worktime should be summed directly, without filtering by key
+        if entry['team'] not in total_worktime_dict:
+            total_worktime_dict[entry['team']] = 0
+        
+        total_worktime_dict[entry['team']] += float(entry['time'] or 0)
 
     # Prepare the data for JSON response
     data = {
@@ -3100,3 +3127,29 @@ from .models import TeamRanking
 def get_team_names(request):
     team_data = TeamRanking.objects.values('team_name', 'team_member').distinct()
     return JsonResponse(list(team_data), safe=False)
+
+
+from django.http import JsonResponse
+from django.core.mail import send_mail
+from django.conf import settings
+
+def send_notification(request):
+    # Assuming the request contains the admin notification data
+    data = json.loads(request.body)
+    message = data.get('message', '')
+    recipient = data.get('recipient', '')
+
+    if not message or not recipient:
+        return JsonResponse({"error": "Invalid data"}, status=400)
+
+    # Send the email notification to the admin/MD
+    try:
+        send_mail(
+            "Task Benchmark Missing",  # Email subject
+            message,  # The message body
+            settings.DEFAULT_FROM_EMAIL,  # From address (set this in your settings)
+            [recipient],  # Recipient's email
+        )
+        return JsonResponse({"success": "Notification sent to admin."})
+    except Exception as e:
+        return JsonResponse({"error": f"Failed to send notification: {str(e)}"}, status=500)

@@ -39,6 +39,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             borderColor: '#F04693',
                             borderWidth: 2,
                             borderRadius: 10,
+                            color: '#000000',
                         },
                         {
                             label: 'Total Worktime',
@@ -47,6 +48,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             borderColor: '#00B0F0',
                             borderWidth: 2,
                             borderRadius: 10,
+                            color: '#000000',
                         }
                     ]
                 },
@@ -131,6 +133,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                 borderColor: '#F04693',
                                 borderWidth: 2,
                                 borderRadius: 10,
+                                color: '#000000',
                             },
                             {
                                 label: 'Total Worktime',
@@ -139,6 +142,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                 borderColor: '#00B0F0',
                                 borderWidth: 2,
                                 borderRadius: 10,
+                                color: '#000000',
                             }
                         ]
                     },
@@ -167,70 +171,161 @@ document.addEventListener("DOMContentLoaded", function() {
             });
     };
 
-    // Function to load tasks based on selected project
-    window.loadTasks = function() {
-        const team = teamSelect.value;
-        const project = projectSelect.value;
-        if (!team || !project) return;
+// Function to load tasks based on selected project
+window.loadTasks = function () {
+    const team = teamSelect.value;
+    const project = projectSelect.value;
+    if (!team || !project) return;
 
-        fetch(`/get-task-data/${team}/${project}/`) // Fetch task data based on team and project
-            .then(response => response.json())
-            .then(data => {
-                const approvedHours = data.approvedHours.map(value => value || 0);
-                const totalWorktime = data.totalWorktime.map(value => value || 0);
-                const tasks = data.tasks;
+    fetch(`/get-task-datas/${team}/${project}/`) // Fetch task data based on team and project
+        .then(response => response.json())
+        .then(data => {
+            const approvedHours = data.approvedHours.map(value => value || 0);
+            const totalWorktime = data.totalWorktime.map(value => value || 0);
+            const tasks = data.tasks;
+            const userWorktimes = data.userWorktimes;
 
-                // Destroy the previous chart before creating a new one
-                if (chartInstance) {
-                    chartInstance.destroy();
-                }
+            // Destroy the previous chart before creating a new one
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
 
-                // Create a new chart with task data
-                chartInstance = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: tasks,
-                        datasets: [
-                            {
-                                label: 'Approved Project Hours',
-                                data: approvedHours,
-                                backgroundColor: '#F04693',
-                                borderColor: '#F04693',
-                                borderWidth: 2,
-                                borderRadius: 10,
-                            },
-                            {
-                                label: 'Total Worktime',
-                                data: totalWorktime,
-                                backgroundColor: '#00B0F0',
-                                borderColor: '#00B0F0',
-                                borderWidth: 2,
-                                borderRadius: 10,
+            // Create a new chart with task data
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: tasks,
+                    datasets: [
+                        {
+                            label: 'Approved Project Hours',
+                            data: approvedHours,
+                            backgroundColor: '#F04693',
+                            borderColor: '#F04693',
+                            borderWidth: 2,
+                            borderRadius: 10,
+                            color: '#000000',
+                        },
+                        {
+                            label: 'Total Worktime',
+                            data: totalWorktime,
+                            backgroundColor: '#00B0F0',
+                            borderColor: '#00B0F0',
+                            borderWidth: 2,
+                            borderRadius: 10,
+                            color: '#000000',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Hours'
                             }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Hours'
-                                }
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Tasks'
-                                }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Tasks'
                             }
                         }
                     }
-                });
-            })
-            .catch(error => {
-                console.error("Failed to fetch task data:", error);
+                }
             });
-    };
+
+            // Call the function to render the table
+            renderUserWorktimeTable(userWorktimes);
+        })
+        .catch(error => {
+            console.error("Failed to fetch task data:", error);
+        });
+};
+
+function renderUserWorktimeTable(userWorktimes) {
+    const tableContainer = document.getElementById('user-worktime-table-container');
+    tableContainer.innerHTML = ''; // Clear the previous table content
+
+    if (!userWorktimes || Object.keys(userWorktimes).length === 0) {
+        const message = document.createElement('p');
+        message.textContent = "No worktime data available for the selected project.";
+        message.style.color = "red";
+        tableContainer.appendChild(message);
+        return;
+    }
+
+    const table = document.createElement('table');
+    table.classList.add('worktime-table');
+
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    const headers = ['User Name', 'Total Worktime (Hours)'];
+
+    headers.forEach(headerText => {
+        const th = document.createElement('th');
+        th.textContent = headerText;
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+
+    const tbody = document.createElement('tbody');
+    
+    // Sort users by worktime in descending order
+    const sortedUsers = Object.entries(userWorktimes)
+        .sort(([, a], [, b]) => b - a);
+
+    // Highlight the top performer and calculate the total worktime
+    let totalWorktime = 0;
+
+    sortedUsers.forEach(([username, worktime], index) => {
+        const row = document.createElement('tr');
+
+        const userCell = document.createElement('td');
+        userCell.textContent = username;
+        row.appendChild(userCell);
+
+        const worktimeCell = document.createElement('td');
+        worktimeCell.textContent = worktime;
+        row.appendChild(worktimeCell);
+
+        // Highlight the top performer
+        if (index === 0) {
+            row.style.backgroundColor = '#d4edda'; // Light green background
+            row.style.fontWeight = 'bold';
+        }
+
+        tbody.appendChild(row);
+
+        // Accumulate total worktime
+        totalWorktime += parseFloat(worktime);
+    });
+
+    // Add the total worktime row at the bottom
+    const totalRow = document.createElement('tr');
+    const totalUserCell = document.createElement('td');
+    totalUserCell.textContent = 'Total Project Worktime';
+    totalUserCell.style.fontWeight = 'bold';
+
+    const totalWorktimeCell = document.createElement('td');
+    totalWorktimeCell.textContent = totalWorktime.toFixed(2); // Rounded to 2 decimal places
+    totalWorktimeCell.style.fontWeight = 'bold';
+
+    totalRow.appendChild(totalUserCell);
+    totalRow.appendChild(totalWorktimeCell);
+
+    // Apply a distinct style to the total row
+    totalRow.style.backgroundColor = '#f8d7da'; // Light red background
+    totalRow.style.fontWeight = 'bold';
+
+    tbody.appendChild(totalRow);
+
+    table.appendChild(thead);
+    table.appendChild(tbody);
+
+    tableContainer.appendChild(table);
+}
+
+
 });

@@ -67,6 +67,7 @@ urlpatterns = [
     path('get-team-chart-data/', views.get_team_chart_data, name='get_team_chart_data'),
     path('get-projects/<team>/', views.get_project, name='get_projects'),
     path('get-project-data/<team>/<project>/', views.get_project_data, name='get_project_data'),
-    path('get-task-data/<team>/<project>/', views.get_task_data, name='get_task_data'),
+    path('get-task-datas/<team>/<project>/', views.get_task_datas, name='get_task_datas'),
+    path('api/send-notification/', views.send_notification, name='send_notification'),  # Add this line
 ]
 

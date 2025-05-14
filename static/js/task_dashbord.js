@@ -1,7 +1,3 @@
-
-
-
-
 document.getElementById('aproover_creattask').addEventListener('click', function () {
     const dropdownContainer = document.getElementById('dropdownContainer');
 
@@ -1000,7 +996,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
 document.getElementById("savetask_creatask").addEventListener("click", function (e) {
     e.preventDefault(); // Prevent default behavior (if inside a form)
-    // Collect form data
+
+    // Get the benchmark value
+    const benchmark = document.getElementById("benchmarkcreatetask").value;
+
+    // If benchmark is empty, send a notification to admin/MD
+    if (!benchmark) {
+        alert("Benchmark is required! Sending notification to Admin/MD...");
+        sendAdminNotification(); // Function to send notification to Admin/MD
+    }
+
+    // Collect other form data
     const taskData = {
         team: document.getElementById("teamcreatetask").value,
         title: document.getElementById("taskTitlecreatetask").value,
@@ -1008,7 +1014,7 @@ document.getElementById("savetask_creatask").addEventListener("click", function 
         project: document.getElementById("id_projectcreatetask").value,
         scope: document.getElementById("id_scopecreatetask").value,
         priority: document.getElementById("id_prioritycreatetask").value,
-        task_benchmark: document.getElementById("benchmarkcreatetask").value, 
+        task_benchmark: benchmark,  // Task benchmark is here
         assigned_to: document.getElementById("assignedTocreatetask").value,
         checker: document.getElementById("checkercreatetask").value,
         qc_3_checker: document.getElementById("qcCheckercreatetask").value,
@@ -1020,7 +1026,9 @@ document.getElementById("savetask_creatask").addEventListener("click", function 
         rev_no: document.getElementById("id_revnocreatetask").value,
         d_no: document.getElementById("id_dnocreatetask").value,
     };
+
     console.log("Task Created taskData:", taskData); // Log the response
+    
     // Send the data to the backend
     fetch("/api/create-task/", {
         method: "POST",
@@ -1044,6 +1052,33 @@ document.getElementById("savetask_creatask").addEventListener("click", function 
         });
 });
 
+// Function to send notification to Admin/MD if benchmark is missing
+function sendAdminNotification() {
+    const adminData = {
+        message: "A task was created without a benchmark value. Please review.",
+        recipient: "varshithkumar742001@gmail.com", // Replace with actual admin/MD email or ID
+    };
+
+    fetch("/api/send-notification/", { // Adjust the URL to the actual endpoint for sending notifications
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(adminData),
+    })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error("Error sending notification to admin.");
+            }
+            return response.json();
+        })
+        .then((data) => {
+            console.log("Admin notification sent:", data);
+        })
+        .catch((error) => {
+            console.error("Error sending notification:", error);
+        });
+}
 
 document.getElementById("savetask_updatetask").addEventListener("click", function (e) {
     e.preventDefault(); // Prevent default behavior (if inside a form)
