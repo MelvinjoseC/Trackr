@@ -162,45 +162,49 @@
                 
                 
                 <form id="teamForm">
+                    
                     <h2>Add Team Ranking</h2>
-                    <label for="team_name_dropdown">Select Team:</label>
-                    <select name="team_name" id="team_name_dropdown" required>   
+                    <div class="rating-block">
+                    <label for="team_name_dropdown">Select Team</label>
+                    :<select name="team_name" id="team_name_dropdown" required>   
                         <option value="">-- Select Team Name --</option>
                     </select>
-                    <br>
-                    <label for="team_member_dropdown">Select Team Member:</label>
-                    <select id="team_member_dropdown" name="team_member" required>
+                    </div>
+                     <div class="rating-block">
+                    <label for="team_member_dropdown">Select Member</label>
+                    :<select id="team_member_dropdown" name="team_member" required>
                         <option value="">-- Select Member --</option>
-                    </select><br>
-                    <div class="rating-block">
-                        <label>Speed of Execution:</label>
-                        <div class="star-rating" data-name="speed_of_execution"></div>
+                    </select></div>
+                   <div class="rating-block">
+                        <label>Speed of Execution</label>
+                        :<div class="star-rating" data-name="speed_of_execution"></div>
                       </div>
                       
                       <div class="rating-block">
-                        <label>Complaints:</label>
-                        <div class="star-rating" data-name="complaints_of_check_list"></div>
+                        <label>Complaints</label>
+                        :<div class="star-rating" data-name="complaints_of_check_list"></div>
                       </div>
                       
                       <div class="rating-block">
-                        <label>Task Ownership:</label>
-                        <div class="star-rating" data-name="task_ownership"></div>
+                        <label>Task Ownership</label>
+                        :<div class="star-rating" data-name="task_ownership"></div>
                       </div>
                       
                       <div class="rating-block">
-                        <label>Understanding Task:</label>
-                        <div class="star-rating" data-name="understanding_task"></div>
+                        <label>Understanding Task</label>
+                        :<div class="star-rating" data-name="understanding_task"></div>
                       </div>
                       
                       <div class="rating-block">
-                        <label>Quality of Work:</label>
-                        <div class="star-rating" data-name="quality_of_work"></div>
+                        <label>Quality of Work</label>
+                        :<div class="star-rating" data-name="quality_of_work"></div>
                       </div>
                       
                     <button type="submit">Add</button>
                     
+                   
                 </form>
-                <button id="viewRankingButton">Rank lists</button>
+               <button id="viewRankingButton">Rank lists</button>  
                 <!-- <div class="calendar_header">
                     <button id="prevMonth"><img id="arrow_left" src="{% static 'images/arrow_left.png' %}"></button>
                     <h2 id="monthYear"></h2>
@@ -234,45 +238,59 @@
                     <tbody></tbody>
                 </table></div>
             <div class="search-history">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>User Details</th>
-                            {% for key, value in to_approve_data.items %}
-                                <th>{{ key|capfirst }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <strong>EMP ID - {{ user_data.employee_id }}</strong><br>
-                                Name - {{ user_data.name }}
-                            </td>
-                            {% for key, value in to_approve_data.items %}
-                                <td>
-                                    {% if key == "checker" %}
-                                        <a href="#" class="checker-link">{{ value }}</a>
-                                    {% elif key == "end_date" or key == "start_date" %}
-                                        <span class="date-highlight">{{ value }}</span>
-                                    {% elif key == "assigned_to" %}
-                                        <a href="#" class="assigned-link">{{ value }}</a>
-                                    {% else %}
-                                        {{ value }}
-                                    {% endif %}
-                                </td>
-                            {% endfor %}
-                        </tr>
-                        <tr class="action-row">
-                            <td colspan="{{ to_approve_data|length|add:1 }}">
-                                <div class="button_container">
-                                    <button class="action-btn accept-btn" onclick="handleTaskAction('accept')">Accept</button>
-                                    <button class="action-btn reject-btn" onclick="handleTaskAction('reject')">Reject</button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <table>
+                <thead>
+                <tr>
+                    <th>User Details</th>
+                    <th>Task_title</th>
+                    <th>D_no</th>
+                    <th>Scope</th>
+                    <th>Rev_no</th>
+                    <th>Checker</th>
+                    <th>Project</th>
+                    <th>Category</th>
+                    <th>End_date</th>
+                    <th>Priority</th>
+                    <th>Start_date</th>    
+                    <th>Assigned_to</th>
+                    <th>Task_status</th>
+                    <th>Qc_3_checker</th>
+                    <th>Verification_status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for task in task_list %}
+                    <tr>
+                    <td>
+                        <strong>EMP ID - {{ task.sender_name }}</strong><br>
+                        Name - {{ task.project_name }}
+                    </td>
+                    <td>{{ task.title }}</td>
+                    <td>{{ task.d_no }}</td>
+                    <td>{{ task.scope }}</td>
+                    <td>{{ task.rev_no }}</td>
+                    <td>{{ task.checker }}</td>
+                    <td>{{ task.project }}</td>
+                    <td>{{ task.category }}</td>
+                    <td>{{ task.end_date }}</td>
+                    <td>{{ task.priority }}</td>
+                    <td>{{ task.start_date }}</td> 
+                    <td>{{ task.assigned_to }}</td>
+                    <td>{{ task.task_status }}</td>
+                    <td>{{ task.qc_3_checker }}</td>
+                    <td>{{ task.verification_status }}</td>
+                    <td>
+                        <button class="accept-btn" onclick="handleTaskAction('accept', '{{ task.project_name }}', '{{ task.d_no }}')">Accept</button>
+                        <button class="reject-btn" onclick="handleTaskAction('reject', '{{ task.project_name }}', '{{ task.d_no }}')">Reject</button>
+                    </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="17">No tasks to approve.</td></tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
             </div>
         </div> 
     
@@ -346,7 +364,7 @@
    <!-- Total Project Worktime -->
    <div id="total-time-display">
     <h4>Approved Hours : <span id="task-benchmark-time">0 hrs</span></h4>
-    <h4>Total Project Hours : <span id="total-time">0 hrs</span> </h4>
+    <h4>MONTHLY Project Hours : <span id="total-time">0 hrs</span> </h4>
     </div>
    <div id="total-phase-time-display" style="display: none;">
        <h3>Total Category Time : <span id="total-phase-time">0 hrs</span></h3>

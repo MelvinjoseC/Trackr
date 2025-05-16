@@ -782,109 +782,143 @@ def generate_pie_chart(request):
 
 
 
-import base64
 from django.shortcuts import render, redirect
 from django.db import connection
-from django.http import JsonResponse
+import base64
+from .models import ProjectTacker
 
 global_user_data = None  # Global variable for user data
 
 def project_tracker(request):
     global global_user_data
 
-    # ✅ Ensure user is logged in
+    # Ensure user is logged in
     if not global_user_data:
         return redirect("login_page")  # Redirect to login if not logged in
 
-    # ✅ Fetch user details from global data
+    # Fetch user details from global data
     user_id = global_user_data.get("employee_id", None)
     name = global_user_data.get("name", "Guest")
-    designation = global_user_data.get("designation", None)  # Try from global data
-    role = global_user_data.get("role", "").lower()  # Role should be 'admin' or 'user'
+    designation = global_user_data.get("designation", None)
+    authentication = global_user_data.get("authentication", None)
     image_base64 = None
 
-    # ✅ If designation is not found in global data, fetch from DB
-    if user_id and not designation:
+    # If designation or authentication is not found, fetch from DB
+    if user_id and (not designation or not authentication):
         with connection.cursor() as cursor:
-            cursor.execute("SELECT designation, image FROM employee_details WHERE employee_id = %s", [user_id])
+            cursor.execute("SELECT designation, authentication, image FROM employee_details WHERE employee_id = %s", [user_id])
             result = cursor.fetchone()
             if result:
-                designation = result[0] if result[0] else "No Designation"  # Handle missing designation
-                image_base64 = base64.b64encode(result[1]).decode("utf-8") if result[1] else None
+                designation = result[0] if result[0] else "No Designation"
+                authentication = result[1] if result[1] else "No Role"
+                image_base64 = base64.b64encode(result[2]).decode("utf-8") if result[2] else None
 
-    # ✅ Check if user is Admin or MD
-    is_admin_or_md = False
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT authentication FROM employee_details WHERE employee_id = %s
-        """, [user_id])
-        auth_result = cursor.fetchone()
+    # Fetch only the records where status is 'Pending'
+    project_data = ProjectTacker.objects.filter(status="Pending")
 
-        if auth_result:
-            auth_value = str(auth_result[0]).strip().lower()
-            is_admin_or_md = (auth_value == "admin" or auth_value == "md")
+    # Flatten all to_approve JSON data into one list with project info attached
+    task_list = []
+    for project in project_data:
+        to_approve = project.to_aproove
+        if to_approve:
+            if isinstance(to_approve, dict):
+                tasks = [to_approve]
+            elif isinstance(to_approve, list):
+                tasks = to_approve
+            else:
+                tasks = []
 
-    # ✅ Fetch the row from ProjectTacker where name matches global_user_data['name']
-    project_data = ProjectTacker.objects.filter(name=global_user_data["name"]).first()
+            for task in tasks:
+                task_copy = task.copy()
+                task_copy["project_name"] = project.name
+                task_copy["sender_name"] = project.sender_name
+                task_list.append(task_copy)
 
-    # If project_data exists, load the to_aproove JSON as a Python dictionary
-    to_approve_data = project_data.to_aproove if project_data else []
+    # Determine if user is admin or MD based on the 'authentication' column
+    is_admin_or_md = authentication in ['admin', 'MD']
 
-    # ✅ Pass data to the template
     context = {
         "user_data": global_user_data,
-        "project_data": project_data,
-        "to_approve_data": to_approve_data,  # Pass JSON data to the template
-        "is_admin_or_md": is_admin_or_md,   # Pass Admin or MD status to the template
+        "task_list": task_list,
         "name": name,
-        "designation": designation,
+        "designation": designation,  # <-- Now this is included
+        "authentication": authentication,
         "image_base64": image_base64,
         "employee_id": user_id,
+        "is_admin_or_md": is_admin_or_md  # <-- Pass it here
     }
 
     return render(request, "project_tracker.html", context)
 
 
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import ProjectTacker, TrackerTasks
 
-@csrf_exempt  # Required if CSRF protection is enabled
+@csrf_exempt
 def task_action(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            task_data = data.get("task_data")  # Task data being passed
-            action = data.get("action")  # Action: 'accept' or 'reject'
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
 
-            # Find the ProjectTacker record by name (or any other unique identifier you are using)
-            project_tracker = ProjectTacker.objects.filter(
-                name=task_data.get("name")
-            ).first()
+    try:
+        data = json.loads(request.body)
+        task_data = data.get("task_data")
+        action = data.get("action")
 
-            if project_tracker:
-                # Update the status based on the action
-                if action == "accept":
-                    project_tracker.status = "Accepted"
-                elif action == "reject":
-                    project_tracker.status = "Rejected"
-                else:
-                    return JsonResponse(
-                        {"success": False, "message": "Invalid action specified."}
-                    )
+        if not task_data or "name" not in task_data or "d_no" not in task_data:
+            return JsonResponse({"success": False, "message": "Task data or identifiers missing."}, status=400)
 
-                # Save the updated status in the database
-                project_tracker.save()
+        project_tracker = ProjectTacker.objects.filter(name=task_data.get("name")).first()
+        if not project_tracker:
+            return JsonResponse({"success": False, "message": "Project task not found."}, status=404)
 
-                return JsonResponse(
-                    {"success": True, "message": f"Task has been {action}ed."}
-                )
-            else:
-                return JsonResponse(
-                    {"success": False, "message": "Project task not found."}
-                )
+        to_approve_data = project_tracker.to_aproove
+        if not to_approve_data:
+            return JsonResponse({"success": False, "message": "No tasks to approve."}, status=404)
 
-        except json.JSONDecodeError:
-            return JsonResponse({"success": False, "message": "Invalid JSON format."})
+        task = None
+        for t in to_approve_data if isinstance(to_approve_data, list) else [to_approve_data]:
+            if t.get("d_no") == task_data.get("d_no"):
+                task = t
+                break
 
-    return JsonResponse({"success": False, "message": "Invalid request method."})
+        if not task:
+            return JsonResponse({"success": False, "message": "Task not found in project data."}, status=404)
+
+        if action not in ("accept", "reject"):
+            return JsonResponse({"success": False, "message": "Invalid action specified."}, status=400)
+
+        project_tracker.status = "Approved" if action == "accept" else "Rejected"
+        project_tracker.save()
+
+        if action == "accept":
+            tracker_task, created = TrackerTasks.objects.get_or_create(d_no=task.get("d_no"))
+
+            tracker_task.title = task.get("task_title") or task.get("title")
+            tracker_task.d_no = task.get("d_no")
+            tracker_task.scope = task.get("scope")
+            tracker_task.rev = task.get("rev_no")
+            tracker_task.checker = task.get("checker")
+            tracker_task.projects = task.get("project")
+            tracker_task.category = task.get("category")
+            tracker_task.end = task.get("end_date")
+            tracker_task.priority = task.get("priority")
+            tracker_task.start = task.get("start_date")
+            tracker_task.assigned = task.get("assigned_to")
+            tracker_task.task_status = task.get("task_status") or "Accepted"
+            tracker_task.qc3_checker = task.get("qc_3_checker")
+            tracker_task.verification_status = task.get("verification_status", True)
+            tracker_task.project_status = "Accepted"
+
+            tracker_task.save()
+
+        return JsonResponse({"success": True, "message": f"Task has been {action}ed."})
+
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "message": "Invalid JSON format."}, status=400)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": f"Error: {str(e)}"}, status=500)
 
 
 def notifications_view(request):
@@ -2692,6 +2726,7 @@ def get_task_details_for_sidebar(request):
 from django.shortcuts import render
 from .models import TrackerTasks, EmployeeDetails  # Your model import
 import base64
+from django.db import connection
 
 # Assuming global_user_data is a global variable
 global_user_data = None
@@ -2702,22 +2737,28 @@ def team_dashboard(request):
     # Default data if global_user_data is not set
     user_id = global_user_data.get("employee_id", None) if global_user_data else None
     name = global_user_data.get("name", "Guest") if global_user_data else "Guest"
-    designation = global_user_data.get("designation", "No Designation") if global_user_data else "No Designation"
+    designation = global_user_data.get("designation", None) if global_user_data else None
+    authentication = global_user_data.get("authentication", None) if global_user_data else None
     image_base64 = None  # Initialize empty image
+
+    # If designation or authentication is not found, fetch from DB
+    if user_id and (not designation or not authentication):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT designation, authentication, image FROM employee_details WHERE employee_id = %s", [user_id])
+            result = cursor.fetchone()
+            if result:
+                designation = result[0] if result[0] else "No Designation"
+                authentication = result[1] if result[1] else "No Role"
+                image_base64 = base64.b64encode(result[2]).decode("utf-8") if result[2] else None
+
+    # Determine if user is admin or MD based on the 'authentication' column
+    is_admin_or_md = authentication in ['admin', 'MD']
 
     # Fetch TrackerTasks data
     tracker_data = []
 
     if user_id:
         try:
-            # Fetch employee details if available
-            employee = EmployeeDetails.objects.get(employee_id=user_id)
-            designation = employee.designation  # Override with the value from DB
-            
-            # Convert image to base64 if it exists
-            if employee.image:
-                image_base64 = base64.b64encode(employee.image).decode('utf-8')
-
             # Get all tasks related to the user's team or their assignment
             tasks = TrackerTasks.objects.filter(assigned=name)  # Assuming 'assigned' stores employee name
             for task in tasks:
@@ -2734,8 +2775,6 @@ def team_dashboard(request):
                     "end": task.end,
                 })
         
-        except EmployeeDetails.DoesNotExist:
-            designation = "Employee Not Found"
         except TrackerTasks.DoesNotExist:
             tracker_data = []
 
@@ -2746,11 +2785,14 @@ def team_dashboard(request):
         {
             "name": name,
             "designation": designation,
+            "authentication": authentication,
             "image_base64": image_base64,  # Send base64 encoded image
             "employee_id": user_id,  # Pass employee_id to template
             "tracker_data": tracker_data,  # Pass tracker task data to template
+            "is_admin_or_md": is_admin_or_md  # <-- Pass it here as well
         },
     )
+
 from django.http import JsonResponse
 from .models import TrackerTasks
 from django.db.models import Sum
@@ -3132,24 +3174,29 @@ def get_team_names(request):
 from django.http import JsonResponse
 from django.core.mail import send_mail
 from django.conf import settings
+import json
 
 def send_notification(request):
-    # Assuming the request contains the admin notification data
-    data = json.loads(request.body)
-    message = data.get('message', '')
-    recipient = data.get('recipient', '')
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            message = data.get('message', '')
+            recipient = data.get('recipient', '')
 
-    if not message or not recipient:
-        return JsonResponse({"error": "Invalid data"}, status=400)
+            if not message or not recipient:
+                return JsonResponse({"error": "Invalid data"}, status=400)
 
-    # Send the email notification to the admin/MD
-    try:
-        send_mail(
-            "Task Benchmark Missing",  # Email subject
-            message,  # The message body
-            settings.DEFAULT_FROM_EMAIL,  # From address (set this in your settings)
-            [recipient],  # Recipient's email
-        )
-        return JsonResponse({"success": "Notification sent to admin."})
-    except Exception as e:
-        return JsonResponse({"error": f"Failed to send notification: {str(e)}"}, status=500)
+            send_mail(
+                subject="Task Benchmark Missing",  # Email subject
+                message=message,                   # The message body
+                from_email=settings.DEFAULT_FROM_EMAIL,  # From address
+                recipient_list=[recipient],        # Recipient's email
+                fail_silently=False
+            )
+            return JsonResponse({"success": "Notification sent to admin."})
+        except Exception as e:
+            print(f"Failed to send email: {e}")
+            return JsonResponse({"error": f"Failed to send notification: {str(e)}"}, status=500)
+    else:
+        return JsonResponse({"error": "Invalid request method"}, status=405)
+

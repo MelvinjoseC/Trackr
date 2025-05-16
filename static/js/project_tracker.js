@@ -89,46 +89,47 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// Function to handle task action (related to task management)
-function handleTaskAction(action, projectName) {
-    fetch('/task_action/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken()
-        },
-        body: JSON.stringify({
-            task_data: { name: projectName },
-            action: action
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(`Task has been ${action}ed.`);
-            location.reload();
-        } else {
-            alert('Error: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
-
-// Function to get CSRF Token (for security in POST requests)
-function getCsrfToken() {
-    let cookieValue = null;
-    let cookies = document.cookie ? document.cookie.split('; ') : [];
-
-    for (let cookie of cookies) {
-        let [key, value] = cookie.split('=');
-        if (key === 'csrftoken') {
-            return decodeURIComponent(value);
-        }
+// Updated function to handle task action with name and d_no
+function handleTaskAction(action, projectName, taskDno) {
+  fetch("/task-action/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCSRFToken(),
+    },
+    credentials: "include",
+    body: JSON.stringify({
+      action: action,
+      task_data: {
+        name: projectName,   // ProjectTacker.name to find project
+        d_no: taskDno        // unique task identifier within to_aproove JSON
+      }
+    }),
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert(data.message);
+      location.reload();
+    } else {
+      alert('Error: ' + data.message);
     }
-    return cookieValue;
+  })
+  .catch(err => alert('Request failed: ' + err));
 }
+
+function getCSRFToken() {
+  const name = 'csrftoken';
+  const cookies = document.cookie.split(';');
+  for (let cookie of cookies) {
+    cookie = cookie.trim();
+    if (cookie.startsWith(name + '=')) {
+      return decodeURIComponent(cookie.substring(name.length + 1));
+    }
+  }
+  return '';
+}
+
 // Ensure JavaScript runs only after DOM is fully loaded
 document.addEventListener("DOMContentLoaded", function () {
     const submitButton1 = document.getElementById("submit1");

@@ -146,115 +146,6 @@ input[type="date"] {
     width: 34.5vh;;
 }
 
-.calendar_header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    text-align: center;
-    background-color: #FFFFFF;
-}
-
-#monthYear{
-    font-size: 1.8vh;
-    font-weight: 500;
-    color: #16151C;
-}
-
-button#prevMonth {
-    border: none;
-    background-color: #6389DA;
-    width: 1.5vw;
-    height: 3vh;
-    border-radius: 5px;
-}
-
-img#arrow_left {
-    height: 1vh;
-    width: 0.6vw;
-}
-
-button#nextMonth {
-    border: none;
-    background-color: #6389DA;
-    width: 1.5vw;
-    height: 3vh;
-    border-radius: 5px;
-}
-
-img#arrow_right {
-    height: 1vh;
-    width: 0.6vw;
-}
-
-.calendar-days {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    font-weight: 500;
-    margin-bottom: 0.5vh;
-    font-family: Lexend;
-    font-size: 1.5vh;
-    color: #16151C;
-}
-
-img#calendar-check {
-    width: 1.1vw;
-    height: 2.2vh;
-}
-
-.calendar-dates {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 1vw;
-}
-
-.current-month {
-    width: 1.8vw;
-    height: 3vh;
-    margin-left: 0.6vw;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: 0.3s;
-    font-size: 1.5vh;
-    font-family: Lexend;
-    color: #16151C;
-}
-
-.date:hover {
-    background: #e0e0e0;
-}
-
-.current-month {
-    color: #16151C;
-}
-
-.other-month {
-    visibility: hidden;
-}
-
-.selected {
-    background: #6389DA;
-    color: white;
-}
-
-.apply-btn {
-    margin-top: 1.5vh;
-    margin-left: 6.6vw;
-    width: 39%;
-    padding: 0.5vh 0.5vw;
-    background: #333DAE;
-    color: white;
-    font-size: 1.4vh;
-    font-weight: bold;
-    border-radius: 5px;
-    cursor: pointer;
-    display: flex;
-    border: none;
-    gap: 0.5vw;
-    line-height: 1.6;
-}
 
 .sidebar {
     background-image: url(/static/images/Left_Panel.png);   
@@ -612,7 +503,7 @@ span.date-highlight {
 
 /* Hover effect for submit button */
 #submit_button1:hover {
-    background-color: #45a049;
+    background-color: #48b64d;
 }
 
 
@@ -678,11 +569,92 @@ span.date-highlight {
     transition: color 0.2s ease;
 }
 
+/* Main Form Container */
+
+/* Form Header */
+#teamForm h2 {
+    margin: -7% auto;
+    margin-bottom: 15px;
+    color: #000000;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Rating Block Container */
 .rating-block {
-    margin: 10px 0;
+    margin-bottom: 10px;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-weight: bold;
+}
+
+/* Label Styling */
+.rating-block label {
+    font-size: 16px;
+    color: #000000;
+    flex: 1;
+    text-align: left;
+}
+
+/* Dropdown Styling */
+#team_name_dropdown, 
+#team_member_dropdown {
+    width: 50%;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: #fff;
+    transition: border-color 0.2s ease-in-out;
+}
+
+#team_name_dropdown:focus,
+#team_member_dropdown:focus {
+    border-color: #a7d1ff;
+    outline: none;
+}
+
+/* Star Rating Block */
+.star-rating {
+    display: flex;
+    gap: 19px;
+    cursor: pointer;
+}
+
+.star-rating span {
+    font-size: 24px;
+    color: #ccc;
+    transition: color 0.2s ease;
+}
+
+.star-rating span:hover,
+.star-rating span.active {
+    color: #ffbf00;
+}
+
+/* Buttons Styling */
+#teamForm button {
+    background-color: #007bff;
+    color: #ffffff;
+    padding: 5px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 5px;
+    transition: background-color 0.3s ease;
 }
 
 
-.teamForm{
-    margin-top: 10%;
+#viewRankingButton ,#backToSearch {
+    background-color: #28a745;
+    margin-left: 5px;
+}
+
+#viewRankingButton:hover ,#backToSearch {
+    background-color: #218838;
 }
