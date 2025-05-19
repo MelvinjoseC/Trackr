@@ -150,7 +150,7 @@ class TeamRanking(models.Model):
     teamid = models.AutoField(primary_key=True)
     team_name = models.CharField(max_length=100)
     team_member = models.TextField()
-    date = models.DateField(default=now)  # Auto set to current date
+    date = models.DateField(auto_now=True)  # Auto set to current date
     speed_of_execution = models.IntegerField()
     complaints_of_check_list = models.IntegerField()
     task_ownership = models.IntegerField()

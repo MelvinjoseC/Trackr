@@ -69,5 +69,6 @@ urlpatterns = [
     path('get-project-data/<team>/<project>/', views.get_project_data, name='get_project_data'),
     path('get-task-datas/<team>/<project>/', views.get_task_datas, name='get_task_datas'),
     path('api/send-notification/', views.send_notification, name='send_notification'),  # Add this line
+    path('get-team-member-details/', views.get_team_member_details, name='get_team_member_details'),
 ]
 

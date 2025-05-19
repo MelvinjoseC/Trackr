@@ -3141,34 +3141,78 @@ from django.views.decorators.csrf import csrf_exempt
 
 def team_ranking_page(request):
     return render(request, 'project_tracker.html')
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import TeamRanking
+import json
 
 @csrf_exempt
 def add_team_ranking(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        TeamRanking.objects.create(
+        
+        # Check if the team member already exists in the specified team
+        existing_record = TeamRanking.objects.filter(
             team_name=data['team_name'],
-            team_member=data['team_member'],
-            speed_of_execution=data['speed_of_execution'],
-            complaints_of_check_list=data['complaints_of_check_list'],
-            task_ownership=data['task_ownership'],
-            understanding_task=data['understanding_task'],
-            quality_of_work=data['quality_of_work'],
-        )
-        return JsonResponse({'status': 'success'})
+            team_member=data['team_member']
+        ).first()
+        
+        if existing_record:
+            # Update the existing record
+            existing_record.speed_of_execution = data['speed_of_execution']
+            existing_record.complaints_of_check_list = data['complaints_of_check_list']
+            existing_record.task_ownership = data['task_ownership']
+            existing_record.understanding_task = data['understanding_task']
+            existing_record.quality_of_work = data['quality_of_work']
+            existing_record.save()
+            return JsonResponse({'status': 'updated'})
+        else:
+            # Create a new record if it doesn't exist
+            TeamRanking.objects.create(
+                team_name=data['team_name'],
+                team_member=data['team_member'],
+                speed_of_execution=data['speed_of_execution'],
+                complaints_of_check_list=data['complaints_of_check_list'],
+                task_ownership=data['task_ownership'],
+                understanding_task=data['understanding_task'],
+                quality_of_work=data['quality_of_work'],
+            )
+            return JsonResponse({'status': 'created'})
     return JsonResponse({'status': 'invalid request'}, status=400)
 
-def get_team_rankings(request):
-    team_data = list(TeamRanking.objects.values())
-    return JsonResponse(team_data, safe=False)
+
+# In your views.py
+@csrf_exempt
+def get_team_member_details(request):
+    team_name = request.GET.get('team_name')
+    team_member = request.GET.get('team_member')
+    
+    data = TeamRanking.objects.filter(team_name=team_name, team_member=team_member).values().first()
+    return JsonResponse(data, safe=False)
 
 
 from django.http import JsonResponse
 from .models import TeamRanking
 
+def get_team_rankings(request):
+    # Fetch the team data ordered by date in descending order (newest first)
+    team_data = list(TeamRanking.objects.order_by('-date').values())
+    return JsonResponse(team_data, safe=False)
+
+
+
+from django.http import JsonResponse
+from .models import TrackerTasks
+
 def get_team_names(request):
-    team_data = TeamRanking.objects.values('team_name', 'team_member').distinct()
-    return JsonResponse(list(team_data), safe=False)
+    team_data = (
+        TrackerTasks.objects.values('team', 'assigned')
+        .distinct()
+        .exclude(team__isnull=True, assigned__isnull=True)
+    )
+    formatted_data = [{'team_name': item['team'], 'team_member': item['assigned']} for item in team_data]
+    return JsonResponse(formatted_data, safe=False)
+
 
 
 from django.http import JsonResponse

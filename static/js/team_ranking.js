@@ -1,22 +1,33 @@
 const form = document.getElementById('teamForm');
-form.addEventListener('submit', async function(e) {
+form.addEventListener('submit', async function (e) {
     e.preventDefault();
+    
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
 
+    // Send data to the backend
     const response = await fetch('/add-team-ranking/', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data)
     });
 
-    if ((await response.json()).status === 'success') {
+    const result = await response.json();
+
+    // Handle responses
+    if (result.status === 'created') {
         alert('Team ranking added!');
-        form.reset();
-        loadTable();
+    } else if (result.status === 'updated') {
+        alert('Team ranking updated!');
+    } else {
+        alert('An error occurred. Please try again.');
     }
+
+    form.reset();
+    
 });
 
+// Load the table
 async function loadTable() {
     const res = await fetch('/get-team-rankings/');
     const data = await res.json();
@@ -24,9 +35,9 @@ async function loadTable() {
     tbody.innerHTML = '';
 
     data.forEach(row => {
-        // Check if the date is empty or undefined
+        // Skip rows with no date
         if (!row.date) {
-            return; // Skip this row if date is empty or undefined
+            return;
         }
 
         const tr = document.createElement('tr');
@@ -39,18 +50,36 @@ async function loadTable() {
             <td>${getStars(row.task_ownership)}</td>
             <td>${getStars(row.understanding_task)}</td>
             <td>${getStars(row.quality_of_work)}</td>
+            
         `;
         tbody.appendChild(tr);
     });
 }
+
+// Edit function
+async function editRow(team_name, team_member) {
+    const response = await fetch(`/get-team-member-details/?team_name=${team_name}&team_member=${team_member}`);
+    const data = await response.json();
+    
+    // Populate the form with the fetched data
+    document.getElementById('team_name').value = data.team_name;
+    document.getElementById('team_member').value = data.team_member;
+    document.getElementById('speed_of_execution').value = data.speed_of_execution;
+    document.getElementById('complaints_of_check_list').value = data.complaints_of_check_list;
+    document.getElementById('task_ownership').value = data.task_ownership;
+    document.getElementById('understanding_task').value = data.understanding_task;
+    document.getElementById('quality_of_work').value = data.quality_of_work;
+
+    alert(`You are now editing the ranking for ${team_name} - ${team_member}`);
+    loadTable();
+}
+
 
 function getStars(rating) {
     const filledStar = '<span style="color: orange;">★</span>';
     const emptyStar = '<span style="color: #ccc;">☆</span>';
     return filledStar.repeat(rating) + emptyStar.repeat(5 - rating);
 }
-
-document.addEventListener('DOMContentLoaded', loadTable);
 
 document.addEventListener('DOMContentLoaded', function () {
     fetch('/get-team-names/')
@@ -64,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Group team members by team name
             data.forEach(item => {
                 const team = item.team_name;
-                const members = item.team_member.split(',').map(m => m.trim());
+                const members = item.team_member ? item.team_member.split(',').map(m => m.trim()) : [];
 
                 if (!teamMap[team]) {
                     teamMap[team] = new Set();
@@ -93,8 +122,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     memberDropdown.appendChild(option);
                 });
             });
+        })
+        .catch(error => {
+            console.error("Error fetching team names:", error);
         });
 });
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const starContainers = document.querySelectorAll('.star-rating');
@@ -140,6 +173,9 @@ document.addEventListener('DOMContentLoaded', function () {
     viewRankingButton.addEventListener('click', function () {
         searchContainer.style.display = 'none';
         rankDiv.style.display = 'block';
+        
+        // Load the table data when the Rank List button is clicked
+        loadTable();
     });
 
     backToSearchButton.addEventListener('click', function () {
@@ -147,4 +183,5 @@ document.addEventListener('DOMContentLoaded', function () {
         searchContainer.style.display = 'block';
     });
 });
+
 
