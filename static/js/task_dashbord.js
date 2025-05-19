@@ -1056,7 +1056,7 @@ document.getElementById("savetask_creatask").addEventListener("click", function 
 function sendAdminNotification() {
     const adminData = {
         message: "A task was created without a benchmark value. Please review.",
-        recipient: "varshithkumar742001@gmail.com", // Replace with actual admin/MD email or ID
+        recipient: "ananthakrishnan@fusie-engineers.com", // Replace with actual admin/MD email or ID
     };
 
     fetch("/api/send-notification/", {

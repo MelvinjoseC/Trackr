@@ -3226,7 +3226,7 @@ def send_notification(request):
             data = json.loads(request.body)
             message = data.get('message', '')
             recipient = data.get('recipient', '')
-
+            print(recipient)  
             if not message or not recipient:
                 return JsonResponse({"error": "Invalid data"}, status=400)
 
@@ -3234,7 +3234,8 @@ def send_notification(request):
                 subject="Task Benchmark Missing",  # Email subject
                 message=message,                   # The message body
                 from_email=settings.DEFAULT_FROM_EMAIL,  # From address
-                recipient_list=[recipient],        # Recipient's email
+                recipient_list=[recipient],
+                       # Recipient's email
                 fail_silently=False
             )
             return JsonResponse({"success": "Notification sent to admin."})
