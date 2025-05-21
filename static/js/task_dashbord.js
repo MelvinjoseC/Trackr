@@ -995,18 +995,10 @@ document.addEventListener("DOMContentLoaded", function () {
 // Create reusable modal for creating and editing tasks
 
 document.getElementById("savetask_creatask").addEventListener("click", function (e) {
-    e.preventDefault(); // Prevent default behavior (if inside a form)
+    e.preventDefault(); // Prevent form submission
 
-    // Get the benchmark value
     const benchmark = document.getElementById("benchmarkcreatetask").value;
 
-    // If benchmark is empty, send a notification to admin/MD
-    if (!benchmark) {
-        alert("Benchmark is required! Sending notification to Admin/MD...");
-        sendAdminNotification(); // Function to send notification to Admin/MD
-    }
-
-    // Collect other form data
     const taskData = {
         team: document.getElementById("teamcreatetask").value,
         title: document.getElementById("taskTitlecreatetask").value,
@@ -1014,7 +1006,7 @@ document.getElementById("savetask_creatask").addEventListener("click", function 
         project: document.getElementById("id_projectcreatetask").value,
         scope: document.getElementById("id_scopecreatetask").value,
         priority: document.getElementById("id_prioritycreatetask").value,
-        task_benchmark: benchmark,  // Task benchmark is here
+        task_benchmark: benchmark,
         assigned_to: document.getElementById("assignedTocreatetask").value,
         checker: document.getElementById("checkercreatetask").value,
         qc_3_checker: document.getElementById("qcCheckercreatetask").value,
@@ -1027,9 +1019,36 @@ document.getElementById("savetask_creatask").addEventListener("click", function 
         d_no: document.getElementById("id_dnocreatetask").value,
     };
 
-    console.log("Task Created taskData:", taskData); // Log the response
-    
-    // Send the data to the backend
+    // If benchmark is missing, send notification — but continue task creation
+if (!benchmark) {
+    const message = `
+⚠️ *Missing Benchmark Alert* ⚠️
+
+A task was created without a benchmark value. Please review the following details:
+
+• Title: ${taskData.title}
+• Project: ${taskData.project}
+• Scope: ${taskData.scope}
+• Assigned To: ${taskData.assigned_to}
+• Checker: ${taskData.checker}
+• QC 3 Checker: ${taskData.qc_3_checker}
+• Priority: ${taskData.priority}
+• Category: ${taskData.category}
+• Status: ${taskData.task_status}
+• Verification Status: ${taskData.verification_status}
+• Start Date: ${taskData.start_date}
+• End Date: ${taskData.end_date}
+• Rev No: ${taskData.rev_no}
+• D No: ${taskData.d_no}
+• Team: ${taskData.team}
+
+This task requires a benchmark to be defined.
+    `.trim();
+
+    sendAdminNotification(message);
+}
+
+    // Continue with task creation regardless
     fetch("/api/create-task/", {
         method: "POST",
         headers: {
@@ -1038,13 +1057,12 @@ document.getElementById("savetask_creatask").addEventListener("click", function 
         body: JSON.stringify(taskData),
     })
         .then((response) => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
             return response.json();
         })
         .then((data) => {
             console.log("Task Created:", data);
+            alert("Task created successfully!");
         })
         .catch((error) => {
             console.error("Error creating task:", error);
@@ -1052,26 +1070,23 @@ document.getElementById("savetask_creatask").addEventListener("click", function 
         });
 });
 
-// Function to send notification to Admin/MD if benchmark is missing
-function sendAdminNotification() {
+// Updated Notification Function
+function sendAdminNotification(message) {
     const adminData = {
-        message: "A task was created without a benchmark value. Please review.",
-        recipient: "ananthakrishnan@fusie-engineers.com", // Replace with actual admin/MD email or ID
+        message: message,
+        recipient: "ananthakrishnan@fusie-engineers.com",
     };
 
     fetch("/api/send-notification/", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": getCookie('csrftoken'), // Include the CSRF token
+            "X-CSRFToken": getCookie("csrftoken"),
         },
         body: JSON.stringify(adminData),
     })
-
         .then((response) => {
-            if (!response.ok) {
-                throw new Error("Error sending notification to admin.");
-            }
+            if (!response.ok) throw new Error("Error sending notification to admin.");
             return response.json();
         })
         .then((data) => {
@@ -1081,6 +1096,7 @@ function sendAdminNotification() {
             console.error("Error sending notification:", error);
         });
 }
+
 
 document.getElementById("savetask_updatetask").addEventListener("click", function (e) {
     e.preventDefault(); // Prevent default behavior (if inside a form)
@@ -1102,6 +1118,7 @@ document.getElementById("savetask_updatetask").addEventListener("click", functio
         task_status: document.getElementById("id_task_statusedittask").value,
         rev_no: document.getElementById("id_revnoedittask").value,
         d_no: document.getElementById("id_dnoedittask").value,
+         task_benchmark: document.getElementById("id_benchmarkedittask").value, // ✅ Added this line
         globalselectedtitil_for_edit_task_backend : globalselectedtitil_for_edit_task
     };
 
@@ -1112,11 +1129,15 @@ document.getElementById("savetask_updatetask").addEventListener("click", functio
         },
         body: JSON.stringify(taskData),
     })
-        .then((response) => response.json())
-        .then((data) => {
-            console.log("Task Edited:", data); // Logs the response JSON
-        })
-        .catch((error) => console.error("Error editing task:", error));
+    .then((response) => response.json())
+    .then((data) => {
+        console.log("Task Edited:", data); // Logs the response JSON
+        alert("Task updated successfully!");
+    })
+    .catch((error) => {
+        console.error("Error editing task:", error);
+        alert("Error editing task. Check console for details.");
+    });
     
 });
 

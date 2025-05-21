@@ -354,54 +354,54 @@ def execute_query(query, params=None):
             return None
 
 
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.utils.dateparse import parse_date
+from tracker.models import TrackerTasks
+import json
+
 @csrf_exempt
 def create_task(request):
     if request.method == "POST":
         try:
-            # Parse the request body
             data = json.loads(request.body.decode("utf-8"))
-
-            # Debugging: Print received data (Optional)
             print("Received Data:", data)
 
-            # SQL query to insert data into tracker_project
-            query = """
-                INSERT INTO tracker_project
-                (title, `list`, projects, scope, priority, assigned, checker, qc3_checker, category, start, end, verification_status, task_status, d_no, rev, team, task_benchmark)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s)
-            """
-            params = (
-                data.get("title", ""),  # Provide default empty string if None
-                data.get("list", ""),  # `list` is escaped with backticks
-                data.get("project", ""),
-                data.get("scope", ""),
-                data.get("priority", ""),
-                data.get("assigned_to", ""),
-                data.get("checker", ""),
-                data.get("qc_3_checker", ""),
-                data.get("category", ""),
-                data.get("start_date", ""),
-                data.get("end_date", ""),
-                data.get("verification_status", ""),
-                data.get("task_status", ""),
-                data.get("d_no", ""),
-                data.get("rev_no", ""),
-                data.get("team", ""),
-                data.get("task_benchmark", ""),
+            # Handle optional numeric field
+            benchmark_raw = data.get("task_benchmark", "")
+            try:
+                task_benchmark = float(benchmark_raw) if benchmark_raw.strip() else None
+            except ValueError:
+                # If not a valid number, treat it as None without raising error
+                task_benchmark = None
+
+            task = TrackerTasks.objects.create(
+                title=data.get("title", ""),
+                list=data.get("list", ""),
+                projects=data.get("project", ""),
+                scope=data.get("scope", ""),
+                priority=data.get("priority", "Medium"),
+                assigned=data.get("assigned_to", ""),
+                checker=data.get("checker", ""),
+                qc3_checker=data.get("qc_3_checker", ""),
+                category=data.get("category", ""),
+                start=parse_date(data.get("start_date")) if data.get("start_date") else None,
+                end=parse_date(data.get("end_date")) if data.get("end_date") else None,
+                verification_status=data.get("verification_status", ""),
+                task_status=data.get("task_status", ""),
+                d_no=data.get("d_no", ""),
+                rev=data.get("rev_no", ""),
+                team=data.get("team", ""),
+                task_benchmark=task_benchmark
             )
 
-            # Execute the query safely
-            with connection.cursor() as cursor:
-                cursor.execute(query, params)
-
-            # Return success response
-            return JsonResponse(
-                {"message": "Task created successfully!", "task": data}, status=201
-            )
+            return JsonResponse({"message": "Task created successfully!", "task_id": task.id}, status=201)
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON format"}, status=400)
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
@@ -507,72 +507,70 @@ def aproove_task(request):
 
 
 
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.utils.dateparse import parse_date
+from tracker.models import TrackerTasks  # Adjust import as needed
+import json
+
 @csrf_exempt
 def edit_task(request):
     if request.method == "POST":
         try:
-            # Parse the request body
             data = json.loads(request.body.decode("utf-8"))
-            title_name = data.get(
-                "globalselectedtitil_for_edit_task_backend", ""
-            )  # Old title
 
-            # Check if the task with the given old title, project, and scope already exists
-            check_query = """
-                SELECT id FROM tracker_project 
-                WHERE title = %s AND projects = %s AND scope = %s
-            """
-            params_check = (title_name, data.get("project", ""), data.get("scope", ""))
+            # Extract old task identifier
+            old_title = data.get("globalselectedtitil_for_edit_task_backend", "")
+            old_project = data.get("project", "")
+            old_scope = data.get("scope", "")
 
-            # Execute the check query
-            with connection.cursor() as cursor:
-                cursor.execute(check_query, params_check)
-                result = cursor.fetchone()  # Get the result if it exists
-
-            if result:
-                # Task exists, update the existing row with new title and other values
-                update_query = """
-                    UPDATE tracker_project
-                    SET title = %s, `list` = %s, priority = %s, assigned = %s, checker = %s, qc3_checker = %s,
-                     category = %s, start = %s, end = %s, verification_status = %s, task_status = %s
-                    WHERE id = %s
-                """
-                params_update = (
-                    data.get("title", ""),  # Update with new title
-                    data.get("list", ""),
-                    data.get("priority", ""),
-                    data.get("assigned_to", ""),
-                    data.get("checker", ""),
-                    data.get("qc_3_checker", ""),
-                    data.get("category", ""),
-                    data.get("start_date", ""),
-                    data.get("end_date", ""),
-                    data.get("verification_status", ""),
-                    data.get("task_status", ""),
-                    result[0],  # ID of the existing row
-                )
-
-                with connection.cursor() as cursor:
-                    cursor.execute(update_query, params_update)
-
+            # Fetch the task using the model
+            try:
+                task = TrackerTasks.objects.get(title=old_title, projects=old_project, scope=old_scope)
+            except TrackerTasks.DoesNotExist:
                 return JsonResponse(
-                    {"message": "Task updated successfully!", "task": data}, status=200
+                    {"error": "Task with the given title, project, and scope not found"},
+                    status=404
                 )
 
-            else:
-                return JsonResponse(
-                    {
-                        "error": "Task with the given title, project, and scope not found"
-                    },
-                    status=404,
-                )
+            # Safely parse task_benchmark
+            benchmark_raw = data.get("task_benchmark", "")
+            try:
+                task_benchmark = float(benchmark_raw) if benchmark_raw.strip() else None
+            except ValueError:
+                task_benchmark = None
+
+            # Update fields
+            task.title = data.get("title", "")
+            task.list = data.get("list", "")
+            task.priority = data.get("priority", "")
+            task.assigned = data.get("assigned_to", "")
+            task.checker = data.get("checker", "")
+            task.qc3_checker = data.get("qc_3_checker", "")
+            task.category = data.get("category", "")
+            task.start = parse_date(data.get("start_date")) if data.get("start_date") else None
+            task.end = parse_date(data.get("end_date")) if data.get("end_date") else None
+            task.verification_status = data.get("verification_status", "")
+            task.task_status = data.get("task_status", "")
+            task.task_benchmark = task_benchmark
+
+            # Save the updated task
+            task.save()
+
+            return JsonResponse(
+                {"message": "Task updated successfully!", "task": data},
+                status=200
+            )
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON format"}, status=400)
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
+
 
 
 @csrf_exempt
