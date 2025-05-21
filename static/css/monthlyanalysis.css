@@ -1,23 +1,22 @@
 /* Simple calendar styling */
  
 #monthly-analysis {
-    background-color: #ffffff;
-    padding: 30px;
+  background-color: #ffffff;
+    padding: 35px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    margin-top: 30px;
+    margin-top: 17px;
     transition: all 0.3s ease;
     width: 1220px;
-    height: 850px;
+    height: 859px;
     margin-left: 20px;
     align-content: center;
-  }
-  
+}
  
   .header {
     display: flex;
     align-items: center;
-    gap: 290px; /* 👈 Add this line to create space between elements */
+    gap: 268px; /* 👈 Add this line to create space between elements */
     margin-bottom: 30px;
   }
   

@@ -70,9 +70,16 @@
             <a class="sidebar_link" id="project-button" 
             href="{% url 'project_tracker' %}" 
             data-default-img="{% static 'images/leavepage.png' %}" 
-            data-active-img="{% static 'images/leavepage1.png' %}" 
-            style="display: none;">
-            <img src="{% static 'images/leavepage.png' %}" alt="Project Tracker Icon"> PROJECT TRACKER
+            data-active-img="{% static 'images/leavepage1.png' %}">
+                <img src="{% static 'images/leavepage.png' %}" alt="Project Tracker Icon"> 
+                PROJECT TRACKER
+
+                {% if pending_count > 0 %}
+                    <div class="notification-bubble">
+                        {{ pending_count }}
+                        <div class="bubble-pointer"></div>
+                    </div>
+                {% endif %}
             </a>
             <a class="sidebar-link" id="team-button" href="{% url 'team_dashboard' %}"
                 data-default-img="{% static 'images/leavepage.png' %}" 

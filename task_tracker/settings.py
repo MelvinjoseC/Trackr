@@ -78,6 +78,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # Register your custom context processor
+                'tracker.context_processors.pending_task_count',
             ],
         },
     },

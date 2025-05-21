@@ -49,11 +49,19 @@
                 
                 {% if is_admin_or_md  %}
                 <!-- ✅ Show Project Tracker for Admins only -->
-                <a class="sidebar_link" id="project-button" 
-                href="{% url 'project_tracker' %}" 
-                data-default-img="{% static 'images/leavepage.png' %}" 
-                data-active-img="{% static 'images/leavepage1.png' %}">
-                <img src="{% static 'images/leavepage.png' %}" alt="Project Tracker Icon"> PROJECT TRACKER
+               <a class="sidebar_link" id="project-button" 
+            href="{% url 'project_tracker' %}" 
+            data-default-img="{% static 'images/leavepage.png' %}" 
+            data-active-img="{% static 'images/leavepage1.png' %}">
+                <img src="{% static 'images/leavepage.png' %}" alt="Project Tracker Icon"> 
+                PROJECT TRACKER
+
+                {% if pending_count > 0 %}
+                    <div class="notification-bubble">
+                        {{ pending_count }}
+                        <div class="bubble-pointer"></div>
+                    </div>
+                {% endif %}
             </a>            
                 {% else %}
                 <!-- ✅ Show Notifications for Normal Users -->

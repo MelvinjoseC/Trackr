@@ -505,6 +505,8 @@ def aproove_task(request):
     return JsonResponse({"error": "Invalid HTTP method"}, status=405)
 
 
+
+
 @csrf_exempt
 def edit_task(request):
     if request.method == "POST":
@@ -691,12 +693,12 @@ def submit_timesheet(request):
                                 date1,
                                 time,
                                 comments,
-                                "Medium",
+                                "",
                                 "Unassigned",
-                                "Unassigned",
-                                "Default Group",
-                                "1970-01-01",
-                                "1970-01-01",
+                                "",
+                                "",
+                                "",
+                                "",
                                 False,
                                 assigned,
                                 0,
@@ -705,7 +707,7 @@ def submit_timesheet(request):
                         )
                 return JsonResponse(
                     {
-                        "message": "New timesheet entry created successfully (default values)."
+                        "message": "New timesheet entry created successfully."
                     },
                     status=201,
                 )

@@ -2536,3 +2536,28 @@ textarea {
         height: 80px;
     }
 }
+
+.notification-bubble  {
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 12px;
+    font-size: 18px;
+    position: absolute;
+    z-index: 10;
+    margin-left: 167px;
+    font-weight: bold;
+    top: 52%;
+}
+.bubble-pointer {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 0px;
+    border-top: 12px solid transparent;
+    border-bottom: 0px solid transparent;
+    border-right: 6px solid red;
+}

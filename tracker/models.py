@@ -9,7 +9,6 @@ class ProjectTacker(models.Model):
     status = models.CharField(max_length=45, null=True, blank=True)
     sender_name = models.CharField(max_length=45, null=True, blank=True)  # Added missing field
 
-
     class Meta:
         db_table = 'project_tacker'  # Matches the DB table name
 
