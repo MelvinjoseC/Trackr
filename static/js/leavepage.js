@@ -370,14 +370,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 const leaveRow = document.createElement("div");
                 leaveRow.classList.add("leave-row");
 
-                // Convert the start date to check if it's in the past
                 const startDate = new Date(leave.start_date);
                 const today = new Date();
 
-                // Check if start date is in the past
                 const isPastDate = startDate < today;
 
-                // Change button HTML based on whether the start date is in the past
                 const editButtonHTML = isPastDate 
                     ? `<button class="action-btn edit-btn disabled" disabled>
                             <img src="/static/images/blue_edit_button_disabled.png">
@@ -411,7 +408,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         <div class="leave-value">${leave.approver || "-"}</div>
                     </div>
                     <div class="leave-cell actions">
-                        <button class="action-btn comment-btn"><img src="/static/images/comment_button.png"></button>
+                        <button class="action-btn comment-btn" data-reason="${leave.reason}">
+                            <img src="/static/images/comment_button.png">
+                        </button>
                         ${editButtonHTML}
                         <button class="action-btn delete-btn" data-id="${leave.id}"><img src="/static/images/delete_button.png"></button>
                     </div>
@@ -419,7 +418,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 leaveContainer.appendChild(leaveRow);
             });
 
-            // Event Listeners
+            // Event Listeners for Edit buttons
             document.querySelectorAll(".edit-btn:not(.disabled)").forEach(button => {
                 button.addEventListener("click", function () {
                     const leaveId = this.getAttribute("data-id");
@@ -432,6 +431,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             });
 
+            // Event Listener for Comment Button to Show Leave Reason Modal
+            document.querySelectorAll(".comment-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                    const reason = this.getAttribute("data-reason");
+                    showLeaveReasonModal(reason);
+                });
+            });
+
+            // Event Listener for Delete buttons
             document.querySelectorAll(".delete-btn").forEach(button => {
                 button.addEventListener("click", function () {
                     const leaveId = this.getAttribute("data-id");
@@ -441,6 +449,27 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(error => console.error("Error fetching leave applications:", error));
 });
+
+// Function to show the leave reason in a modal
+function showLeaveReasonModal(reason) {
+    const modal = document.getElementById("leave-reason-modal");
+    const reasonText = document.getElementById("leave-reason-text");
+    reasonText.textContent = reason;  // Set the reason text
+    modal.style.display = "block";  // Show the modal
+
+    // Close modal when clicking the close button
+    const closeBtn = document.querySelector(".close-btn");
+    closeBtn.addEventListener("click", function() {
+        modal.style.display = "none"; // Hide the modal
+    });
+
+    // Close modal when clicking outside of the modal content
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            modal.style.display = "none"; // Hide the modal
+        }
+    };
+}
 
 // Function to open the Edit Modal
 function openEditModal(leaveId, startDate, endDate, reason, leaveType) {
@@ -537,6 +566,28 @@ async function deleteLeave(leaveId) {
         alert("⚠️ Network error! Please try again.");
     }
 }
+
+// Function to show the leave reason in a modal
+function showLeaveReasonModal(reason) {
+    const modal = document.getElementById("leave-reason-modal");
+    const reasonText = document.getElementById("leave-reason-text");
+    reasonText.textContent = reason;  // Set the reason text
+    modal.style.display = "block";  // Show the modal
+
+    // Close modal when clicking the close button
+    const closeBtn = document.querySelector(".close-btn");
+    closeBtn.addEventListener("click", function() {
+        modal.style.display = "none"; // Hide the modal
+    });
+
+    // Close modal when clicking outside of the modal content
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            modal.style.display = "none"; // Hide the modal
+        }
+    };
+}
+
 
 
 

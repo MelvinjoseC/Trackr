@@ -848,3 +848,44 @@ button#compleave-btn:hover {
     border-bottom: 0px solid transparent;
     border-right: 6px solid red;
 }
+
+/* Modal Background */
+#leave-reason-modal {
+    display: none; /* Initially hidden */
+    position: fixed; /* Fixed position so it stays in place when scrolling */
+    z-index: 1000; /* Make sure it's on top of everything else */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background to darken the page */
+    overflow: auto; /* Allow scrolling if needed */
+}
+
+/* Modal Content */
+#leave-reason-modal > div {
+    position: relative;
+    background-color: #dfdfdf;
+    margin: 23% auto;
+    padding: 20px;
+    width: 50%;
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Close Button */
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #ff0000;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: #ff0000;
+}

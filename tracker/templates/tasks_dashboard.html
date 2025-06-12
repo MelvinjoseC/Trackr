@@ -443,9 +443,9 @@
             <!-- Header Section -->
         <div class="header">
             <h1>EDIT ALL TASKS</h1>
-            <button id="openPopupButton" class="copy-task-btn">
+            <!-- <button id="openPopupButton" class="copy-task-btn">
                 <i class="fas fa-copy"></i> Copy Task
-            </button>
+            </button> -->
         </div>
 
 
@@ -470,6 +470,11 @@
                     <label for="id_scopeedittask">Scope</label>
                     <select id="id_scopeedittask">
                         <option>Select Scope</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_categoryedittask">Category</label>
+                    <select id="id_categoryedittask">
                     </select>
                 </div>
                 <div class="form-group3">
@@ -511,11 +516,7 @@
                     <label for="id_groupedittask">Group</label>
                     <input type="text" id="id_groupedittask" placeholder="Enter task Group">
                 </div> -->
-                <div class="form-group">
-                    <label for="id_categoryedittask">Category</label>
-                    <select id="id_categoryedittask">
-                    </select>
-                </div>
+                
                 <div class="form-group">
                     <label for="id_start_dateedittask">Start Date</label>
                     <input type="date" id="id_start_dateedittask">
@@ -541,7 +542,7 @@
             </form>
                 <div class="form-group">
                     <button id="savetask_updatetask">Update Task</button>
-                    <button id="closePopupButton_updatetask">Close</button>
+                    <button id="closePopupButton_updatetask">Cancel</button>
                 </div>
           
            
@@ -597,9 +598,9 @@
                     </select>
                 </div>
 
-                <div class="form-group3">
+               <div class="form-group3">
                     <label>Hours</label>
-                    <input type="number" id="time" step="0.1" min="0" value="2.75" required>
+                    <input type="number" id="time" min="0" max="23" step="any">
                 </div>
 
                 <div class="form-group3">
@@ -646,7 +647,7 @@
 
 <div class="button-container">
     <button type="button" id="submitTimesheetButton">Submit Timesheet</button>
-<button id="closePopupButton_manualtimesheet">Close</button>
+<button id="closePopupButton_manualtimesheet">Cancel</button>
 </div>
 
     </div>
@@ -657,13 +658,14 @@
 <!-- Popup Modal -->
  <div id="taskModalPopup" class="popup-modal">
         <h2>Create Task</h2>
+         <span class="close-btn4" id="closePopupButton">&times;</span>
         <form id="createTaskForm">
             <div class="form-group">
                 <label for="teamcreatetask">Team:</label>
                 <select id="teamcreatetask" name="team">
                     <option value="">Select</option> 
                 </select>
-                <button id="lockTeamBtn" type="button123">🔒 Lock</button>
+                <span id="lockTeamBtn" class="lock-toggle">🔒 Lock</span>
             </div>
             <div class="form-group">
                 <label for="taskTitlecreatetask">Title:</label>
@@ -747,7 +749,7 @@
         <div class="form-group">
             <button id="savetask_creatask" style="display: none;">Save Task</button>
             <button id="aproover_creattask" style="display: none;">Approver</button>
-            <button id="closePopupButton_creattask">Close</button>
+            <button id="closePopupButton_creattask">Cancel</button>
             
             <div id="dropdownContainer" style="display: none; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9; width: 200px; position: absolute;">
                 <!-- Dynamically populated list will go here -->

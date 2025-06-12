@@ -90,9 +90,8 @@
         
             <!-- Dropdown for selecting team -->
             <label for="teamSelect">Select Team:</label>
-            <select id="teamSelect" onchange="loadProjects()">
+            <select id="teamSelect" onchange="if(this.value === '') location.reload(); else loadProjects();">
                 <option value="">Select Team</option>
-                <!-- Team options will be populated dynamically -->
             </select>
         
             <!-- Dropdown for selecting project (initially disabled) -->

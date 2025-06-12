@@ -507,10 +507,10 @@ def aproove_task(request):
 
 
 
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
 from django.utils.dateparse import parse_date
-from tracker.models import TrackerTasks  # Adjust import as needed
+from tracker.models import TrackerTasks
 import json
 
 @csrf_exempt
@@ -519,28 +519,21 @@ def edit_task(request):
         try:
             data = json.loads(request.body.decode("utf-8"))
 
-            # Extract old task identifier
             old_title = data.get("globalselectedtitil_for_edit_task_backend", "")
             old_project = data.get("project", "")
             old_scope = data.get("scope", "")
 
-            # Fetch the task using the model
             try:
-                task = TrackerTasks.objects.get(title=old_title, projects=old_project, scope=old_scope)
+               task = TrackerTasks.objects.get(title=old_title, projects=old_project, scope=old_scope)
             except TrackerTasks.DoesNotExist:
-                return JsonResponse(
-                    {"error": "Task with the given title, project, and scope not found"},
-                    status=404
-                )
+                return JsonResponse({"error": "Task with the given title, project, and scope not found"}, status=404)
 
-            # Safely parse task_benchmark
             benchmark_raw = data.get("task_benchmark", "")
             try:
                 task_benchmark = float(benchmark_raw) if benchmark_raw.strip() else None
             except ValueError:
                 task_benchmark = None
 
-            # Update fields
             task.title = data.get("title", "")
             task.list = data.get("list", "")
             task.priority = data.get("priority", "")
@@ -552,15 +545,29 @@ def edit_task(request):
             task.end = parse_date(data.get("end_date")) if data.get("end_date") else None
             task.verification_status = data.get("verification_status", "")
             task.task_status = data.get("task_status", "")
+            task.rev = data.get("rev_no", "")
+            task.d_no = data.get("d_no", "")
             task.task_benchmark = task_benchmark
 
-            # Save the updated task
+            # Handle phase benchmarks
+            phase_benchmarks = [
+                'phase_1_benchmark', 'phase_2_benchmark', 'phase_3_benchmark', 'phase_4_benchmark',
+                'phase_5_benchmark', 'phase_6_benchmark', 'phase_7_benchmark', 'phase_8_benchmark',
+                'phase_9_benchmark', 'phase_10_benchmark'
+            ]
+            for phase in phase_benchmarks:
+                benchmark_value = data.get(phase, "")
+                try:
+                    if benchmark_value.strip():
+                        task.__setattr__(phase, float(benchmark_value))
+                    else:
+                        task.__setattr__(phase, None)
+                except ValueError:
+                    task.__setattr__(phase, None)
+
             task.save()
 
-            return JsonResponse(
-                {"message": "Task updated successfully!", "task": data},
-                status=200
-            )
+            return JsonResponse({"message": "Task updated successfully!", "task": data}, status=200)
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON format"}, status=400)
@@ -571,13 +578,54 @@ def edit_task(request):
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from tracker.models import TrackerTasks  # Use correct import if your model is elsewhere
+
+@csrf_exempt
+def get_task_by_title_project_scope(request):
+    if request.method == "GET":
+        title = request.GET.get("title")
+        project = request.GET.get("project")
+        scope = request.GET.get("scope")
+
+        if not (title and project and scope):
+            return JsonResponse({"error": "Missing title, project, or scope"}, status=400)
+
+        try:
+            task = TrackerTasks.objects.get(title=title, projects=project, scope=scope)
+
+            return JsonResponse({
+                "title": task.title,
+                "list": task.list,
+                "project": task.projects,
+                "scope": task.scope,
+                "priority": task.priority,
+                "assigned_to": task.assigned,
+                "checker": task.checker,
+                "qc_3_checker": task.qc3_checker,
+                "category": task.category,
+                "start_date": task.start.isoformat() if task.start else '',
+                "end_date": task.end.isoformat() if task.end else '',
+                "verification_status": task.verification_status,
+                "task_status": task.task_status,
+                "rev_no": task.rev,
+                "d_no": task.d_no,
+                "task_benchmark": task.task_benchmark
+            })
+
+        except TrackerTasks.DoesNotExist:
+            return JsonResponse({"error": "Task not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
 
 
 @csrf_exempt
 def submit_timesheet(request):
     if request.method == "POST":
         try:
-            # Parse the request body
             data = json.loads(request.body.decode("utf-8"))
 
             department = data.get("list", "")
@@ -589,10 +637,8 @@ def submit_timesheet(request):
             time = data.get("time", 0)
             comments = data.get("comments", "")
 
-            # Assume assigned user is coming from global_user_data['name']
             assigned = global_user_data.get("name", "Unassigned")
 
-            # Check if a record exists with the same task
             select_query = """
                 SELECT * FROM tracker_project 
                 WHERE `list` = %s AND projects = %s AND scope = %s 
@@ -600,43 +646,36 @@ def submit_timesheet(request):
                 ORDER BY id DESC LIMIT 1
             """
             with connection.cursor() as cursor:
-                cursor.execute(
-                    select_query, [department, project_type, scope, task, phase]
-                )
+                cursor.execute(select_query, [department, project_type, scope, task, phase])
                 result = cursor.fetchone()
-                columns = [col[0] for col in cursor.description]  # Get column names
+                columns = [col[0] for col in cursor.description]
 
             if result:
-                existing_row = dict(
-                    zip(columns, result)
-                )  # Convert the result to a dictionary
+                existing_row = dict(zip(columns, result))
+                team_value = existing_row.get("team", "")
 
                 if existing_row["date1"] is None:
-                    # If date1 is NULL, update the existing row
                     update_query = """
                         UPDATE tracker_project 
-                        SET date1 = %s, time = %s, comments = %s, assigned = %s 
+                        SET date1 = %s, time = %s, comments = %s, assigned = %s, team = %s 
                         WHERE id = %s
                     """
                     with connection.cursor() as cursor:
                         cursor.execute(
                             update_query,
-                            [date1, time, comments, assigned, existing_row["id"]],
+                            [date1, time, comments, assigned, team_value, existing_row["id"]],
                         )
                     return JsonResponse(
-                        {
-                            "message": "Timesheet entry updated successfully (existing row)."
-                        },
+                        {"message": "Timesheet entry updated successfully (existing row)."},
                         status=200,
                     )
 
                 else:
-                    # If date1 is NOT NULL, copy values from the existing row and insert a new row
                     insert_query = """
                         INSERT INTO tracker_project (title, `list`, projects, scope, category, date1, time, comments, 
                                                      priority, checker, qc3_checker, `group`, start, end, 
-                                                     verification_status, assigned, d_no, rev) 
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                                     verification_status, assigned, d_no, rev, team) 
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """
                     with transaction.atomic():
                         with connection.cursor() as cursor:
@@ -661,22 +700,20 @@ def submit_timesheet(request):
                                     assigned,
                                     existing_row["d_no"],
                                     existing_row["rev"],
+                                    team_value,
                                 ],
                             )
                     return JsonResponse(
-                        {
-                            "message": "New timesheet entry created successfully (with copied values)."
-                        },
+                        {"message": "New timesheet entry created successfully (with copied values)."},
                         status=201,
                     )
 
             else:
-                # If no matching record is found, insert a new row with default values
                 insert_query = """
                     INSERT INTO tracker_project (title, `list`, projects, scope, category, date1, time, comments, 
                                                  priority, checker, qc3_checker, `group`, start, end, 
-                                                 verification_status, assigned, d_no, rev) 
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                                 verification_status, assigned, d_no, rev, team) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
                 with transaction.atomic():
                     with connection.cursor() as cursor:
@@ -701,12 +738,11 @@ def submit_timesheet(request):
                                 assigned,
                                 0,
                                 "0.0",
+                                "",  # Default/empty team for new insert
                             ],
                         )
                 return JsonResponse(
-                    {
-                        "message": "New timesheet entry created successfully."
-                    },
+                    {"message": "New timesheet entry created successfully."},
                     status=201,
                 )
 

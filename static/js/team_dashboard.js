@@ -75,33 +75,37 @@ document.addEventListener("DOMContentLoaded", function() {
         .catch(error => {
             console.error("Failed to fetch chart data:", error);
         });
+window.loadProjects = function() {
+    const team = document.getElementById("teamSelect").value; // ✅ define 'team' first
 
-    // Function to load projects based on selected team
-    window.loadProjects = function() {
-        const team = teamSelect.value;
-        if (!team) return;
+    if (!team) {
+        location.reload();
+        return;
+    }
 
-        fetch(`/get-projects/${team}/`)  // Fetch projects based on selected team
-            .then(response => response.json())
-            .then(data => {
-                // Clear previous project options
-                projectSelect.innerHTML = '<option value="">Select Project</option>';
+    fetch(`/get-projects/${team}/`)
+        .then(response => response.json())
+        .then(data => {
+            projectSelect.innerHTML = '<option value="">Select Project</option>';
 
-                // Populate the project dropdown
-                data.projects.forEach(project => {
-                    const option = document.createElement("option");
-                    option.value = project;
-                    option.textContent = project;
-                    projectSelect.appendChild(option);
-                });
-
-                projectSelect.disabled = false;
-                loadProjectData(data.projects[0]);  // Optionally load the data for the first project
-            })
-            .catch(error => {
-                console.error("Failed to fetch projects:", error);
+            data.projects.forEach(project => {
+                const option = document.createElement("option");
+                option.value = project;
+                option.textContent = project;
+                projectSelect.appendChild(option);
             });
-    };
+
+            projectSelect.disabled = false;
+
+            if (data.projects.length > 0) {
+                loadProjectData(data.projects[0]);
+            }
+        })
+        .catch(error => {
+            console.error("Failed to fetch projects:", error);
+        });
+};
+
 
     // Function to load the project data and display it on the graph
     window.loadProjectData = function(project) {

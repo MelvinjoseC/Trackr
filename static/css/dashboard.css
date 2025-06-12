@@ -792,25 +792,15 @@ form#form_date {
     align-items: center;
 }
 
-input[type="date"]::-webkit-datetime-edit, input[type="date"]::-webkit-inner-spin-button, input[type="date"]::-webkit-clear-button {
-    display: none;
-}
-
-input[type="date"] {
-    text-indent: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-}
-
 #date-input {
     display: flex;
     padding: 0.4vh 0.4vw;
     border: none;
     background: #ECECEC;
-    font-size: 2vh;
+    font-size: 1.5vh;
     align-items: center;
     border-radius: 5px 0px 0px 5px;
-    height: 3.5vh;
+    height: 3vh;
 }
 
 #selected-date {
@@ -828,14 +818,14 @@ input[type="date"] {
 }
 
 input#from_date {
-    width: 8%;
+    width: 57%;
     display: flex;
-    padding: 0.4vh 0.4vw;
+    padding: 1.4vh 0.4vw;
     border: none;
     background: #ECECEC;
-    font-size: 2vh;
+    font-size: 1.5vh;
     align-items: center;
-    border-radius: 5px 0px 0px 5px;
+    border-radius: 5px 6px 6px 5px;
 }
 
 span#selected-from {
@@ -859,14 +849,14 @@ span#selected-from {
 }
 
 input#to_date {
-    width: 8%;
+    width: 57%;
     display: flex;
-    padding: 0.4vh 0.4vw;
+    padding: 1.4vh 0.4vw;
     border: none;
     background: #ECECEC;
-    font-size: 2vh;
+    font-size: 1.5vh;
     align-items: center;
-    border-radius: 5px 0px 0px 5px;
+    border-radius: 5px 6px 6px 5px;
 }
 
 span#selected-to {
@@ -1117,16 +1107,6 @@ body {
     margin-bottom: 15px;
 }
 
-.popup-modal input[type="text"],
-.popup-modal input[type="date"],
-.popup-modal select {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-}
-
 .popup-modal button {
     padding: 10px 15px;
     background-color: #007bff;
@@ -1168,7 +1148,6 @@ body {
 }
 
 #taskModalPopup input[type="text"],
-#taskModalPopup input[type="date"],
 #taskModalPopup select {
     width: 100%;
     padding: 10px;
@@ -1176,6 +1155,28 @@ body {
     border-radius: 5px;
     border: 1px solid #ddd;
 }
+
+
+#taskModalPopup input[type="date"]
+{
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.lock-toggle {
+    cursor: pointer;
+    font-size: 16px;
+    user-select: none;
+    background-color: #ff9d9d;
+    width: 11%;
+    border-radius: 6px;
+    font-weight: bold;
+    padding: 10px 10px;
+}
+
 
 #taskModalPopup button {
     padding: 10px 15px;
@@ -2027,7 +2028,7 @@ textarea {
 }
 
 label.notify_hd {
-    margin-top: 8vh;
+    margin-top: 3vh;
 }
 
 small {

@@ -148,14 +148,14 @@
                                     <label for="from_date">FROM</label>
                                     <div class="from_div"> 
                                         <input type="date" id="from_date" name="from_date">
-                                        <span id="selected-from"></span>
+                                        <!-- <span id="selected-from"></span> -->
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="to_date">TO</label>
                                     <div class="to_div"> 
                                         <input type="date" id="to_date" name="to_date">
-                                        <span id="selected-to"></span>
+                                        <!-- <span id="selected-to"></span> -->
                                     </div>
                                 </div>
                             </div>
@@ -171,7 +171,7 @@
                             </div>
                     
                             <div class="form-group">
-                                <label class="notify_hd" for="notify">NOTIFY</label>
+                                <label class="notify_hd" for="notify">APPROVER</label>
                                 <select id="notify" name="notify" required>
                                     <option value="" disabled selected>Select</option>
         
@@ -207,6 +207,7 @@
                 <button class="apply-btn"><img id="calendar-check" src="{% static 'images/calendar-check.png' %}">Apply for Leave</button>
             </div>
         </div>
+        
         <div class="holiday-calendar-container">
     <div class="leave-history">
         <div class="leave-history-header">
@@ -215,6 +216,15 @@
             <button type="button" class="btn btn-primary" id="approvals-btn" onclick="toggleButton()">APPROVALS</button>
             <button type="button" class="btn btn-primary" id="compleave-btn" >COMP LEAVE BALANCE</button>
         </div>
+            
+        <div id="leave-reason-modal" style="display: none;">
+            <div>
+                <span class="close-btn">&times;</span>
+                <h2 align="center">Leave Reason</h2>
+                <p id="leave-reason-text"></p>
+            </div>
+        </div>
+
         <div class="leave-history-content">
             <div id="leave-container" style="display: block;">
                 <div id="edit-modal" class="modal">

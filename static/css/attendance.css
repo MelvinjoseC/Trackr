@@ -455,17 +455,6 @@ p#profile_designation {
     align-items: center;
     border-radius: 5px 0px 0px 5px;
 }
-
-input[type="date"]::-webkit-datetime-edit, input[type="date"]::-webkit-inner-spin-button, input[type="date"]::-webkit-clear-button {
-    display: none;
-}
-
-input[type="date"] {
-    text-indent: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-}
-
 #selected-date {
     font-size: 1.3vh;
     color: #4F4F4F;
