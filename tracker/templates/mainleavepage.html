@@ -48,7 +48,7 @@
                 
                 {% if is_admin or is_md %}
                      <!-- ✅ Show Project Tracker for Admins only -->
-               <a class="sidebar_link" id="project-button" 
+               <a class="sidebar-link" id="project-button" 
             href="{% url 'project_tracker' %}" 
             data-default-img="{% static 'images/leavepage.png' %}" 
             data-active-img="{% static 'images/leavepage1.png' %}">
@@ -64,7 +64,7 @@
             </a>
                 {% else %}
                 <!-- ✅ Show Notifications for Normal Users -->
-                <a class="sidebar_link" id="notifications" 
+                <a class="sidebar-link" id="notifications" 
                 href="{% url 'notifications_page' %}"
                 data-default-img="{% static 'images/leavepage.png' %}" 
                 data-active-img="{% static 'images/leavepage1.png' %}">

@@ -353,7 +353,6 @@ def execute_query(query, params=None):
             # For INSERT, UPDATE, DELETE
             return None
 
-
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.utils.dateparse import parse_date
@@ -364,145 +363,149 @@ import json
 def create_task(request):
     if request.method == "POST":
         try:
+            # Parse the task data from the request body
             data = json.loads(request.body.decode("utf-8"))
-            print("Received Data:", data)
+            task_data = data.get("taskData", {})  # Form data
+            excel_tasks = data.get("tasks", [])  # Excel file data
+            
+            # Handle the Excel data and save it
+            for task in excel_tasks:
+                # Extract fields from the Excel data
+                task_benchmark = task.get("task_benchmark", None)
+                title = task.get("title", "")
+                projects = task.get("projects", "")
+                scope = task.get("scope", "")
 
-            # Handle optional numeric field
-            benchmark_raw = data.get("task_benchmark", "")
-            try:
-                task_benchmark = float(benchmark_raw) if benchmark_raw.strip() else None
-            except ValueError:
-                # If not a valid number, treat it as None without raising error
-                task_benchmark = None
+                # Ensure task_benchmark is a float, if not, set it to None
+                try:
+                    task_benchmark = float(task_benchmark) if task_benchmark else None
+                except ValueError:
+                    task_benchmark = None
 
-            task = TrackerTasks.objects.create(
-                title=data.get("title", ""),
-                list=data.get("list", ""),
-                projects=data.get("project", ""),
-                scope=data.get("scope", ""),
-                priority=data.get("priority", "Medium"),
-                assigned=data.get("assigned_to", ""),
-                checker=data.get("checker", ""),
-                qc3_checker=data.get("qc_3_checker", ""),
-                category=data.get("category", ""),
-                start=parse_date(data.get("start_date")) if data.get("start_date") else None,
-                end=parse_date(data.get("end_date")) if data.get("end_date") else None,
-                verification_status=data.get("verification_status", ""),
-                task_status=data.get("task_status", ""),
-                d_no=data.get("d_no", ""),
-                rev=data.get("rev_no", ""),
-                team=data.get("team", ""),
-                task_benchmark=task_benchmark
-            )
+                # Create the task entry in the database
+                TrackerTasks.objects.create(
+                    title=title,  # Maps to TASKS (Excel Column B)
+                    projects=projects,  # Maps to SCOPE (Excel Column C)
+                    scope=scope,  # Maps to PARENT DELIVERABLE (Excel Column D)
+                    task_benchmark=task_benchmark,  # Maps to ESTIMATED TIME (Column F)
+                    
+                    # Use form data (defaults to empty if not provided)
+                    team=task_data.get("team", ""),
+                    list=task_data.get("list", ""),
+                    rev=task_data.get("rev_no", ""),
+                    d_no=task_data.get("d_no", ""),
+                    start=parse_date(task_data.get("start_date")) if task_data.get("start_date") else None,
+                    end=parse_date(task_data.get("end_date")) if task_data.get("end_date") else None,
+                    # Other fields can be left empty (null) as required
+                )
 
-            return JsonResponse({"message": "Task created successfully!", "task_id": task.id}, status=201)
+            return JsonResponse({"message": "Tasks created successfully!"}, status=201)
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON format"}, status=400)
         except Exception as e:
             import traceback
-            traceback.print_exc()
+            traceback.print_exc()  # Log full traceback for debugging
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
+# from django.http import JsonResponse
+# from django.views.decorators.csrf import csrf_exempt
+# import json
+# from datetime import datetime
+# from .models import ProjectTacker
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
-from datetime import datetime
-from .models import ProjectTacker
 
+# @csrf_exempt
+# def aproove_task(request):
+#     if request.method == "POST":
+#         try:
+#             # Parse JSON data
+#             data = json.loads(request.body)
 
-@csrf_exempt
-def aproove_task(request):
-    if request.method == "POST":
-        try:
-            # Parse JSON data
-            data = json.loads(request.body)
+#             # Debugging: Print received JSON data
+#             print("Received Data:", data)
 
-            # Debugging: Print received JSON data
-            print("Received Data:", data)
+#             # Validate approver_name
+#             approver_name = data.get("approver_name")
+#             if not approver_name or not isinstance(approver_name, str):
+#                 return JsonResponse(
+#                     {"error": "Invalid or missing approver_name."}, status=400
+#                 )
 
-            # Validate approver_name
-            approver_name = data.get("approver_name")
-            if not approver_name or not isinstance(approver_name, str):
-                return JsonResponse(
-                    {"error": "Invalid or missing approver_name."}, status=400
-                )
+#             # Validate required fields
+#             required_fields = ["title", "project"]
+#             missing_fields = [field for field in required_fields if not data.get(field)]
+#             if missing_fields:
+#                 return JsonResponse(
+#                     {"error": f'Missing required fields: {", ".join(missing_fields)}'},
+#                     status=400,
+#                 )
 
-            # Validate required fields
-            required_fields = ["title", "project"]
-            missing_fields = [field for field in required_fields if not data.get(field)]
-            if missing_fields:
-                return JsonResponse(
-                    {"error": f'Missing required fields: {", ".join(missing_fields)}'},
-                    status=400,
-                )
+#             # Extract task title
+#             task_title = data.get("title")
 
-            # Extract task title
-            task_title = data.get("title")
+#             # Validate and format dates
+#             start_date = data.get("start_date")
+#             end_date = data.get("end_date")
 
-            # Validate and format dates
-            start_date = data.get("start_date")
-            end_date = data.get("end_date")
+#             try:
+#                 if start_date:
+#                     start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+#                 if end_date:
+#                     end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+#             except ValueError:
+#                 return JsonResponse(
+#                     {"error": "Invalid date format. Use YYYY-MM-DD."}, status=400
+#                 )
 
-            try:
-                if start_date:
-                    start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
-                if end_date:
-                    end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
-            except ValueError:
-                return JsonResponse(
-                    {"error": "Invalid date format. Use YYYY-MM-DD."}, status=400
-                )
+#             # Convert dates to strings for JSON serialization
+#             task_details = {
+#                 "team": data.get("team"),
+#                 "task_title": task_title,
+#                 "project": data.get("project"),
+#                 "scope": data.get("scope"),
+#                 "priority": data.get("priority"),
+#                 "task_benchmark":data.get("task_benchmark"),
+#                 "assigned_to": data.get("assigned_to"),
+#                 "checker": data.get("checker"),
+#                 "qc_3_checker": data.get("qc_3_checker"),
+#                 "category": data.get("category"),
+#                 "start_date": start_date.strftime("%Y-%m-%d") if start_date else None,
+#                 "end_date": end_date.strftime("%Y-%m-%d") if end_date else None,
+#                 "verification_status": data.get("verification_status"),
+#                 "task_status": data.get("task_status"),
+#                 "rev_no": data.get("rev_no"),
+#                 "d_no": data.get("d_no"),
+#             }
 
-            # Convert dates to strings for JSON serialization
-            task_details = {
-                "team": data.get("team"),
-                "task_title": task_title,
-                "project": data.get("project"),
-                "scope": data.get("scope"),
-                "priority": data.get("priority"),
-                "task_benchmark":data.get("task_benchmark"),
-                "assigned_to": data.get("assigned_to"),
-                "checker": data.get("checker"),
-                "qc_3_checker": data.get("qc_3_checker"),
-                "category": data.get("category"),
-                "start_date": start_date.strftime("%Y-%m-%d") if start_date else None,
-                "end_date": end_date.strftime("%Y-%m-%d") if end_date else None,
-                "verification_status": data.get("verification_status"),
-                "task_status": data.get("task_status"),
-                "rev_no": data.get("rev_no"),
-                "d_no": data.get("d_no"),
-            }
+#             # Save task details to the database
+#             project_tacker_entry = ProjectTacker.objects.create(
+#                 name=approver_name,
+#                 to_aproove=task_details,
+#                 status="Pending",
+#                 sender_name=global_user_data,
+#             )
 
-            # Save task details to the database
-            project_tacker_entry = ProjectTacker.objects.create(
-                name=approver_name,
-                to_aproove=task_details,
-                status="Pending",
-                sender_name=global_user_data,
-            )
+#             return JsonResponse(
+#                 {
+#                     "message": "Task created successfully!",
+#                     "project_tacker_id": project_tacker_entry.id,
+#                 },
+#                 status=201,
+#             )
 
-            return JsonResponse(
-                {
-                    "message": "Task created successfully!",
-                    "project_tacker_id": project_tacker_entry.id,
-                },
-                status=201,
-            )
+#         except json.JSONDecodeError:
+#             return JsonResponse({"error": "Invalid JSON data"}, status=400)
+#         except Exception as e:
+#             # Log the error for debugging purposes
+#             print("Error:", str(e))
+#             return JsonResponse(
+#                 {"error": f"Internal server error: {str(e)}"}, status=500
+#             )
 
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON data"}, status=400)
-        except Exception as e:
-            # Log the error for debugging purposes
-            print("Error:", str(e))
-            return JsonResponse(
-                {"error": f"Internal server error: {str(e)}"}, status=500
-            )
-
-    return JsonResponse({"error": "Invalid HTTP method"}, status=405)
+#     return JsonResponse({"error": "Invalid HTTP method"}, status=405)
 
 
 
@@ -622,6 +625,12 @@ def get_task_by_title_project_scope(request):
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
 
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.db import transaction
+from .models import TrackerTasks
+import json
+
 @csrf_exempt
 def submit_timesheet(request):
     if request.method == "POST":
@@ -634,116 +643,81 @@ def submit_timesheet(request):
             task = data.get("task", "")
             phase = data.get("phase", "")
             date1 = data.get("date1", "")
-            time = data.get("time", 0)
+            time = float(data.get("time") or 0)
             comments = data.get("comments", "")
 
             assigned = global_user_data.get("name", "Unassigned")
 
-            select_query = """
-                SELECT * FROM tracker_project 
-                WHERE `list` = %s AND projects = %s AND scope = %s 
-                AND title = %s AND category = %s 
-                ORDER BY id DESC LIMIT 1
-            """
-            with connection.cursor() as cursor:
-                cursor.execute(select_query, [department, project_type, scope, task, phase])
-                result = cursor.fetchone()
-                columns = [col[0] for col in cursor.description]
+            # Try to get an existing task
+            existing_task = TrackerTasks.objects.filter(
+                list=department,
+                projects=project_type,
+                scope=scope,
+                title=task,
+                category=phase
+            ).order_by('-id').first()
 
-            if result:
-                existing_row = dict(zip(columns, result))
-                team_value = existing_row.get("team", "")
-
-                if existing_row["date1"] is None:
-                    update_query = """
-                        UPDATE tracker_project 
-                        SET date1 = %s, time = %s, comments = %s, assigned = %s, team = %s 
-                        WHERE id = %s
-                    """
-                    with connection.cursor() as cursor:
-                        cursor.execute(
-                            update_query,
-                            [date1, time, comments, assigned, team_value, existing_row["id"]],
-                        )
+            if existing_task:
+                if existing_task.date1 is None:
+                    # Update the existing task
+                    existing_task.date1 = date1
+                    existing_task.time = time
+                    existing_task.comments = comments
+                    existing_task.assigned = assigned
+                    existing_task.team = existing_task.team or ""  # retain existing or set default
+                    existing_task.save()
                     return JsonResponse(
                         {"message": "Timesheet entry updated successfully (existing row)."},
-                        status=200,
+                        status=200
                     )
-
                 else:
-                    insert_query = """
-                        INSERT INTO tracker_project (title, `list`, projects, scope, category, date1, time, comments, 
-                                                     priority, checker, qc3_checker, `group`, start, end, 
-                                                     verification_status, assigned, d_no, rev, team) 
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    """
+                    # Create a new entry with copied fields
                     with transaction.atomic():
-                        with connection.cursor() as cursor:
-                            cursor.execute(
-                                insert_query,
-                                [
-                                    existing_row["title"],
-                                    existing_row["list"],
-                                    existing_row["projects"],
-                                    existing_row["scope"],
-                                    existing_row["category"],
-                                    date1,
-                                    time,
-                                    comments,
-                                    existing_row["priority"],
-                                    existing_row["checker"],
-                                    existing_row["qc3_checker"],
-                                    existing_row["group"],
-                                    existing_row["start"],
-                                    existing_row["end"],
-                                    existing_row["verification_status"],
-                                    assigned,
-                                    existing_row["d_no"],
-                                    existing_row["rev"],
-                                    team_value,
-                                ],
-                            )
-                    return JsonResponse(
-                        {"message": "New timesheet entry created successfully (with copied values)."},
-                        status=201,
-                    )
-
-            else:
-                insert_query = """
-                    INSERT INTO tracker_project (title, `list`, projects, scope, category, date1, time, comments, 
-                                                 priority, checker, qc3_checker, `group`, start, end, 
-                                                 verification_status, assigned, d_no, rev, team) 
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """
-                with transaction.atomic():
-                    with connection.cursor() as cursor:
-                        cursor.execute(
-                            insert_query,
-                            [
-                                task,
-                                department,
-                                project_type,
-                                scope,
-                                phase,
-                                date1,
-                                time,
-                                comments,
-                                "",
-                                "Unassigned",
-                                "",
-                                "",
-                                "",
-                                "",
-                                False,
-                                assigned,
-                                0,
-                                "0.0",
-                                "",  # Default/empty team for new insert
-                            ],
+                        TrackerTasks.objects.create(
+                            title=existing_task.title,
+                            list=existing_task.list,
+                            projects=existing_task.projects,
+                            scope=existing_task.scope,
+                            category=existing_task.category,
+                            date1=date1,
+                            time=time,
+                            comments=comments,
+                            priority=existing_task.priority,
+                            checker=existing_task.checker,
+                            qc3_checker=existing_task.qc3_checker,
+                            group=existing_task.group,
+                            start=existing_task.start,
+                            end=existing_task.end,
+                            verification_status=existing_task.verification_status,
+                            assigned=assigned,
+                            d_no=existing_task.d_no,
+                            rev=existing_task.rev,
+                            team=existing_task.team,
+                            task_benchmark=existing_task.task_benchmark  # updated with passed benchmark
                         )
+                    return JsonResponse(
+                        {"message": "Timesheet created successfully."},
+                        status=201
+                    )
+            else:
+                # Create a completely new row
+                with transaction.atomic():
+                    TrackerTasks.objects.create(
+                        title=task,
+                        list=department,
+                        projects=project_type,
+                        scope=scope,
+                        category=phase,
+                        date1=date1,
+                        time=time,
+                        comments=comments,
+                        assigned=assigned,
+                        team=data.get("team", ""),  # Set team if passed
+                        task_benchmark=data.get("task_benchmark", ""),  # Set benchmark
+                    )
                 return JsonResponse(
                     {"message": "New timesheet entry created successfully."},
-                    status=201,
+                    status=201
                 )
 
         except json.JSONDecodeError:
@@ -1610,76 +1584,78 @@ def get_task_details(request):
 
 import json
 from django.http import JsonResponse
-from django.db import connection, transaction
 from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction
+from .models import TrackerTasks
 
-@csrf_exempt  # Remove in production
+@csrf_exempt
 def update_timesheet(request):
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
 
     try:
-        # Parse JSON request body
         data = json.loads(request.body.decode("utf-8"))
 
-        # Extract fields from JSON
         task_id = data.get("task_id")
-        list_value = data.get("list", "").strip()  # Avoid conflict with Python keyword
+        list_value = data.get("list", "").strip()
         projects = data.get("projects", "").strip()
         scope = data.get("scope", "").strip()
         title = data.get("title", "").strip()
-        category = data.get("category", "").strip()  # "Phase" is mapped to category
+        category = data.get("category", "").strip()
         task_status = data.get("task_status", "").strip()
         date1 = data.get("date1", "").strip()
-        time = data.get("time", 0)
         comments = data.get("comments", "").strip()
 
-        # Debugging: Log received data
-        print("Received Data:", data)
+        try:
+            time = float(data.get("time", 0))
+        except ValueError:
+            return JsonResponse({"error": "Invalid value for 'time'. It must be a number."}, status=400)
 
-        # Ensure task_id is provided
         if not task_id:
             return JsonResponse({"error": "task_id parameter is required"}, status=400)
 
-        # Validate date1 - If empty, set it to NULL
-        if not date1:
-            date1 = None
-
-        # Ensure 'time' is a valid number (default to 0 if invalid)
+        # ✅ Retrieve the task being updated
         try:
-            time = int(time)
-        except ValueError:
-            return JsonResponse({"error": "Invalid value for 'time'. It must be an integer."}, status=400)
+            task = TrackerTasks.objects.get(id=task_id)
+        except TrackerTasks.DoesNotExist:
+            return JsonResponse({"error": "Task not found"}, status=404)
 
-        # Ensure task exists
-        select_query = "SELECT id FROM tracker_project WHERE id = %s"
-        with connection.cursor() as cursor:
-            cursor.execute(select_query, [task_id])
-            if not cursor.fetchone():
-                return JsonResponse({"error": "Task not found"}, status=404)
+        # ✅ Search for an existing task to fetch team and benchmark
+        reference_task = TrackerTasks.objects.filter(
+            list=list_value,
+            projects=projects,
+            scope=scope,
+            title=title,
+            category=category
+        ).exclude(id=task_id).order_by('-id').first()
 
-        # Update task details
-        update_query = """
-            UPDATE tracker_project 
-            SET list = %s, projects = %s, scope = %s, title = %s, category = %s, 
-                date1 = %s, time = %s, comments = %s, task_status = %s
-            WHERE id = %s
-        """
+        # Fallbacks if no matching task found
+        team_value = reference_task.team if reference_task else ""
+        benchmark_value = reference_task.task_benchmark if reference_task else 0
+
+        # ✅ Update fields
+        task.list = list_value
+        task.projects = projects
+        task.scope = scope
+        task.title = title
+        task.category = category
+        task.task_status = task_status
+        task.date1 = date1 if date1 else None
+        task.time = time
+        task.comments = comments
+        task.team = team_value
+        task.task_benchmark = benchmark_value
+
         with transaction.atomic():
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    update_query,
-                    [list_value, projects, scope, title, category, date1, time, comments, task_status, task_id],
-                )
+            task.save()
 
         return JsonResponse({"message": "Timesheet updated successfully."}, status=200)
 
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON format"}, status=400)
     except Exception as e:
-        print("Error:", str(e))  # Debugging
+        print("Error:", str(e))
         return JsonResponse({"error": str(e)}, status=500)
-
 
 
 def delete_task(request):

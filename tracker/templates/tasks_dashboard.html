@@ -9,15 +9,11 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
-<style>
-
-</style>
-
 <body>
  
     <div class="main-container">
@@ -60,27 +56,26 @@
                 <img src="{% static 'images/leavepage.png' %}" alt="Leave Tracker Icon"> LEAVE TRACKER
 
             </a>
-            <a class="sidebar_link" id="notifications" 
+            <a class="sidebar-link" id="notifications" 
                 href="{% url 'notifications_page' %}"
                 data-default-img="{% static 'images/leavepage.png' %}" 
                 data-active-img="{% static 'images/leavepage1.png' %}">
                 <img src="{% static 'images/leavepage.png' %}" alt="notifications Icon"> NOTIFICATIONS
             </a>
 
-            <a class="sidebar_link" id="project-button" 
+            <a class="sidebar-link" id="project-button" 
             href="{% url 'project_tracker' %}" 
             data-default-img="{% static 'images/leavepage.png' %}" 
             data-active-img="{% static 'images/leavepage1.png' %}">
-                <img src="{% static 'images/leavepage.png' %}" alt="Project Tracker Icon"> 
-                PROJECT TRACKER
-
-                {% if pending_count > 0 %}
-                    <div class="notification-bubble">
-                        {{ pending_count }}
-                        <div class="bubble-pointer"></div>
-                    </div>
-                {% endif %}
+                <img src="{% static 'images/leavepage.png' %}" alt="Project Tracker Icon"> PROJECT TRACKER   
             </a>
+            {% if pending_count > 0 %}
+                <div class="notification-bubble">
+                    {{ pending_count }}
+                    <div class="bubble-pointer"></div>
+                </div>
+            {% endif %}
+
             <a class="sidebar-link" id="team-button" href="{% url 'team_dashboard' %}"
                 data-default-img="{% static 'images/leavepage.png' %}" 
                 data-active-img="{% static 'images/leavepage1.png' %}">
@@ -658,92 +653,30 @@
 <!-- Popup Modal -->
  <div id="taskModalPopup" class="popup-modal">
         <h2>Create Task</h2>
-         <span class="close-btn4" id="closePopupButton">&times;</span>
+        <span class="close-btn4" id="closePopupButton">&times;</span>
         <form id="createTaskForm">
-            <div class="form-group">
+            <!-- <div class="form-group">
                 <label for="teamcreatetask">Team:</label>
                 <select id="teamcreatetask" name="team">
                     <option value="">Select</option> 
                 </select>
                 <span id="lockTeamBtn" class="lock-toggle">🔒 Lock</span>
-            </div>
-            <div class="form-group">
-                <label for="taskTitlecreatetask">Title:</label>
-                <input type="text" id="taskTitlecreatetask" placeholder="Enter task title">
-            </div>
-            <div class="form-group">
-                <label for="id_listcreatetask">DEPARTMENT:</label>
-                <select id="id_listcreatetask">
-                    <option value="">Select List</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="id_projectcreatetask">Project:</label>
-                <select id="id_projectcreatetask">
-                    <option value="">Select Project</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="id_scopecreatetask">Scope:</label>
-                <select id="id_scopecreatetask">
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="id_categorycreatetask">Category:</label>
-                <select id="id_categorycreatetask">
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="id_revnocreatetask">REV NO</label>
-                <input type="text" id="id_revnocreatetask" placeholder="Enter task rev no">
-            </div>
-            <div class="form-group">
-                <label for="id_dnocreatetask">D NO</label>
-                <input type="text" id="id_dnocreatetask" placeholder="Enter task d no">
-            </div>
-            <div class="form-group">
-                <label for="id_prioritycreatetask">Priority:</label>
-                <select id="id_prioritycreatetask">
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="benchmarkcreatetask">Benchmark:</label>
-                <input type="text" id="benchmarkcreatetask" placeholder="Enter task benchmark">
-            </div>
-            <div class="form-group">
-                <label for="assignedTocreatetask">Assigned To:</label>
-                <input type="text" id="assignedTocreatetask" placeholder="Enter task Assigned">
-            </div>
-            <div class="form-group">
-                <label for="checkercreatetask">Checker:</label>
-                <input type="text" id="checkercreatetask" placeholder="Enter task Checker">
-            </div>
-            <div class="form-group">
-                <label for="qcCheckercreatetask">QC-3 Checker:</label>
-                <input type="text" id="qcCheckercreatetask" placeholder="Enter task QC-3 Checker">
-            </div>
-            <!-- <div class="form-group">
-                <label for="groupcreatetask">Group:</label>
-                <input type="text" id="groupcreatetask" placeholder="Enter task Group">
             </div> -->
             
             <div class="form-group">
-                <label for="startDatecreatetask">Start Date:</label>
-                <input type="date" id="startDatecreatetask">
-            </div>
-            <div class="form-group">
-                <label for="endDatecreatetask">End Date:</label>
-                <input type="date" id="endDatecreatetask">
-            </div>
-            <div class="form-group">
-                <label for="id_verification_statuscreatetask">ISO Verification Status:</label>
-                <select id="id_verification_statuscreatetask">
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="id_task_statuscreatetask">Task Status:</label>
-                <select id="id_task_statuscreatetask">
-                </select>
+                    <label>Upload Excel File:</label>
+                    <input type="file" id="fileInput" accept=".xlsx, .xls, .csv">
+                </div>
+                <div id="excelDataTable">
+                <table id="dataTable" border="1">
+                    <!-- Table headers will be dynamically populated -->
+                    <thead>
+                        <tr></tr>
+                    </thead>
+                    <tbody>
+                        <!-- Table rows will be dynamically populated -->
+                    </tbody>
+                </table>
             </div>
         </form>
         <div class="form-group">

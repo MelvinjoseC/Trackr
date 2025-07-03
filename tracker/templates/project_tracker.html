@@ -46,7 +46,7 @@
 
             </a>
             {% if is_admin_or_md %}
-            <a class="sidebar_link" id="project-button" 
+            <a class="sidebar-link" id="project-button" 
             href="{% url 'project_tracker' %}" 
             data-default-img="{% static 'images/leavepage.png' %}" 
             data-active-img="{% static 'images/leavepage1.png' %}">
@@ -63,7 +63,7 @@
 
 
             {% else %}
-            <a class="sidebar_link" id="notifications" 
+            <a class="sidebar-link" id="notifications" 
                 href="{% url 'notifications_page' %}"
                 data-default-img="{% static 'images/leavepage.png' %}" 
                 data-active-img="{% static 'images/leavepage1.png' %}">
@@ -157,9 +157,11 @@
 
                     <label for="project_status">Project Status:</label>
                     <select name="project_status" id="project_status">
-                        <option value="Completed">Completed</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Paused">Paused</option>
+                        <option value="Select">Select Status</option>
+                        <option value="Audit Pending">AUDIT PENDING</option>
+                        <option value="Completed">CLOSED</option>
+                        <option value="In Progress">IN PROGRESS</option>
+                        <option value="Paused">PAUSED</option>
                     </select>
 
                     <button type="submit" id="submit_button1">Update Status</button>

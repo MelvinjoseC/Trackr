@@ -887,14 +887,14 @@ document.addEventListener("DOMContentLoaded", () => {
             // Show/hide buttons based on admin or MD status
             if (isAdminOrMd) {
                 document.getElementById('savetask_creatask').style.display = 'block';
-                document.getElementById('project-button').style.display = 'block';
+                document.getElementById('project-button').style.display = 'flex';
                 document.getElementById('aproover_creattask').style.display = 'none';
                 document.getElementById('notifications').style.display = 'none';
             } else {
                 document.getElementById('savetask_creatask').style.display = 'none';
-                document.getElementById('aproover_creattask').style.display = 'block';
+                document.getElementById('aproover_creattask').style.display = 'flex';
                 document.getElementById('project-button').style.display = 'none';
-                document.getElementById('notifications').style.display = 'block';
+                document.getElementById('notifications').style.display = 'flex';
             }
 
             if (data.tasks && data.tasks.length > 0) {
@@ -983,114 +983,108 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // Create reusable modal for creating and editing tasks
-
 document.getElementById("savetask_creatask").addEventListener("click", function (e) {
     e.preventDefault(); // Prevent form submission
 
-    const benchmark = document.getElementById("benchmarkcreatetask").value;
-
+    // Get the task form data
     const taskData = {
-        team: document.getElementById("teamcreatetask").value,
-        title: document.getElementById("taskTitlecreatetask").value,
-        list: document.getElementById("id_listcreatetask").value,
-        project: document.getElementById("id_projectcreatetask").value,
-        scope: document.getElementById("id_scopecreatetask").value,
-        priority: document.getElementById("id_prioritycreatetask").value,
-        task_benchmark: benchmark,
-        assigned_to: document.getElementById("assignedTocreatetask").value,
-        checker: document.getElementById("checkercreatetask").value,
-        qc_3_checker: document.getElementById("qcCheckercreatetask").value,
-        category: document.getElementById("id_categorycreatetask").value,
-        start_date: document.getElementById("startDatecreatetask").value,
-        end_date: document.getElementById("endDatecreatetask").value,
-        verification_status: document.getElementById("id_verification_statuscreatetask").value,
-        task_status: document.getElementById("id_task_statuscreatetask").value,
-        rev_no: document.getElementById("id_revnocreatetask").value,
-        d_no: document.getElementById("id_dnocreatetask").value,
+        team: document.getElementById("teamcreatetask") ? document.getElementById("teamcreatetask").value : "",
+        list: document.getElementById("id_listcreatetask") ? document.getElementById("id_listcreatetask").value : "",
+        project: document.getElementById("id_projectcreatetask") ? document.getElementById("id_projectcreatetask").value : "",
+        rev_no: document.getElementById("id_revnocreatetask") ? document.getElementById("id_revnocreatetask").value : "",
+        d_no: document.getElementById("id_dnocreatetask") ? document.getElementById("id_dnocreatetask").value : "",
+        task_benchmark: document.getElementById("benchmarkcreatetask") ? document.getElementById("benchmarkcreatetask").value : "",  // Correct field name
+        start_date: document.getElementById("startDatecreatetask") ? document.getElementById("startDatecreatetask").value : "",
+        end_date: document.getElementById("endDatecreatetask") ? document.getElementById("endDatecreatetask").value : "",
     };
 
-if (!benchmark) {
-    const editUrl = `http://127.0.0.1:8000/task_dashboard/?edit=true&title=${encodeURIComponent(taskData.title)}&project=${encodeURIComponent(taskData.project)}&scope=${encodeURIComponent(taskData.scope)}`;
+    const fileInput = document.getElementById("fileInput");
+    const file = fileInput ? fileInput.files[0] : null; // Get the file selected by the user
 
-    const message = `
-⚠️ *Missing Benchmark Alert* ⚠️
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const data = e.target.result;
+            const workbook = XLSX.read(data, { type: 'binary' });
 
+            // Get the first sheet of the Excel file
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-A task was created without a benchmark value. Please review the following details:
+            // Convert the sheet to JSON format
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-• Title: ${taskData.title}
-• Project: ${taskData.project}
-• Scope: ${taskData.scope}
-• Assigned To: ${taskData.assigned_to}
-• Checker: ${taskData.checker}
-• QC 3 Checker: ${taskData.qc_3_checker}
-• Priority: ${taskData.priority}
-• Category: ${taskData.category}
-• Status: ${taskData.task_status}
-• Verification Status: ${taskData.verification_status}
-• Start Date: ${taskData.start_date}
-• End Date: ${taskData.end_date}
-• Rev No: ${taskData.rev_no}
-• D No: ${taskData.d_no}
-• Team: ${taskData.team}
+            // Extract relevant columns from the Excel file starting from line 41 (index 40)
+            const excelData = [];
+            for (let index = 40; index < jsonData.length; index++) {  // Start from line 41 (index 40)
+                const row = jsonData[index];
 
-🚨 This task requires a benchmark to be defined.
+                // If the row is empty (all columns are empty), stop the loop
+                if (row.every(cell => cell === "" || cell === null)) {
+                    break;  // Stop if the row is empty
+                }
 
-🔧 [Click here to Edit Task](${editUrl})
-    `.trim();
+                // Only include rows with valid data
+                excelData.push({
+                    title: row[1],  // Column B: TASKS (mapped to 'title')
+                    projects: row[2],  // Column C: SCOPE (mapped to 'projects')
+                    scope: row[3],  // Column D: PARENT DELIVERABLE (mapped to 'scope')
+                    task_benchmark: row[5]  // Column F: ESTIMATED TIME (mapped to 'task_benchmark')
+                });
+            }
 
-    sendAdminNotification(message);
-}
+            // Send the data to the backend (form data + excel data)
+            fetch("/api/create-task/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ taskData: taskData, tasks: excelData })
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log("Task Created:", data);
+                alert("Task created successfully!");
+            })
+            .catch((error) => {
+                console.error("Error creating task:", error);
+                alert("Error creating task. Check console for details.");
+            });
+        };
 
-
-    // Continue with task creation regardless
-    fetch("/api/create-task/", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(taskData),
-    })
-        .then((response) => {
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-            return response.json();
-        })
-        .then((data) => {
-            console.log("Task Created:", data);
-            alert("Task created successfully!");
-        })
-        .catch((error) => {
-            console.error("Error creating task:", error);
-            alert("Error creating task. Check console for details.");
-        });
+        reader.readAsBinaryString(file);
+    } else {
+        console.error("No file selected!");
+        alert("Please select a file to upload.");
+    }
 });
 
-// Updated Notification Function
-function sendAdminNotification(message) {
-    const adminData = {
-        message: message,
-        recipient: "varshith@fusie-engineers.com",
-    };
 
-    fetch("/api/send-notification/", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken"),
-        },
-        body: JSON.stringify(adminData),
-    })
-        .then((response) => {
-            if (!response.ok) throw new Error("Error sending notification to admin.");
-            return response.json();
-        })
-        .then((data) => {
-            console.log("Admin notification sent:", data);
-        })
-        .catch((error) => {
-            console.error("Error sending notification:", error);
-        });
-}
+// Updated Notification Function
+// function sendAdminNotification(message) {
+//     const adminData = {
+//         message: message,
+//         recipient: "varshith@fusie-engineers.com",
+//     };
+
+//     fetch("/api/send-notification/", {
+//         method: "POST",
+//         headers: {
+//             "Content-Type": "application/json",
+//             "X-CSRFToken": getCookie("csrftoken"),
+//         },
+//         body: JSON.stringify(adminData),
+//     })
+//         .then((response) => {
+//             if (!response.ok) throw new Error("Error sending notification to admin.");
+//             return response.json();
+//         })
+//         .then((data) => {
+//             console.log("Admin notification sent:", data);
+//         })
+//         .catch((error) => {
+//             console.error("Error sending notification:", error);
+//         });
+// }
 
 
 // Handle "Save" button for updating a task
@@ -1504,9 +1498,9 @@ document.addEventListener("DOMContentLoaded", function () {
                    </div>
 
                    <div class="form-group">
-                       <label for="timeforupdatetimesheet">Hours:</label>
-                       <input type="number" id="timeforupdatetimesheet" name="time1" required>
-                   </div>
+                        <label for="timeforupdatetimesheet">Hours:</label>
+                        <input type="number" id="timeforupdatetimesheet" name="time1" step="any" min="0" max="23" required>
+                    </div>
 
                    <div class="form-group">
                        <label for="commentsforupdatetimesheet">Comments:</label>
@@ -1549,15 +1543,49 @@ function openUpdateTimesheetModal(taskId) {
             console.log("Dropdown Data:", data.dropdowns);
             dropdownData = data.dropdowns;
 
-            document.getElementById("task_id").value = data.task.id;
-            populateDropdown1("listforupdatetimesheet", dropdownData.list, data.task.list);
-            filterProjects(); // Start filtering chain
+            const task = data.task;
+
+            // Set hidden field
+            document.getElementById("task_id").value = task.id;
+
+            // Set simple input fields
+            document.getElementById("dateforupdatetimesheet").value = task.date1 || "";
+            document.getElementById("timeforupdatetimesheet").value = task.time || "";
+            document.getElementById("task_statusforupdatetimesheet").value = task.task_status || "";
+            document.getElementById("commentsforupdatetimesheet").value = task.comments || "";
+
+            // Populate dropdowns (cascade and select existing values)
+            populateDropdown1("listforupdatetimesheet", dropdownData.list, task.list);
+
+            // Set up delay to allow dropdown filtering to complete
+            setTimeout(() => {
+                populateDropdown1("projectsforupdatetimesheet", 
+                    dropdownData.projects.filter(p => p.list === task.list).map(p => p.name),
+                    task.projects
+                );
+
+                populateDropdown1("scopeforupdatetimesheet", 
+                    dropdownData.scope.filter(s => s.project === task.projects).map(s => s.name),
+                    task.scope
+                );
+
+                populateDropdown1("titleforupdatetimesheet", 
+                    dropdownData.titles.filter(t => t.scope === task.scope).map(t => t.name),
+                    task.title
+                );
+
+                populateDropdown1("categoryforupdatetimesheet", 
+                    dropdownData.category.filter(c => c.task === task.title).map(c => c.name),
+                    task.category
+                );
+            }, 100); // Delay to allow filters to cascade
         })
         .catch(error => {
             console.error("Error fetching task details:", error);
             alert("Failed to fetch task details. Please check the backend.");
         });
 }
+
 
 function populateDropdown1(selectId, options, selectedValue) {
     const selectElement = document.getElementById(selectId);
@@ -1778,4 +1806,72 @@ function getCookies(name) {
     }
 
     return "";
+}
+
+document.getElementById("fileInput").addEventListener("change", function(event) {
+    const file = event.target.files[0];
+    
+    if (file) {
+        // Create a FileReader to read the Excel file
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const data = e.target.result;
+            const workbook = XLSX.read(data, { type: 'binary' });
+
+            // Get the first sheet of the Excel file
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+            // Convert the sheet to JSON format
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+            // Call the function to populate the table with row 40 data and onwards
+            populateTable(jsonData);
+        };
+
+        reader.readAsBinaryString(file);
+    }
+});
+
+function populateTable(data) {
+    // Show the table and clear any previous data
+    const table = document.getElementById("dataTable");
+    const tableHeader = table.querySelector("thead tr");
+    const tableBody = table.querySelector("tbody");
+
+    // Clear existing data
+    tableHeader.innerHTML = "";
+    tableBody.innerHTML = "";
+
+    // Populate the table header (for the relevant columns B, D, F)
+    const headers = ['TASKS', 'PROJECT', 'PARENT DELIVERABLE', 'ESTIMATED TIME (Hrs)'];
+    headers.forEach(header => {
+        const th = document.createElement("th");
+        th.textContent = header;
+        tableHeader.appendChild(th);
+    });
+
+    // Loop through rows starting from row 40 (index 39 in 0-indexed array)
+    for (let i = 40; i < data.length; i++) {
+        const row = data[i];
+
+        // Ensure the row has enough columns (check if it has at least 6 columns)
+        if (row.length >= 6) {
+            const tr = document.createElement("tr");
+
+            // Only add columns B, D, F (index 1, 3, 5) to the table
+            const relevantColumns = [row[1], row[2], row[3], row[5]]; // Column B (index 1), D (index 3), F (index 5)
+
+            relevantColumns.forEach(cellData => {
+                const td = document.createElement("td");
+                td.textContent = cellData || ''; // Handle empty cells gracefully
+                tr.appendChild(td);
+            });
+
+            tableBody.appendChild(tr);
+        }
+    }
+
+    // Show the table after populating it
+    document.getElementById("excelDataTable").style.display = "block";
 }

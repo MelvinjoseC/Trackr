@@ -15,9 +15,9 @@ class ProjectTacker(models.Model):
 class TrackerTasks(models.Model):
     id = models.AutoField(primary_key=True)
     d_no = models.CharField(null=True, blank=True, max_length=50)
-    title = models.CharField(max_length=255)
-    projects = models.CharField(max_length=255)
-    scope = models.TextField(null=True, blank=True)
+    title = models.CharField(max_length=255)  # Maps to TASKS (Column B)
+    projects = models.CharField(max_length=255)  # Maps to SCOPE (Column D)
+    scope = models.TextField(null=True, blank=True)  # Maps to PARENT DELIVERABLE (Column E)
     rev = models.CharField(max_length=50, null=True, blank=True)
     task_status = models.CharField(max_length=50, null=True, blank=True)
     category = models.CharField(max_length=100, null=True, blank=True)
@@ -38,16 +38,8 @@ class TrackerTasks(models.Model):
     qc3 = models.CharField(max_length=50, null=True, blank=True)
     verification_status = models.CharField(max_length=50, null=True, blank=True)
     phase_1_benchmark = models.CharField(max_length=50, null=True, blank=True)
-    phase_2_benchmark = models.CharField(max_length=50, null=True, blank=True)
-    phase_3_benchmark = models.CharField(max_length=50, null=True, blank=True)
-    phase_4_benchmark = models.CharField(max_length=50, null=True, blank=True)
-    phase_5_benchmark = models.CharField(max_length=50, null=True, blank=True)
-    phase_6_benchmark = models.CharField(max_length=50, null=True, blank=True)
-    phase_7_benchmark = models.CharField(max_length=50, null=True, blank=True)
-    phase_8_benchmark = models.CharField(max_length=50, null=True, blank=True)
-    phase_9_benchmark = models.CharField(max_length=50, null=True, blank=True)
-    phase_10_benchmark = models.CharField(max_length=50, null=True, blank=True)
-    task_benchmark = models.FloatField(null=True, blank=True)
+    # Add other phase benchmarks if needed
+    task_benchmark = models.FloatField(null=True, blank=True)  # Maps to ESTIMATED TIME (Column F)
     mail_no = models.CharField(max_length=50, null=True, blank=True)
     ref_no = models.CharField(max_length=50, null=True, blank=True)
     list = models.CharField(max_length=50, null=True, blank=True)
@@ -56,6 +48,7 @@ class TrackerTasks(models.Model):
     comments = models.CharField(max_length=1000, null=True, blank=True)
     project_status = models.CharField(max_length=50, null=True, blank=True)
     team = models.CharField(max_length=50, null=True, blank=True)
+    
     class Meta:
         db_table = 'tracker_project'  # Custom table name
 
