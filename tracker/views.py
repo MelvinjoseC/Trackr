@@ -635,8 +635,10 @@ import json
 def submit_timesheet(request):
     if request.method == "POST":
         try:
+            # Parse the JSON body of the request
             data = json.loads(request.body.decode("utf-8"))
 
+            # Extract fields from the request
             department = data.get("list", "")
             project_type = data.get("project_type", "")
             scope = data.get("scope", "")
@@ -645,10 +647,17 @@ def submit_timesheet(request):
             date1 = data.get("date1", "")
             time = float(data.get("time") or 0)
             comments = data.get("comments", "")
+            team = data.get("team", "")
+            task_benchmark = data.get("task_benchmark", "")
 
+            # Assign default value for "assigned" user (you should adjust this based on actual data)
             assigned = global_user_data.get("name", "Unassigned")
 
-            # Try to get an existing task
+            # Check if essential fields are provided
+            if not all([department, project_type, scope, task, phase, date1]):
+                return JsonResponse({"error": "Missing required fields."}, status=400)
+
+            # Try to get an existing task matching the criteria
             existing_task = TrackerTasks.objects.filter(
                 list=department,
                 projects=project_type,
@@ -658,20 +667,21 @@ def submit_timesheet(request):
             ).order_by('-id').first()
 
             if existing_task:
+                # If the existing task has no date1, update it
                 if existing_task.date1 is None:
                     # Update the existing task
                     existing_task.date1 = date1
                     existing_task.time = time
                     existing_task.comments = comments
                     existing_task.assigned = assigned
-                    existing_task.team = existing_task.team or ""  # retain existing or set default
+                    existing_task.team = existing_task.team or ""  # Keep existing team or set default
                     existing_task.save()
                     return JsonResponse(
                         {"message": "Timesheet entry updated successfully (existing row)."},
                         status=200
                     )
                 else:
-                    # Create a new entry with copied fields
+                    # If the existing task has a date1, create a new entry based on the existing task
                     with transaction.atomic():
                         TrackerTasks.objects.create(
                             title=existing_task.title,
@@ -693,14 +703,14 @@ def submit_timesheet(request):
                             d_no=existing_task.d_no,
                             rev=existing_task.rev,
                             team=existing_task.team,
-                            task_benchmark=existing_task.task_benchmark  # updated with passed benchmark
+                            task_benchmark=task_benchmark  # Optionally update task benchmark
                         )
                     return JsonResponse(
-                        {"message": "Timesheet created successfully."},
+                        {"message": "Timesheet created successfully based on existing task."},
                         status=201
                     )
             else:
-                # Create a completely new row
+                # If no matching task found, create a new task
                 with transaction.atomic():
                     TrackerTasks.objects.create(
                         title=task,
@@ -712,8 +722,8 @@ def submit_timesheet(request):
                         time=time,
                         comments=comments,
                         assigned=assigned,
-                        team=data.get("team", ""),  # Set team if passed
-                        task_benchmark=data.get("task_benchmark", ""),  # Set benchmark
+                        team=team,  # If team is passed, set it
+                        task_benchmark=task_benchmark  # Set the benchmark if provided
                     )
                 return JsonResponse(
                     {"message": "New timesheet entry created successfully."},
@@ -721,11 +731,74 @@ def submit_timesheet(request):
                 )
 
         except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON format"}, status=400)
+            return JsonResponse({"error": "Invalid JSON format."}, status=400)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 
-    return JsonResponse({"error": "Invalid request method"}, status=405)
+    return JsonResponse({"error": "Invalid request method."}, status=405)
+
+from django.http import JsonResponse
+from .models import TrackerTasks
+from django.views.decorators.csrf import csrf_exempt
+import json
+from datetime import datetime
+
+# View to fetch timesheet data
+@csrf_exempt
+def get_hoursheet_data(request):
+    try:
+        tasks = TrackerTasks.objects.all().values(
+            'id', 'projects', 'scope', 'title', 'date1', 'time', 'total_hours'
+        )
+
+        # Process each task to determine the day of the week and assign time to that day
+        for task in tasks:
+            date1 = task.get('date1')
+            if date1:
+                weekday = datetime.strptime(str(date1), "%Y-%m-%d").weekday()
+                week_days = {'mon': 0, 'tue': 0, 'wed': 0, 'thur': 0, 'fri': 0, 'sat': 0, 'sun': 0}
+                
+                if weekday == 0: week_days['mon'] = task['time']
+                elif weekday == 1: week_days['tue'] = task['time']
+                elif weekday == 2: week_days['wed'] = task['time']
+                elif weekday == 3: week_days['thur'] = task['time']
+                elif weekday == 4: week_days['fri'] = task['time']
+                elif weekday == 5: week_days['sat'] = task['time']
+                elif weekday == 6: week_days['sun'] = task['time']
+
+                task.update(week_days)
+        
+        return JsonResponse({
+            "draw": int(request.GET.get('draw', 1)),
+            "recordsTotal": len(tasks),
+            "recordsFiltered": len(tasks),
+            "data": list(tasks)
+        })
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+# View to update timesheet data
+@csrf_exempt
+def update_timesheet_data(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        try:
+            task = TrackerTasks.objects.get(id=data['id'])
+            task.mon = data['mon']
+            task.tue = data['tue']
+            task.wed = data['wed']
+            task.thur = data['thur']
+            task.fri = data['fri']
+            task.sat = data['sat']
+            task.sun = data['sun']
+            task.total_hours = data['total_hours']
+            task.save()
+
+            return JsonResponse({'message': 'Timesheet updated successfully.'})
+        except TrackerTasks.DoesNotExist:
+            return JsonResponse({'error': 'Task not found.'}, status=400)
 
 
 from django.http import JsonResponse

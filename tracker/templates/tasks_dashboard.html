@@ -7,11 +7,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Tracker</title>
     {% load static %}
+        <!-- Include jQuery and DataTables CSS & JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script> 
+    <!-- Other libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Your custom styles -->
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
 </head>
 <body>
@@ -553,8 +563,8 @@
 
         <div class="popup-grid">
             <!-- Left Panel -->
-            <div class="left-panel">
-                <div class="form-group3">
+             <div class="left-panel">
+               <!-- <div class="form-group3">
                     <label>Select Date</label>
                     <input type="date" id="date1" required>
                 </div>
@@ -601,37 +611,48 @@
                 <div class="form-group3">
                     <label>Comments</label>
                     <input type="text" id="comments" required>
-                </div>
-
-                <!-- <div class="form-group3">
-                    <button type="button" onclick="submitTimesheet()">Submit Timesheet</button>
-                </div> -->
-            </div>
-
-
-<!-- Right Panel -->
-<div class="right-panel">
-    <div class="tab-buttons">
-        <button class="tab-button active" onclick="showTab('taskDetails')">Task Details</button>
-        <button class="tab-button" onclick="showTab('benchmark')">Benchmark</button>
-        <button class="tab-button" onclick="showTab('totalTime')">Total Time</button>
+                </div>-->
+<div class="container">
+    <div class="week-info">
+        <div>
+            <p>NAME: <span style="color: #f38f8f;">JOSE BABU MALIAKEL</span></p>
+            <p>WEEK START DATE: 09-06-2025</p>
+            <p>WEEK END DATE: 15-06-2025</p>
+        </div>
+        <div>
+            <h3>WEEK 24</h3>
+            <img class="logo" src="{% static 'images/logo.png' %}" alt="FUSIE Engineers Logo">
+        </div>
     </div>
 
-    <!-- Task Details -->
-    <div id="taskDetails" class="tab-content" style="display: block;">
-        <table class="task-table">
-            <tr><th>Title</th><td id="taskTitle">-</td></tr>
-            <tr><th>Project Type</th><td id="projectType">-</td></tr>
-            <tr><th>Scope</th><td id="taskScope">-</td></tr>
-            <tr><th>Category</th><td id="taskCategory">-</td></tr>
-            <tr><th>Priority</th><td id="taskPriority">-</td></tr>
-        </table>
+    <table id="hoursheet-table" class="hoursheet-table">
+        <thead>
+            <tr class="header-row">
+                <th>PROJECT <input type="text" id="filter-project" placeholder="Search Project"></th>
+                <th>PROJECT PART <input type="text" id="filter-task" placeholder="Search Task"></th>
+                <th>TASKS <input type="text" id="filter-tasks" placeholder="Search Tasks"></th>
+                <th>MON</th>
+                <th>TUE</th>
+                <th>WED</th>
+                <th>THUR</th>
+                <th>FRI</th>
+                <th>SAT</th>
+                <th>SUN</th>
+                <th>TOTAL PROJECT HOURS PER WEEK</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be dynamically populated here by AJAX -->
+        </tbody>
+    </table>
+    
+    <div class="button-container">
+        <button type="button" id="submitTimesheetButton">Submit Timesheet</button>
+        <button id="closePopupButton_manualtimesheet">Cancel</button>
     </div>
+</div>
+</div> 
 
-    <!-- Benchmark Chart -->
-    <div id="benchmark" class="tab-content">
-        <canvas id="benchmarkChart"></canvas>
-    </div>
 
     <!-- Total Time Chart -->
     <div id="totalTime" class="tab-content">
@@ -640,10 +661,7 @@
 </div>
 </div>
 
-<div class="button-container">
-    <button type="button" id="submitTimesheetButton">Submit Timesheet</button>
-<button id="closePopupButton_manualtimesheet">Cancel</button>
-</div>
+
 
     </div>
 </div>

@@ -1237,10 +1237,10 @@ button#date_in_daily_timesheet{
 /* Popup container */
 .popup-content {
     background: white;
-    width: 90%;
-    max-width: 1000px;
+    width: 70%;
+    /* max-width: 1000px; */
     border-radius: 10px;
-    padding: 20px;
+    padding: 65px;
     position: relative;
     animation: fadeIn 0.3s ease-in-out;
 }
@@ -2589,3 +2589,66 @@ textarea {
     border-bottom: 0px solid transparent;
     border-right: 6px solid red;
 }
+
+.container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .hoursheet-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .hoursheet-table th, .hoursheet-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .hoursheet-table th {
+            background-color: #1E6FE4;
+            color: white;
+            font-size: 16px;
+        }
+
+        .hoursheet-table td {
+            font-size: 14px;
+        }
+
+        .header-row {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+
+        .total-row {
+            background-color: #E6F7FF;
+            font-weight: bold;
+            color: #1E6FE4;
+        }
+
+        .week-total {
+            background-color: #1E6FE4;
+            color: white;
+            font-weight: bold;
+        }
+
+        .logo {
+            width: 150px;
+        }
+
+        .week-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .week-info div {
+            font-weight: bold;
+        }

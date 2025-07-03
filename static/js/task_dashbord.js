@@ -462,6 +462,7 @@ function submitTimesheet() {
         team: team // Added here
     };
 
+    // Validate form data
     if (!formData.date1 || !formData.list || !formData.project_type || 
         !formData.scope || !formData.task || !formData.phase || 
         !formData.time || !formData.comments) {
@@ -471,6 +472,7 @@ function submitTimesheet() {
 
     console.log("Form Data Sent to Backend:", formData);
 
+    // Sending the data to the backend via POST request
     fetch("/api/submit_timesheet/", {
         method: "POST",
         headers: {
@@ -512,12 +514,14 @@ document.getElementById("manual_timesheet").addEventListener("click", function()
     var TaskSelect = document.getElementById("TaskSelect");
     var phaseSelect = document.getElementById("phaseSelect");
 
+    // Clear previous selections and populate new ones
     projectListSelect.innerHTML = "<option value=''>Select List</option>";
     projectTypeSelect.innerHTML = "<option value=''>Select Project</option>";
     scopeSelect.innerHTML = "<option value=''>Select Scope</option>";
     TaskSelect.innerHTML = "<option value=''>Select Task</option>";
     phaseSelect.innerHTML = "<option value=''>Select Phase</option>";
 
+    // Populate project lists
     var listsSet = new Set();
     golbalfetchdata.tasks.forEach(task => {
         if (!listsSet.has(task.list)) {
@@ -529,6 +533,7 @@ document.getElementById("manual_timesheet").addEventListener("click", function()
         }
     });
 
+    // Handle project list change
     projectListSelect.addEventListener("change", function() {
         var selectedList = projectListSelect.value;
 
@@ -537,6 +542,7 @@ document.getElementById("manual_timesheet").addEventListener("click", function()
         TaskSelect.innerHTML = "<option value=''>Select Task</option>";
         phaseSelect.innerHTML = "<option value=''>Select Phase</option>";
 
+        // Populate projects based on selected list
         var projectSet = new Set();
         golbalfetchdata.tasks.forEach(task => {
             if (task.list === selectedList && !projectSet.has(task.projects)) {
@@ -549,6 +555,7 @@ document.getElementById("manual_timesheet").addEventListener("click", function()
         });
     });
 
+    // Handle project type change
     projectTypeSelect.addEventListener("change", function() {
         var selectedProject = projectTypeSelect.value;
 
@@ -556,6 +563,7 @@ document.getElementById("manual_timesheet").addEventListener("click", function()
         TaskSelect.innerHTML = "<option value=''>Select Task</option>";
         phaseSelect.innerHTML = "<option value=''>Select Phase</option>";
 
+        // Populate scope based on selected project
         var scopeSet = new Set();
         golbalfetchdata.tasks.forEach(task => {
             if (task.projects === selectedProject && !scopeSet.has(task.scope)) {
@@ -568,12 +576,14 @@ document.getElementById("manual_timesheet").addEventListener("click", function()
         });
     });
 
+    // Handle scope change
     scopeSelect.addEventListener("change", function() {
         var selectedScope = scopeSelect.value;
 
         TaskSelect.innerHTML = "<option value=''>Select Task</option>";
         phaseSelect.innerHTML = "<option value=''>Select Phase</option>";
 
+        // Populate tasks based on selected scope
         var taskSet = new Set();
         golbalfetchdata.tasks.forEach(task => {
             if (task.scope === selectedScope && !taskSet.has(task.title)) {
@@ -586,11 +596,13 @@ document.getElementById("manual_timesheet").addEventListener("click", function()
         });
     });
 
+    // Handle task change
     TaskSelect.addEventListener("change", function() {
         var selectedTask = TaskSelect.value;
 
         phaseSelect.innerHTML = "<option value=''>Select Phase</option>";
 
+        // Populate phases based on selected task
         var phaseSet = new Set();
         golbalfetchdata.tasks.forEach(task => {
             if (task.title === selectedTask && !phaseSet.has(task.category)) {
@@ -1237,72 +1249,72 @@ function showTab(tabId) {
     event.target.classList.add('active');
 }
 
-// Charts
-setTimeout(() => {
-    new Chart(document.getElementById("benchmarkChart"), {
-        type: 'bar',
-        data: {
-            labels: ["Benchmark", "Total Task"],
-            datasets: [{ data: [126, 100], backgroundColor: ["#4c8bf5", "#92b4f5"] }]
-        }
-    });
+// // Charts
+// setTimeout(() => {
+//     new Chart(document.getElementById("benchmarkChart"), {
+//         type: 'bar',
+//         data: {
+//             labels: ["Benchmark", "Total Task"],
+//             datasets: [{ data: [126, 100], backgroundColor: ["#4c8bf5", "#92b4f5"] }]
+//         }
+//     });
 
-    new Chart(document.getElementById("timeChart"), {
-        type: 'pie',
-        data: {
-            labels: ["Discussion", "Designing", "Calculating", "Modeling", "Checking"],
-            datasets: [{ data: [19, 12, 24, 15, 30], backgroundColor: ["#1E90FF", "#4682B4", "#5F9EA0", "#87CEFA", "#B0E0E6"] }]
-        }
-    });
-}, 300);
+//     new Chart(document.getElementById("timeChart"), {
+//         type: 'pie',
+//         data: {
+//             labels: ["Discussion", "Designing", "Calculating", "Modeling", "Checking"],
+//             datasets: [{ data: [19, 12, 24, 15, 30], backgroundColor: ["#1E90FF", "#4682B4", "#5F9EA0", "#87CEFA", "#B0E0E6"] }]
+//         }
+//     });
+// }, 300);
 
 
 
 // Listen for task selection change
-document.getElementById("TaskSelect").addEventListener("change", function () {
-    const selectedTask = this.value;
+// document.getElementById("TaskSelect").addEventListener("change", function () {
+//     const selectedTask = this.value;
 
-    // Find the selected task data in `golbalfetchdata.tasks`
-    const taskData = golbalfetchdata.tasks.find(task => task.title === selectedTask);
+//     // Find the selected task data in `golbalfetchdata.tasks`
+//     const taskData = golbalfetchdata.tasks.find(task => task.title === selectedTask);
 
-    if (taskData) {
-        // Update the task details table with selected task data
-        document.getElementById("taskTitle").textContent = taskData.title || '-';
-        document.getElementById("projectType").textContent = taskData.projects || '-';
-        document.getElementById("taskScope").textContent = taskData.scope || '-';
-        document.getElementById("taskCategory").textContent = taskData.category || '-';
+//     if (taskData) {
+//         // Update the task details table with selected task data
+//         document.getElementById("taskTitle").textContent = taskData.title || '-';
+//         document.getElementById("projectType").textContent = taskData.projects || '-';
+//         document.getElementById("taskScope").textContent = taskData.scope || '-';
+//         document.getElementById("taskCategory").textContent = taskData.category || '-';
 
-        // Update and change priority color
-        const priorityElement = document.getElementById("taskPriority");
-        const priorityValue = taskData.priority || 'Medium';
-        priorityElement.textContent = priorityValue;
+//         // Update and change priority color
+//         const priorityElement = document.getElementById("taskPriority");
+//         const priorityValue = taskData.priority || 'Medium';
+//         priorityElement.textContent = priorityValue;
 
-        // Change text color based on priority value
-        switch (priorityValue.toUpperCase()) {
-            case 'HIGH':
-                priorityElement.style.color = 'green';
-                break;
-            case 'MEDIUM':
-                priorityElement.style.color = 'orange';
-                break;
-            case 'LOW':
-                priorityElement.style.color = 'red';
-                break;
-            default:
-                priorityElement.style.color = 'black';  // Default color if priority is unknown
-        }
-    } else {
-        // Clear the task details if no valid task is found
-        document.getElementById("taskTitle").textContent = '-';
-        document.getElementById("projectType").textContent = '-';
-        document.getElementById("taskScope").textContent = '-';
-        document.getElementById("taskCategory").textContent = '-';
+//         // Change text color based on priority value
+//         switch (priorityValue.toUpperCase()) {
+//             case 'HIGH':
+//                 priorityElement.style.color = 'green';
+//                 break;
+//             case 'MEDIUM':
+//                 priorityElement.style.color = 'orange';
+//                 break;
+//             case 'LOW':
+//                 priorityElement.style.color = 'red';
+//                 break;
+//             default:
+//                 priorityElement.style.color = 'black';  // Default color if priority is unknown
+//         }
+//     } else {
+//         // Clear the task details if no valid task is found
+//         document.getElementById("taskTitle").textContent = '-';
+//         document.getElementById("projectType").textContent = '-';
+//         document.getElementById("taskScope").textContent = '-';
+//         document.getElementById("taskCategory").textContent = '-';
 
-        const priorityElement = document.getElementById("taskPriority");
-        priorityElement.textContent = '-';
-        priorityElement.style.color = 'black';  // Reset to default
-    }
-});
+//         const priorityElement = document.getElementById("taskPriority");
+//         priorityElement.textContent = '-';
+//         priorityElement.style.color = 'black';  // Reset to default
+//     }
+// });
 // CALENDER CODE
 
 // JavaScript code to fetch task details when a calendar day is clicked and show time in calendar cells
@@ -1875,3 +1887,132 @@ function populateTable(data) {
     // Show the table after populating it
     document.getElementById("excelDataTable").style.display = "block";
 }
+
+
+
+
+$(document).ready(function() {
+    var table = $('#hoursheet-table').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '/api/get_hoursheet_data/',  // Your Django view URL
+            type: 'GET',
+            dataSrc: 'data',  // Map the 'data' key from your response to the DataTable rows
+        },
+        columns: [
+            { data: 'projects' },  // PROJECT
+            { data: 'scope' },     // PROJECT PART (CATEGORY)
+            { data: 'title' },     // TASK (TITLE)
+            { data: 'mon', className: 'editable' }, // MON
+            { data: 'tue', className: 'editable' }, // TUE
+            { data: 'wed', className: 'editable' }, // WED
+            { data: 'thur', className: 'editable' }, // THUR
+            { data: 'fri', className: 'editable' }, // FRI
+            { data: 'sat', className: 'editable' }, // SAT
+            { data: 'sun', className: 'editable' }, // SUN
+            { data: 'total_hours' }  // TOTAL PROJECT HOURS PER WEEK
+        ],
+        initComplete: function() {
+            // Add column search functionality
+            this.api().columns([0, 1, 2]).every(function() {
+                var column = this;
+                var input = $('<input type="text" placeholder="Search">').appendTo($(column.header()).empty());
+                input.on('keyup change', function() {
+                    column.search(this.value).draw();
+                });
+            });
+        }
+    });
+
+    // Handle editable cells
+    $('#hoursheet-table').on('click', '.editable', function() {
+        var originalValue = $(this).text();
+        var inputField = $('<input type="text" value="' + originalValue + '">');
+        $(this).html(inputField);
+        inputField.focus();
+
+        inputField.on('blur', function() {
+            var newValue = inputField.val();
+            $(this).parent().html(newValue);
+
+            var rowData = table.row($(this).closest('tr')).data();
+            var updatedData = {
+                id: rowData.id,  // Assuming 'id' is the identifier for the row
+                mon: rowData.mon,
+                tue: rowData.tue,
+                wed: rowData.wed,
+                thur: rowData.thur,
+                fri: rowData.fri,
+                sat: rowData.sat,
+                sun: rowData.sun,
+                total_hours: rowData.total_hours
+            };
+
+            // Update the backend with the modified data
+            fetch('/api/update_timesheet_data/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                } else {
+                    console.error('Error:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating timesheet:', error);
+            });
+        });
+    });
+
+    // Handle submit timesheet button click
+    $('#submitTimesheetButton').click(function() {
+        var allData = table.rows().data().toArray();  // Get all table data
+        var timesheetData = allData.map(row => {
+            return {
+                id: row.id,  // Assuming the row has an 'id' field
+                project: row.projects,
+                task: row.title,
+                mon: row.mon,
+                tue: row.tue,
+                wed: row.wed,
+                thur: row.thur,
+                fri: row.fri,
+                sat: row.sat,
+                sun: row.sun,
+                total_hours: row.total_hours
+            };
+        });
+
+        fetch('/api/submit_timesheet/', {  // Your backend URL for timesheet submission
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(timesheetData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+            } else {
+                console.error('Error:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error submitting timesheet:', error);
+        });
+    });
+
+    // Close popup (cancel button)
+    $('#closePopupButton_manualtimesheet').click(function() {
+        $('#timesheetpopup').hide();  // Hide the popup
+    });
+});
+
