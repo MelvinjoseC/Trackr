@@ -624,182 +624,94 @@ def get_task_by_title_project_scope(request):
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
-
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from django.db import transaction
-from .models import TrackerTasks
-import json
-
-@csrf_exempt
-def submit_timesheet(request):
-    if request.method == "POST":
-        try:
-            # Parse the JSON body of the request
-            data = json.loads(request.body.decode("utf-8"))
-
-            # Extract fields from the request
-            department = data.get("list", "")
-            project_type = data.get("project_type", "")
-            scope = data.get("scope", "")
-            task = data.get("task", "")
-            phase = data.get("phase", "")
-            date1 = data.get("date1", "")
-            time = float(data.get("time") or 0)
-            comments = data.get("comments", "")
-            team = data.get("team", "")
-            task_benchmark = data.get("task_benchmark", "")
-
-            # Assign default value for "assigned" user (you should adjust this based on actual data)
-            assigned = global_user_data.get("name", "Unassigned")
-
-            # Check if essential fields are provided
-            if not all([department, project_type, scope, task, phase, date1]):
-                return JsonResponse({"error": "Missing required fields."}, status=400)
-
-            # Try to get an existing task matching the criteria
-            existing_task = TrackerTasks.objects.filter(
-                list=department,
-                projects=project_type,
-                scope=scope,
-                title=task,
-                category=phase
-            ).order_by('-id').first()
-
-            if existing_task:
-                # If the existing task has no date1, update it
-                if existing_task.date1 is None:
-                    # Update the existing task
-                    existing_task.date1 = date1
-                    existing_task.time = time
-                    existing_task.comments = comments
-                    existing_task.assigned = assigned
-                    existing_task.team = existing_task.team or ""  # Keep existing team or set default
-                    existing_task.save()
-                    return JsonResponse(
-                        {"message": "Timesheet entry updated successfully (existing row)."},
-                        status=200
-                    )
-                else:
-                    # If the existing task has a date1, create a new entry based on the existing task
-                    with transaction.atomic():
-                        TrackerTasks.objects.create(
-                            title=existing_task.title,
-                            list=existing_task.list,
-                            projects=existing_task.projects,
-                            scope=existing_task.scope,
-                            category=existing_task.category,
-                            date1=date1,
-                            time=time,
-                            comments=comments,
-                            priority=existing_task.priority,
-                            checker=existing_task.checker,
-                            qc3_checker=existing_task.qc3_checker,
-                            group=existing_task.group,
-                            start=existing_task.start,
-                            end=existing_task.end,
-                            verification_status=existing_task.verification_status,
-                            assigned=assigned,
-                            d_no=existing_task.d_no,
-                            rev=existing_task.rev,
-                            team=existing_task.team,
-                            task_benchmark=task_benchmark  # Optionally update task benchmark
-                        )
-                    return JsonResponse(
-                        {"message": "Timesheet created successfully based on existing task."},
-                        status=201
-                    )
-            else:
-                # If no matching task found, create a new task
-                with transaction.atomic():
-                    TrackerTasks.objects.create(
-                        title=task,
-                        list=department,
-                        projects=project_type,
-                        scope=scope,
-                        category=phase,
-                        date1=date1,
-                        time=time,
-                        comments=comments,
-                        assigned=assigned,
-                        team=team,  # If team is passed, set it
-                        task_benchmark=task_benchmark  # Set the benchmark if provided
-                    )
-                return JsonResponse(
-                    {"message": "New timesheet entry created successfully."},
-                    status=201
-                )
-
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON format."}, status=400)
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
-
-    return JsonResponse({"error": "Invalid request method."}, status=405)
-
-from django.http import JsonResponse
-from .models import TrackerTasks
-from django.views.decorators.csrf import csrf_exempt
-import json
-from datetime import datetime
-
-# View to fetch timesheet data
 @csrf_exempt
 def get_hoursheet_data(request):
     try:
-        tasks = TrackerTasks.objects.all().values(
-            'id', 'projects', 'scope', 'title', 'date1', 'time', 'total_hours'
-        )
+        tasks = TrackerTasks.objects.all()
 
-        # Process each task to determine the day of the week and assign time to that day
+        result_data = []
+
         for task in tasks:
-            date1 = task.get('date1')
-            if date1:
-                weekday = datetime.strptime(str(date1), "%Y-%m-%d").weekday()
-                week_days = {'mon': 0, 'tue': 0, 'wed': 0, 'thur': 0, 'fri': 0, 'sat': 0, 'sun': 0}
-                
-                if weekday == 0: week_days['mon'] = task['time']
-                elif weekday == 1: week_days['tue'] = task['time']
-                elif weekday == 2: week_days['wed'] = task['time']
-                elif weekday == 3: week_days['thur'] = task['time']
-                elif weekday == 4: week_days['fri'] = task['time']
-                elif weekday == 5: week_days['sat'] = task['time']
-                elif weekday == 6: week_days['sun'] = task['time']
+            week_days = {'mon': 0, 'tue': 0, 'wed': 0, 'thur': 0, 'fri': 0, 'sat': 0, 'sun': 0}
+            date1 = task.date1
+            time_val = task.time or 0
 
-                task.update(week_days)
-        
+            if date1:
+                weekday = date1.weekday()
+                keys = ['mon', 'tue', 'wed', 'thur', 'fri', 'sat', 'sun']
+                if 0 <= weekday <= 6:
+                    week_days[keys[weekday]] = float(time_val)
+
+            row = {
+                'projects': task.projects,
+                'scope': task.scope,
+                'title': task.title,
+                'category': task.category or '',
+                'comments': task.comments or '',
+                **week_days,
+                'total_hours': sum(week_days.values())
+            }
+
+            result_data.append(row)
+
+        dropdowns = {
+            'projects': list(TrackerTasks.objects.values_list('projects', flat=True).distinct()),
+            'scopes': list(TrackerTasks.objects.values_list('scope', flat=True).distinct()),
+            'tasks': list(TrackerTasks.objects.values_list('title', flat=True).distinct()),
+            'categories': list(TrackerTasks.objects.values_list('category', flat=True).distinct()),
+        }
+
         return JsonResponse({
             "draw": int(request.GET.get('draw', 1)),
-            "recordsTotal": len(tasks),
-            "recordsFiltered": len(tasks),
-            "data": list(tasks)
+            "recordsTotal": len(result_data),
+            "recordsFiltered": len(result_data),
+            "data": result_data,
+            "dropdowns": dropdowns
         })
-    
+
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from datetime import datetime
+from .models import TrackerTasks
+import json
 
-# View to update timesheet data
+global_user_data = None  # Assumed already set elsewhere
+
 @csrf_exempt
-def update_timesheet_data(request):
-    if request.method == "POST":
+def submit_timesheet(request):
+    try:
+        global global_user_data
+        if not global_user_data:
+            return JsonResponse({"error": "User not logged in."}, status=401)
+
+        username = global_user_data.get("name")
         data = json.loads(request.body.decode("utf-8"))
-        try:
-            task = TrackerTasks.objects.get(id=data['id'])
-            task.mon = data['mon']
-            task.tue = data['tue']
-            task.wed = data['wed']
-            task.thur = data['thur']
-            task.fri = data['fri']
-            task.sat = data['sat']
-            task.sun = data['sun']
-            task.total_hours = data['total_hours']
-            task.save()
 
-            return JsonResponse({'message': 'Timesheet updated successfully.'})
-        except TrackerTasks.DoesNotExist:
-            return JsonResponse({'error': 'Task not found.'}, status=400)
+        for entry in data:
+            TrackerTasks.objects.update_or_create(
+                projects=entry['projects'],
+                scope=entry['scope'],
+                title=entry['title'],
+                date1=datetime.strptime(entry['date1'], "%Y-%m-%d").date(),
+                defaults={
+                    'time': float(entry['time']),
+                    'category': entry.get('category', ''),
+                    'comments': entry.get('comments', ''),
+                    'assigned': username,
+                    'task_benchmark': float(entry.get('task_benchmark', 0)),
+                    'd_no': entry.get('d_no', ''),
+                    'rev': entry.get('rev', '')
+                }
+            )
 
+        return JsonResponse({"message": "Timesheet saved successfully."})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()  # Debugging line
+        return JsonResponse({"error": str(e)}, status=500)
 
 from django.http import JsonResponse
 from django.db.models import Count, F

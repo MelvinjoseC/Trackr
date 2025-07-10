@@ -154,9 +154,8 @@ p#profile_designation {
 
 /* Content */
 .content {
-    padding: 1vw;
-    width: 65%;
-    /* overflow-y: auto; */
+    padding: 1vh;
+    width: 132vh;
 }
 
 #first-box{
@@ -476,12 +475,6 @@ p#p_calender {
     font-weight: bold; /* Make names stand out */
 }
 
-/* Right Sidebar */
-.right-sidebar {
-    display: flex;
-    margin-top: 2vh;
-    flex-direction: column;
-}
 
 #my-team{
     background-color: #FFFFFF;
@@ -2477,9 +2470,7 @@ img#filter_button {
 }
 
 
-/* LEAVE EDIT DELETE */
-
-input, select, textarea {
+input {
     width: 100%;
     padding: 10px;
     margin-top: 5px;
@@ -2488,81 +2479,6 @@ input, select, textarea {
     font-size: 14px;
     background-color: #f9f9f9;
     box-sizing: border-box; /* Ensures padding doesn't expand beyond container */
-}
-
-textarea {
-    height: 100px;  /* Increased height for better text visibility */
-    resize: vertical;  /* Allows resizing only vertically */
-    max-height: 200px;  /* Prevents textarea from growing too large */
-    min-height: 80px;
-    overflow-y: auto;  /* Enables scrolling inside the textarea */
-    margin-left: 5px;
-}
-
-/* Modal Responsiveness */
-.modal {
-    display: none;
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-}
-
-.modal-content {
-    background-color: white;
-    padding: 25px;
-    margin: 10% auto;
-    width: 35%;
-    text-align: center;
-    border-radius: 10px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-    position: relative;
-    max-width: 500px;  /* Prevents modal from becoming too wide */
-}
-
-/* Ensuring modal content does not overflow */
-.modal-content h2 {
-    margin-bottom: 15px;
-}
-
-
-#update-leave-btn {
-    background-color: #28a745;
-    color: white;
-    width: 100%;
-}
-
-#update-leave-btn:hover {
-    background-color: #218838;
-}
-
-.close-btns {
-    position: absolute;
-    right: 15px;
-    top: 15px;
-    font-size: 20px;
-    background: none;
-    border: none;
-    cursor: pointer;
-}
-
-.close-btns:hover {
-    color: #333;
-}
-
-/* Responsive Styling for Smaller Screens */
-@media (max-width: 768px) {
-    .modal-content {
-        width: 90%;
-        max-width: 400px;
-    }
-
-    textarea {
-        height: 80px;
-    }
 }
 
 .notification-bubble  {
@@ -2590,65 +2506,3 @@ textarea {
     border-right: 6px solid red;
 }
 
-.container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .hoursheet-table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .hoursheet-table th, .hoursheet-table td {
-            padding: 12px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-
-        .hoursheet-table th {
-            background-color: #1E6FE4;
-            color: white;
-            font-size: 16px;
-        }
-
-        .hoursheet-table td {
-            font-size: 14px;
-        }
-
-        .header-row {
-            background-color: #f4f4f4;
-            font-weight: bold;
-        }
-
-        .total-row {
-            background-color: #E6F7FF;
-            font-weight: bold;
-            color: #1E6FE4;
-        }
-
-        .week-total {
-            background-color: #1E6FE4;
-            color: white;
-            font-weight: bold;
-        }
-
-        .logo {
-            width: 150px;
-        }
-
-        .week-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .week-info div {
-            font-weight: bold;
-        }

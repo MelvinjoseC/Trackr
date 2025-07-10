@@ -1,0 +1,100 @@
+
+#hoursheet-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 2vh auto;
+    background-color: white;
+    box-shadow: 0 0 1vh rgba(0, 0, 0, 0.1);
+    font-size: 1.4vh;
+}
+
+#hoursheet-table thead {
+    background-color: #ffffff;
+    color: #111a27;
+}
+
+#hoursheet-table thead th {
+    padding: 1.3vh 1vh;
+    border-bottom: 0.2vh solid #333;
+    position: sticky;
+    top: 0;
+    background-color: #ffffff;
+    z-index: 2;
+    font-weight: 700;
+    font-size: 1.35vh;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+#hoursheet-table tbody td {
+    padding: 1vh;
+    text-align: center;
+    border-bottom: 0.1vh solid #e2e2e2;
+    font-size: 1.3vh;
+}
+
+#hoursheet-table tbody tr:nth-child(even) {
+    background-color: #e6ecff;
+}
+
+#hoursheet-table tbody tr:nth-child(odd) {
+    background-color: #d6e0fb;
+}
+
+#hoursheet-table tbody td input {
+    width: 5vh;
+    padding: 0.3vh;
+    font-size: 1.3vh;
+    border: 0.1vh solid #000000;
+    border-radius: 0.3vh;
+    text-align: center;
+    background-color: #fdfdfd;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 120vh) {
+    #hoursheet-table {
+        font-size: 1.2vh;
+    }
+
+    #hoursheet-table thead th,
+    #hoursheet-table tbody td {
+        padding: 0.8vh;
+    }
+
+    #hoursheet-table thead select {
+        font-size: 1.1vh;
+        padding: 0.4vh;
+    }
+}
+
+.logo {
+    width: 150px;
+}
+
+.week-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2vh;
+}
+
+.week-info div {
+    font-weight: bold;
+}
+
+/* Optional: Basic button style (if you want) */
+button {
+    font-size: 1.3vh;
+    padding: 1vh 2vh;
+    margin: 2vh 1vh 0 0;
+    border: 0.2vh solid #111a27;
+    background-color: white;
+    color: #111a27;
+    border-radius: 0.5vh;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #d6e0fb;
+}

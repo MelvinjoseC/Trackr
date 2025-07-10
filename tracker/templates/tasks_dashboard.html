@@ -16,7 +16,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Your custom styles -->
+    <link rel="stylesheet" href="{% static 'css/manualtimesheet.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+
     <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
 
     <!-- Font Awesome -->
@@ -613,44 +615,62 @@
                     <input type="text" id="comments" required>
                 </div>-->
 <div class="container">
-    <div class="week-info">
-        <div>
-            <p>NAME: <span style="color: #f38f8f;">JOSE BABU MALIAKEL</span></p>
-            <p>WEEK START DATE: 09-06-2025</p>
-            <p>WEEK END DATE: 15-06-2025</p>
-        </div>
-        <div>
-            <h3>WEEK 24</h3>
-            <img class="logo" src="{% static 'images/logo.png' %}" alt="FUSIE Engineers Logo">
-        </div>
-    </div>
-
-    <table id="hoursheet-table" class="hoursheet-table">
-        <thead>
-            <tr class="header-row">
-                <th>PROJECT <input type="text" id="filter-project" placeholder="Search Project"></th>
-                <th>PROJECT PART <input type="text" id="filter-task" placeholder="Search Task"></th>
-                <th>TASKS <input type="text" id="filter-tasks" placeholder="Search Tasks"></th>
-                <th>MON</th>
-                <th>TUE</th>
-                <th>WED</th>
-                <th>THUR</th>
-                <th>FRI</th>
-                <th>SAT</th>
-                <th>SUN</th>
-                <th>TOTAL PROJECT HOURS PER WEEK</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Data will be dynamically populated here by AJAX -->
-        </tbody>
-    </table>
-    
-    <div class="button-container">
-        <button type="button" id="submitTimesheetButton">Submit Timesheet</button>
-        <button id="closePopupButton_manualtimesheet">Cancel</button>
+ <!-- Timesheet Table -->
+<table id="hoursheet-table" class="display">
+    <thead>
+        <tr>
+            <th>
+                Project
+                <select id="filter-project">
+                    <option value="">All</option>
+                </select>
+            </th>
+            <th>
+                Project Part
+                <select id="filter-scope">
+                    <option value="">All</option>
+                </select>
+            </th>
+            <th>
+                Task
+                <select id="filter-task">
+                    <option value="">All</option>
+                </select>
+            </th>
+            <th>
+                Category
+                <select id="filter-category">
+                    <option value="">All</option>
+                </select>
+            </th>
+            <th>Mon</th>
+            <th>Tue</th>
+            <th>Wed</th>
+            <th>Thu</th>
+            <th>Fri</th>
+            <th>Sat</th>
+            <th>Sun</th>
+            <th>Total Project Hours Per Week</th>
+        </tr>
+    </thead>
+</table>
+<!-- Comment Popup -->
+<div id="commentPopup" style="display:none; position: fixed; top: 30%; left: 50%; transform: translate(-50%, -30%); background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 20px; z-index: 9999; width: 400px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+    <h3 style="margin-top: 0;">Enter Comment</h3>
+    <textarea id="commentText" ></textarea>
+    <div style="text-align: right; margin-top: 10px;">
+        <button id="saveCommentBtn">Save</button>
+        <button id="closeCommentBtn">Cancel</button>
     </div>
 </div>
+
+<button type="button" id="submitTimesheetButton">Submit Timesheet</button>
+        <button type="button" id="addRowButton">Add Row</button>
+        <button id="closePopupButton_manualtimesheet">Cancel</button>
+<!-- Manual Timesheet Entry Popup -->
+
+</div>
+</div> 
 </div> 
 
 
@@ -723,5 +743,6 @@
     <script src="{% static 'js/attendence.js' %}"></script>
     <script src="{% static 'js/task_dashbord.js' %}"></script>
     <script src="{% static 'js/leavepage.js' %}"></script>
+    <script src="{% static 'js/manualtimesheet.js' %}"></script>
 </body>
 </html>
