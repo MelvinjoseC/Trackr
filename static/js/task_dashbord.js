@@ -1,136 +1,17 @@
-document.getElementById('aproover_creattask').addEventListener('click', function () {
-    const dropdownContainer = document.getElementById('dropdownContainer');
-
-    // Toggle dropdown visibility
-    if (dropdownContainer.style.display === 'none' || dropdownContainer.style.display === '') {
-        dropdownContainer.style.display = 'block';  // Show
-        populateDropdown();  // Populate list when shown
-    } else {
-        dropdownContainer.style.display = 'none';  // Hide
-    }
-});
-
-// Function to populate dropdown list
-function populateDropdown() {
-    const dropdownContainer = document.getElementById('dropdownContainer');
-    dropdownContainer.innerHTML = '';  // Clear previous options
-
-    // Filter employee details for admins and populate the list
-    golbalfetchdata.employee_details
-        .filter(employee => employee.authentication === 'admin')
-        .forEach(employee => {
-            const option = document.createElement('div');
-            option.textContent = employee.name;
-            option.style.padding = '5px';
-            option.style.cursor = 'pointer';
-
-            // Select the name and display it on the button
-            option.addEventListener('click', () => {
-                document.getElementById('aproover_creattask').textContent = employee.name;
-                dropdownContainer.style.display = 'none';  // Hide dropdown after selection
-                
-                // Show the alert modal
-                showModal(employee.name);
-            });
-
-            dropdownContainer.appendChild(option);
-        });
-}
-
-// Function to show the alert modal
-// Function to show the alert modal and blur the background
-function showModal(name) {
-    document.getElementById('modalTitle').textContent = `Selected: ${name}`;
-    document.getElementById('alertModal').style.display = 'block';
-
-    // Blur both the main container and task modal popup
-    document.querySelector('.main-container').classList.add('blur');
-    document.getElementById('taskModalPopup').classList.add('blur');
-}
-
-// Function to close the modal and remove the blur effect
-function closeModal() {
-    document.getElementById('alertModal').style.display = 'none';
-
-    // Remove blur effect
-    document.querySelector('.main-container').classList.remove('blur');
-    document.getElementById('taskModalPopup').classList.remove('blur');
-}
-
-// Close the modal when clicking the close button or OK button
-document.getElementById('closeModal').addEventListener('click', closeModal);
-document.getElementById('okButton').addEventListener('click', closeModal);
-
-
-
-document.getElementById("okButton").addEventListener("click", function (e) {
-    e.preventDefault(); // Prevent default behavior (if inside a form)
-    // Collect form data
-    const taskData = {
-        approver_name: document.getElementById('aproover_creattask').textContent,  // Selected approver name
-        team: document.getElementById("teamcreatetask").value,
-        title: document.getElementById("taskTitlecreatetask").value,
-        list: document.getElementById("id_listcreatetask").value,
-        project: document.getElementById("id_projectcreatetask").value,
-        scope: document.getElementById("id_scopecreatetask").value,
-        priority: document.getElementById("id_prioritycreatetask").value,
-        task_benchmark: document.getElementById("benchmarkcreatetask").value, 
-        assigned_to: document.getElementById("assignedTocreatetask").value,
-        checker: document.getElementById("checkercreatetask").value,
-        qc_3_checker: document.getElementById("qcCheckercreatetask").value,
-        category: document.getElementById("id_categorycreatetask").value,
-        start_date: document.getElementById("startDatecreatetask").value,
-        end_date: document.getElementById("endDatecreatetask").value,
-        verification_status: document.getElementById("id_verification_statuscreatetask").value,
-        task_status: document.getElementById("id_task_statuscreatetask").value,
-        rev_no: document.getElementById("id_revnocreatetask").value,
-        d_no: document.getElementById("id_dnocreatetask").value,
-    };
-    console.log("Task Created taskData:", taskData); // Log the response
-    // Send the data to the backend
-    fetch("/aproove_task/", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(taskData),
-    })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json().then((data) => ({
-                status: response.status,
-                body: data
-            }));
-            
-        })
-        .then((data) => {
-            console.log("Task Created:", data); // Log the response
-            alert("Task created successfully!"); // Optional success notification
-        })
-        .catch((error) => {
-            console.error("Error creating task:", error);
-            alert("Error creating task. Check console for details.");
-        });
-});
-
 document.getElementById("closePopupButton_creattask").addEventListener("click", function () {
     document.getElementById("taskModalPopup").style.display = "none";
 });
 
-
 document.getElementById('up-arrow').addEventListener('click', function() {
     document.getElementById('scrollable-list').scrollBy({
-        top: -50, // Adjust the scroll amount as needed
+        top: -50,
         behavior: 'smooth'
-
     });
 });
 
 document.getElementById('down-arrow').addEventListener('click', function() {
     document.getElementById('scrollable-list').scrollBy({
-        top: 50, // Adjust the scroll amount as needed
+        top: 50,
         behavior: 'smooth'
     });
 });
@@ -138,32 +19,26 @@ document.getElementById('down-arrow').addEventListener('click', function() {
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('left-arrow').addEventListener('click', function() {
         document.querySelector('.tasks').scrollBy({
-            left: -300, // Adjust the scroll amount as needed
+            left: -300,
             behavior: 'smooth'
         });
     });
 
     document.getElementById('right-arrow').addEventListener('click', function() {
         document.querySelector('.tasks').scrollBy({
-            left: 300, // Adjust the scroll amount as needed
+            left: 300,
             behavior: 'smooth'
         });
     });
 });
 
 const sidebarLinks = document.querySelectorAll('.sidebar-link');
-
 sidebarLinks.forEach(link => {
     link.addEventListener('click', function () {
-        // Remove the active class from all links
         sidebarLinks.forEach(l => l.classList.remove('active'));
-        
-        // Add the active class to the clicked link
         this.classList.add('active');
     });
 });
-
-
 
 
 // Helper function to get CSRF token
@@ -377,7 +252,13 @@ function populateTimesheet(tasks) {
             toggleTaskInfo();
             updateSwitchText(this);
         });
-        
+       setTimeout(() => {
+        if (data.tasks && data.tasks.length > 0) {
+            populateDropdowns(data.tasks);
+            populateDropdowns_updatetask(data.tasks);
+        }
+    }, 300); // small delay to ensure modal content is rendered
+    
 }
 
 // Function to hide task-info and show calendar inside the timesheet container
@@ -503,121 +384,9 @@ document.addEventListener("DOMContentLoaded", function () {
 // FOR MANUAL TIMESHEETS
 // -------------------------------------
 
-var globalselectedtitil_for_edit_task;
-
 document.getElementById("manual_timesheet").addEventListener("click", function () {
     document.getElementById("timesheetpopup").style.display = "flex";
-
-    const projectListSelect = document.getElementById("projectListSelect");
-    const projectTypeSelect = document.getElementById("projectTypeSelect");
-    const scopeSelect = document.getElementById("scopeSelect");
-    const TaskSelect = document.getElementById("TaskSelect");
-    const phaseSelect = document.getElementById("phaseSelect");
-
-    // Reset all dropdowns
-    projectListSelect.innerHTML = "<option value=''>Select List</option>";
-    projectTypeSelect.innerHTML = "<option value=''>Select Project</option>";
-    scopeSelect.innerHTML = "<option value=''>Select Scope</option>";
-    TaskSelect.innerHTML = "<option value=''>Select Task</option>";
-    phaseSelect.innerHTML = "<option value=''>Select Phase</option>";
-
-    // Clean old listeners if present
-    projectListSelect.onchange = null;
-    projectTypeSelect.onchange = null;
-    scopeSelect.onchange = null;
-    TaskSelect.onchange = null;
-
-    // Populate project lists
-    const listsSet = new Set();
-    globalFetchData.tasks.forEach(task => {
-        const list = task.list?.trim() || "No List Assigned";
-        if (!listsSet.has(list)) {
-            listsSet.add(list);
-            const option = new Option(list, list);
-            projectListSelect.appendChild(option);
-        }
-    });
-
-    // Project List change
-    projectListSelect.onchange = function () {
-        const selectedList = projectListSelect.value;
-
-        projectTypeSelect.innerHTML = "<option value=''>Select Project</option>";
-        scopeSelect.innerHTML = "<option value=''>Select Scope</option>";
-        TaskSelect.innerHTML = "<option value=''>Select Task</option>";
-        phaseSelect.innerHTML = "<option value=''>Select Phase</option>";
-
-        const projectSet = new Set();
-        globalFetchData.tasks.forEach(task => {
-            if (task.list === selectedList) {
-                const project = task.projects?.trim() || "No Project Assigned";
-                if (!projectSet.has(project)) {
-                    projectSet.add(project);
-                    projectTypeSelect.appendChild(new Option(project, project));
-                }
-            }
-        });
-    };
-
-    // Project Type change
-    projectTypeSelect.onchange = function () {
-        const selectedProject = projectTypeSelect.value;
-
-        scopeSelect.innerHTML = "<option value=''>Select Scope</option>";
-        TaskSelect.innerHTML = "<option value=''>Select Task</option>";
-        phaseSelect.innerHTML = "<option value=''>Select Phase</option>";
-
-        const scopeSet = new Set();
-        globalFetchData.tasks.forEach(task => {
-            if (task.projects === selectedProject) {
-                const scope = task.scope?.trim() || "No Scope Assigned";
-                if (!scopeSet.has(scope)) {
-                    scopeSet.add(scope);
-                    scopeSelect.appendChild(new Option(scope, scope));
-                }
-            }
-        });
-    };
-
-    // Scope change
-    scopeSelect.onchange = function () {
-        const selectedScope = scopeSelect.value;
-
-        TaskSelect.innerHTML = "<option value=''>Select Task</option>";
-        phaseSelect.innerHTML = "<option value=''>Select Phase</option>";
-
-        const taskSet = new Set();
-        globalFetchData.tasks.forEach(task => {
-            if (task.scope === selectedScope) {
-                const taskTitle = task.title?.trim() || "No Task Assigned";
-                if (!taskSet.has(taskTitle)) {
-                    taskSet.add(taskTitle);
-                    TaskSelect.appendChild(new Option(taskTitle, taskTitle));
-                }
-            }
-        });
-    };
-
-    // Task change
-    TaskSelect.onchange = function () {
-        const selectedTask = TaskSelect.value;
-
-        phaseSelect.innerHTML = "<option value=''>Select Phase</option>";
-
-        const phaseSet = new Set();
-        globalFetchData.tasks.forEach(task => {
-            if (task.title === selectedTask) {
-                const phase = task.category?.trim() || "No Phase Assigned";
-                if (!phaseSet.has(phase)) {
-                    phaseSet.add(phase);
-                    phaseSelect.appendChild(new Option(phase, phase));
-                }
-            }
-        });
-    };
 });
-
-
 
 
 // Add event listener to the button
@@ -653,225 +422,7 @@ function populateDropdowns(tasks) {
         }
     }
 
-    function handleDependentDropdowns() {
-        const filteredTasks = tasks.filter(task =>
-            (!selectedList || task.list === selectedList)
-        );
-
-        populateDropdown("id_scopecreatetask", "scope", filteredTasks);
-        populateDropdown("id_prioritycreatetask", "priority", filteredTasks);
-        populateDropdown("id_categorycreatetask", "category", filteredTasks);
-        populateDropdown("id_verification_statuscreatetask", "verification_status", filteredTasks);
-        populateDropdown("id_task_statuscreatetask", "task_status", filteredTasks);
-    }
-
-    document.getElementById("id_listcreatetask").addEventListener("change", function() {
-        selectedList = this.value;
-        const filteredProjects = tasks.filter(task => task.list === selectedList);
-        populateDropdown("id_projectcreatetask", "projects", filteredProjects);
-        handleDependentDropdowns();
-    });
-
-    document.getElementById("id_projectcreatetask").addEventListener("change", function() {
-        selectedProject = this.value;
-        handleDependentDropdowns();
-    });
-
-    // 👇 Add this to populate team dropdown
-    populateDropdown("teamcreatetask", "team");
-
-    populateDropdown("id_listcreatetask", "list");
-    populateDropdown("id_projectcreatetask", "projects");
 }
-
-// === TEAM LOCK FEATURE ===
-document.addEventListener("DOMContentLoaded", function () {
-    const teamDropdown = document.getElementById("teamcreatetask");
-    const lockBtn = document.getElementById("lockTeamBtn");
-
-    const lockedTeam = localStorage.getItem("locked_team");
-
-    function applyLockedTeam() {
-        if (!lockedTeam) return;
-
-        const optionExists = Array.from(teamDropdown.options).some(option => option.value === lockedTeam);
-
-        if (!optionExists) {
-            const newOption = document.createElement("option");
-            newOption.value = lockedTeam;
-            newOption.textContent = lockedTeam;
-            teamDropdown.appendChild(newOption);
-        }
-
-        teamDropdown.value = lockedTeam;
-        teamDropdown.disabled = true;
-        lockBtn.textContent = "🔓 Unlock";
-    }
-
-    applyLockedTeam(); // Call on page load
-
-    lockBtn.addEventListener("click", function (event) {
-        event.preventDefault();
-
-        if (teamDropdown.disabled) {
-            teamDropdown.disabled = false;
-            lockBtn.textContent = "🔒 Lock";
-            localStorage.removeItem("locked_team");
-        } else {
-            const selectedTeam = teamDropdown.value;
-            if (selectedTeam) {
-                teamDropdown.disabled = true;
-                lockBtn.textContent = "🔓 Unlock";
-                localStorage.setItem("locked_team", selectedTeam);
-            } else {
-                alert("Please select a team before locking.");
-            }
-        }
-    });
-});
-
-
-function populateDropdowns_updatetask(tasks) {
-    let selectedProject = "";
-    let selectedList = "";
-
-    // Helper function to populate a dropdown with unique options
-    function populateDropdown_updatetask(dropdownId, field, filterTasks = tasks) {
-        const dropdown = document.getElementById(dropdownId);
-
-        if (dropdown) {
-            // Clear existing options and add a default option
-            dropdown.innerHTML = '<option value="">Select</option>';
-
-            // Track unique values using a Set
-            const uniqueOptions = new Set();
-
-            // Populate the dropdown based on the filtered tasks
-            filterTasks.forEach(task => {
-                const value = task[field];
-                if (value && !uniqueOptions.has(value)) {
-                    uniqueOptions.add(value);  // Add value to the Set
-
-                    const option = document.createElement("option");
-                    option.value = value;
-                    option.textContent = value;
-                    dropdown.appendChild(option);
-                }
-            });
-        } else {
-            console.error(`Dropdown with ID '${dropdownId}' not found.`);
-        }
-    }
-
-
-
-    // Populate form fields based on selected task data
-    function populateFormFields(selectedTask) {
-        if (selectedTask) {
-            document.getElementById("taskTitle3").value = selectedTask.title || "";
-            document.getElementById("id_dnoedittask").value = selectedTask.d_no || "";
-            document.getElementById("id_priorityedittask").value = selectedTask.priority || "";
-            document.getElementById("id_assigned_toedittask").value = selectedTask.assigned || "";
-            document.getElementById("id_checkeredittask").value = selectedTask.checker || "";
-            document.getElementById("id_qc_3_checkeredittask").value = selectedTask.qc_3_checker || "";
-            document.getElementById("id_categoryedittask").value = selectedTask.category || "";
-            document.getElementById("id_start_dateedittask").value = selectedTask.start_date || "";
-            document.getElementById("id_end_dateedittask").value = selectedTask.end_date || "";
-            document.getElementById("id_verification_statusedittask").value = selectedTask.verification_status || "";
-            document.getElementById("id_task_statusedittask").value = selectedTask.task_status || "";
-        }
-    }
-    function populateFormFields_creattask(selectedTask) {
-        if (selectedTask) {
-           
-            document.getElementById("id_dnocreatetask").value = selectedTask.d_no || "";
-            document.getElementById("id_prioritycreatetask").value = selectedTask.priority || "";
-            document.getElementById("assignedTocreatetask").value = selectedTask.assigned || "";
-            document.getElementById("checkercreatetask").value = selectedTask.checker || "";
-            document.getElementById("qcCheckercreatetask").value = selectedTask.qc_3_checker || "";
-            document.getElementById("id_categorycreatetask").value = selectedTask.category || "";
-            document.getElementById("startDatecreatetask").value = selectedTask.start_date || "";
-            document.getElementById("endDatecreatetask").value = selectedTask.end_date || "";
-            document.getElementById("id_verification_statuscreatetask").value = selectedTask.verification_status || "";
-            document.getElementById("id_task_statuscreatetask").value = selectedTask.task_status || "";
-        }
-    }
-    // Filter and populate dependent dropdowns dynamically
-    function handleDependentDropdowns_updatetask() {
-        const filteredTasks = tasks.filter(task => (!selectedList || task.list === selectedList));
-
-        populateDropdown_updatetask("id_scopeedittask", "scope", filteredTasks);
-        populateDropdown_updatetask("taskTitleedittask", "title", filteredTasks);
-        populateDropdown_updatetask("id_revnoedittask", "rev", filteredTasks);
-        populateDropdown_updatetask("id_priorityedittask", "priority", filteredTasks);
-        populateDropdown_updatetask("id_categoryedittask", "category", filteredTasks);
-        populateDropdown_updatetask("id_verification_statusedittask", "verification_status", filteredTasks);
-        populateDropdown_updatetask("id_task_statusedittask", "task_status", filteredTasks);
-    }
-
-
-    // Event listener to populate form when REV NO is selected
-    document.getElementById("id_revnocreatetask").addEventListener("change", function () {
-        const selectedRevNo = this.value;
-        const selectedTask = tasks.find(task => task.rev_no === selectedRevNo);
-        populateFormFields_creattask(selectedTask);
-    });
-
-    // Event listener for Category
-    document.getElementById("id_categorycreatetask").addEventListener("change", function () {
-        const selectedCategory = this.value.trim();
-        const selectedTask = tasks.find(task => task.category.trim() === selectedCategory);
-        populateFormFields_creattask(selectedTask);
-    });
-
-
-
-    document.getElementById("taskTitleedittask").addEventListener("change", function () {
-        const selectedTitle = this.value;
-        const selectedTask = tasks.find(task => task.title === selectedTitle);
-        globalselectedtitil_for_edit_task =selectedTitle;
-        console.log("globalselectedtitil_for_edit_task:",globalselectedtitil_for_edit_task);
-        populateFormFields(selectedTask);
-    });
-
-    // Event listener to populate form when REV NO is selected
-    document.getElementById("id_revnoedittask").addEventListener("change", function () {
-        const selectedRevNo = this.value;
-        const selectedTask = tasks.find(task => task.rev_no === selectedRevNo);
-        populateFormFields(selectedTask);
-    });
-
-    // Event listener for Category
-    document.getElementById("id_categoryedittask").addEventListener("change", function () {
-        const selectedCategory = this.value.trim();
-        const selectedTask = tasks.find(task => task.category.trim() === selectedCategory);
-            populateFormFields(selectedTask);
-    });
-
-
-
-    // Handle change event for list dropdown to filter projects
-    document.getElementById("id_listedittask").addEventListener("change", function () {
-        selectedList = this.value;
-
-        // Filter projects based on the selected list
-        const filteredProjects = tasks.filter(task => task.list === selectedList);
-        populateDropdown_updatetask("id_projectedittask", "projects", filteredProjects);
-
-        handleDependentDropdowns_updatetask();  // Refresh dependent dropdowns
-    });
-
-    // Handle change events for project dropdown
-    document.getElementById("id_projectedittask").addEventListener("change", function () {
-        selectedProject = this.value;
-        handleDependentDropdowns_updatetask();  // Refresh dependent dropdowns
-    });
-
-    // Initially populate list and project dropdowns
-    populateDropdown_updatetask("id_listedittask", "list");
-    populateDropdown_updatetask("id_projectedittask", "projects");
-}
-
 
 
 let golbalfetchdata;
@@ -892,24 +443,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
             currentUserName = document.getElementById('profile_name').textContent.trim();
 
-            // Check if the current user is an admin or MD
-            const isAdminOrMd = golbalfetchdata.employee_details.some(
-                employee => employee.name === currentUserName && (employee.authentication === 'admin' || employee.authentication === 'MD')
-            );
+            // Always show Save Task and Project Tracker buttons
+            const saveBtn = document.getElementById('savetask_creatask');
+            const projectBtn = document.getElementById('project-button');
 
-            // Show/hide buttons based on admin or MD status
-            if (isAdminOrMd) {
-                document.getElementById('savetask_creatask').style.display = 'block';
-                document.getElementById('project-button').style.display = 'flex';
-                document.getElementById('aproover_creattask').style.display = 'none';
-                document.getElementById('notifications').style.display = 'none';
-            } else {
-                document.getElementById('savetask_creatask').style.display = 'none';
-                document.getElementById('aproover_creattask').style.display = 'flex';
-                document.getElementById('project-button').style.display = 'none';
-                document.getElementById('notifications').style.display = 'flex';
-            }
+            if (saveBtn) saveBtn.style.display = 'block';
+            if (projectBtn) projectBtn.style.display = 'flex';
 
+            // Always hide approver and notifications
+            const approverBtn = document.getElementById('aproover_creattask');
+            const notificationBtn = document.getElementById('notifications');
+
+            if (approverBtn) approverBtn.style.display = 'none';
+            if (notificationBtn) notificationBtn.style.display = 'none';
+
+            // Populate dropdowns
             if (data.tasks && data.tasks.length > 0) {
                 populateDropdowns(data.tasks);
                 populateDropdowns_updatetask(data.tasks);
@@ -921,6 +469,8 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error fetching tasks:", error);
         });
 });
+
+
 
 
 // Handle tab switching for Running, Revisions, and Others
@@ -992,132 +542,134 @@ document.addEventListener("DOMContentLoaded", function () {
         const modal = document.getElementById('popupModal');
         modal.style.display = "flex"; // Show the modal
 
+        // Repopulate dropdowns every time modal opens
+        if (golbalfetchdata && golbalfetchdata.tasks && golbalfetchdata.tasks.length > 0) {
+            populateDropdowns_updatetask(golbalfetchdata.tasks);
+
+            // Optionally, trigger the first dropdown's change event to cascade
+            const initialProjectDropdown = document.getElementById("id_projectedittask");
+            if (initialProjectDropdown && initialProjectDropdown.options.length > 1) {
+                initialProjectDropdown.selectedIndex = 1;  // Select first project (skip "Select")
+                initialProjectDropdown.dispatchEvent(new Event("change"));
+            }
+        } else {
+            console.error("No tasks data found for Edit Task dropdowns.");
+        }
     });
 });
 
-// Create reusable modal for creating and editing tasks
-document.getElementById("savetask_creatask").addEventListener("click", function (e) {
-    e.preventDefault(); // Prevent form submission
 
-    // Get the task form data
-    const taskData = {
-        team: document.getElementById("teamcreatetask") ? document.getElementById("teamcreatetask").value : "",
-        list: document.getElementById("id_listcreatetask") ? document.getElementById("id_listcreatetask").value : "",
-        project: document.getElementById("id_projectcreatetask") ? document.getElementById("id_projectcreatetask").value : "",
-        rev_no: document.getElementById("id_revnocreatetask") ? document.getElementById("id_revnocreatetask").value : "",
-        d_no: document.getElementById("id_dnocreatetask") ? document.getElementById("id_dnocreatetask").value : "",
-        task_benchmark: document.getElementById("benchmarkcreatetask") ? document.getElementById("benchmarkcreatetask").value : "",  // Correct field name
-        start_date: document.getElementById("startDatecreatetask") ? document.getElementById("startDatecreatetask").value : "",
-        end_date: document.getElementById("endDatecreatetask") ? document.getElementById("endDatecreatetask").value : "",
-    };
 
-    const fileInput = document.getElementById("fileInput");
-    const file = fileInput ? fileInput.files[0] : null; // Get the file selected by the user
+function populateDropdowns_updatetask(tasks) {
+    let selectedProject = "";
+    let selectedScope = "";
 
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const data = e.target.result;
-            const workbook = XLSX.read(data, { type: 'binary' });
-
-            // Get the first sheet of the Excel file
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-            // Convert the sheet to JSON format
-            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-            // Extract relevant columns from the Excel file starting from line 41 (index 40)
-            const excelData = [];
-            for (let index = 40; index < jsonData.length; index++) {  // Start from line 41 (index 40)
-                const row = jsonData[index];
-
-                // If the row is empty (all columns are empty), stop the loop
-                if (row.every(cell => cell === "" || cell === null)) {
-                    break;  // Stop if the row is empty
-                }
-
-                // Only include rows with valid data
-                excelData.push({
-                    title: row[1],  // Column B: TASKS (mapped to 'title')
-                    projects: row[2],  // Column C: SCOPE (mapped to 'projects')
-                    scope: row[3],  // Column D: PARENT DELIVERABLE (mapped to 'scope')
-                    task_benchmark: row[5]  // Column F: ESTIMATED TIME (mapped to 'task_benchmark')
-                });
+    function populateDropdown(id, field, filterTasks = tasks) {
+        const dropdown = document.getElementById(id);
+        if (!dropdown) return;
+        dropdown.innerHTML = '<option value="">Select</option>';
+        const unique = new Set();
+        filterTasks.forEach(task => {
+            const val = task[field];
+            if (val && !unique.has(val)) {
+                unique.add(val);
+                const option = document.createElement("option");
+                option.value = val;
+                option.textContent = val;
+                dropdown.appendChild(option);
             }
-
-            // Send the data to the backend (form data + excel data)
-            fetch("/api/create-task/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ taskData: taskData, tasks: excelData })
-            })
-            .then((response) => response.json())
-            .then((data) => {
-                console.log("Task Created:", data);
-                alert("Task created successfully!");
-            })
-            .catch((error) => {
-                console.error("Error creating task:", error);
-                alert("Error creating task. Check console for details.");
-            });
-        };
-
-        reader.readAsBinaryString(file);
-    } else {
-        console.error("No file selected!");
-        alert("Please select a file to upload.");
+        });
     }
-});
+
+    function populateFormFields(task) {
+        if (!task) return;
+        document.getElementById("id_projectedittask").value = task.projects || "";
+        document.getElementById("id_scopeedittask").value = task.scope || "";
+        document.getElementById("taskTitle3").value = task.title || "";
+        document.getElementById("id_dnoedittask").value = task.d_no || "";
+        document.getElementById("id_categoryedittask").value = task.category || "";
+        document.getElementById("id_start_dateedittask").value = task.start_date || "";
+        document.getElementById("id_end_dateedittask").value = task.end_date || "";
+        document.getElementById("id_benchmarkedittask").value = task.task_benchmark || "";
+    }
+
+    document.getElementById("id_projectedittask").addEventListener("change", function () {
+        selectedProject = this.value;
+        const filtered = tasks.filter(task => task.projects === selectedProject);
+        populateDropdown("id_scopeedittask", "scope", filtered);
+        document.getElementById("id_scopeedittask").dispatchEvent(new Event("change")); // Auto trigger next
+    });
+
+    document.getElementById("id_scopeedittask").addEventListener("change", function () {
+        selectedScope = this.value;
+        const filtered = tasks.filter(task => task.projects === selectedProject && task.scope === selectedScope);
+        populateDropdown("taskTitleedittask", "title", filtered);
+
+        // Populate category dropdown based on selected project and scope
+        populateDropdown("id_categoryedittask", "category", filtered);
+    });
+
+    document.getElementById("taskTitleedittask").addEventListener("change", function () {
+        const title = this.value;
+        globalselectedtitil_for_edit_task = title;
+
+        // Filter and populate rev options
+        const matchingTasks = tasks.filter(t => t.title === title && t.projects === selectedProject && t.scope === selectedScope);
+        const revDropdown = document.getElementById("id_revnoedittask");
+        if (revDropdown) {
+            revDropdown.innerHTML = '<option value="">Select</option>';
+            const uniqueRevs = new Set();
+            matchingTasks.forEach(task => {
+                if (task.rev && !uniqueRevs.has(task.rev)) {
+                    uniqueRevs.add(task.rev);
+                    const option = document.createElement("option");
+                    option.value = task.rev;
+                    option.textContent = task.rev;
+                    revDropdown.appendChild(option);
+                }
+            });
+        }
+
+        // Populate category dropdown based on selected project, scope, and title
+        populateDropdown("id_categoryedittask", "category", matchingTasks);
+
+        // Autofill form using first matching task
+        if (matchingTasks.length > 0) {
+            populateFormFields(matchingTasks[0]);
+        }
+    });
 
 
-// Updated Notification Function
-// function sendAdminNotification(message) {
-//     const adminData = {
-//         message: message,
-//         recipient: "varshith@fusie-engineers.com",
-//     };
-
-//     fetch("/api/send-notification/", {
-//         method: "POST",
-//         headers: {
-//             "Content-Type": "application/json",
-//             "X-CSRFToken": getCookie("csrftoken"),
-//         },
-//         body: JSON.stringify(adminData),
-//     })
-//         .then((response) => {
-//             if (!response.ok) throw new Error("Error sending notification to admin.");
-//             return response.json();
-//         })
-//         .then((data) => {
-//             console.log("Admin notification sent:", data);
-//         })
-//         .catch((error) => {
-//             console.error("Error sending notification:", error);
-//         });
-// }
+    document.getElementById("id_revnoedittask").addEventListener("change", function () {
+        const rev = this.value;
+        const task = tasks.find(t => t.rev === rev && t.title === globalselectedtitil_for_edit_task);
+        populateFormFields(task);
+    });
 
 
-// Handle "Save" button for updating a task
+    // 🔧 Initialize Project Dropdown and trigger first change to populate rest
+    populateDropdown("id_projectedittask", "projects");
+
+    const initialProjectDropdown = document.getElementById("id_projectedittask");
+    if (initialProjectDropdown.options.length > 1) {
+        initialProjectDropdown.selectedIndex = 1;  // Select first project (skip "Select")
+        initialProjectDropdown.dispatchEvent(new Event("change"));
+    }
+}
+
+
+// Save/Update handler
+
 document.getElementById("savetask_updatetask").addEventListener("click", function (e) {
-    e.preventDefault(); // Prevent default behavior (if inside a form)
+    e.preventDefault();
 
     const taskData = {
         title: document.getElementById("taskTitle3").value,
-        list: document.getElementById("id_listedittask").value,
         project: document.getElementById("id_projectedittask").value,
         scope: document.getElementById("id_scopeedittask").value,
-        priority: document.getElementById("id_priorityedittask").value,
-        assigned_to: document.getElementById("id_assigned_toedittask").value,
-        checker: document.getElementById("id_checkeredittask").value,
-        qc_3_checker: document.getElementById("id_qc_3_checkeredittask").value,
         category: document.getElementById("id_categoryedittask").value,
         start_date: document.getElementById("id_start_dateedittask").value,
         end_date: document.getElementById("id_end_dateedittask").value,
-        verification_status: document.getElementById("id_verification_statusedittask").value,
-        task_status: document.getElementById("id_task_statusedittask").value,
         rev_no: document.getElementById("id_revnoedittask").value,
         d_no: document.getElementById("id_dnoedittask").value,
         task_benchmark: document.getElementById("id_benchmarkedittask").value,
@@ -1128,99 +680,28 @@ document.getElementById("savetask_updatetask").addEventListener("click", functio
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": getCookies("csrftoken"),  // Ensure CSRF token is passed here
+            "X-CSRFToken": getCookies("csrftoken"),
         },
         body: JSON.stringify(taskData),
     })
-    .then((response) => response.json())
-    .then((data) => {
-        console.log("Task Edited:", data);
-        alert("Task updated successfully!");
-        console.log("Sending benchmark:", taskData.task_benchmark);
-
-    })
-    .catch((error) => {
-        console.error("Error editing task:", error);
-        alert("Error editing task. Check console for details.");
-    });
+        .then((res) => res.json())
+        .then((data) => {
+            console.log("✅ Task Updated:", data);
+            alert("Task updated successfully!");
+        })
+        .catch((err) => {
+            console.error("❌ Task update failed:", err);
+            alert("Error updating task. Check console.");
+        });
 });
 
-
-// ✅ Auto-open modal and load data when coming from a link
-window.addEventListener("DOMContentLoaded", function () {
-    const urlParams = new URLSearchParams(window.location.search);
-    const editMode = urlParams.get("edit");
-    const title = urlParams.get("title");
-    const project = urlParams.get("project");
-    const scope = urlParams.get("scope");
-
-    if (editMode === "true" && title && project && scope) {
-        // ✅ OPEN THE MODAL DIRECTLY
-        const modal = document.getElementById("popupModal");
-        if (modal) {
-            modal.style.display = "flex";  // Show the popup manually
-        }
-
-        // ✅ WAIT A MOMENT TO LET THE FORM LOAD THEN FETCH AND POPULATE
-        setTimeout(() => {
-            fetch(`/api/get-task-edit/?title=${encodeURIComponent(title)}&project=${encodeURIComponent(project)}&scope=${encodeURIComponent(scope)}`)
-                .then(response => response.json())
-                .then((data) => {
-                    if (data.error) {
-                        alert("Task not found.");
-                        return;
-                    }
-
-                    // Helper to set value and create <option> if missing
-                    function setSelectValue(selectId, value) {
-                        const select = document.getElementById(selectId);
-                        if (!select) return;
-
-                        // If option doesn't exist, create and append it
-                        if (![...select.options].some(opt => opt.value === value)) {
-                            const newOption = document.createElement("option");
-                            newOption.value = value;
-                            newOption.textContent = value;
-                            newOption.selected = true;
-                            select.appendChild(newOption);
-                        }
-                        select.value = value;
-                    }
-
-                    // Apply values
-                    document.getElementById("taskTitle3").value = data.title || '';
-                    document.getElementById("id_dnoedittask").value = data.d_no || '';
-                    document.getElementById("id_assigned_toedittask").value = data.assigned_to || '';
-                    document.getElementById("id_checkeredittask").value = data.checker || '';
-                    document.getElementById("id_qc_3_checkeredittask").value = data.qc_3_checker || '';
-                    document.getElementById("id_start_dateedittask").value = data.start_date || '';
-                    document.getElementById("id_end_dateedittask").value = data.end_date || '';
-                    document.getElementById("id_benchmarkedittask").value = data.task_benchmark || '';
-
-                    // Dynamically ensure dropdowns are populated and selected
-                    setSelectValue("id_listedittask", data.list || '');
-                    setSelectValue("id_projectedittask", data.project || '');
-                    setSelectValue("id_scopeedittask", data.scope || '');
-                    setSelectValue("id_priorityedittask", data.priority || '');
-                    setSelectValue("id_categoryedittask", data.category || '');
-                    setSelectValue("id_verification_statusedittask", data.verification_status || '');
-                    setSelectValue("id_task_statusedittask", data.task_status || '');
-                    setSelectValue("id_revnoedittask", data.rev_no || '');
-                    setSelectValue("taskTitleedittask", data.title || '');
-                })
-                .catch(err => {
-                    console.error("Failed to load task data:", err);
-                    alert("Failed to load task data.");
-                });
-        }, 300);
-    }
-});
 
 
 // manual timesheet
 
 document.getElementById("closePopupButton_manualtimesheet").addEventListener("click", function () {
     document.getElementById("timesheetpopup").style.display = "none";
+    location.reload(); // This will refresh the page
 });
 
 document.getElementById("closePopupButton_updatetask").addEventListener("click", function () {
@@ -1249,74 +730,6 @@ function showTab(tabId) {
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
     event.target.classList.add('active');
 }
-
-// // Charts
-// setTimeout(() => {
-//     new Chart(document.getElementById("benchmarkChart"), {
-//         type: 'bar',
-//         data: {
-//             labels: ["Benchmark", "Total Task"],
-//             datasets: [{ data: [126, 100], backgroundColor: ["#4c8bf5", "#92b4f5"] }]
-//         }
-//     });
-
-//     new Chart(document.getElementById("timeChart"), {
-//         type: 'pie',
-//         data: {
-//             labels: ["Discussion", "Designing", "Calculating", "Modeling", "Checking"],
-//             datasets: [{ data: [19, 12, 24, 15, 30], backgroundColor: ["#1E90FF", "#4682B4", "#5F9EA0", "#87CEFA", "#B0E0E6"] }]
-//         }
-//     });
-// }, 300);
-
-
-
-// Listen for task selection change
-// document.getElementById("TaskSelect").addEventListener("change", function () {
-//     const selectedTask = this.value;
-
-//     // Find the selected task data in `golbalfetchdata.tasks`
-//     const taskData = golbalfetchdata.tasks.find(task => task.title === selectedTask);
-
-//     if (taskData) {
-//         // Update the task details table with selected task data
-//         document.getElementById("taskTitle").textContent = taskData.title || '-';
-//         document.getElementById("projectType").textContent = taskData.projects || '-';
-//         document.getElementById("taskScope").textContent = taskData.scope || '-';
-//         document.getElementById("taskCategory").textContent = taskData.category || '-';
-
-//         // Update and change priority color
-//         const priorityElement = document.getElementById("taskPriority");
-//         const priorityValue = taskData.priority || 'Medium';
-//         priorityElement.textContent = priorityValue;
-
-//         // Change text color based on priority value
-//         switch (priorityValue.toUpperCase()) {
-//             case 'HIGH':
-//                 priorityElement.style.color = 'green';
-//                 break;
-//             case 'MEDIUM':
-//                 priorityElement.style.color = 'orange';
-//                 break;
-//             case 'LOW':
-//                 priorityElement.style.color = 'red';
-//                 break;
-//             default:
-//                 priorityElement.style.color = 'black';  // Default color if priority is unknown
-//         }
-//     } else {
-//         // Clear the task details if no valid task is found
-//         document.getElementById("taskTitle").textContent = '-';
-//         document.getElementById("projectType").textContent = '-';
-//         document.getElementById("taskScope").textContent = '-';
-//         document.getElementById("taskCategory").textContent = '-';
-
-//         const priorityElement = document.getElementById("taskPriority");
-//         priorityElement.textContent = '-';
-//         priorityElement.style.color = 'black';  // Reset to default
-//     }
-// });
-// CALENDER CODE
 
 // JavaScript code to fetch task details when a calendar day is clicked and show time in calendar cells
 let currentYear = new Date().getFullYear();
@@ -1821,71 +1234,100 @@ function getCookies(name) {
     return "";
 }
 
-document.getElementById("fileInput").addEventListener("change", function(event) {
+let previewedExcelData = []; // Global to share between both parts
+
+// Handle Excel file change (Preview in table)
+document.getElementById("fileInput").addEventListener("change", function (event) {
     const file = event.target.files[0];
     
     if (file) {
-        // Create a FileReader to read the Excel file
         const reader = new FileReader();
-        
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             const data = e.target.result;
             const workbook = XLSX.read(data, { type: 'binary' });
-
-            // Get the first sheet of the Excel file
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-            // Convert the sheet to JSON format
             const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-            // Call the function to populate the table with row 40 data and onwards
-            populateTable(jsonData);
+            previewedExcelData = jsonData; // Save for later POST use
+            populateTable(jsonData);       // Show preview
         };
-
         reader.readAsBinaryString(file);
     }
 });
 
+// Show Excel data in a table
 function populateTable(data) {
-    // Show the table and clear any previous data
     const table = document.getElementById("dataTable");
     const tableHeader = table.querySelector("thead tr");
     const tableBody = table.querySelector("tbody");
 
-    // Clear existing data
     tableHeader.innerHTML = "";
     tableBody.innerHTML = "";
 
-    // Populate the table header (for the relevant columns B, D, F)
-    const headers = ['TASKS', 'PROJECT', 'PARENT DELIVERABLE', 'ESTIMATED TIME (Hrs)'];
+    const headers = ['TASKS', 'PROJECT', 'SCOPE', 'CATEGORY', 'TASK BENCHMARK', 'D. NO','REV','START','END','MAILNO','REF NO'];
+    
     headers.forEach(header => {
         const th = document.createElement("th");
         th.textContent = header;
         tableHeader.appendChild(th);
     });
 
-    // Loop through rows starting from row 40 (index 39 in 0-indexed array)
-    for (let i = 40; i < data.length; i++) {
+    for (let i = 1; i < data.length; i++) {
         const row = data[i];
+        const tr = document.createElement("tr");
 
-        // Ensure the row has enough columns (check if it has at least 6 columns)
-        if (row.length >= 6) {
-            const tr = document.createElement("tr");
-
-            // Only add columns B, D, F (index 1, 3, 5) to the table
-            const relevantColumns = [row[1], row[2], row[3], row[5]]; // Column B (index 1), D (index 3), F (index 5)
-
-            relevantColumns.forEach(cellData => {
-                const td = document.createElement("td");
-                td.textContent = cellData || ''; // Handle empty cells gracefully
-                tr.appendChild(td);
-            });
-
-            tableBody.appendChild(tr);
+        for (let j = 0; j < headers.length; j++) {
+            const td = document.createElement("td");
+            td.textContent = row[j] || '';
+            tr.appendChild(td);
         }
+
+        tableBody.appendChild(tr);
     }
 
-    // Show the table after populating it
     document.getElementById("excelDataTable").style.display = "block";
 }
+
+// Submit form and Excel data to backend
+document.getElementById("savetask_creatask").addEventListener("click", function (e) {
+    e.preventDefault();
+
+    if (!previewedExcelData.length) {
+        alert("Please upload and preview a valid Excel file first.");
+        return;
+    }
+
+    // Process Excel rows starting from line 41 (index 40)
+    const excelData = [];
+    for (let index = 40; index < previewedExcelData.length; index++) {
+        const row = previewedExcelData[index];
+        if (row.every(cell => cell === "" || cell === null)) break;
+
+        excelData.push({
+            title: row[1],
+            projects: row[2],
+            scope: row[3],
+            task_benchmark: row[5]
+        });
+    }
+
+    fetch("/api/create-task/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tasks: excelData })
+
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Task Created:", data);
+        alert("Task created successfully!");
+    })
+    .catch(error => {
+        console.error("Error creating task:", error);
+        alert("Error creating task. Check console for details.");
+    });
+});
+
 

@@ -1,3 +1,408 @@
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from django.http import HttpResponse
+# --- Styled Excel Export for Project Report ---
+def export_project_report_excel(request):
+
+    # Create workbook FIRST
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)  # Remove default sheet
+
+    # --- Summary Sheet for All Projects ---
+    from openpyxl.chart import BarChart, Reference
+
+    # Fetch all TrackerTasks for the previous month, or for a single project if ?project= is given
+    from .models import TrackerTasks
+    from datetime import datetime, timedelta
+    import re
+    today = datetime.today()
+    prev_month = today.month - 1 if today.month > 1 else 12
+    prev_year = today.year if today.month > 1 else today.year - 1
+    project_param = request.GET.get('project')
+    if project_param:
+        # Only export the selected project
+        tasks = TrackerTasks.objects.filter(date1__year=prev_year, date1__month=prev_month, projects=project_param)
+    else:
+        tasks = TrackerTasks.objects.filter(date1__year=prev_year, date1__month=prev_month)
+
+
+    # --- Build summary sheet using ALL projects for the month, regardless of filter ---
+    all_tasks = TrackerTasks.objects.filter(date1__year=prev_year, date1__month=prev_month)
+    summary_project_map = {}
+    for t in all_tasks:
+        project = t.projects or "(No Project)"
+        if project not in summary_project_map:
+            summary_project_map[project] = []
+        summary_project_map[project].append(t)
+
+    summary_ws = wb.create_sheet(title="Summary", index=0)
+    summary_ws['A1'] = 'Project'
+    summary_ws['B1'] = 'Total Hours'
+    summary_ws['A1'].font = Font(bold=True)
+    summary_ws['B1'].font = Font(bold=True)
+    summary_project_names = list(summary_project_map.keys())
+    total_hours = []
+    for i, project in enumerate(summary_project_names, start=2):
+        summary_ws[f'A{i}'] = project
+        # Sum hours for all tasks in this project
+        hours = sum(float(getattr(t, 'time', 0) or 0) for t in summary_project_map[project])
+        summary_ws[f'B{i}'] = hours
+        total_hours.append(hours)
+    # Add bar chart for all projects
+    if summary_project_names:
+        chart = BarChart()
+        chart.title = "Total Hours per Project"
+        chart.y_axis.title = 'Total Hours'
+        chart.x_axis.title = 'Project'
+        data = Reference(summary_ws, min_col=2, min_row=1, max_row=1+len(summary_project_names))
+        cats = Reference(summary_ws, min_col=1, min_row=2, max_row=1+len(summary_project_names))
+        chart.add_data(data, titles_from_data=True)
+        chart.set_categories(cats)
+        chart.height = 8
+        chart.width = 20
+        summary_ws.add_chart(chart, "D2")
+
+    # --- Group by project for the rest of the sheets (filtered if project_param) ---
+    project_map = {}
+    for t in tasks:
+        project = t.projects or "(No Project)"
+        if project_param and project != project_param:
+            continue
+        if project not in project_map:
+            project_map[project] = []
+        project_map[project].append(t)
+
+    # Styles
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill("solid", fgColor="4472C4")
+    cell_border = Border(
+        left=Side(style='thin', color='000000'),
+        right=Side(style='thin', color='000000'),
+        top=Side(style='thin', color='000000'),
+        bottom=Side(style='thin', color='000000')
+    )
+    align_center = Alignment(horizontal="center", vertical="center")
+    alt_fill = PatternFill("solid", fgColor="E9EDF6")
+
+    # Table headers
+    headers = [
+        "DWG NO", "SCOPE", "STATUS", "START DATE", "END DATE", "REVISION", "HOURS", "PHASE", "DONE BY", "DESCRIPTION OF WORK", "PROJECT PART"
+    ]
+
+    from collections import defaultdict
+    import calendar
+    for project, rows in project_map.items():
+        # --- Monthly Overview Sheet ---
+        safe_title = re.sub(r'[^\w\- ]', '', project)[:31] or "Sheet1"
+        ws = wb.create_sheet(title=safe_title)
+
+        # Monthly Overview Section (with border)
+        ws.merge_cells('A1:K1')
+        ws['A1'] = 'MONTHLY OVERVIEW'
+        ws['A1'].font = Font(bold=True, color='00BFFF', size=16)
+        ws['A1'].alignment = Alignment(horizontal="left", vertical="center")
+        ws.row_dimensions[1].height = 28
+
+        overview_labels = [
+            ('PROJECT', project),
+            ('PO.NO', ''),
+            ('MONTH', rows[0].date1.strftime('%B %Y') if rows and rows[0].date1 else ''),
+            ('PREPARED BY', ''),
+            ('PREPARED ON', 'dd - mm - yyyy'),
+        ]
+        # Improved Monthly Overview Table Styling
+        overview_label_fill = PatternFill("solid", fgColor="F2F2F2")  # Light gray
+        overview_value_fill = PatternFill("solid", fgColor="FFFFFF")  # White
+        pink_label = 'FFFF00B7'  # Excel ARGB for #FF00B7 (Hot Pink)
+        for i, (label, value) in enumerate(overview_labels):
+            row = i + 2
+            ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=2)
+            ws.merge_cells(start_row=row, start_column=3, end_row=row, end_column=11)
+            # Label cell
+            label_cell = ws.cell(row=row, column=1, value=label)
+            label_cell.font = Font(bold=True, color=pink_label)
+            label_cell.alignment = Alignment(horizontal="left", vertical="center")
+            label_cell.fill = overview_label_fill
+            # Value cell
+            value_cell = ws.cell(row=row, column=3, value=value)
+            value_cell.font = Font(bold=False, color='FF000000')
+            value_cell.alignment = Alignment(horizontal="left", vertical="center")
+            value_cell.fill = overview_value_fill
+            ws.row_dimensions[row].height = 22
+        # Draw a single box border around the whole overview section (rows 2-6, cols 1-11)
+        for row in range(2, 7):
+            for col in range(1, 12):
+                cell = ws.cell(row=row, column=col)
+                left = 'medium' if col == 1 else None
+                right = 'medium' if col == 11 else None
+                top = 'medium' if row == 2 else None
+                bottom = 'medium' if row == 6 else None
+                cell.border = Border(
+                    left=Side(style=left or 'thin', color='B7B7B7'),
+                    right=Side(style=right or 'thin', color='B7B7B7'),
+                    top=Side(style=top or 'thin', color='B7B7B7'),
+                    bottom=Side(style=bottom or 'thin', color='B7B7B7')
+                )
+
+        ws.row_dimensions[7].height = 10
+
+        ws.merge_cells('A8:E8')
+        ws.merge_cells('F8:K8')
+        ws['A8'] = 'PROJECT'
+        ws['F8'] = 'TOTAL PROJECT HOURS'
+        ws['A8'].font = ws['F8'].font = Font(bold=True, color='FF003366')
+        ws['A8'].alignment = ws['F8'].alignment = align_center
+        for col in range(1, 12):
+            cell = ws.cell(row=8, column=col)
+            cell.fill = overview_label_fill if col <= 5 else overview_value_fill
+            cell.border = Border(
+                left=Side(style='thin', color='B7B7B7'),
+                right=Side(style='thin', color='B7B7B7'),
+                top=Side(style='thin', color='B7B7B7'),
+                bottom=Side(style='thin', color='B7B7B7')
+            )
+
+        ws.merge_cells('A9:E9')
+        ws.merge_cells('F9:K9')
+        ws['A9'] = ''
+        ws['F9'] = ''
+        for col in range(1, 12):
+            cell = ws.cell(row=9, column=col)
+            cell.fill = overview_value_fill
+            cell.border = Border(
+                left=Side(style='thin', color='B7B7B7'),
+                right=Side(style='thin', color='B7B7B7'),
+                top=Side(style='thin', color='B7B7B7'),
+                bottom=Side(style='thin', color='B7B7B7')
+            )
+
+        ws.merge_cells('A10:E10')
+        ws.merge_cells('F10:K10')
+        ws['A10'] = 'DESIGNATION'
+        ws['F10'] = 'TOTAL HOURS'
+        ws['A10'].font = ws['F10'].font = Font(bold=True, color='FF003366')
+        ws['A10'].alignment = ws['F10'].alignment = align_center
+        for col in range(1, 12):
+            cell = ws.cell(row=10, column=col)
+            cell.fill = overview_label_fill if col <= 5 else overview_value_fill
+            cell.border = Border(
+                left=Side(style='thin', color='B7B7B7'),
+                right=Side(style='thin', color='B7B7B7'),
+                top=Side(style='thin', color='B7B7B7'),
+                bottom=Side(style='thin', color='B7B7B7')
+            )
+
+        ws.merge_cells('A11:E11')
+        ws.merge_cells('F11:K11')
+        ws['A11'] = 'PROJECT PART'
+        ws['F11'] = 'TOTAL HOURS'
+        ws['A11'].font = ws['F11'].font = Font(bold=True, color='FF003366')
+        ws['A11'].alignment = ws['F11'].alignment = align_center
+        for col in range(1, 12):
+            cell = ws.cell(row=11, column=col)
+            cell.fill = overview_label_fill if col <= 5 else overview_value_fill
+            cell.border = Border(
+                left=Side(style='thin', color='B7B7B7'),
+                right=Side(style='thin', color='B7B7B7'),
+                top=Side(style='thin', color='B7B7B7'),
+                bottom=Side(style='thin', color='B7B7B7')
+            )
+
+        ws.merge_cells('A12:F12')
+        ws.merge_cells('G12:K12')
+        ws['A12'] = 'TOTAL HOURS APPROVED'
+        ws['G12'] = 'TOTAL HOURS SPENT TO DATE'
+        ws['A12'].font = ws['G12'].font = Font(bold=True, color='FF003366')
+        ws['A12'].alignment = ws['G12'].alignment = align_center
+        for col in range(1, 12):
+            cell = ws.cell(row=12, column=col)
+            cell.fill = overview_label_fill if col <= 6 else overview_value_fill
+            cell.border = Border(
+                left=Side(style='thin', color='B7B7B7'),
+                right=Side(style='thin', color='B7B7B7'),
+                top=Side(style='thin', color='B7B7B7'),
+                bottom=Side(style='thin', color='B7B7B7')
+            )
+
+        ws.merge_cells('A13:F13')
+        ws.merge_cells('G13:K13')
+        ws['A13'] = ''
+        ws['G13'] = ''
+        for col in range(1, 12):
+            cell = ws.cell(row=13, column=col)
+            cell.fill = overview_value_fill
+            cell.border = Border(
+                left=Side(style='thin', color='B7B7B7'),
+                right=Side(style='thin', color='B7B7B7'),
+                top=Side(style='thin', color='B7B7B7'),
+                bottom=Side(style='thin', color='B7B7B7')
+            )
+
+        ws.merge_cells('A14:K14')
+        ws['A14'] = 'SIGNED BY'
+        ws['A14'].font = Font(bold=True)
+        ws['A14'].alignment = Alignment(horizontal="left")
+        for col in range(1, 12):
+            ws.cell(row=14, column=col).border = cell_border
+
+        ws.merge_cells('A15:K15')
+        ws['A15'] = 'NAME: ' + '_'*30
+        ws['A15'].alignment = Alignment(horizontal="left")
+        for col in range(1, 12):
+            ws.cell(row=15, column=col).border = cell_border
+
+        ws.merge_cells('A16:K16')
+        ws['A16'] = 'DATE: ' + '_'*30
+        ws['A16'].alignment = Alignment(horizontal="left")
+        for col in range(1, 12):
+            ws.cell(row=16, column=col).border = cell_border
+
+        ws.merge_cells('A17:K17')
+    
+        ws['A17'].font = Font(italic=True, color='FF000000')
+        ws['A17'].alignment = Alignment(horizontal="left")
+        for col in range(1, 12):
+            ws.cell(row=17, column=col).border = cell_border
+
+        # --- Data Table Section (Only full month data, no weekly data, no weekly summary at end) ---
+        start_row = 19
+        
+      
+
+        widths = [12, 18, 12, 12, 12, 10, 8, 10, 12, 24, 14]
+        for col, width in enumerate(widths, start=1):
+            ws.column_dimensions[openpyxl.utils.get_column_letter(col)].width = width
+
+        # --- Week Sheets ---
+        # Group rows by week number and create separate sheets (not shown in main/first page)
+        week_map = defaultdict(list)
+        for t in rows:
+            if t.date1:
+                week_num = ((t.date1.day - 1) // 7) + 1
+                week_map[week_num].append(t)
+
+        from openpyxl.chart import BarChart, Reference
+        for week_num, week_rows in week_map.items():
+            if not week_rows:
+                continue
+            # Get week date range
+            week_dates = [t.date1 for t in week_rows if t.date1]
+            week_start = min(week_dates)
+            week_end = max(week_dates)
+            week_label = f"WEEK {week_num} ({week_start.strftime('%d-%b')} - {week_end.strftime('%d-%b')})"
+            week_sheet_title = f"Week{week_num}_{week_start.strftime('%d%b')}"
+            week_sheet_title = week_sheet_title[:31]
+            ws_week = wb.create_sheet(title=week_sheet_title)
+
+            # --- Custom Header Table (Rows 1-3) ---
+            ws_week.merge_cells('A1:B1')
+            ws_week.merge_cells('C1:E1')
+            ws_week.merge_cells('F1:K1')
+            ws_week['A1'] = 'PROJECT'
+            ws_week['C1'] = project
+            ws_week['F1'] = ''
+            for col in range(1, 12):
+                cell = ws_week.cell(row=1, column=col)
+                cell.border = Border(left=Side(style='thin', color='000000'),
+                                    right=Side(style='thin', color='000000'),
+                                    top=Side(style='thin', color='000000'),
+                                    bottom=Side(style='thin', color='000000'))
+                if col == 1:
+                    cell.font = Font(bold=True, color='0000FF')
+                cell.alignment = Alignment(horizontal="left" if col in [1,3] else "center", vertical="center")
+            ws_week.merge_cells('A2:B2')
+            ws_week.merge_cells('C2:E2')
+            ws_week.merge_cells('F2:K2')
+            ws_week['A2'] = 'WEEK NO'
+            ws_week['C2'] = str(week_num)
+            ws_week['F2'] = ''
+            for col in range(1, 12):
+                cell = ws_week.cell(row=2, column=col)
+                cell.border = Border(left=Side(style='thin', color='000000'),
+                                    right=Side(style='thin', color='000000'),
+                                    top=Side(style='thin', color='000000'),
+                                    bottom=Side(style='thin', color='000000'))
+                if col == 1:
+                    cell.font = Font(bold=True, color='0000FF')
+                cell.alignment = Alignment(horizontal="left" if col in [1,3] else "center", vertical="center")
+            ws_week.merge_cells('A3:K3')
+            ws_week['A3'] = ''
+            for col in range(1, 12):
+                cell = ws_week.cell(row=3, column=col)
+                cell.border = Border(left=Side(style='thin', color='000000'),
+                                    right=Side(style='thin', color='000000'),
+                                    top=Side(style='thin', color='000000'),
+                                    bottom=Side(style='thin', color='000000'))
+
+            # --- Data Table Section ---
+            table_start_row = 5
+            for col, header in enumerate(headers, start=1):
+                cell = ws_week.cell(row=table_start_row, column=col, value=header)
+                cell.font = Font(bold=True, color="FFFFFF")
+                cell.fill = PatternFill("solid", fgColor="4472C4")
+                cell.alignment = align_center
+                cell.border = cell_border
+
+            # Data rows
+            for row_idx, t in enumerate(week_rows, start=table_start_row+1):
+                ws_week.append([
+                    t.d_no or '', t.scope or '', getattr(t, 'project_status', ''),
+                    t.start.strftime('%Y-%m-%d') if t.start else '',
+                    t.end.strftime('%Y-%m-%d') if t.end else '',
+                    t.rev or '', t.time or '', getattr(t, 'phase', ''),
+                    t.assigned or '', t.comments or '', t.list or ''
+                ])
+                for col in range(1, len(headers) + 1):
+                    cell = ws_week.cell(row=row_idx, column=col)
+                    cell.border = cell_border
+                    if (row_idx % 2) == 1:
+                        cell.fill = PatternFill("solid", fgColor="E9EDF6")
+
+            for col, width in enumerate(widths, start=1):
+                ws_week.column_dimensions[openpyxl.utils.get_column_letter(col)].width = width
+
+            # --- Add Bar Chart for Hours per Scope ---
+            if week_rows:
+                data_start = table_start_row + 1
+                data_end = data_start + len(week_rows) - 1
+                # Scope is column 2 (B), Hours is column 7 (G)
+                chart = BarChart()
+                chart.title = "Hours per Scope"
+                chart.y_axis.title = 'Hours'
+                chart.x_axis.title = 'Scope'
+                data = Reference(ws_week, min_col=7, min_row=table_start_row, max_row=data_end)  # Hours
+                cats = Reference(ws_week, min_col=2, min_row=data_start, max_row=data_end)  # Scope
+                chart.add_data(data, titles_from_data=True)
+                chart.set_categories(cats)
+                chart.height = 7
+                chart.width = 16
+                ws_week.add_chart(chart, f"B{data_end+2}")
+
+            # --- Footer Section: PHASE, DONE BY, DESCRIPTION OF WORK, PROJECT PART ---
+            last_row = table_start_row + len(week_rows) + 1
+            ws_week.merge_cells(start_row=last_row, start_column=1, end_row=last_row, end_column=11)
+            ws_week.cell(row=last_row, column=1).value = f"PHASE: {getattr(week_rows[0], 'phase', '') if week_rows else ''}"
+            ws_week.cell(row=last_row, column=1).alignment = Alignment(horizontal="left")
+            ws_week.cell(row=last_row, column=1).font = Font(bold=False, color="0000FF")
+            ws_week.merge_cells(start_row=last_row+1, start_column=1, end_row=last_row+1, end_column=11)
+            ws_week.cell(row=last_row+1, column=1).value = f"DONE BY: {getattr(week_rows[0], 'assigned', '') if week_rows else ''}"
+            ws_week.cell(row=last_row+1, column=1).alignment = Alignment(horizontal="left")
+            ws_week.cell(row=last_row+1, column=1).font = Font(bold=False, color="0000FF")
+            ws_week.merge_cells(start_row=last_row+2, start_column=1, end_row=last_row+2, end_column=11)
+            ws_week.cell(row=last_row+2, column=1).value = f"DESCRIPTION OF WORK: {getattr(week_rows[0], 'comments', '') if week_rows else ''}"
+            ws_week.cell(row=last_row+2, column=1).alignment = Alignment(horizontal="left")
+            ws_week.cell(row=last_row+2, column=1).font = Font(bold=False, color="0000FF")
+            ws_week.merge_cells(start_row=last_row+3, start_column=1, end_row=last_row+3, end_column=11)
+            ws_week.cell(row=last_row+3, column=1).value = f"PROJECT PART: {getattr(week_rows[0], 'list', '') if week_rows else ''}"
+            ws_week.cell(row=last_row+3, column=1).alignment = Alignment(horizontal="left")
+            ws_week.cell(row=last_row+3, column=1).font = Font(bold=False, color="0000FF")
+
+    # Response
+    filename = f"project_report_{project_param}.xlsx" if project_param else "project_report.xlsx"
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename={filename}'
+    wb.save(response)
+    return response
 import calendar
 from datetime import datetime
 from django.shortcuts import render
@@ -59,6 +464,48 @@ def login(request):
             )
 
     return render(request, "signin.html")
+def report_view_page(request):
+    global global_user_data  # Use the global user data
+
+    from .models import TrackerTasks, EmployeeDetails  # Import here to avoid circular import if any
+    import base64
+
+    # Fetch all data from tracker_project table
+    all_tasks = TrackerTasks.objects.all()
+    tasks_data = list(all_tasks.values())
+
+    # Prepare user info for sidebar
+    user_id = global_user_data.get("employee_id", None) if global_user_data else None
+    name = global_user_data.get("name", "Guest") if global_user_data else "Guest"
+    designation = global_user_data.get("designation", "NO DESIGNATION") if global_user_data else "NO DESIGNATION"
+    image_base64 = None
+
+    if user_id:
+        try:
+            employee = EmployeeDetails.objects.get(employee_id=user_id)
+            designation = employee.designation
+            if employee.image:
+                image_base64 = base64.b64encode(employee.image).decode("utf-8")
+        except EmployeeDetails.DoesNotExist:
+            designation = "Employee not found"
+
+    # If AJAX/JSON request, return JSON
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
+        return JsonResponse({"tracker_project_data": tasks_data}, safe=False)
+
+    # Otherwise, render the template as usual, always provide range_6 for template context
+    return render(
+        request,
+        'report_view.html',
+        {
+            "tracker_project_data": tasks_data,
+            "range_6": range(6),
+            "name": name,
+            "designation": designation,
+            "image_base64": image_base64,
+            "employee_id": user_id,
+        }
+    )
 
 def get_admins(request):
     admins = EmployeeDetails.objects.filter(authentication__iexact='admin')  # Case-insensitive check
@@ -363,40 +810,42 @@ import json
 def create_task(request):
     if request.method == "POST":
         try:
-            # Parse the task data from the request body
             data = json.loads(request.body.decode("utf-8"))
-            task_data = data.get("taskData", {})  # Form data
-            excel_tasks = data.get("tasks", [])  # Excel file data
-            
-            # Handle the Excel data and save it
-            for task in excel_tasks:
-                # Extract fields from the Excel data
-                task_benchmark = task.get("task_benchmark", None)
-                title = task.get("title", "")
-                projects = task.get("projects", "")
-                scope = task.get("scope", "")
+            task_data = data.get("taskData", {})  # Static form data
+            excel_tasks = data.get("tasks", [])  # Excel rows
 
-                # Ensure task_benchmark is a float, if not, set it to None
+            for task in excel_tasks:
+                title = task.get("title", "")                # Column 0
+                projects = task.get("projects", "")          # Column 1
+                scope = task.get("scope", "")                # Column 2
+                category = task.get("category", "")          # Column 3
+                task_benchmark = task.get("task_benchmark")  # Column 4
+                d_no = task.get("d_no", "")                  # Column 5
+                rev = task.get("rev", "")                    # Column 6
+                start = task.get("start", "")                # Column 7
+                end = task.get("end", "")                    # Column 8
+                mail_no = task.get("mail_no", "")            # Column 9
+                ref_no = task.get("ref_no", "")              # Column 10
+
                 try:
                     task_benchmark = float(task_benchmark) if task_benchmark else None
                 except ValueError:
                     task_benchmark = None
 
-                # Create the task entry in the database
                 TrackerTasks.objects.create(
-                    title=title,  # Maps to TASKS (Excel Column B)
-                    projects=projects,  # Maps to SCOPE (Excel Column C)
-                    scope=scope,  # Maps to PARENT DELIVERABLE (Excel Column D)
-                    task_benchmark=task_benchmark,  # Maps to ESTIMATED TIME (Column F)
-                    
-                    # Use form data (defaults to empty if not provided)
+                    title=title,
+                    projects=projects,
+                    scope=scope,
+                    category=category,
+                    task_benchmark=task_benchmark,
+                    d_no=d_no,
+                    rev=rev,
+                    mail_no=mail_no,
+                    ref_no=ref_no,
+                    start=parse_date(start) if start else None,
+                    end=parse_date(end) if end else None,
                     team=task_data.get("team", ""),
                     list=task_data.get("list", ""),
-                    rev=task_data.get("rev_no", ""),
-                    d_no=task_data.get("d_no", ""),
-                    start=parse_date(task_data.get("start_date")) if task_data.get("start_date") else None,
-                    end=parse_date(task_data.get("end_date")) if task_data.get("end_date") else None,
-                    # Other fields can be left empty (null) as required
                 )
 
             return JsonResponse({"message": "Tasks created successfully!"}, status=201)
@@ -405,112 +854,13 @@ def create_task(request):
             return JsonResponse({"error": "Invalid JSON format"}, status=400)
         except Exception as e:
             import traceback
-            traceback.print_exc()  # Log full traceback for debugging
+            traceback.print_exc()
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
-# from django.http import JsonResponse
-# from django.views.decorators.csrf import csrf_exempt
-# import json
-# from datetime import datetime
-# from .models import ProjectTacker
 
-
-# @csrf_exempt
-# def aproove_task(request):
-#     if request.method == "POST":
-#         try:
-#             # Parse JSON data
-#             data = json.loads(request.body)
-
-#             # Debugging: Print received JSON data
-#             print("Received Data:", data)
-
-#             # Validate approver_name
-#             approver_name = data.get("approver_name")
-#             if not approver_name or not isinstance(approver_name, str):
-#                 return JsonResponse(
-#                     {"error": "Invalid or missing approver_name."}, status=400
-#                 )
-
-#             # Validate required fields
-#             required_fields = ["title", "project"]
-#             missing_fields = [field for field in required_fields if not data.get(field)]
-#             if missing_fields:
-#                 return JsonResponse(
-#                     {"error": f'Missing required fields: {", ".join(missing_fields)}'},
-#                     status=400,
-#                 )
-
-#             # Extract task title
-#             task_title = data.get("title")
-
-#             # Validate and format dates
-#             start_date = data.get("start_date")
-#             end_date = data.get("end_date")
-
-#             try:
-#                 if start_date:
-#                     start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
-#                 if end_date:
-#                     end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
-#             except ValueError:
-#                 return JsonResponse(
-#                     {"error": "Invalid date format. Use YYYY-MM-DD."}, status=400
-#                 )
-
-#             # Convert dates to strings for JSON serialization
-#             task_details = {
-#                 "team": data.get("team"),
-#                 "task_title": task_title,
-#                 "project": data.get("project"),
-#                 "scope": data.get("scope"),
-#                 "priority": data.get("priority"),
-#                 "task_benchmark":data.get("task_benchmark"),
-#                 "assigned_to": data.get("assigned_to"),
-#                 "checker": data.get("checker"),
-#                 "qc_3_checker": data.get("qc_3_checker"),
-#                 "category": data.get("category"),
-#                 "start_date": start_date.strftime("%Y-%m-%d") if start_date else None,
-#                 "end_date": end_date.strftime("%Y-%m-%d") if end_date else None,
-#                 "verification_status": data.get("verification_status"),
-#                 "task_status": data.get("task_status"),
-#                 "rev_no": data.get("rev_no"),
-#                 "d_no": data.get("d_no"),
-#             }
-
-#             # Save task details to the database
-#             project_tacker_entry = ProjectTacker.objects.create(
-#                 name=approver_name,
-#                 to_aproove=task_details,
-#                 status="Pending",
-#                 sender_name=global_user_data,
-#             )
-
-#             return JsonResponse(
-#                 {
-#                     "message": "Task created successfully!",
-#                     "project_tacker_id": project_tacker_entry.id,
-#                 },
-#                 status=201,
-#             )
-
-#         except json.JSONDecodeError:
-#             return JsonResponse({"error": "Invalid JSON data"}, status=400)
-#         except Exception as e:
-#             # Log the error for debugging purposes
-#             print("Error:", str(e))
-#             return JsonResponse(
-#                 {"error": f"Internal server error: {str(e)}"}, status=500
-#             )
-
-#     return JsonResponse({"error": "Invalid HTTP method"}, status=405)
-
-
-
-
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.utils.dateparse import parse_date
 from tracker.models import TrackerTasks
@@ -521,65 +871,32 @@ def edit_task(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body.decode("utf-8"))
+            task_id = data.get("id")
+            if not task_id:
+                return JsonResponse({"error": "Task ID is required"}, status=400)
 
-            old_title = data.get("globalselectedtitil_for_edit_task_backend", "")
-            old_project = data.get("project", "")
-            old_scope = data.get("scope", "")
-
-            try:
-               task = TrackerTasks.objects.get(title=old_title, projects=old_project, scope=old_scope)
-            except TrackerTasks.DoesNotExist:
-                return JsonResponse({"error": "Task with the given title, project, and scope not found"}, status=404)
-
-            benchmark_raw = data.get("task_benchmark", "")
-            try:
-                task_benchmark = float(benchmark_raw) if benchmark_raw.strip() else None
-            except ValueError:
-                task_benchmark = None
+            task = TrackerTasks.objects.get(id=task_id)
 
             task.title = data.get("title", "")
-            task.list = data.get("list", "")
-            task.priority = data.get("priority", "")
-            task.assigned = data.get("assigned_to", "")
-            task.checker = data.get("checker", "")
-            task.qc3_checker = data.get("qc_3_checker", "")
+            task.projects = data.get("project", "")
+            task.scope = data.get("scope", "")
             task.category = data.get("category", "")
-            task.start = parse_date(data.get("start_date")) if data.get("start_date") else None
-            task.end = parse_date(data.get("end_date")) if data.get("end_date") else None
-            task.verification_status = data.get("verification_status", "")
-            task.task_status = data.get("task_status", "")
+            task.start = parse_date(data.get("start_date"))
+            task.end = parse_date(data.get("end_date"))
             task.rev = data.get("rev_no", "")
             task.d_no = data.get("d_no", "")
-            task.task_benchmark = task_benchmark
-
-            # Handle phase benchmarks
-            phase_benchmarks = [
-                'phase_1_benchmark', 'phase_2_benchmark', 'phase_3_benchmark', 'phase_4_benchmark',
-                'phase_5_benchmark', 'phase_6_benchmark', 'phase_7_benchmark', 'phase_8_benchmark',
-                'phase_9_benchmark', 'phase_10_benchmark'
-            ]
-            for phase in phase_benchmarks:
-                benchmark_value = data.get(phase, "")
-                try:
-                    if benchmark_value.strip():
-                        task.__setattr__(phase, float(benchmark_value))
-                    else:
-                        task.__setattr__(phase, None)
-                except ValueError:
-                    task.__setattr__(phase, None)
+            task.task_benchmark = data.get("task_benchmark", None)
 
             task.save()
+            return JsonResponse({"message": "Task updated successfully!"}, status=200)
 
-            return JsonResponse({"message": "Task updated successfully!", "task": data}, status=200)
-
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON format"}, status=400)
+        except TrackerTasks.DoesNotExist:
+            return JsonResponse({"error": "Task not found"}, status=404)
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
+
 
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -624,42 +941,64 @@ def get_task_by_title_project_scope(request):
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
+from datetime import datetime, timedelta
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import TrackerTasks
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from datetime import datetime, timedelta
+from .models import TrackerTasks
+
 @csrf_exempt
 def get_hoursheet_data(request):
     try:
-        tasks = TrackerTasks.objects.all()
+        # Parse start_date and end_date from the query params
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+
+        if not start_date or not end_date:
+            today = datetime.today()
+            start_of_week = today - timedelta(days=today.weekday())
+            end_of_week = start_of_week + timedelta(days=6)
+            start_date = start_of_week.date()
+            end_date = end_of_week.date()
+        else:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+
+        tasks = TrackerTasks.objects.filter(date1__range=[start_date, end_date])
+
+        week_rows = {}
+        for task in tasks:
+            key = (task.projects, task.scope, task.title, task.category or '')
+            if key not in week_rows:
+                week_rows[key] = {
+                    'projects': task.projects,
+                    'scope': task.scope,
+                    'title': task.title,
+                    'category': task.category or '',
+                    'comments': {},
+                    'mon': 0, 'tue': 0, 'wed': 0, 'thur': 0, 'fri': 0, 'sat': 0, 'sun': 0
+                }
+
+            day_index = task.date1.weekday()
+            day_keys = ['mon', 'tue', 'wed', 'thur', 'fri', 'sat', 'sun']
+            weekday = day_keys[day_index]
+            time_val = float(task.time or 0)
+            week_rows[key][weekday] += time_val
+
+            if task.comments:
+                week_rows[key]['comments'][weekday] = task.comments
 
         result_data = []
-
-        for task in tasks:
-            week_days = {'mon': 0, 'tue': 0, 'wed': 0, 'thur': 0, 'fri': 0, 'sat': 0, 'sun': 0}
-            date1 = task.date1
-            time_val = task.time or 0
-
-            if date1:
-                weekday = date1.weekday()
-                keys = ['mon', 'tue', 'wed', 'thur', 'fri', 'sat', 'sun']
-                if 0 <= weekday <= 6:
-                    week_days[keys[weekday]] = float(time_val)
-
-            row = {
-                'projects': task.projects,
-                'scope': task.scope,
-                'title': task.title,
-                'category': task.category or '',
-                'comments': task.comments or '',
-                **week_days,
-                'total_hours': sum(week_days.values())
-            }
-
+        for row in week_rows.values():
+            total_hours = sum([row[d] for d in ['mon', 'tue', 'wed', 'thur', 'fri', 'sat', 'sun']])
+            row['total_hours'] = round(total_hours, 2)
             result_data.append(row)
 
-        dropdowns = {
-            'projects': list(TrackerTasks.objects.values_list('projects', flat=True).distinct()),
-            'scopes': list(TrackerTasks.objects.values_list('scope', flat=True).distinct()),
-            'tasks': list(TrackerTasks.objects.values_list('title', flat=True).distinct()),
-            'categories': list(TrackerTasks.objects.values_list('category', flat=True).distinct()),
-        }
+        dropdowns = list(TrackerTasks.objects.values('projects', 'scope', 'title', 'category').distinct())
 
         return JsonResponse({
             "draw": int(request.GET.get('draw', 1)),
@@ -667,6 +1006,79 @@ def get_hoursheet_data(request):
             "recordsFiltered": len(result_data),
             "data": result_data,
             "dropdowns": dropdowns
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .models import TrackerTasks  # or your actual model
+
+@csrf_exempt
+def delete_timesheet_row(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            project = data.get('projects')
+            scope = data.get('scope')
+            title = data.get('title')
+            category = data.get('category')
+            # You can also filter by user if needed
+
+            TrackerTasks.objects.filter(
+                projects=project,
+                scope=scope,
+                title=title,
+                category=category
+            ).delete()
+
+            return JsonResponse({"status": "success"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+from datetime import datetime
+from django.http import JsonResponse
+from .models import TrackerTasks
+
+def get_filter_data(request):
+    try:
+        # Get required date range
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+        if not start_date_str or not end_date_str:
+            return JsonResponse({'error': 'Start and end date are required.'}, status=400)
+
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+
+        # Optional cascading filters
+        selected_project = request.GET.get('project')
+        selected_scope = request.GET.get('scope')
+        selected_task = request.GET.get('task')
+
+        # Filter base queryset
+        queryset = TrackerTasks.objects.filter(date1__range=(start_date, end_date))
+
+        if selected_project:
+            queryset = queryset.filter(projects=selected_project)
+        if selected_scope:
+            queryset = queryset.filter(scope=selected_scope)
+        if selected_task:
+            queryset = queryset.filter(title=selected_task)
+
+        # Return distinct dropdown values based on current filter level
+        projects = queryset.values_list('projects', flat=True).distinct()
+        scopes = queryset.values_list('scope', flat=True).distinct()
+        tasks = queryset.values_list('title', flat=True).distinct()
+        categories = queryset.values_list('category', flat=True).distinct()
+
+        return JsonResponse({
+            'projects': list(projects),
+            'scopes': list(scopes),
+            'tasks': list(tasks),
+            'categories': list(categories)
         })
 
     except Exception as e:
@@ -691,19 +1103,48 @@ def submit_timesheet(request):
         data = json.loads(request.body.decode("utf-8"))
 
         for entry in data:
+            # Check if entry has the required fields
+            if not entry.get('projects') or not entry.get('scope') or not entry.get('title'):
+                return JsonResponse({"error": "Missing required fields."}, status=400)
+
+            # Convert date1 to a valid date object if not already
+            try:
+                date1 = datetime.strptime(entry['date1'], "%Y-%m-%d").date()
+            except ValueError:
+                return JsonResponse({"error": f"Invalid date format for date1: {entry['date1']}"}, status=400)
+
+            # Check if there's an existing task with the same project, scope, title, and category
+            existing_task = TrackerTasks.objects.filter(
+                projects=entry['projects'],
+                scope=entry['scope'],
+                title=entry['title'],
+                category=entry.get('category', '')
+            ).first()
+
+            # If the task already exists, update its benchmark, drawing number, and revision number
+            if existing_task:
+                task_benchmark = entry.get('task_benchmark', existing_task.task_benchmark)
+                d_no = entry.get('d_no', existing_task.d_no)
+                rev = entry.get('rev', existing_task.rev)
+            else:
+                task_benchmark = entry.get('task_benchmark', 0)
+                d_no = entry.get('d_no', '')
+                rev = entry.get('rev', '')
+
+            # Update or create the task entry
             TrackerTasks.objects.update_or_create(
                 projects=entry['projects'],
                 scope=entry['scope'],
                 title=entry['title'],
-                date1=datetime.strptime(entry['date1'], "%Y-%m-%d").date(),
+                date1=date1,
                 defaults={
                     'time': float(entry['time']),
                     'category': entry.get('category', ''),
                     'comments': entry.get('comments', ''),
                     'assigned': username,
-                    'task_benchmark': float(entry.get('task_benchmark', 0)),
-                    'd_no': entry.get('d_no', ''),
-                    'rev': entry.get('rev', '')
+                    'task_benchmark': task_benchmark,
+                    'd_no': d_no,
+                    'rev': rev
                 }
             )
 
@@ -2151,53 +2592,6 @@ def get_monthly_weekly_attendance(request):
     })
 
 
-
-from django.http import JsonResponse
-from datetime import datetime, timedelta
-from .models import Attendance  # Import the Attendance model
-
-global_user_data = None  # Global user data
-
-def get_last_week_metrics(request):
-    global global_user_data
-    if not global_user_data:
-        return JsonResponse({"error": "User not logged in."}, status=401)
-
-    user_id = global_user_data.get("employee_id")
-
-    # Get last week's date range (Monday to Sunday)
-    today = datetime.today()
-    last_week_start = today - timedelta(days=today.weekday() + 7)  # Previous Monday
-    last_week_end = last_week_start + timedelta(days=6)  # Previous Sunday
-
-    # Fetch total work hours and count working days in last week using Django ORM
-    worktime_data = Attendance.objects.filter(
-        user_id=user_id,
-        date__range=[last_week_start, last_week_end]
-    ).aggregate(total_worktime=models.Sum('worktime'), total_days=models.Count('date', distinct=True))
-
-    total_hours_last_week = worktime_data['total_worktime'] or 0.0
-    total_working_days = worktime_data['total_days'] or 1  # Avoid division by zero
-
-    # Calculate Average Hours per Day
-    average_hours_per_day = total_hours_last_week / total_working_days
-
-    # Fetch total on-time arrivals (Punch-in before or at 9 AM)
-    on_time_count = Attendance.objects.filter(
-        user_id=user_id,
-        date__range=[last_week_start, last_week_end],
-        punch_in__lte="09:00:00"
-    ).count()
-
-    # Calculate On-Time Arrival Percentage
-    on_time_percentage = (on_time_count / total_working_days) * 100 if total_working_days > 0 else 0.0
-
-    return JsonResponse({
-        "average_hours_per_day": f"{int(average_hours_per_day):02}:{int((average_hours_per_day % 1) * 60):02}",  # Convert to HH:MM format
-        "on_time_percentage": round(on_time_percentage, 2)
-    })
-
-
 from django.http import JsonResponse
 from .models import Attendance  # Import the Attendance model
 
@@ -2475,27 +2869,28 @@ def get_user_worktime(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 from django.http import JsonResponse
-from .models import Attendance  # Assuming you have an Attendance model
+from .models import Attendance
+from django.views.decorators.http import require_GET
 
+@require_GET
 def get_attendance_details(request):
-    try:
-        employee_id = request.GET.get('employee_id')
-        date = request.GET.get('date')  # Format: YYYY-MM-DD
-        
-        if not employee_id or not date:
-            return JsonResponse({'error': 'Missing employee_id or date'}, status=400)
+    employee_id = request.GET.get('employee_id')
+    date = request.GET.get('date')  # Expected format: YYYY-MM-DD
 
-        # Fetch the attendance record for the specific employee and date
+    if not employee_id or not date:
+        return JsonResponse({'error': 'Missing employee_id or date'}, status=400)
+
+    try:
         attendance = Attendance.objects.filter(
             user_id=employee_id,
             date=date
-        ).values('punch_in', 'punch_out', 'break_time', 'worktime')
+        ).values('punch_in', 'punch_out', 'break_time', 'worktime').first()
 
         if not attendance:
-            return JsonResponse({'error': 'No attendance found for this date'}, status=404)
+            # ✅ Return status=200 with an error message to avoid 404
+            return JsonResponse({'error': 'No data for selected date'}, status=200)
 
-        # Return the data as JSON
-        return JsonResponse({'attendance': attendance[0]})
+        return JsonResponse({'attendance': attendance}, status=200)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
@@ -2684,23 +3079,21 @@ from .models import TrackerTasks
 from datetime import datetime
 
 def get_task_details_for_sidebar(request):
-    # Fetch the date from the request
     selected_date = request.GET.get('date')
 
     if not selected_date:
         return JsonResponse({'error': 'date is required'}, status=400)
 
     try:
-        # Ensure the date format is correct
         selected_date = datetime.strptime(selected_date, '%Y-%m-%d').date()
 
-        # Query tasks by date (assuming date1 is the field that holds the task date)
+        # Query tasks by date
         tasks = TrackerTasks.objects.filter(date1=selected_date)
 
-        if not tasks:
-            return JsonResponse({'error': 'No tasks found for this date'}, status=404)
+        if not tasks.exists():  # ✅ Use exists() instead of evaluating queryset
+            return JsonResponse({'tasks': []})  # ✅ Return empty list, not error
 
-        # Prepare task data to return in JSON format, including the assignee field (assigned)
+        # Prepare task data
         task_data = [{
             'title': task.title,
             'projects': task.projects,
@@ -2709,7 +3102,7 @@ def get_task_details_for_sidebar(request):
             'time': task.time,
             'comments': task.comments,
             'task_benchmark': task.task_benchmark,
-            'assigned': task.assigned  # Correctly using 'assigned' field
+            'assigned': task.assigned
         } for task in tasks]
 
         return JsonResponse({'tasks': task_data})
@@ -2794,162 +3187,160 @@ from django.http import JsonResponse
 from .models import TrackerTasks
 from django.db.models import Sum
 
-def get_team_chart_data(request):
-    # Fetch all tasks from the database
-    team_data = TrackerTasks.objects.values(
-        'team',
-        'projects',
-        'scope',
-        'category',
-        'title',
-        'rev',
-        'task_benchmark'
-    ).order_by('team')
+def get_projects(request):
+    # Get distinct project names
+    distinct_projects = TrackerTasks.objects.values_list('projects', flat=True).distinct()
 
-    # Dictionary to accumulate approved hours and worktime
-    approved_hours_dict = {}
-    total_worktime_dict = {}
-
-    # Loop through the data to manually filter duplicates for Approved Hours
-    unique_combinations = set()
-    for entry in team_data:
-        key = (entry['team'], entry['projects'], entry['scope'], entry['category'], entry['title'], entry['rev'])
-        
-        # Check if the combination already exists
-        if key not in unique_combinations:
-            unique_combinations.add(key)  # Mark this combination as counted
-            
-            # Initialize the dictionary if team not present
-            if entry['team'] not in approved_hours_dict:
-                approved_hours_dict[entry['team']] = 0
-            
-            # Add the benchmark value only if it's unique
-            approved_hours_dict[entry['team']] += float(entry['task_benchmark'] or 0)
-    
-    # Calculate Total Worktime by filtering just the Team
-    worktime_data = TrackerTasks.objects.values('team').annotate(
-        total_worktime=Sum('time')
-    ).order_by('team')
-
-    # Populate the dictionary with worktime values
-    for entry in worktime_data:
-        total_worktime_dict[entry['team']] = entry['total_worktime']
-
-    # Prepare data for JSON response
-    data = {
-        "teams": list(approved_hours_dict.keys()),
-        "approvedHours": list(approved_hours_dict.values()),
-        "totalWorktime": [total_worktime_dict.get(team, 0) for team in approved_hours_dict.keys()]
-    }
-    
-    return JsonResponse(data)
-
-from django.http import JsonResponse
-from .models import TrackerTasks
-
-def get_team_data(request):
-    teams = TrackerTasks.objects.values('team').distinct()
-    team_names = [team['team'] for team in teams]
-    return JsonResponse({"teams": team_names})
-
-def get_projects(request, team):
-    projects = TrackerTasks.objects.filter(team=team).values('projects').distinct()
-    project_names = [project['projects'] for project in projects]
-    return JsonResponse({"projects": project_names})
-
-from django.http import JsonResponse
-from .models import TrackerTasks
-from django.db.models import Sum
-
-def get_task_data(request, team, project):
-    # Decode team and project if needed (e.g., if they contain special characters)
-    # team = urllib.parse.unquote(team)
-    # project = urllib.parse.unquote(project)
-
-    # Query tasks based on team and project
-    tasks = TrackerTasks.objects.filter(team=team, projects=project).values('title').distinct()
-    
+    # Prepare response containers
+    project_names = []
     approved_hours = []
     total_worktime = []
-    task_titles = []
-    
-    for task in tasks:
-        task_titles.append(task['title'])
-        
-        # Calculate total approved hours for each task
-        approved_hours_sum = TrackerTasks.objects.filter(
-            team=team, projects=project, title=task['title']
-        ).aggregate(Sum('task_benchmark'))['task_benchmark__sum'] or 0
-        approved_hours.append(approved_hours_sum)
-        
-        # Calculate total worktime for each task
-        total_worktime_sum = TrackerTasks.objects.filter(
-            team=team, projects=project, title=task['title']
-        ).aggregate(Sum('time'))['time__sum'] or 0
-        total_worktime.append(total_worktime_sum)
-    
+
+    for project in distinct_projects:
+        project_names.append(project)
+
+        tasks = TrackerTasks.objects.filter(projects=project).values(
+            'scope', 'category', 'title', 'rev', 'd_no', 'task_benchmark', 'time'
+        )
+
+        # Approved hours should be based on unique task definitions
+        unique_keys = set()
+        approved_sum = 0
+        worktime_sum = 0
+
+        for task in tasks:
+            key = (task['scope'], task['category'], task['title'], task['rev'], task['d_no'])
+            if key not in unique_keys:
+                unique_keys.add(key)
+                approved_sum += float(task['task_benchmark'] or 0)
+
+            worktime_sum += float(task['time'] or 0)
+
+        approved_hours.append(approved_sum)
+        total_worktime.append(worktime_sum)
+
+    # Final combined response
     return JsonResponse({
-        "tasks": task_titles,
+        "projects": project_names,
         "approvedHours": approved_hours,
         "totalWorktime": total_worktime
     })
 
+
+
+# ✅ New view: Get project-level data (approved + total worktime)
+def get_project_data(request, project):
+    # Filter only for the selected project
+    tasks = TrackerTasks.objects.filter(projects=project).values(
+        'projects', 'scope', 'category', 'title', 'rev', 'task_benchmark'
+    )
+
+    # For unique approved hours
+    unique_keys = set()
+    approved_hours = 0
+    for task in tasks:
+        key = (task['projects'], task['scope'], task['category'], task['title'], task['rev'])
+        if key not in unique_keys:
+            unique_keys.add(key)
+            approved_hours += float(task['task_benchmark'] or 0)
+
+    # Total worktime for this project
+    total_worktime = TrackerTasks.objects.filter(projects=project).aggregate(
+        total=Sum('time')
+    )['total'] or 0
+
+    return JsonResponse({
+        "projects": [project],
+        "approvedHours": [approved_hours],
+        "totalWorktime": [total_worktime]
+    })
+
+
 from django.http import JsonResponse
 from .models import TrackerTasks
-from django.db.models import Sum
 
-def get_team_chart_data(request):
-    # Fetch all tasks from the database
-    team_data = TrackerTasks.objects.values(
-        'team',
-        'projects',
-        'scope',
-        'category',
-        'title',
-        'rev',
-        'd_no',  # Include d_no in the values
-        'task_benchmark'
-    ).order_by('team')
+def get_task_data(request, project):
+    tasks = TrackerTasks.objects.filter(projects=project)
 
-    # Dictionary to accumulate approved hours and worktime
-    approved_hours_dict = {}
-    total_worktime_dict = {}
+    task_names = []
+    approved_hours_list = []
+    total_worktime_list = []
+    user_worktime_map = {}
 
-    # Loop through the data to manually filter duplicates for Approved Hours
-    unique_combinations = set()
-    for entry in team_data:
-        # Create a unique key based on the combination of team, project, scope, category, title, rev, and d_no
-        key = (entry['team'], entry['projects'], entry['scope'], 
-               entry['category'], entry['title'], entry['rev'], entry['d_no'])
+    for task in tasks:
+        task_name = task.title
+        task_names.append(task_name)
+        approved_hours_list.append(float(task.task_benchmark or 0))
+        total_worktime_list.append(float(task.time or 0))
+
+        user = task.assigned or "Unassigned"
+        user_worktime_map[user] = user_worktime_map.get(user, 0) + float(task.time or 0)
+
+    return JsonResponse({
+        "tasks": task_names,
+        "approvedHours": approved_hours_list,
+        "totalWorktime": total_worktime_list,
+        "userWorktimes": user_worktime_map
+    })
+
+
+
+# from django.http import JsonResponse
+# from .models import TrackerTasks
+# from django.db.models import Sum
+
+# def get_team_chart_datas(request):
+#     # Fetch all tasks from the database
+#     team_data = TrackerTasks.objects.values(
+#         'team',
+#         'projects',
+#         'scope',
+#         'category',
+#         'title',
+#         'rev',
+#         'd_no',  # Include d_no in the values
+#         'task_benchmark'
+#     ).order_by('team')
+
+#     # Dictionary to accumulate approved hours and worktime
+#     approved_hours_dict = {}
+#     total_worktime_dict = {}
+
+#     # Loop through the data to manually filter duplicates for Approved Hours
+#     unique_combinations = set()
+#     for entry in team_data:
+#         # Create a unique key based on the combination of team, project, scope, category, title, rev, and d_no
+#         key = (entry['team'], entry['projects'], entry['scope'], 
+#                entry['category'], entry['title'], entry['rev'], entry['d_no'])
         
-        # Check if the combination already exists
-        if key not in unique_combinations:
-            unique_combinations.add(key)  # Mark this combination as counted
+#         # Check if the combination already exists
+#         if key not in unique_combinations:
+#             unique_combinations.add(key)  # Mark this combination as counted
             
-            # Initialize the dictionary if team is not present
-            if entry['team'] not in approved_hours_dict:
-                approved_hours_dict[entry['team']] = 0
+#             # Initialize the dictionary if team is not present
+#             if entry['team'] not in approved_hours_dict:
+#                 approved_hours_dict[entry['team']] = 0
             
-            # Add the benchmark value (approved hours) for the unique combination
-            approved_hours_dict[entry['team']] += float(entry['task_benchmark'] or 0)
+#             # Add the benchmark value (approved hours) for the unique combination
+#             approved_hours_dict[entry['team']] += float(entry['task_benchmark'] or 0)
     
-    # Calculate Total Worktime by filtering just the Team
-    worktime_data = TrackerTasks.objects.values('team').annotate(
-        total_worktime=Sum('time')
-    ).order_by('team')
+#     # Calculate Total Worktime by filtering just the Team
+#     worktime_data = TrackerTasks.objects.values('team').annotate(
+#         total_worktime=Sum('time')
+#     ).order_by('team')
 
-    # Populate the dictionary with worktime values
-    for entry in worktime_data:
-        total_worktime_dict[entry['team']] = entry['total_worktime']
+#     # Populate the dictionary with worktime values
+#     for entry in worktime_data:
+#         total_worktime_dict[entry['team']] = entry['total_worktime']
 
-    # Prepare data for JSON response
-    data = {
-        "teams": list(approved_hours_dict.keys()),
-        "approvedHours": list(approved_hours_dict.values()),
-        "totalWorktime": [total_worktime_dict.get(team, 0) for team in approved_hours_dict.keys()]
-    }
+#     # Prepare data for JSON response
+#     data = {
+#         "teams": list(approved_hours_dict.keys()),
+#         "approvedHours": list(approved_hours_dict.values()),
+#         "totalWorktime": [total_worktime_dict.get(team, 0) for team in approved_hours_dict.keys()]
+#     }
 
-    return JsonResponse(data)
+#     return JsonResponse(data)
 
 
 def get_project(request, team):
@@ -2962,53 +3353,48 @@ from django.http import JsonResponse
 from .models import TrackerTasks
 from django.db.models import Sum
 
-def get_task_datas(request, team, project):
-    # Fetch all tasks for the specified team and project, grouped by the combination of team, project, scope, category, title, rev, and d_no (as string)
-    tasks = TrackerTasks.objects.filter(team=team, projects=project).values(
-        'team', 'projects', 'scope', 'category', 'title', 'rev', 'd_no'
+def get_task_datas(request, project):  # ✅ Only project now
+    # Fetch all unique task combinations under the project
+    tasks = TrackerTasks.objects.filter(projects=project).values(
+        'projects', 'scope', 'category', 'title', 'rev', 'd_no'
     ).distinct()
-
-    print("🟢 Tasks found:", list(tasks))
 
     approved_hours = []
     total_worktime = []
     task_titles = []
-
-    # New: User worktime dictionary
     user_worktimes = {}
 
     for task in tasks:
         task_titles.append(task['title'])
 
-        # Calculate total approved hours for this task combination (unique combination)
-        approved_hours_sum = TrackerTasks.objects.filter(
-            team=team, projects=project, title=task['title'], rev=task['rev'], d_no=task['d_no']
-        ).aggregate(Sum('task_benchmark'))['task_benchmark__sum'] or 0
-        approved_hours.append(approved_hours_sum)
+        filters = {
+            'projects': project,
+            'title': task['title'],
+            'rev': task['rev'],
+            'd_no': task['d_no'],
+        }
 
-        # Calculate total worktime for this task combination (unique combination)
-        total_worktime_sum = TrackerTasks.objects.filter(
-            team=team, projects=project, title=task['title'], rev=task['rev'], d_no=task['d_no']
-        ).aggregate(Sum('time'))['time__sum'] or 0
-        total_worktime.append(total_worktime_sum)
+        # Approved hours
+        approved_sum = TrackerTasks.objects.filter(**filters).aggregate(
+            total=Sum('task_benchmark')
+        )['total'] or 0
+        approved_hours.append(approved_sum)
 
-    # New: Aggregate total worktime per user for the selected project
-    user_data = TrackerTasks.objects.filter(team=team, projects=project).values('assigned').annotate(
+        # Total worktime
+        worktime_sum = TrackerTasks.objects.filter(**filters).aggregate(
+            total=Sum('time')
+        )['total'] or 0
+        total_worktime.append(worktime_sum)
+
+    # Aggregate user worktimes under this project
+    user_data = TrackerTasks.objects.filter(projects=project).values('assigned').annotate(
         total_worktime=Sum('time')
     )
 
-    print("🟢 User Data Found:", list(user_data))  # << This should show user details
-
-    # Fill the user_worktimes dictionary
     for entry in user_data:
-        username = entry['assigned']
-        worktime = entry['total_worktime']
-        
-        # Only add to the dictionary if worktime is not None
-        if worktime is not None:
-            user_worktimes[username] = worktime
-
-    print("🟢 Final user worktimes:", user_worktimes)  # << This should show the final dictionary
+        username = entry['assigned'] or 'Unassigned'
+        if entry['total_worktime'] is not None:
+            user_worktimes[username] = entry['total_worktime']
 
     return JsonResponse({
         "tasks": task_titles,
@@ -3018,15 +3404,12 @@ def get_task_datas(request, team, project):
     })
 
 
-
 from django.http import JsonResponse
 from .models import TrackerTasks
-from django.db.models import Sum
 
-def get_project_data(request, team, project):
-    # Fetch all tasks for the specified team and project with the relevant fields
-    team_data = TrackerTasks.objects.filter(team=team, projects=project).values(
-        'team',
+def get_project_data(request, project):
+    # Fetch all tasks for the specified project
+    project_data = TrackerTasks.objects.filter(projects=project).values(
         'projects',
         'scope',
         'category',
@@ -3035,47 +3418,39 @@ def get_project_data(request, team, project):
         'd_no',
         'task_benchmark',
         'time'
-    ).order_by('team')
+    )
 
-    # Dictionary to accumulate approved hours and worktime
-    approved_hours_dict = {}
-    total_worktime_dict = {}
-
-    # Set to track unique combinations for Approved Hours only
+    # Use dicts to accumulate approved hours and total worktime
+    approved_hours = 0
+    total_worktime = 0
     unique_combinations = set()
 
-    # Loop through the data
-    for entry in team_data:
-        # Create a unique key for Approved Hours only (scope, category, title, rev, d_no)
-        key = (entry['team'], entry['projects'], entry['scope'], 
-               entry['category'], entry['title'], entry['rev'], entry['d_no'])
+    for entry in project_data:
+        key = (
+            entry['projects'],
+            entry['scope'],
+            entry['category'],
+            entry['title'],
+            entry['rev'],
+            entry['d_no']
+        )
 
-        # Filter only approved hours with unique key
+        # Add approved hours only once for each unique key
         if key not in unique_combinations:
-            unique_combinations.add(key)  # Mark this combination as counted
+            unique_combinations.add(key)
+            approved_hours += float(entry['task_benchmark'] or 0)
 
-            # Initialize the dictionary if team not present
-            if entry['team'] not in approved_hours_dict:
-                approved_hours_dict[entry['team']] = 0
+        # Always sum total worktime
+        total_worktime += float(entry['time'] or 0)
 
-            # Add the benchmark value (Approved Hours)
-            approved_hours_dict[entry['team']] += float(entry['task_benchmark'] or 0)
-
-        # Total worktime should be summed directly, without filtering by key
-        if entry['team'] not in total_worktime_dict:
-            total_worktime_dict[entry['team']] = 0
-        
-        total_worktime_dict[entry['team']] += float(entry['time'] or 0)
-
-    # Prepare the data for JSON response
+    # Prepare JSON response
     data = {
-        "projects": [project],  # Since we are filtering for one project
-        "approvedHours": [approved_hours_dict.get(team, 0) for team in approved_hours_dict.keys()],
-        "totalWorktime": [total_worktime_dict.get(team, 0) for team in approved_hours_dict.keys()]
+        "projects": [project],
+        "approvedHours": [approved_hours],
+        "totalWorktime": [total_worktime]
     }
 
     return JsonResponse(data)
-
 
 
 from django.shortcuts import render

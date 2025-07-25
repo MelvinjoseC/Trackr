@@ -1,23 +1,27 @@
 /* Simple calendar styling */
- 
 #monthly-analysis {
-  background-color: #ffffff;
-    padding: 35px;
+    background-color: #ffffff;
+    padding: 2.2rem;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    margin-top: 17px;
+    margin-top: 14px;
     transition: all 0.3s ease;
-    width: 1220px;
-    height: 859px;
-    margin-left: 20px;
-    align-content: center;
+    width: 65vw;
+    /* max-width: 1280px; */
+    height: 91vh;
+    /* margin-left: auto; */
+    /* margin-right: auto; */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
+
  
-  .header {
+.header {
     display: flex;
     align-items: center;
-    gap: 268px; /* 👈 Add this line to create space between elements */
-    margin-bottom: 30px;
+    gap: 34vh;
+    margin-bottom: 3vh;
   }
   
   .dropdown {
@@ -124,18 +128,21 @@ hr {
     display: flex;
 
   }
-  button {
+ 
+  #toggle-btn, #toggle-btn2, #toggle-btnweekly {
     padding: 5px 10px;
     font-size: 18px;
     border: none;
-    background-color: #fff;
+    background-color: #333DAE;
     border-radius: 6px;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 4px rgb(255, 255, 255);
     transition: background 0.2s ease;
+    color: white;
   }
-  button:hover {
-    background-color: #e0e0e0;
+  #toggle-btn:hover, #toggle-btn2:hover, #toggle-btnweekly:hover {
+    background-color: #1d2a85;
+
   }
   h2 {
     margin: 0;
@@ -143,23 +150,40 @@ hr {
   }
   
 
-  #right-sidebar1 {
-    width: 225px;
-    background: #f8f9fa;
-    padding: 54px;
+#right-sidebar1 {
+    width: 13vw;
+    /* max-width: 90vw; */
+    background: #fff;
+    padding: 4vh 2vw;
     position: absolute;
     right: 0;
     bottom: 0;
-    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-    background: #fff;
-    border-radius: 8px;
-    height: 89%;
-    margin-left: 16px;
-    margin-top: 0px;
+    box-shadow: -0.3vw 0 0.7vw rgba(0, 0, 0, 0.1);
+    border-radius: 1vh;
+    height: 90vh;
+    margin-left: 1vw;
+    margin-top: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
+    overflow-y: auto;
+    transition: all 0.3s ease;
 }
+/* 📱 Responsive: On smaller screens, make it full width at bottom */
+@media (max-width: 768px) {
+    #right-sidebar1 {
+        width: 100vw;
+        height: auto;
+        padding: 3vh 4vw;
+        border-radius: 0;
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        align-items: flex-start;
+        box-shadow: 0 -0.3vh 0.8vh rgba(0, 0, 0, 0.1);
+    }
+}
+
 
 #attendance-details {
   margin-top: 280px;

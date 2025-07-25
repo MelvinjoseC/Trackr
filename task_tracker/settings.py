@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
 from pathlib import Path
-
+import pymysql
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -91,18 +91,26 @@ WSGI_APPLICATION = 'task_tracker.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'tasktracker',  # Name of your MySQL database
+#         'USER': 'root',  # Your MySQL username
+#         'PASSWORD': 'varshith123',  # Your MySQL password
+#         'HOST': 'localhost',  # Set to 'localhost' or your MySQL server's IP address
+#         'PORT': '3306',  # Default MySQL port
+#     }
+# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'tasktracker',
+        'NAME': 'tasktracker',  # Name of your MySQL database
         'USER': 'root',
         'PASSWORD': 'Fusie@123',
         'HOST': '192.168.0.7',
         'PORT': '3306',
     }
 }
- 
- 
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

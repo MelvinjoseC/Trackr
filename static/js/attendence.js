@@ -878,28 +878,3 @@ document.addEventListener("DOMContentLoaded", function () {
     fetchAttendanceSummary();
 });
 
-
-
-document.addEventListener("DOMContentLoaded", function () {
-    function fetchLastWeekMetrics() {
-        fetch(`/get_last_week_metrics/`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    console.error("Error fetching last week metrics:", data.error);
-                    return;
-                }
-
-                // ✅ Update UI with last week's stats
-                document.querySelector(".highlight-text1").innerText = data.average_hours_per_day;
-                document.querySelector(".highlight-text2").innerText = `${data.on_time_percentage}%`;
-            })
-            .catch(error => console.error("Error fetching last week metrics:", error));
-    }
-
-    // ✅ Fetch and display last week's work stats on page load
-    fetchLastWeekMetrics();
-});
-
-
-// ADMIN STATUS

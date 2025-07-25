@@ -97,7 +97,14 @@ input[type="date"] {
     justify-content: flex-end;
     margin-top: 1.45vh;
 }
-
+.submit-btns {
+    padding: 1vh 2vw;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5vh;
+    border-radius: 5px;
+    font-weight: 500;
+}
 .submit-btn {
     padding: 1vh 2vw;
     border: none;
@@ -405,7 +412,17 @@ span.date-highlight {
     font-size: 14px;
     border-radius: 4px;
 }
-
+#UPDATE_PROJECTSTATUS{
+    padding: 5px 10px;
+    font-size: 18px;
+    border: none;
+    background-color: #333DAE;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgb(255, 255, 255);
+    transition: background 0.2s ease;
+    color: white;
+}
 .accept-btn {
     background-color: #333DAE;
     color: white;
@@ -643,26 +660,41 @@ span.date-highlight {
 
 /* Buttons Styling */
 #teamForm button {
-    background-color: #007bff;
-    color: #ffffff;
-    padding: 5px 15px;
+    padding: 5px 10px;
+    font-size: 18px;
     border: none;
-    border-radius: 4px;
+    background-color: #333DAE;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    margin-top: 5px;
-    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 4px rgb(255, 255, 255);
+    transition: background 0.2s ease;
+    color: white;
 }
-
-
-#viewRankingButton ,#backToSearch {
-    background-color: #28a745;
+#goBackBtn {
+    background-color: #333DAE;
     margin-left: 5px;
+    color: white;
+    padding: 1vh 2vw;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5vh;
+    border-radius: 5px;
+    font-weight: 500;
+}
+#viewRankingButton ,#backToSearch {
+    background-color: #333DAE;;
+    margin-left: 5px;
+    color: white;
+    padding: 1vh 2vw;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5vh;
+    border-radius: 5px;
+    font-weight: 500;
 }
 
 #viewRankingButton:hover ,#backToSearch {
-    background-color: #218838;
+    background-color: #333DAE;
 }
 
 

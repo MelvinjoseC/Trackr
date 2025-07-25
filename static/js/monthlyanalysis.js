@@ -22,21 +22,21 @@ function handleDateClick(dateStr, employeeId) {
     return;
   }
 
-  fetch(`/attendance/get-attendance-details/?employee_id=${employeeId}&date=${dateStr}`)
+    fetch(`/attendance/get-attendance-details/?employee_id=${employeeId}&date=${dateStr}`)
     .then(res => res.json())
     .then(data => {
       if (data.error) {
-        alert(data.error);  // Handle error, e.g., "No attendance found for this date"
+        alert(data.error);
         return;
       }
 
       const attendanceDetails = data.attendance;
       detailsDisplay.innerHTML = `
-        <p><strong>ATTENDACE DETAILS</strong></p>
+        <p><strong>ATTENDANCE DETAILS</strong></p>
         <hr>
         <p><strong>Punch In:</strong> ${attendanceDetails.punch_in}</p>
         <p><strong>Punch Out:</strong> ${attendanceDetails.punch_out}</p>
-        <p><strong>Break Time:</strong> ${convertSecondsToTime(attendanceDetails.break_time)} </p>  <!-- Convert seconds to hh:mm:ss -->
+        <p><strong>Break Time:</strong> ${convertSecondsToTime(attendanceDetails.break_time)} </p>
         <p><strong>Worktime:</strong> ${attendanceDetails.worktime} hrs</p>
       `;
     })
@@ -44,6 +44,8 @@ function handleDateClick(dateStr, employeeId) {
       console.error("Error fetching attendance details:", err);
       alert("Failed to fetch attendance details.");
     });
+
+
 }
 
 // Function to update the calendar view
@@ -84,7 +86,14 @@ function updateCalendar(datesWithWorktime = {}, employeeId) {
     }
 
     // Add event listener for the click event on each date
-    div.addEventListener("click", () => handleDateClick(dateStr, employeeId));
+    div.addEventListener("click", () => {
+      if (employeeId) {
+        handleDateClick(dateStr, employeeId);
+      } else {
+        alert("Please select an employee first.");
+      }
+    });
+
 
     calendar.appendChild(div);
   }
@@ -170,7 +179,7 @@ select.addEventListener("change", () => {
 });
 
 // Initialize the calendar on page load
-updateCalendar();
+updateCalendar({}, null); // pass null to employeeId explicitly
 
 // Toggle between forms
 document.addEventListener("DOMContentLoaded", function () {

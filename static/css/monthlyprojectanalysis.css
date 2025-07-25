@@ -29,11 +29,49 @@
     gap: 20px;
 }
 
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2vh 4vw;
+  background-color: #f8f9fa;
+  border-bottom: 0.3vh solid #eee;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.left-section,
+.right-section {
+  flex: 1;
+}
+
+.center-section {
+  flex: 2;
+  text-align: center;
+}
+
+#back-btn {
+    font-weight: bold;
+    font-size: 3vh;
+    background: white;
+    border-color: #ffffff;
+}
+
+#go-back-btn {
+    font-weight: bold;
+    font-size: 3vh;
+    background: white;
+    border-color: #ffffff;
+}
 
 #month-year {
-    font-size: 20px;
-    font-weight: bold;
+  font-size: 2vh;
+  font-weight: bold;
+  white-space: nowrap;      /* Prevents line break */
+  text-align: center;
+  display: inline-block;    /* Prevents full-width block stacking */
 }
+
 
 /* Total Project Worktime */
 .total-time {
@@ -73,10 +111,6 @@
 }
 
 
-/* Go Back Button */
-#go-back-btn {
-    margin-top: 20px;
-}
 
 /* Calendar Grid */
 .calendar-grid {

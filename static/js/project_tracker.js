@@ -253,7 +253,7 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .finally(() => {
                 submitButton1.disabled = false;
-                submitButton1.textContent = "Submit";
+                submitButton1.textContent = "submit";
             });
         });
     

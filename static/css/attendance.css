@@ -346,93 +346,12 @@ p#profile_designation {
     color: #484848;
 }
 
-/* Weekly Average Time Section */
-.average-week-time {
-    width: 16%;
-    height: 14vh;
-    text-align: center;
-    background-color: #ffffff;
-    padding: 1vw;
-    border-radius: 10px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-}
-
-.week-header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 1.5vh;
-    font-weight: 500;
-    color: #484848;
-    /* align-items: center; */
-    padding-top: 1vh;
-}
-
-.week-header span {
-    text-decoration: underline;
-}
-
-.user-heading{
-    padding-right:1vw;
-}
-
-.week-metric {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1.3vh;
-    color: #484848;
-    margin-top: 1vh;
-}
-
-.highlight-text1 {
-    font-size: 2.7vh;
-    font-weight: 500;
-    color: #333DAE;
-}
-
-.highlight-text2 {
-    font-size: 2.7vh;
-    font-weight: 500;
-    color: #333DAE;
-    margin-right: 0.5vw;
-}
-
-.divider {
-    border: none;
-    border-top: 1px solid #ccc;
-    margin: 5px 0;
-}
 
 /* Divider between event items */
 .event-item:not(:last-child) {
     border-right: 1px solid rgba(0, 0, 0, 0.1);
     padding-right: 15px;
 }
-
-/* .timesheet {
-    background-color: white;
-    padding: 2vh 2vw;    
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    height: 56vh;
-    margin-top:2vh;
-}
-
-.timesheet-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5vh;
-}
-
-.timesheet-header h3 {
-    margin: 0;
-    font-size: 2vh;
-    color: #484848;
-    text-decoration: underline;
-    text-transform: uppercase;
-    font-weight: 500;
-} */
 
 .date-picker {
     display: flex;

@@ -1,0 +1,192 @@
+body {
+    background-color: #ECECEC;
+    color: #343a40;
+    font-family: Roboto;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+    text-transform: uppercase;
+}
+/* ========== Container Layout ========== */
+.weekly-overview {
+  width: 173%;
+  height: auto;
+  padding: 10px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  background-color: #fff;
+}
+
+/* ========== Header ========== */
+.overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #000;
+  margin-bottom: 10px;
+}
+.tabs-container{
+  margin-left: 2vh;
+}
+.header-left {
+  width: 65%;
+}
+.header-logo{
+    margin-top: 1VH;
+    margin-left: 5.4vh;
+    width: 38vh;
+    height: 13vh;
+}
+.header-left table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.header-left td {
+  padding: 6px;
+  font-size: 14px;
+  color: #007bff;
+  font-weight: bold;
+  vertical-align: middle;
+}
+
+.header-left input {
+  width: 100%;
+  height: 24px;
+  border: 1px solid #ccc;
+  padding-left: 6px;
+  font-size: 13px;
+}
+
+.header-right {
+    width: 34%;
+    height: 15.6vh;
+    border: 1px solid black;
+    background-color: #f9f9f9;
+    margin-top: 0.8vh;
+}
+
+/* Base Table Styling */
+.main-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 20px;
+    border: 1px solid #000;
+}
+
+/* Table Header */
+.main-table th {
+    background-color: #00B0F0; /* Light blue header like in image */
+    color: #000;
+    font-weight: bold;
+    border: 1px solid #000;
+    padding: 6px;
+    text-align: center;
+}
+
+/* Table Body Cells */
+.main-table td {
+    border: 1px solid #000;
+    padding: 6px;
+    vertical-align: top;
+}
+
+/* Completed Status Cell */
+.main-table td.status-completed {
+    background-color: #C6EFCE; /* Green cell */
+    color: #006100;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Row Label Cells (e.g. PROJECT PART, PHASE) */
+.row-label {
+    font-weight: bold;
+    color: #0070C0;
+    white-space: nowrap;
+    vertical-align: top;
+}
+
+/* Multiline Description (wrap text) */
+.multiline-cell {
+    white-space: pre-wrap;
+}
+
+/* Zebra striping for grouped blocks (optional, if needed) */
+.main-table tr.grouped-block:nth-child(odd) td {
+    background-color: #f9f9f9;
+}
+
+/* Optional: Slight spacing between grouped task blocks */
+.group-separator {
+    height: 10px;
+    border: none;
+}
+
+
+/* ========== Metadata Row ========== */
+.meta-row {
+  background-color: #f2f2f2;
+}
+
+.meta-row td {
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.meta-row .label {
+  display: inline-block;
+  font-weight: bold;
+  color: #007bff;
+  min-width: 120px;
+}
+
+/* ========== Input Cell ========== */
+.input-cell input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  color: #000;
+}
+
+/* ========== Sheet Tabs ========== */
+.sheet-tabs {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+.sheet-tabs li {
+  flex: 1;
+  padding: 8px 12px;
+  text-align: center;
+  cursor: pointer;
+  background: #f2f2f2;
+  font-size: 13px;
+  border-right: 1px solid #ccc;
+  white-space: nowrap;
+}
+
+.sheet-tabs li:last-child {
+  border-right: none;
+}
+
+.sheet-tabs li.active {
+  background: #00AEEF;
+  color: #fff;
+  font-weight: bold;
+}
+
+/* ========== Chart Styling (optional) ========== */
+canvas {
+  max-width: 100%;
+  margin-top: 10px;
+}

@@ -88,12 +88,13 @@
         <button id="toggle-btn" type="button" class="btn btn-secondary">MONTHLY ANALYSIS</button>
         <button id="toggle-btn2" type="button" class="btn btn-secondary">MONTHLY PROJECT ANALYSIS</button>
         <button id="toggle-btnweekly" type="button" class="btn btn-secondary">WEEKLY PROJECT ANALYSIS</button>
+        <button id="UPDATE_PROJECTSTATUS">PROJECT CLOSURE</button>
         <div class="form-set">
             <div class="form-container">
                 <!-- Title Section -->
                  <div id="updatecontainer">
                 <div class="form-title-box">
-                    <h3 class="form-title">CREATE PROJECT<button id="UPDATE_PROJECTSTATUS">PROJECT CLOSURE</button></h3>
+                    <h3 class="form-title">CREATE PROJECT</h3>
                     
                 </div>
             
@@ -211,12 +212,10 @@
                         <label>Quality of Work</label>
                         :<div class="star-rating" data-name="quality_of_work"></div>
                       </div>
-                      
-                    <button type="submit">Add</button>
-                    
-                   
-                </form>
-               <button id="viewRankingButton">Rank lists</button>  
+
+                    <button type="submit" class="submit-btns">Add</button>
+                
+               <button id="viewRankingButton">Rank lists</button>  </form>
                 <!-- <div class="calendar_header">
                     <button id="prevMonth"><img id="arrow_left" src="{% static 'images/arrow_left.png' %}"></button>
                     <h2 id="monthYear"></h2>
@@ -312,10 +311,18 @@
  
  <div id="monthly-analysis" style="display: none;">
     <!-- Your monthly analysis calendar goes here -->
-    <button id="back-btn" type="button" class="btn btn-outline-secondary" style="margin-bottom: 15px;">
-       ← GO BACK
-     </button> 
-   <h1 align="center">MONTHLY ANALYSIS</h1>
+    <div class="topbar">
+  <div class="left-section">
+    <button id="back-btn" type="button" class="btn btn-outline-secondary">
+    🡨
+    </button>
+  </div>
+  <div class="center-section">
+    <h1>MONTHLY ANALYSIS</h1>
+  </div>
+  <div class="right-section"></div> <!-- Empty div to balance flex space -->
+</div>
+
    <div class="header">
        <select id="employee-select" class="dropdown">
          <option value="">-- Select Employee --</option>
@@ -327,7 +334,7 @@
          <button id="next-month">&#8594;</button>
        </div>
      
-     <div id="total-worktime-display" style="font-size: 18px; font-weight: 600; margin-bottom: 15px;"></div>
+     <div id="total-worktime-display" style="font-weight: bold;"></div>
    </div>
    <div class="weekdays">
     <div class="day-label">Sunday</div>
@@ -344,15 +351,27 @@
      <div id="right-sidebar1">
         <div id="attendance-details">
             <!-- Attendance details will be displayed here -->
-          </div>       
+          </div>   
+          <div id="monthly-summary" class="sidebar-box">
+  <!-- Monthly summary will be injected here -->
+</div>
+    
    </div>
 </div>
 <div id="monthlyprojectanalysis" style="display: none;">
    <!-- Go Back Button -->
-   <button id="go-back-btn" type="button" class="btn btn-outline-secondary">
-       ← GO BACK
-   </button>
-   <h2 align="center">MONTHLY PROJECT ANALYSIS</h2>
+<div class="topbar">
+  <div class="left-section">
+    <button id="go-back-btn" type="button" class="btn btn-outline-secondary">
+      🡨
+    </button>
+  </div>
+  <div class="center-section">
+    <h2>MONTHLY PROJECT ANALYSIS</h2>
+  </div>
+  <div class="right-section"></div> <!-- Spacer for flex balance -->
+</div>
+
    <div id="Selectoptionheader">
    
 

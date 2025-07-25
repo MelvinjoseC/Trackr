@@ -1,46 +1,230 @@
- /* Center the canvas */
- #teamBarChart {
+
+/* General Reset */
+body {
+    margin: 0;
+    font-family: Roboto;
+    background-color: #ECECEC;
+    padding: 0;
+    flex-wrap: wrap;
+    text-transform: uppercase;
+}
+
+/* Main Container */
+.main-container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    background-image: url(/static/images/Left_Panel.png);   
+    background-size: cover;
+    background-repeat: no-repeat;
+    color: white;
+    padding: 1vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 10%;
+}
+
+img#fusie {
+    width: 7.5vw;
+    height: 4vh;
+}
+
+img#profile_pic {
+    width: 50%;
+    height: 11%;
+    border-radius: 50%;
+}
+
+h4#profile_name {
+    color: #FFFFFF;
+    font-size: 1.5vh;
+    font-weight: bold;
+    text-transform: capitalize;
+    margin: 2vh 0 0;
+}
+
+p#profile_designation {
+    color: #FFFFFF;
+    font-size: 1.5vh;
+    font-weight: 300;
+    text-transform: capitalize;
+    margin: 0.3vh 0 0;
+}
+select {
+    width: 54vh;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
+.sidebar_buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Align items to the start for consistency */
+    gap: 2vh; /* Adds space between buttons */
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    font-size: 1.4vh;
+    font-weight: 300;
+    cursor: pointer;
+    color: #FFFFFF;
+    gap: 1vw;
+}
+
+.sidebar-link.active {
+    font-size: 1.4vh;
+    font-weight: bold;
+    color: #FFFFFF; /* Keep text white */
+}
+
+.sidebar_link {
+    display: inline-block; 
+    width: 100%; 
+    text-decoration: none;
+    font-size: 1.4vh;
+    font-weight: 300;
+    color: #FFFFFF;
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+.sidebar_link img {
+    vertical-align: middle;
+    margin-right: 0.8vw;
+    height: 2.1vh;
+    width: 1.1vw;
+}
+
+.sidebar .sign-out {
+    margin-top: auto;
+}
+
+/* Content */
+.content {
+    padding: 1vw;
+    width: 71%;
+    /* overflow-y: auto; */
+}
+
+#first-box{
+    display: flex;
+    align-items: flex-start;
+    gap: 1vw; /* Space between the two divs */
+}
+
+/* Date and Time Section */
+.date-time {
+    width: 13%;
+    height: 14vh;
+    text-align: center;
+    background-color: #ffffff;
+    padding: 1vw;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+ 
+.date-time .date {
+    font-size: 2vh;
+    font-weight: bold;
+    font-family: Roboto;
+    color: #767676;
+    margin-bottom: 1vh;
+    margin-top: 3.3vh;
+}
+
+.date-time .time {
+    font-size: 3.5vh;
+    font-weight: bold;
+    color: #333DAE;
+    font-family: Roboto;
+}
+
+/* Container Styling */
+.date-time-container {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-size: cover;
+    background-position: center;
+    height:14vh;
+    padding:1vw;
+}
+
+/* Main Chart Container */
+
+#teamBarChart {
     display: block;
     margin: 40px auto;
     background-color: #ffffff;
-    padding: 49px;
+    padding: 0vh;
     border-radius: 9px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-    max-width: 1880px;
-    max-height: 513px;
-    margin-left: 106px;
+    width: 100%;
 }
-    
+#teamBarChart {
+    height: 43vh;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+/* Chart canvas (dynamically created) */
+/* canvas[id^="chart-"] {
+    width: 100% !important;
+    max-width: 100%;
+    height: auto !important;
+    margin: 20px auto;
+    display: block;
+} */
 
-/* Optional body styling for better page look */
+/* Page body */
 body {
     background-color: #f5f7fa;
+    margin: 0;
+    padding: 0;
 }
 
+/* Responsive full-screen container with scroll if needed */
+.container {
+    width: 89vw;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+
+/* Heading */
 h1 {
-    text-align: center;
+    text-align: left;
+    padding-left: 5vh;
     font-size: 28px;
     margin-top: 20px;
     color: #000000;
 }
 
-label{
+/* Labels & Selects */
+label,
+#teamSelect,
+#projectSelect {
     margin-left: 106px;
-    max-width: 1880px;
-}
-
-#teamSelect{
-    margin-left: 106px;
-    max-width: 1880px;
-}
-#projectSelect{
-    margin-left: 106px;
-    max-width: 1880px;
+    /* max-width: 100%;
+    width: calc(100% - 200px); */
+    margin-bottom: 10px;
 }
 
 /* Worktime Table Styling */
 .worktime-table {
-    width: 108%;
+    width: 100%;
     border-collapse: collapse;
     margin-top: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -49,10 +233,10 @@ label{
 }
 
 .worktime-table thead th {
-    background-color: #004080;
-    color: white;
+    background-color: #ffffff;
+    color: #000;
     padding: 12px 15px;
-    text-align: left;
+    text-align: center;
     font-size: 14px;
     font-weight: bold;
 }
@@ -61,39 +245,48 @@ label{
     border-bottom: 1px solid #dddddd;
     padding: 10px 15px;
     font-size: 13px;
-    text-align: left;
-}
-
-.worktime-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.worktime-table tbody tr:hover {
-    background-color: #f1f1f1;
-    cursor: pointer;
-}
-
-.worktime-table tbody tr:first-child {
-    background-color: #d4edda !important;
+    text-align: center;
     font-weight: bold;
 }
 
-.worktime-table tbody tr:last-child {
-    background-color: #f8d7da !important;
-    font-weight: bold;
+.worktime-table tbody tr:nth-child(odd) td {
+    background-color: #d6e0fb;
 }
 
-/* Responsive Design */
+.worktime-table tbody tr:nth-child(even) td {
+    background-color: #e6ecff;
+}
+
+.worktime-table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 8px;
+}
+.worktime-table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 8px;
+}
+
+/* Responsive Table */
 @media screen and (max-width: 768px) {
+    h1 {
+        padding-left: 20px;
+        font-size: 22px;
+    }
+
+    label,
+    #teamSelect,
+    #projectSelect {
+        margin-left: 20px;
+        width: calc(100% - 40px);
+    }
+
     .worktime-table thead {
         display: none;
     }
-    
+
     .worktime-table tr {
         display: block;
         margin-bottom: 10px;
     }
-    
+
     .worktime-table td {
         display: flex;
         justify-content: space-between;
@@ -106,37 +299,43 @@ label{
         font-weight: bold;
         color: #004080;
     }
+
+    #teamBarChart {
+        padding: 15px;
+        margin-left: auto;
+    }
 }
 
+/* Table container adjustments */
 #user-worktime-table-container {
     display: block !important;
     visibility: visible !important;
     height: auto !important;
-    margin-left: 106px;
+    /* margin-left: 0%; */
+    /* margin-right: 5%; */
+    padding-top: 21px;
 }
 
-.notification-bubble  {
-    background-color: red;
-    color: white;
-    border-radius: 50%;
-    padding: 2px 12px;
-    font-size: 18px;
-    position: absolute;
-    z-index: 10;
-    margin-left: 167px;
-    font-weight: bold;
-    top: 52%;
+.header1{
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 9px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    box-sizing: border-box;
+    }
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #444; /* Matches the dark grey in your image */
 }
 
-.bubble-pointer {
-    content: '';
-    position: absolute;
-    left: -5px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1px;
-    height: 0px;
-    border-top: 12px solid transparent;
-    border-bottom: 0px solid transparent;
-    border-right: 6px solid red;
+.back-button span {
+  cursor: pointer;
+  font-size: 5vh;
+  font-weight: bold;
 }

@@ -75,8 +75,17 @@
 }
 /* Go Back Button */
 #go-back-btnz {
-    margin-top: 20px;
+    background-color: #333DAE;
+    margin-left: 5px;
+    color: white;
+    padding: 1vh 2vw;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5vh;
+    border-radius: 5px;
+    font-weight: 500;
 }
+
 
 
 .week-time-container {

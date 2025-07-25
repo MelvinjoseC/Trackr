@@ -1,77 +1,97 @@
+from django.http import JsonResponse
 from django.urls import path
 from . import views
 
 urlpatterns = [
+
+    # 🔐 AUTHENTICATION
     path("", views.login, name="login"),
-    path("task_dashboard/", views.task_dashboard, name="task_dashboard"),
     path("sign_up/", views.sign_up, name="sign_up"),
-    path("save_employee_details/", views.save_employee_details,name="save_employee_details",),
-    path("api/task_dashboard/", views.task_dashboard_api, name="task_dashboard_api"),  # New API endpoint
+    path("save_employee_details/", views.save_employee_details, name="save_employee_details"),
+
+    # 📋 TASK MANAGEMENT
+    path("task_dashboard/", views.task_dashboard, name="task_dashboard"),
+    path("api/task_dashboard/", views.task_dashboard_api, name="task_dashboard_api"),
     path("api/create-task/", views.create_task, name="create_task"),
     path("api/edit-task/", views.edit_task, name="edit_task"),
-    path('api/get_hoursheet_data/', views.get_hoursheet_data, name="get_hoursheet_data"),
-    path('api/submit_timesheet/', views.submit_timesheet, name="submit_timesheet"),
-    # path("aproove_task/", views.aproove_task, name="aproove_task"),
-    path("project-tracker/", views.project_tracker, name="project_tracker"),
-    path('task-action/', views.task_action, name='task_action'),
-    path("notifications/", views.notifications_view, name="notifications_page"),
+    path("task-action/", views.task_action, name="task_action"),
     path("check_task_status/", views.check_task_status, name="check_task_status"),
-    path("generate-pie-chart/", views.generate_pie_chart, name="generate_pie_chart"),
-    path("calendar/", views.attendance_calendar, name="calendar"),
-    path('timesheet/get_times_by_date/', views.get_times_by_date, name='get_times_by_date'),
-    path('timesheet/get_all_times_by_month/', views.get_all_times_by_month, name='get_all_times_by_month'),
-    path('timesheet/get_tasks_by_date/', views.get_tasks_by_date, name='get_tasks_by_date'),
-    path('create-project/', views.create_project_view, name='create_project'),
-    path('get-admins/', views.get_admins, name='get_admins'),
-    path('apply-leave/', views.apply_leave_view, name='apply_leave'),  # ✅ Leave request form submission
-    path('get-holidays/', views.get_holidays, name='get_holidays'),
-    path("api/leave-applications/", views.leave_application_view, name="leave-applications"),
-    path('api/leave-approvals/', views.leave_approvals_view, name='leave_approvals'),
-    path('api/update-leave-status/', views.update_leave_status, name='update_leave_status'),
-    path("api/check-admin-status/", views.check_admin_status, name="check-admin-status"),
+    path("get_task_details/", views.get_task_details, name="get_task_details"),
     path("update_task/", views.update_timesheet, name="update_timesheet"),
     path("delete_task/", views.delete_task, name="delete_task"),
-    path("get_task_details/", views.get_task_details, name="get_task_details"),
+    path("api/get-task-edit/", views.get_task_by_title_project_scope, name="get_task_by_title_project_scope"),
+    path("api/get_filter_data/", views.get_filter_data, name="get_filter_data"),
+    path("get-task-datas/<str:project>/", views.get_task_datas, name="get_task_datas"),
+    path("get-task-data/<str:project>/", views.get_task_data, name="get_task_data"),
+    path("attendance/get-task-details-for-sidebar/", views.get_task_details_for_sidebar, name="get_task_details_for_sidebar"),
+
+    # ⏱ TIMESHEET
+    path("api/get_hoursheet_data/", views.get_hoursheet_data, name="get_hoursheet_data"),
+    path("api/submit_timesheet/", views.submit_timesheet, name="submit_timesheet"),
+    path("api/delete_timesheet_row/", views.delete_timesheet_row, name="delete_timesheet_row"),
+    path("timesheet/get_times_by_date/", views.get_times_by_date, name="get_times_by_date"),
+    path("timesheet/get_all_times_by_month/", views.get_all_times_by_month, name="get_all_times_by_month"),
+    path("timesheet/get_tasks_by_date/", views.get_tasks_by_date, name="get_tasks_by_date"),
+
+    # 🗂 PROJECTS
+    path("project-tracker/", views.project_tracker, name="project_tracker"),
+    path("create-project/", views.create_project_view, name="create_project"),
+    path("get-projects/", views.get_projects, name="get_projects"),
+    path("get-project-data/<str:project>/", views.get_project_data, name="get_project_data_by_name"),
+    path("get-projects-data/", views.get_projects_data, name="get_projects_data"),
+    path("get_project_data/", views.get_project_datas, name="get_project_datas"),
+    path("get-admins/", views.get_admins, name="get_admins"),
+    path("update_project_status/", views.update_project_status, name="update_project_status"),
+
+    # 🧑‍🤝‍🧑 TEAM
+    path("team_dashboard/", views.team_dashboard, name="team_dashboard"),
+    path("team-ranking/", views.team_ranking_page, name="team_ranking_page"),
+    path("add-team-ranking/", views.add_team_ranking, name="add_team_ranking"),
+    path("get-team-rankings/", views.get_team_rankings, name="get_team_rankings"),
+    path("get-team-names/", views.get_team_names, name="get_team_names"),
+    path("get-team-member-details/", views.get_team_member_details, name="get_team_member_details"),
+    # path("get-team-chart-data/", views.get_team_chart_data, name="get_team_chart_data"),  # Uncomment if needed
+
+    # 📅 ATTENDANCE
+    path("calendar/", views.attendance_calendar, name="calendar"),
+    path("attendance/", views.attendance_view, name="attendance_view_raw"),
+    path("edit_attendance/", views.edit_attendance_view, name="edit-attendance"),
+    path("get_attendance/", views.get_attendance, name="get-attendance"),
+    path("get_monthly_weekly_attendance/", views.get_monthly_weekly_attendance, name="get_monthly_weekly_attendance"),
+    path("delete_attendance/", views.delete_attendance_view, name="delete_attendance"),
+    path("monthly-attendance/", views.monthly_attendance_view, name="monthly_attendance"),
+    path("attendance/get-users/", views.get_employee_names, name="get_employee_names"),
+    path("attendance/get-user-worktime/", views.get_user_worktime, name="get_user_worktime"),
+    path("attendance/get-attendance-details/", views.get_attendance_details, name="get_attendance_details"),
+    path("attendance/monthly-project-analysis/", views.monthly_project_analysis, name="monthly_project_analysis"),
+    path("attendance/project-categories/", views.get_project_categories, name="get_project_categories"),
+
+    # 🏖 LEAVE
+    path("apply-leave/", views.apply_leave_view, name="apply_leave"),
+    path("mainleavepage/", views.mainleavepage_view, name="mainleavepage"),
+    path("api/leave-applications/", views.leave_application_view, name="leave_applications"),
+    path("api/leave-approvals/", views.leave_approvals_view, name="leave_approvals"),
+    path("api/update-leave-status/", views.update_leave_status, name="update_leave_status"),
     path("leave/edit/<int:leave_id>/", views.edit_leave_application_view, name="edit_leave"),
     path("leave/delete/<int:leave_id>/", views.delete_leave_application_view, name="delete_leave"),
-    path("attendance/", views.attendance_view, name="attendance_view_raw"),
-    path('edit_attendance/',views.edit_attendance_view, name="edit-attendance"),
-    path('get_attendance/', views.get_attendance, name="get-attendance"),
-    path('get_holidays/',views.get_holidays, name="get_holidays"),
-    path('get_monthly_weekly_attendance/',views.get_monthly_weekly_attendance, name='get_monthly_weekly_attendance'),
-    path('get_last_week_metrics/',views.get_last_week_metrics, name="get_last_week_metrics"),
-    path("mainleavepage/", views.mainleavepage_view, name="mainleavepage"),
+    path("get-holidays/", views.get_holidays, name="get_holidays"),  # Keep only kebab-case version
+
+    # 🔁 COMP-OFF
     path("api/compensated-worktime/", views.get_compensated_worktime, name="compensated_worktime"),
+    path('report-view/', views.report_view_page, name='report_view_page'),
+    path('export-excel/', views.export_project_report_excel, name='export_project_report_excel'),
     path("api/request-comp-leave/", views.request_comp_leave, name="request_comp_leave"),
     path("api/comp-leave-approvals/", views.get_pending_comp_leave_requests, name="comp_leave_approvals"),
     path("api/update-comp-leave/", views.update_comp_leave_status, name="update_comp_leave_status"),
-    path("delete_attendance/", views.delete_attendance_view, name="delete_attendance"),
-    path('monthly-attendance/', views.monthly_attendance_view, name='monthly_attendance'),  # URL for the monthly attendance view
-    path('attendance/get-users/', views.get_employee_names, name='get_employee_names'),
-    path('attendance/get-user-worktime/', views.get_user_worktime, name='get_user_worktime'),
-    path('attendance/get-attendance-details/', views.get_attendance_details, name='get_attendance_details'),
-    path('attendance/monthly-project-analysis/', views.monthly_project_analysis, name='monthly_project_analysis'),
-    path('attendance/project-categories/', views.get_project_categories, name='get_project_categories'),
-    path('get_project_data/', views.get_project_datas, name='get_project_data'),
-    path('attendance/get-task-details-for-sidebar/', views.get_task_details_for_sidebar, name='get_task_details_for_sidebar'),
-    path('team_dashboard/', views.team_dashboard, name='team_dashboard'),  # Add the route for team dashboard
-    path('update_project_status/', views.update_project_status, name='update_project_status'),
-    path('get-projects-data/', views.get_projects_data, name='get_project_data'),
-    path('team-ranking/', views.team_ranking_page, name='team_ranking_page'),
-    path('add-team-ranking/', views.add_team_ranking, name='add_team_ranking'),
-    path('get-team-rankings/', views.get_team_rankings, name='get_team_rankings'),
-    path('get-team-names/', views.get_team_names, name='get_team_names'),
-    path('get-team-chart-data/', views.get_team_chart_data, name='get_team_chart_data'),
-    path('get-team-data/', views.get_team_data, name='get_team_data'),
-    path('get-projects/<team>/', views.get_projects, name='get_projects'),
-    path('get-task-data/<team>/<project>/', views.get_task_data, name='get_task_data'),
-    path('get-team-chart-data/', views.get_team_chart_data, name='get_team_chart_data'),
-    path('get-projects/<team>/', views.get_project, name='get_projects'),
-    path('get-project-data/<team>/<project>/', views.get_project_data, name='get_project_data'),
-    path('get-task-datas/<team>/<project>/', views.get_task_datas, name='get_task_datas'),
-    path('api/send-notification/', views.send_notification, name='send_notification'),  # Add this line
-    path('get-team-member-details/', views.get_team_member_details, name='get_team_member_details'),
-    path('api/get-task-edit/', views.get_task_by_title_project_scope, name='get_task_by_title_project_scope'),
 
+    # 📬 NOTIFICATIONS
+    path("notifications/", views.notifications_view, name="notifications_page"),
+    path("api/send-notification/", views.send_notification, name="send_notification"),
+
+    # 📊 REPORTS
+    path("generate-pie-chart/", views.generate_pie_chart, name="generate_pie_chart"),
+
+    # 📦 MISC
+    path("api/check-admin-status/", views.check_admin_status, name="check_admin_status"),
+    path(".well-known/appspecific/com.chrome.devtools.json", lambda request: JsonResponse({}, status=204)),
 ]
-

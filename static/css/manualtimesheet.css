@@ -1,11 +1,16 @@
-
-#hoursheet-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+.table-container {
+    max-height: 54vh;           /* Enables vertical scroll if needed */
+    overflow-y: auto;
+    overflow-x: auto;           /* Enables horizontal scroll */
     margin: 2vh auto;
-    background-color: white;
-    box-shadow: 0 0 1vh rgba(0, 0, 0, 0.1);
+    border: 1px solid #ccc;
+    font-family: 'Roboto';
+    border-radius: 2vh;
+}
+#hoursheet-table {
+    width: 173vh;
+    border-collapse: collapse;
+    background-color: rgb(104, 104, 104);
     font-size: 1.4vh;
 }
 
@@ -27,11 +32,13 @@
     text-align: center;
 }
 
+/* Keep your original cell styling */
 #hoursheet-table tbody td {
-    padding: 1vh;
+    padding: 2vh;
     text-align: center;
     border-bottom: 0.1vh solid #e2e2e2;
-    font-size: 1.3vh;
+    font-size: 1.5vh;
+    position: static;
 }
 
 #hoursheet-table tbody tr:nth-child(even) {
@@ -73,28 +80,196 @@
     width: 150px;
 }
 
-.week-info {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 2vh;
-}
 
 .week-info div {
     font-weight: bold;
 }
 
 /* Optional: Basic button style (if you want) */
-button {
-    font-size: 1.3vh;
+#submitTimesheetButton, #deleteRowBtn, #addRowButton, #copyRowBtn, #closePopupButton_manualtimesheet {
+    font-size: 1.6vh;
     padding: 1vh 2vh;
     margin: 2vh 1vh 0 0;
     border: 0.2vh solid #111a27;
-    background-color: white;
+    background-color: rgb(223, 223, 223);
     color: #111a27;
     border-radius: 0.5vh;
     cursor: pointer;
+    font-weight: bold;
 }
 
-button:hover {
-    background-color: #d6e0fb;
+#submitTimesheetButton,#deleteRowBtn, #addRowButton, #copyRowBtn, #closePopupButton_manualtimesheet :hover {
+    background-color: #d3d3d3;
+}
+
+#commentText{
+    width: 60vh;
+    padding: 0.7vh;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1.4vh;
+    color: #534f4f;
+    height: 10vh;
+    resize: none;
+    background: #534f4f0a;
+    margin-left: initial;
+    
+}
+.comment-button {
+    padding: 1.2vh 1.5vh;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+}
+
+#commentPopup {
+  display: none;
+  position: fixed;
+  top: 30vh;
+  left: 50vw;
+  transform: translate(-50%, -30%);
+  background-color: #ffffff;
+  border: 0.2vh solid #ccc;
+  border-radius: 1vh;
+  padding: 2vh 2vw;
+  z-index: 9999;
+  width: 30vw;
+  box-shadow: 0 0.5vh 1.5vh rgba(0, 0, 0, 0.3);
+}
+
+/* Optional responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  #commentPopup {
+    width: 80vw;
+    padding: 3vh 3vw;
+    top: 20vh;
+    transform: translate(-50%, -20%);
+  }
+}
+#hoursheet-table th input {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
+    font-size: 1.2vh;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+
+#week-navigation{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 2vh 0;
+    font-weight: bold;
+    font-size: 5vh;
+    background: rgb(255, 255, 255);
+    border-radius: 0.5vh;
+}
+
+/* Date and Time Section */
+.date-time {
+    width: 22vh;
+    height: 14vh;
+    text-align: center;
+    background-color: #ffffff;
+    padding: 1vw;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(44, 44, 44, 0.1);
+}
+ 
+.date-time .date {
+    font-size: 2vh;
+    font-weight: bold;
+    font-family: Roboto;
+    color: #767676;
+    margin-bottom: 1vh;
+    margin-top: 3.3vh;
+}
+
+.date-time .time {
+    font-size: 3.5vh;
+    font-weight: bold;
+    color: #333DAE;
+    font-family: Roboto;
+}
+#week-start-date{
+    font-size: 2vh;
+    font-weight: bold;
+    color: #333DAE;
+    font-family: Roboto;
+}
+#week-end-date{
+    font-size: 2vh;
+    font-weight: bold;
+    color: #333DAE;
+    font-family: Roboto;
+}
+#yearly-week{
+    font-size: 2vh;
+    font-weight: bold;
+    color: #333DAE;
+    font-family: Roboto;
+}
+/* Container Styling */
+.week-info {
+    flex-grow: 1;
+    display: flex;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(44, 44, 44, 0.1);
+    background-size: cover;
+    background-position: center;
+    height: 14vh;
+    padding: 1vw;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.top-bar2{
+    display: flex;
+    align-items: flex-start;
+    gap: 1vw; /* Space between the two divs */
+}
+#prevWeekButton {
+    background-color: #ffffff;
+    border: 0.6vh solid #000000;
+    border-radius: 2vh;
+    margin-top: 0vh;
+    margin-left: 2vh;
+    cursor: pointer;
+
+}
+#nextWeekButton {
+    background-color: #ffffff;
+    border: 0.6vh solid #000000;
+    border-radius: 2vh;
+    cursor: pointer;
+    margin-top: 0vh;
+    margin-right: 2vh;
+}
+.popup-content2 {
+    background: white;
+    width: 175vh;
+    /* max-width: 1000px; */
+    /* border-radius: 10px; */
+    padding: 15px;
+    position: relative;
+    animation: fadeIn 0.3s ease-in-out;
+    background-color: rgb(243 243 243);
+}
+.popup-content2 {
+    display: flex;
+    flex-direction: column;
+}
+/* Header */
+.popup-content2 h2 {
+    margin: 0 0 15px;
+    font-size: 22px;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
 }

@@ -85,56 +85,59 @@ document.addEventListener("DOMContentLoaded", function () {
             let totalTime = 0;
             let totalPhaseTime = 0;
             let totalBenchmarkTime = 0;  // Initialize a variable to store the total task benchmark time
+
+            const selectedProject = projectName;
+
             const datesWithTime = {}; // Store total work time for each date
             const projectBenchmarkSum = {}; // Object to store the sum of benchmark time per project
             const processedTitles = {}; // Track task titles processed for each project
 
             // Iterate through the project data
-            data.projects.forEach(project => {
+                        data.projects.forEach(project => {
                 const projectDate = new Date(project.date1);
                 const projectMonth = projectDate.getMonth();
                 const projectYear = projectDate.getFullYear();
 
                 const time = parseFloat(project.time) || 0;
-                const taskBenchmark = parseFloat(project.task_benchmark) || 0;  // Get the task benchmark value
-                const taskTitle = project.projects + project.category + project.title;  // Unique identifier for the task title (combining project, category, and title)
+                const taskBenchmark = parseFloat(project.task_benchmark) || 0;
+                const taskTitle = project.projects + project.category + project.title;
 
-                // Initialize project entry in projectBenchmarkSum if not already initialized
                 if (!projectBenchmarkSum[project.projects]) {
-                    projectBenchmarkSum[project.projects] = 0;  // Initialize benchmark sum for this project
+                    projectBenchmarkSum[project.projects] = 0;
                 }
 
-                // Initialize processedTitles entry for the project if not already initialized
                 if (!processedTitles[project.projects]) {
-                    processedTitles[project.projects] = new Set();  // Initialize set to track processed task titles for this project
+                    processedTitles[project.projects] = new Set();
                 }
+                const isMatchingProject = project.projects === selectedProject;
+                const isMatchingCategory = !category || project.category === category;
+                const isMatchingMonth = projectMonth === currentMonth && projectYear === currentYear;
 
-                // Only consider tasks for the selected project and category, but do not filter by month for task benchmarks
-                if (project.projects === projectName || projectName === '') {  // Show all if no project selected
-                    if (!category || project.category === category) {
-                        // Sum task benchmark time for the project (no need to check for duplicate titles)
-                        if (!processedTitles[project.projects].has(taskTitle)) {
-                            projectBenchmarkSum[project.projects] += taskBenchmark;  // Add the task benchmark for this project
-                            processedTitles[project.projects].add(taskTitle);  // Mark the task title as processed
-                        }
-
-                        // Add task time to the corresponding date (this still respects the month filter for the time display)
-                        const dateStr = projectDate.toLocaleDateString("en-CA"); // Format the date to match YYYY-MM-DD
-                        if (projectMonth === currentMonth && projectYear === currentYear) {
-                            if (!datesWithTime[dateStr]) {
-                                datesWithTime[dateStr] = 0;
-                            }
-                            datesWithTime[dateStr] += time;  // Sum the time for the day cell
-
-                            totalTime += time;  // Sum the total time for the current month
-
-                            if (category && project.category === category) {
-                                totalPhaseTime += time;  // Sum the phase time for the selected category
-                            }
-                        }
+                if (isMatchingProject && isMatchingCategory) {
+                    // ✅ Add benchmark time once per task
+                    if (!processedTitles[project.projects].has(taskTitle)) {
+                        projectBenchmarkSum[project.projects] += taskBenchmark;
+                        processedTitles[project.projects].add(taskTitle);
                     }
                 }
+                // ✅ Accumulate total time for selected project across all months
+                if (isMatchingProject) {
+                    totalTime += time;
+
+                    if (isMatchingCategory) {
+                        totalPhaseTime += time;
+                    }
+                }
+                // ✅ Show daily values for the current month (even if no project is selected)
+                if (projectMonth === currentMonth && projectYear === currentYear) {
+                    const dateStr = projectDate.toLocaleDateString("en-CA");
+                    if (!datesWithTime[dateStr]) {
+                        datesWithTime[dateStr] = 0;
+                    }
+                    datesWithTime[dateStr] += time;
+                }
             });
+
 
             // Sum all task benchmarks for the selected project (in case there were multiple tasks)
             totalBenchmarkTime = Object.values(projectBenchmarkSum).reduce((sum, benchmark) => sum + benchmark, 0);
@@ -201,12 +204,6 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("Error fetching project data:", error);
             calendar.innerHTML = "<div>Error loading data.</div>";
         });
-
-
-
-
-
-
     }
 
     // Function to update the category dropdown based on selected project

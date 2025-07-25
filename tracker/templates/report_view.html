@@ -1,0 +1,353 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance</title>
+    
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="{% static 'js/report.js' %}"></script>
+    {# tracker_project_data is now loaded via AJAX in report.js #}
+    <!-- Responsive icon size -->
+    <style>
+        .sidebar-icon {
+            width: 1.64vw;
+            height: auto;
+            max-width: 100%;
+        }
+
+        .sheet-tabs {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+        }
+
+        .sheet-tabs li {
+            padding: 8px 16px;
+            cursor: pointer;
+            border-right: 1px solid #ccc;
+        }
+
+        .sheet-tabs li.active {
+            background: #00AEEF;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+        /* Reduce container padding and margin */
+    div[style*="border: 2px solid black"] {
+        padding: 8px !important;
+        margin-bottom: 0 !important;
+    }
+
+    /* Make tables more compact */
+    table {
+        margin-top: 8px !important;
+    }
+
+    table td, table th {
+        padding: 4px 6px !important;
+        font-size: 14px !important;
+    }
+
+    /* Reduce input height */
+    input[type="text"], input[type="number"], input[type="date"] {
+        height: 2.8vh !important;
+        font-size: 14px !important;
+        padding: 2px 4px !important;
+    }
+
+    /* Remove unnecessary <br> spacing */
+    form br {
+        display: none;
+    }
+    .download-section {
+    margin-top: 1.5vh;
+    display: flex;
+    flex-direction: row;
+    gap: 1vw;
+    align-items: center;
+    justify-content: flex-end; /* Align to right */
+    width: 100%;
+}
+/* Example: move the first .overview-header .right box down */
+.overview-header .right {
+    margin-top: 0.8vh; /* Increase value for more space */
+}
+
+.download-button {
+    font-size: 0.95rem;
+    border: none;
+    border-radius: 2em;
+    color: #fff;
+    cursor: pointer;
+    margin: 0;
+    min-width: 120px;
+    padding: 0.5em 1.2em;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: background 0.2s, transform 0.1s;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.download-blue {
+    background: linear-gradient(90deg, #00AEEF 0%, #007cf0 100%);
+}
+
+.download-pink {
+    background: linear-gradient(90deg, #ff5f6d 0%, #ffc371 100%);
+}
+
+.download-button:hover {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    opacity: 0.95;
+}
+#monthlyOverview {
+    border: 2px solid black;
+    padding: 2vh;
+    width: 86vw;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+    background: white;
+    display: block;
+}
+
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        
+        <!-- Sidebar -->
+        <div class="sidebar">
+            </br>
+        <img id="fusie" src="{% static 'images/img_19.png' %}" alt="Responsive image">
+        </br></br></br></br>
+        <img id="profile_pic" src="data:image/png;base64,{{ image_base64 }}" alt="Profile Image">
+        <h4 id="profile_name"> {{ name }}</h4>
+        <!-- <p>{{ employee_id }}</p> -->
+        <p id="profile_designation" align="center">{{ designation }}</p>
+
+        </br></br></br>
+
+            <!-- Sidebar Buttons -->
+            <div class="sidebar_buttons">
+                <a href="{% url 'task_dashboard' %}" class="sidebar-link" id="task-button" 
+                   data-default-img="{% static 'images/task_tracker.png' %}" 
+                   data-active-img="{% static 'images/task_tracker1.png' %}">
+                    <img src="{% static 'images/task_tracker.png' %}" alt="Task Tracker Icon" class="sidebar-icon"> TASK TRACKER
+                </a>
+                <a class="sidebar-link" id="attendance-button" href="{% url 'calendar' %}"
+                   data-default-img="{% static 'images/attendance.png' %}" 
+                   data-active-img="{% static 'images/attendance1.png' %}">
+                    <img src="{% static 'images/attendance.png' %}" alt="Attendance Icon" class="sidebar-icon"> ATTENDANCE
+                </a>
+                <a class="sidebar-link" id="leave-button" 
+                   data-default-img="{% static 'images/leavepage.png' %}" 
+                   data-active-img="{% static 'images/leavepage1.png' %}">
+                    <img src="{% static 'images/leavepage.png' %}" alt="Leave Tracker Icon" class="sidebar-icon"> LEAVE TRACKER
+                </a>
+
+                {% if is_admin or is_md %}
+                    <a class="sidebar-link" id="project-button" href="{% url 'project_tracker' %}" 
+                       data-default-img="{% static 'images/leavepage.png' %}" 
+                       data-active-img="{% static 'images/leavepage1.png' %}">
+                        <img src="{% static 'images/leavepage.png' %}" alt="Project Tracker Icon" class="sidebar-icon"> 
+                        PROJECT TRACKER
+                    </a>
+                {% else %}
+                    <a class="sidebar-link" id="notifications" href="{% url 'notifications_page' %}"
+                       data-default-img="{% static 'images/leavepage.png' %}" 
+                       data-active-img="{% static 'images/leavepage1.png' %}">
+                        <img src="{% static 'images/leavepage.png' %}" alt="Notifications Icon" class="sidebar-icon"> NOTIFICATIONS
+                    </a>
+                {% endif %}
+                
+                <a class="sidebar-link" id="team-button" href="{% url 'team_dashboard' %}"
+                   data-default-img="{% static 'images/leavepage.png' %}" 
+                   data-active-img="{% static 'images/leavepage1.png' %}">
+                    <img src="{% static 'images/leavepage.png' %}" alt="Team Dashboard Icon" class="sidebar-icon"> TEAM DASHBOARD
+                </a>
+            </div>
+
+            <a class="sign-out sidebar-link" id="signout-button"
+               data-default-img="{% static 'images/signout.png' %}"
+               data-active-img="{% static 'images/signout1.png' %}">
+                <img src="{% static 'images/signout.png' %}" alt="Sign Out Icon" class="sidebar-icon"> SIGN OUT
+            </a>
+
+        </div>
+
+        {% block content %}
+<div class="tabs-container">
+
+  <!-- Excel-like sheet tabs -->
+  <ul class="sheet-tabs">
+    <li class="active" data-tab="sheet1">
+      <select id="projectDropdown" style="font-size:inherit; background:inherit; color:inherit; border:none; outline:none;">
+        <option value="" disabled selected>Select Project</option>
+      </select>
+    </li>
+    <!-- Week tabs will be injected here by JS -->
+  </ul>
+  <button id="downloadAllPDFs" class="download-button download-blue">All Projects (PDF)</button>
+    <button id="downloadSelectedPDF" class="download-button download-pink">This Project (PDF)</button>
+    <button id="downloadAllExcel" class="download-button download-blue">All Projects (Excel)</button>
+    <button id="downloadSelectedExcel" class="download-button download-pink">This Project (Excel)</button>
+
+  <!-- Sheet 1 -->
+<div id="monthlyOverview" style="border: 2px solid black; padding: 2vh; width: 86.5vw; margin: 0 auto; font-family: Arial, sans-serif; background: white;">
+  <h2 style="color: #00AEEF; margin-bottom: 2vh;">MONTHLY OVERVIEW</h2>
+
+  <form method="post">
+    <!-- CSRF Token (Django-specific, if needed) -->
+    <input type="hidden" name="csrfmiddlewaretoken" value="">
+
+    <!-- Top info table -->
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <td style="color: #EC008C; font-weight: bold;">PROJECT</td>
+        <td><input type="text" name="project" value="FE25.0024 DDL BOATLANDING OCEAN OFFSHORE NKT" style="width: 100%; border: none;"></td>
+      </tr>
+      <tr>
+        <td style="color: #EC008C; font-weight: bold;">PO.NO</td>
+        <td><input type="text" name="po_no" value="" style="width: 100%; border: none;"></td>
+      </tr>
+      <tr>
+        <td style="color: #EC008C; font-weight: bold;">MONTH</td>
+        <td><input type="text" name="month" value="2025.06" style="width: 100%; border: none;"></td>
+      </tr>
+      <tr>
+        <td style="color: #EC008C; font-weight: bold;">PREPARED BY</td>
+        <td><input type="text" name="prepared_by" value="JOSE MALIAKEL" style="width: 100%; border: none;"></td>
+      </tr>
+      <tr>
+        <td style="color: #EC008C; font-weight: bold;">PREPARED ON</td>
+        <td><input type="text" name="prepared_on" value="7/1/2025" style="width: 100%; border: none;"></td>
+      </tr>
+    </table>
+
+    <br>
+
+    <!-- Project hours -->
+    <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+      <tr>
+        <th>PROJECT</th>
+        <th>TOTAL PROJECT HOURS - (JUNE-25) - (WEEK 26 TO WEEK 27)</th>
+      </tr>
+      <tr>
+        <td><input type="text" name="project_name" value="FE25.0024 DDL BOATLANDING OCEAN OFFSHORE NKT" style="width: 100%; border: none;"></td>
+        <td><input type="number" name="total_hours" value="225" style="width: 100%; border: none;"></td>
+      </tr>
+    </table>
+
+    <br>
+
+    <!-- Designation Table -->
+    <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+      <tr>
+        <th>DESIGNATION</th>
+        <th>TOTAL HOURS</th>
+      </tr>
+      <tr>
+        <td>SENIOR DESIGNER</td>
+        <td><input type="number" name="senior_designer_hours" value="120" style="width: 100%; border: none;"></td>
+      </tr>
+      <tr>
+        <td>LEAD DESIGNER</td>
+        <td><input type="number" name="lead_designer_hours" value="103" style="width: 100%; border: none;"></td>
+      </tr>
+    </table>
+
+    <br>
+
+    <!-- Project Part Table -->
+    <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+      <tr>
+        <th>PROJECT PART</th>
+        <th>TOTAL HOURS</th>
+      </tr>
+      <tr>
+        <td>GANGWAY STAIRS</td>
+        <td><input type="number" name="gangway_stairs" value="53.75" style="width: 100%; border: none;"></td>
+      </tr>
+      <tr>
+        <td>BOATLANDING</td>
+        <td><input type="number" name="boatlanding" value="47" style="width: 100%; border: none;"></td>
+      </tr>
+    </table>
+
+    <br>
+
+    <!-- Total hours -->
+    <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+      <tr>
+        <th>TOTAL HOURS APPROVED</th>
+        <th>TOTAL HOURS SPENT TO DATE</th>
+      </tr>
+      <tr>
+        <td><input type="number" name="total_hours_approved" value="162" style="width: 100%; border: none;"></td>
+        <td><input type="number" name="total_hours_spent" value="225" style="width: 100%; border: none;"></td>
+      </tr>
+    </table>
+
+    <br>
+
+<p><strong>Signed By</strong></p>
+<div class="signed-by-row">
+  <label for="signed_name">Name:</label>
+  <input type="text" id="signed_name" name="signed_name" value="">
+</div>
+<div class="signed-by-row">
+  <label for="signed_date">Date:</label>
+  <input type="date" id="signed_date" name="signed_date" value="">
+</div>
+
+
+    <button type="submit" style="margin-top: 2vh;">Save Report</button>
+  </form>
+</div>
+
+    <!-- Sheet 2 (same form, different data) -->
+<div class="download-section">
+    
+</div>
+
+</div>
+
+  <!-- Week tab contents will be injected by JS as needed -->
+
+  </div>
+
+  
+
+  <!-- Sheet 3 -->
+  <div class="tab-content" id="sheet3">
+    <!-- Same: repeat for sheet3 -->
+  </div>
+        {% endblock %}
+    </div>
+
+
+
+</body>
+</html>

@@ -8,12 +8,17 @@
     <title>Task Tracker</title>
     {% load static %}
         <!-- Include jQuery and DataTables CSS & JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script> 
+    <link rel="stylesheet" href="https://cdn.datatables.net/select/1.3.3/css/select.dataTables.min.css">
     <!-- Other libraries -->
+     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- Your custom styles -->
     <link rel="stylesheet" href="{% static 'css/manualtimesheet.css' %}">
@@ -81,12 +86,12 @@
             data-active-img="{% static 'images/leavepage1.png' %}">
                 <img src="{% static 'images/leavepage.png' %}" alt="Project Tracker Icon"> PROJECT TRACKER   
             </a>
-            {% if pending_count > 0 %}
-                <div class="notification-bubble">
-                    {{ pending_count }}
-                    <div class="bubble-pointer"></div>
-                </div>
-            {% endif %}
+            <a class="sidebar-link" id="Report_view" 
+            href="{% url 'report_view_page' %}"
+            data-default-img="{% static 'images/leavepage.png' %}" 
+            data-active-img="{% static 'images/leavepage1.png' %}">
+            <img src="{% static 'images/leavepage.png' %}" alt="Report View Icon"> REPORT VIEW
+            </a>
 
             <a class="sidebar-link" id="team-button" href="{% url 'team_dashboard' %}"
                 data-default-img="{% static 'images/leavepage.png' %}" 
@@ -103,12 +108,12 @@
     </div>
         
         <!-- Main Content -->
- <div class="content" >
-    <div id="first-box">
-        <!-- Clock section -->
-        <div class="date-time">
-            <div class="date" id="current-date1"></div>
-            <div class="time" id="current-time1"></div>
+        <div class="content">
+            <div id="first-box">
+                <!-- Clock section -->
+                <div class="date-time">
+                    <div class="date" id="current-date1"></div>
+                    <div class="time" id="current-time1"></div>
         </div>
         
         <div class="date-time-container">
@@ -439,210 +444,109 @@
         </div>
     </div>
 
+</div>   
 </div>
-  
-    </div>
-    
-</div>
-    <!-- The div to contain the hidden popup form -->
     <div id="popupModal" class="popup-modal">
-        <div class="popup-content">
-            <!-- Header Section -->
+    <div class="popup-content">
+        <!-- Header -->
         <div class="header">
-            <h1>EDIT ALL TASKS</h1>
-            <!-- <button id="openPopupButton" class="copy-task-btn">
-                <i class="fas fa-copy"></i> Copy Task
-            </button> -->
+            <h1>EDIT TASK</h1>
         </div>
 
+        <form id="editTaskForm">
 
-        <!-- Dropdowns (Populated via API) -->
-        <div class="dropdown-row">
-            <!-- <select id="taskTitle2">
-                <option  id="taskTitle2" placeholder="Select title">Select title</option>
-            </select> -->
-        </div>
-            <form id="editTaskForm">
-                <div class="form-group3">
-                    <label for="id_listedittask">DEPARTMENT</label>
-                    <select id="id_listedittask">
-                    </select>
-                </div>
-                <div class="form-group3">
-                    <label for="id_projectedittask">Project</label>
-                    <select id="id_projectedittask">
-                    </select>
-                </div>
-                <div class="form-group3">
-                    <label for="id_scopeedittask">Scope</label>
-                    <select id="id_scopeedittask">
-                        <option>Select Scope</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="id_categoryedittask">Category</label>
-                    <select id="id_categoryedittask">
-                    </select>
-                </div>
-                <div class="form-group3">
-                    <label for="taskTitleedittask">TITLE</label>
-                    <select id="taskTitleedittask">
-                    </select>
-                </div>
-                <div class="form-group3">
-                    <label for="id_revnoedittask">REV NO</label>
-                    <select id="id_revnoedittask"></select>
-                </div>
+            <div class="form-group3">
+                <label for="id_projectedittask">Project</label>
+                <select id="id_projectedittask"></select>
+            </div>
 
-                <div class="form-group">
-                    <label for="taskTitle3">Title:</label>
-                    <input type="text" id="taskTitle3" placeholder="Enter task title">
-                </div>
-                <div class="form-group">
-                    <label for="id_dnoedittask">D NO</label>
-                    <input type="text" id="id_dnoedittask" placeholder="Enter task d no">
-                </div>
-                <div class="form-group">
-                    <label for="id_priorityedittask">Priority</label>
-                    <select id="id_priorityedittask">
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="id_assigned_toedittask">Assigned To</label>
-                    <input type="text" id="id_assigned_toedittask" placeholder="Enter task Assigned">
-                </div>
-                <div class="form-group">
-                    <label for="id_checkeredittask">Checker</label>
-                    <input type="text" id="id_checkeredittask" placeholder="Enter task Checker">
-                </div>
-                <div class="form-group">
-                    <label for="id_qc_3_checkeredittask">QC-3 Checker</label>
-                    <input type="text" id="id_qc_3_checkeredittask" placeholder="Enter task QC-3 Checker">
-                </div>
-                <!-- <div class="form-group">
-                    <label for="id_groupedittask">Group</label>
-                    <input type="text" id="id_groupedittask" placeholder="Enter task Group">
-                </div> -->
-                
-                <div class="form-group">
-                    <label for="id_start_dateedittask">Start Date</label>
-                    <input type="date" id="id_start_dateedittask">
-                </div>
-                <div class="form-group">
-                    <label for="id_end_dateedittask">End Date</label>
-                    <input type="date" id="id_end_dateedittask">
-                </div>
-                <div class="form-group">
-                    <label for="id_benchmarkedittask">Benchmark</label>
-                    <input type="text" id="id_benchmarkedittask" placeholder="Enter Benchmark">
-                </div>
-                <div class="form-group">
-                    <label for="id_verification_statusedittask">ISO Verification Status</label>
-                    <select id="id_verification_statusedittask">
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="id_task_statusedittask">Task Status</label>
-                    <select id="id_task_statusedittask">
-                    </select>
-                </div>
-            </form>
-                <div class="form-group">
-                    <button id="savetask_updatetask">Update Task</button>
-                    <button id="closePopupButton_updatetask">Cancel</button>
-                </div>
-          
-           
-        </div>
+            <div class="form-group3">
+                <label for="id_scopeedittask">Scope</label>
+                <select id="id_scopeedittask"></select>
+            </div>
+
+            <div class="form-group3">
+                <label for="id_categoryedittask">Category</label>
+                <select id="id_categoryedittask"></select>
+            </div>
+
+            <div class="form-group3">
+                <label for="taskTitleedittask">Select Task Title</label>
+                <select id="taskTitleedittask"></select>
+            </div>
+
+            <div class="form-group3">
+                <label for="id_revnoedittask">Rev No</label>
+                <select id="id_revnoedittask"></select>
+            </div>
+
+            <div class="form-group">
+                <label for="taskTitle3">Edit Title</label>
+                <input type="text" id="taskTitle3" placeholder="Enter new title">
+            </div>
+
+            <div class="form-group">
+                <label for="id_dnoedittask">DWG No</label>
+                <input type="text" id="id_dnoedittask" placeholder="Enter DWG No">
+            </div>
+
+            <div class="form-group">
+                <label for="id_start_dateedittask">Start Date</label>
+                <input type="date" id="id_start_dateedittask">
+            </div>
+
+            <div class="form-group">
+                <label for="id_end_dateedittask">End Date</label>
+                <input type="date" id="id_end_dateedittask">
+            </div>
+
+            <div class="form-group">
+                <label for="id_benchmarkedittask">Benchmark</label>
+                <input type="text" id="id_benchmarkedittask" placeholder="Enter Benchmark">
+            </div>
+
+            <div class="form-group">
+                <button id="savetask_updatetask">Update Task</button>
+                <button id="closePopupButton_updatetask">Cancel</button>
+            </div>
+        </form>
     </div>
+</div>
 
-<!-- Popup Container with updated ID -->
+
 <!-- Popup Container with updated IDs -->
 <div class="popup-overlay" id="timesheetpopup">
-    <div class="popup-content">
+    <div class="popup-content2">
         <span class="close-btn4" id="closePopupButton">&times;</span>
-        <h2>Manual Timesheet</h2>
-
+    <div class="top-bar2">
+        <div class="date-time">
+            <div class="date" id="current-date2"></div>
+            <div class="time" id="current-time2"></div>
+        </div>
+        
+        <div class="week-info">
+            <div><strong>Week Start Date:</br></strong> <span id="week-start-date"></span></div>
+            <div><strong>Week End Date:</br></strong> <span id="week-end-date"></span></div>
+            <div><strong>Yearly Week:</br></strong> <span id="yearly-week"></span></div>
+        </div> </div> 
+        <div id="week-navigation">
+        <button id="prevWeekButton"><strong>🡰</strong></button>
+        <span>Manual Timesheet</span>
+        <button id="nextWeekButton"><strong>🡲</strong></button>
+    </div>
         <div class="popup-grid">
             <!-- Left Panel -->
              <div class="left-panel">
-               <!-- <div class="form-group3">
-                    <label>Select Date</label>
-                    <input type="date" id="date1" required>
-                </div>
-
-                <div class="form-group3">
-                    <label>Select Department</label>
-                    <select id="projectListSelect" required></select>
-                </div>
-
-                <div class="form-group3">
-                    <label>Project Type</label>
-                    <select id="projectTypeSelect" required></select>
-                </div>
-
-                <div class="form-group3">
-                    <label>Scope</label>
-                    <select id="scopeSelect" required></select>
-                </div>
-
-                <div class="form-group3">
-                    <label>Task</label>
-                    <select id="TaskSelect" required></select>
-                </div>
-
-                <div class="form-group3">
-                    <label>Phase</label>
-                    <select id="phaseSelect" required></select>
-                </div>
-
-                <div class="form-group3">
-                    <label>Phase Status</label>
-                    <select id="phaseStatusSelect">
-                        <option value="completed">Completed</option>
-                        <option value="paused">Paused</option>
-                        <option value="in_progress">In Progress</option>
-                    </select>
-                </div>
-
-               <div class="form-group3">
-                    <label>Hours</label>
-                    <input type="number" id="time" min="0" max="23" step="any">
-                </div>
-
-                <div class="form-group3">
-                    <label>Comments</label>
-                    <input type="text" id="comments" required>
-                </div>-->
-<div class="container">
- <!-- Timesheet Table -->
+              
+<div class="table-container">
+<!-- Timesheet Table --> 
 <table id="hoursheet-table" class="display">
     <thead>
-        <tr>
-            <th>
-                Project
-                <select id="filter-project">
-                    <option value="">All</option>
-                </select>
-            </th>
-            <th>
-                Project Part
-                <select id="filter-scope">
-                    <option value="">All</option>
-                </select>
-            </th>
-            <th>
-                Task
-                <select id="filter-task">
-                    <option value="">All</option>
-                </select>
-            </th>
-            <th>
-                Category
-                <select id="filter-category">
-                    <option value="">All</option>
-                </select>
-            </th>
+    <th><input type="checkbox" id="select-all-rows"></th> <!-- Select All checkbox -->
+    <th>Project</br><select id="project-filters" class="filter-select"></select></th>
+    <th>Project Part</br><select id="scope-filters" class="filter-select"></select></th>
+    <th>Task</br><select id="title-filters" class="filter-select"></select></th>
+    <th>Category</br><select id="category-filters" class="filter-select"></select></th>
             <th>Mon</th>
             <th>Tue</th>
             <th>Wed</th>
@@ -653,26 +557,32 @@
             <th>Total Project Hours Per Week</th>
         </tr>
     </thead>
+    <tbody>
+        <!-- Filled dynamically -->
+    </tbody>
 </table>
+
+
+<!-- Action Buttons -->
+
 <!-- Comment Popup -->
-<div id="commentPopup" style="display:none; position: fixed; top: 30%; left: 50%; transform: translate(-50%, -30%); background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 20px; z-index: 9999; width: 400px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
-    <h3 style="margin-top: 0;">Enter Comment</h3>
-    <textarea id="commentText" ></textarea>
-    <div style="text-align: right; margin-top: 10px;">
+<div id="commentPopup">
+    <h3 align="center">Enter Comments</h3>
+    <textarea id="commentText"></textarea>
+    <div style="text-align: center; margin-top: 10px;">
         <button id="saveCommentBtn">Save</button>
         <button id="closeCommentBtn">Cancel</button>
     </div>
+    
 </div>
 
-<button type="button" id="submitTimesheetButton">Submit Timesheet</button>
-        <button type="button" id="addRowButton">Add Row</button>
-        <button id="closePopupButton_manualtimesheet">Cancel</button>
-<!-- Manual Timesheet Entry Popup -->
+</div> <button type="button" id="submitTimesheetButton">Submit Timesheet</button>
+<button type="button" id="addRowButton">Add new Row</button>
+<button id="copyRowBtn">Copy Selected Row</button>
+<button id="deleteRowBtn">Delete Row</button>
+<button id="closePopupButton_manualtimesheet">Cancel</button>
 
-</div>
 </div> 
-</div> 
-
 
     <!-- Total Time Chart -->
     <div id="totalTime" class="tab-content">
@@ -680,8 +590,6 @@
     </div>
 </div>
 </div>
-
-
 
     </div>
 </div>
@@ -693,14 +601,6 @@
         <h2>Create Task</h2>
         <span class="close-btn4" id="closePopupButton">&times;</span>
         <form id="createTaskForm">
-            <!-- <div class="form-group">
-                <label for="teamcreatetask">Team:</label>
-                <select id="teamcreatetask" name="team">
-                    <option value="">Select</option> 
-                </select>
-                <span id="lockTeamBtn" class="lock-toggle">🔒 Lock</span>
-            </div> -->
-            
             <div class="form-group">
                     <label>Upload Excel File:</label>
                     <input type="file" id="fileInput" accept=".xlsx, .xls, .csv">
@@ -719,7 +619,6 @@
         </form>
         <div class="form-group">
             <button id="savetask_creatask" style="display: none;">Save Task</button>
-            <button id="aproover_creattask" style="display: none;">Approver</button>
             <button id="closePopupButton_creattask">Cancel</button>
             
             <div id="dropdownContainer" style="display: none; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9; width: 200px; position: absolute;">
@@ -740,9 +639,7 @@
 <script>
 
 </script>
-    <script src="{% static 'js/attendence.js' %}"></script>
     <script src="{% static 'js/task_dashbord.js' %}"></script>
-    <script src="{% static 'js/leavepage.js' %}"></script>
     <script src="{% static 'js/manualtimesheet.js' %}"></script>
 </body>
 </html>

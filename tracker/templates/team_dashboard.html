@@ -6,13 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/attendance.css' %}">
+
     <link rel="stylesheet" href="{% static 'css/teamdashboard.css' %}">
     <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    
+    <!-- HEAD -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- BODY BOTTOM -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 </head>
 <body>
 
@@ -48,23 +53,15 @@
              
                 
                 {% if is_admin_or_md  %}
-                <a class="sidebar-link" id="project-button" 
+                <a class="sidebar_link" id="project-button" 
             href="{% url 'project_tracker' %}" 
             data-default-img="{% static 'images/leavepage.png' %}" 
             data-active-img="{% static 'images/leavepage1.png' %}">
                 <img src="{% static 'images/leavepage.png' %}" alt="Project Tracker Icon"> 
-                PROJECT TRACKER
-
-                {% if pending_count > 0 %}
-                    <div class="notification-bubble">
-                        {{ pending_count }}
-                        <div class="bubble-pointer"></div>
-                    </div>
-                {% endif %}
-            </a>            
+                PROJECT TRACKER</a>            
                 {% else %}
                 <!-- ✅ Show Notifications for Normal Users -->
-                <a class="sidebar-link" id="notifications" 
+                <a class="sidebar_link" id="notifications" 
                 href="{% url 'notifications_page' %}"
                 data-default-img="{% static 'images/leavepage.png' %}" 
                 data-active-img="{% static 'images/leavepage1.png' %}">
@@ -85,31 +82,27 @@
                 <img src="{% static 'images/signout.png' %}" alt="Sign Out Icon"> SIGN OUT
             </a>
         </div>
+        <div class="container">
+           <div class="header1">
+    <div class="back-button">
+      <span onclick="history.back()">🡨</span>
+      <h1>PROJECT DASHBOARD</h1>
+    </div>
         <div>
-            <h1>Welcome to the Team Dashboard</h1>
-        
-            <!-- Dropdown for selecting team -->
-            <label for="teamSelect">Select Team:</label>
-            <select id="teamSelect" onchange="if(this.value === '') location.reload(); else loadProjects();">
-                <option value="">Select Team</option>
-            </select>
-        
-            <!-- Dropdown for selecting project (initially disabled) -->
+            <div style="white-space: nowrap;">
             <label for="projectSelect">Select Project:</label>
-            <select id="projectSelect" onchange="loadTasks()" disabled>
+            
+            <select id="projectSelect" onchange="loadTasks()"disabled>
                 <option value="">Select Project</option>
                 <!-- Project options will be populated dynamically -->
-            </select>
-        
-            <!-- Canvas for displaying the chart -->
-            <canvas id="teamBarChart" width="300px" height="100px" style="background: rgb(255, 255, 255);"></canvas>
-            <div id="user-worktime-table-container"></div>
-
+            </select> </div></div>     
         </div>
-
+            <div id="user-worktime-table-container"></div>
+            <!-- Canvas for displaying the chart -->
+           <div id="teamBarChart"></div>
+        </div>
 </div>      
 </body>
-
-<script src="{% static 'js/task_dashbord.js' %}"></script>
 <script src="{% static 'js/team_dashboard.js' %}"></script>
 </html>
+ 
