@@ -722,7 +722,7 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
     designation = None
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT designation FROM auth_user WHERE id = %s", [user_id])
+            cursor.execute("SELECT designation FROM employee_details WHERE employee_id = %s", [user_id])
             result = cursor.fetchone()
             designation = result[0] if result else None
     except Exception as e:
@@ -747,8 +747,8 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
                 """
                 SELECT 
                     id, title, scope, date, time, assigned, category, projects, 
-                    list, rev, comments, benchmark, d_no, mail_no, ref_no, created, updated, verification_status, task_status, team, 
-                FROM tasktracker.tracker_project
+                    list, rev, comments, benchmark, d_no, mail_no, ref_no, created, updated, verification_status, task_status, team
+                FROM tracker_project
                 WHERE date = %s
             """,
                 [selected_date],
@@ -2757,31 +2757,28 @@ def update_comp_leave_status(request):
         if not record_id or action not in ["approve", "reject"]:
             return JsonResponse({"error": "Invalid request data."}, status=400)
 
-        # Fetch the attendance record using Django ORM
-        attendance = Attendance.objects.filter(id=record_id).first()
+        with transaction.atomic():
+            # Fetch the attendance record using Django ORM
+            attendance = Attendance.objects.filter(id=record_id).first()
 
-        if not attendance:
-            return JsonResponse({"error": "Attendance record not found."}, status=404)
+            if not attendance:
+                return JsonResponse({"error": "Attendance record not found."}, status=404)
 
-        # Update the attendance record based on the action (approve/reject)
-        if action == "approve":
-            attendance.is_compensated = 0  # Set is_compensated to 1 for approved
-            attendance.redeemed = 1  # Set redeemed to 1 for approved
-        elif action == "reject":
-            attendance.is_compensated = 1  # Set is_compensated to 0 for rejected
-            attendance.redeemed = 0 # Set redeemed to 0 for approved
-        # Save the updated record
-        attendance.save()
-
-        # Commit the transaction
-        transaction.commit()
+            # Update the attendance record based on the action (approve/reject)
+            if action == "approve":
+                attendance.is_compensated = 0  # Set is_compensated to 0 for approved
+                attendance.redeemed = 1  # Set redeemed to 1 for approved
+            elif action == "reject":
+                attendance.is_compensated = 1  # Set is_compensated to 1 for rejected
+                attendance.redeemed = 0 # Set redeemed to 0 for approved
+            # Save the updated record
+            attendance.save()
 
         return JsonResponse({"message": f"Comp Leave {action}d successfully."}, status=200)
 
     except Exception as e:
-        # Rollback in case of error
-        transaction.rollback()
         return JsonResponse({"error": str(e)}, status=500)
+
 
 
 
