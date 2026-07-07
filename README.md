@@ -1,45 +1,103 @@
-**Edit a file, create a new file, and clone from Bitbucket in under 2 minutes**
+# Trackr 📋⏱
 
-When you're done, you can delete the content in this README and update the file with details for others getting started with your repository.
-
-*We recommend that you open this README in another tab as you perform the tasks below. You can [watch our video](https://youtu.be/0ocf7u76WSo) for a full demo of all the steps in this tutorial. Open the video in a new tab to avoid leaving Bitbucket.*
+Trackr is a comprehensive, production-ready Django web application designed for task management, project tracking, employee attendance, and leave management. It serves as an all-in-one portal for organizations to track productivity, process approvals, calculate comp-off credits, and monitor team performance metrics.
 
 ---
 
-## Edit a file
+## 🚀 Key Features
 
-You’ll start by editing this README file to learn how to edit a file in Bitbucket.
-
-1. Click **Source** on the left side.
-2. Click the README.md link from the list of files.
-3. Click the **Edit** button.
-4. Delete the following text: *Delete this line to make a change to the README from Bitbucket.*
-5. After making your change, click **Commit** and then **Commit** again in the dialog. The commit page will open and you’ll see the change you just made.
-6. Go back to the **Source** page.
+*   **🔒 Authentication & Employee Directory**: Robust signup/login with roles (MD, Admins, Employees) and profile picture uploads.
+*   **📋 Task & Timesheet Management**:
+    *   Create, edit, delete, and track tasks with status (In Progress, Completed, Paused).
+    *   Log working hours, estimate benchmarks, and submit timesheets.
+*   **🗂 Project Tracking**: Assign distinct scopes, check deliverables, and update project status.
+*   **📅 Attendance & Compensatory Leaves (Comp-Off)**:
+    *   Record daily punch-in, punch-out, and break times.
+    *   Interactive monthly attendance calendar.
+    *   Auto-calculation of compensated worktime with MD approval flows for compensatory leaves.
+*   **🏖 Leave & Holiday Management**:
+    *   Submit leave applications and monitor approval queues.
+    *   Holiday calendars and team holiday listings.
+*   **🧑‍🤝‍🧑 Team Dashboards & Rankings**:
+    *   Rank teams based on KPIs (Speed of execution, Quality of work, Task ownership).
+    *   Interactive charts and team rankings.
+*   **📊 Reports & Exporting**: Export project summary reports directly to Excel spreadsheet sheets.
+*   **📬 Notifications**: System-wide notifications for task assignments and status updates.
 
 ---
 
-## Create a file
+## 🛠 Tech Stack
 
-Next, you’ll add a new file to this repository.
+*   **Framework**: [Django](https://www.djangoproject.com/) (Python 3.12+)
+*   **Databases**: [MySQL](https://www.mysql.com/) (Production) and [SQLite](https://www.sqlite.org/) (Local Development)
+*   **Libraries**:
+    *   `openpyxl` (Excel reporting)
+    *   `python-dotenv` (Environment configuration)
+    *   `celery` & `redis` (Background task queue)
 
-1. Click the **New file** button at the top of the **Source** page.
-2. Give the file a filename of **contributors.txt**.
-3. Enter your name in the empty file space.
-4. Click **Commit** and then **Commit** again in the dialog.
-5. Go back to the **Source** page.
+---
 
-Before you move on, go ahead and explore the repository. You've already seen the **Source** page, but check out the **Commits**, **Branches**, and **Settings** pages.
+## ⚙️ Configuration & Database Setup
 
--------
+Trackr is equipped with a **dynamic database fallback system**. By default, if MySQL configuration is not detected in environment variables, the application will automatically fall back to the local SQLite database (`db.sqlite3`), allowing developers to run and test the project instantly.
 
-## Clone a repository
+### Environment variables (`.env`)
+Create a `.env` file in the project root directory:
 
-Use these steps to clone from SourceTree, our client for using the repository command-line free. Cloning allows you to work on your files locally. If you don't yet have SourceTree, [download and install first](https://www.sourcetreeapp.com/). If you prefer to clone from the command line, see [Clone a repository](https://confluence.atlassian.com/x/4whODQ).
+```env
+# Database Configuration (Optional - Defaults to SQLite if not provided)
+DB_ENGINE=mysql
+DB_NAME=tasktracker
+DB_USER=root
+DB_PASSWORD=your_mysql_password
+DB_HOST=localhost
+DB_PORT=3306
 
-1. You’ll see the clone button under the **Source** heading. Click that button.
-2. Now click **Check out in SourceTree**. You may need to create a SourceTree account or log in.
-3. When you see the **Clone New** dialog in SourceTree, update the destination path and name if you’d like to and then click **Clone**.
-4. Open the directory you just created to see your repository’s files.
+# Email Settings for Alerts (Optional)
+EMAIL_HOST_USER=your_email@gmail.com
+EMAIL_HOST_PASSWORD=your_app_password
+```
 
-Now that you're more familiar with your Bitbucket repository, go ahead and add a new file locally. You can [push your change back to Bitbucket with SourceTree](https://confluence.atlassian.com/x/iqyBMg), or you can [add, commit,](https://confluence.atlassian.com/x/8QhODQ) and [push from the command line](https://confluence.atlassian.com/x/NQ0zDQ).
+---
+
+## 🏃 Getting Started
+
+### 1. Prerequisites
+Make sure Python 3.12+ is installed on your machine.
+
+### 2. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Create Database Migrations
+Generate migrations for the tracker app and apply them:
+```bash
+python manage.py makemigrations tracker
+python manage.py migrate
+```
+
+### 4. Start Development Server
+```bash
+python manage.py runserver
+```
+Visit the application at `http://127.0.0.1:8000/`.
+
+---
+
+## 📂 Project Structure
+
+```text
+├── manage.py            # Django project entrypoint
+├── db.sqlite3           # SQLite Database (for local dev)
+├── requirements.txt     # Python package requirements
+├── task_tracker/        # Project Configuration
+│   ├── settings.py      # Project Settings (Dotenv integration & DB fallbacks)
+│   └── urls.py          # Root Routing Configuration
+└── tracker/             # Main Application Code
+    ├── models.py        # Database Models
+    ├── views.py         # Application Logic & API Endpoints
+    ├── urls.py          # Tracker app routing
+    ├── forms.py         # Form Definitions (with dynamic choice binding)
+    └── templates/       # HTML Templates
+```
