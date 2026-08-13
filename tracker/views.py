@@ -745,10 +745,8 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
     # Fetch the user's designation
     designation = None
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT designation FROM employee_details WHERE employee_id = %s", [user_id])
-            result = cursor.fetchone()
-            designation = result[0] if result else None
+        employee = EmployeeDetails.objects.filter(employee_id=user_id).first()
+        designation = employee.designation if employee else None
     except Exception as e:
         print(f"Error fetching designation: {e}")
 
@@ -1262,13 +1260,13 @@ def project_tracker(request):
 
     # If designation or authentication is not found, fetch from DB
     if user_id and (not designation or not authentication):
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT designation, authentication, image FROM employee_details WHERE employee_id = %s", [user_id])
-            result = cursor.fetchone()
-            if result:
-                designation = result[0] if result[0] else "No Designation"
-                authentication = result[1] if result[1] else "No Role"
-                image_base64 = base64.b64encode(result[2]).decode("utf-8") if result[2] else None
+        try:
+            employee = EmployeeDetails.objects.get(employee_id=user_id)
+            designation = employee.designation or "No Designation"
+            authentication = employee.authentication or "No Role"
+            image_base64 = base64.b64encode(employee.image).decode("utf-8") if employee.image else None
+        except EmployeeDetails.DoesNotExist:
+            pass
 
     # Fetch only the records where status is 'Pending'
     project_data = ProjectTacker.objects.filter(status="Pending")
@@ -1464,24 +1462,19 @@ def attendance_calendar(request):
 
     # ✅ If designation is not found in global data, fetch from DB
     if user_id and not designation:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT designation, image FROM employee_details WHERE employee_id = %s", [user_id])
-            result = cursor.fetchone()
-            if result:
-                designation = result[0] if result[0] else "No Designation"  # Handle missing designation
-                image_base64 = base64.b64encode(result[1]).decode("utf-8") if result[1] else None
+        try:
+            employee = EmployeeDetails.objects.get(employee_id=user_id)
+            designation = employee.designation or "No Designation"
+            image_base64 = base64.b64encode(employee.image).decode("utf-8") if employee.image else None
+        except EmployeeDetails.DoesNotExist:
+            pass
 
     # ✅ Check if user is Admin or MD
     is_admin_or_md = False
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT authentication FROM employee_details WHERE name = %s
-        """, [name])
-        auth_result = cursor.fetchone()
-
-        if auth_result:
-            auth_value = str(auth_result[0]).strip().lower()
-            is_admin_or_md = (auth_value == "admin" or auth_value == "md")
+    employee_auth = EmployeeDetails.objects.filter(name=name).values_list("authentication", flat=True).first()
+    if employee_auth:
+        auth_value = str(employee_auth).strip().lower()
+        is_admin_or_md = (auth_value == "admin" or auth_value == "md")
 
     # ✅ If request is not GET, return JSON response
     if request.method != "GET":
@@ -3135,13 +3128,13 @@ def team_dashboard(request):
 
     # If designation or authentication is not found, fetch from DB
     if user_id and (not designation or not authentication):
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT designation, authentication, image FROM employee_details WHERE employee_id = %s", [user_id])
-            result = cursor.fetchone()
-            if result:
-                designation = result[0] if result[0] else "No Designation"
-                authentication = result[1] if result[1] else "No Role"
-                image_base64 = base64.b64encode(result[2]).decode("utf-8") if result[2] else None
+        try:
+            employee = EmployeeDetails.objects.get(employee_id=user_id)
+            designation = employee.designation or "No Designation"
+            authentication = employee.authentication or "No Role"
+            image_base64 = base64.b64encode(employee.image).decode("utf-8") if employee.image else None
+        except EmployeeDetails.DoesNotExist:
+            pass
 
     # Determine if user is admin or MD based on the 'authentication' column
     is_admin_or_md = authentication in ['admin', 'MD']
