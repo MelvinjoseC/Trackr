@@ -686,6 +686,9 @@ def save_employee_details(request):
         password = request.POST.get("password")
         image = request.FILES.get("image")  # Get the uploaded file
 
+        from django.contrib.auth.hashers import make_password
+        hashed_password = make_password(password) if password else ""
+
         # Save the data to the EmployeeDetails model
         employee = EmployeeDetails(
             name=name,
@@ -695,7 +698,7 @@ def save_employee_details(request):
             phone_number=phone_number,
             department=department,
             status=status,
-            password=password,
+            password=hashed_password,
             image=image.read() if image else None,  # Convert image to binary
         )
         employee.save()
