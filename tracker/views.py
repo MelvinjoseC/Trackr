@@ -606,12 +606,9 @@ def task_dashboard_api(request):
         )
 
     try:
-        with connection.cursor() as cursor:
-            # Fetch all tracker tasks
-            cursor.execute("SELECT * FROM tracker_project")
-            task_columns = [col[0] for col in cursor.description]
-            tasks = cursor.fetchall()
-            task_list = [dict(zip(task_columns, task)) for task in tasks]
+        # Fetch all tracker tasks using Django ORM
+        task_list = list(TrackerTasks.objects.all().values())
+        task_list = convert_bytes_safe(task_list)
 
             # Fetch all employee details
             employees = EmployeeDetails.objects.all()
@@ -764,43 +761,31 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
     # Fetch task data for the selected date
     monthly_calendar_data = []
     try:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT 
-                    id, title, scope, date, time, assigned, category, projects, 
-                    list, rev, comments, benchmark, d_no, mail_no, ref_no, created, updated, verification_status, task_status, team
-                FROM tracker_project
-                WHERE date = %s
-            """,
-                [selected_date],
-            )
-            rows = cursor.fetchall()
-            monthly_calendar_data = [
-                {
-                    "id": row[0],
-                    "title": row[1],
-                    "scope": row[2],
-                    "date": row[3],
-                    "time": row[4],
-                    "assigned": row[5],
-                    "category": row[6],
-                    "project": row[7],
-                    "list": row[8],
-                    "rev_no": row[9],
-                    "comments": row[10],
-                    "benchmark": row[11],
-                    "d_no": row[12],
-                    "mail_no": row[13],
-                    "ref_no": row[14],
-                    "created": row[15],
-                    "updated": row[16],
-                    "verification_status": row[17],
-                    "task_status": row[18],
-                    "team":row[19],
-                }
-                for row in rows
-            ]
+        tasks = TrackerTasks.objects.filter(date1=selected_date)
+        monthly_calendar_data = []
+        for t in tasks:
+            monthly_calendar_data.append({
+                "id": t.id,
+                "title": t.title,
+                "scope": t.scope,
+                "date": t.date1,
+                "time": t.time,
+                "assigned": t.assigned,
+                "category": t.category,
+                "project": t.projects,
+                "list": t.list,
+                "rev_no": t.rev,
+                "comments": t.comments,
+                "benchmark": t.task_benchmark,
+                "d_no": t.d_no,
+                "mail_no": t.mail_no,
+                "ref_no": t.ref_no,
+                "created": None,
+                "updated": None,
+                "verification_status": t.verification_status,
+                "task_status": t.task_status,
+                "team": t.team,
+            })
     except Exception as e:
         print(f"Error fetching monthly calendar data: {e}")
 
@@ -1600,12 +1585,15 @@ def create_project_view(request):
             if not all([project_name, start_date, end_date, scope, category, benchmark]):
                 return JsonResponse({"error": "All fields are required!"}, status=400)
 
-            # Insert into the database
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO tracker_project (projects, scope, category, task_benchmark, start, end)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                """, [project_name, scope, category, benchmark, start_date, end_date])
+            # Insert into the database using Django ORM
+            TrackerTasks.objects.create(
+                projects=project_name,
+                scope=scope,
+                category=category,
+                task_benchmark=benchmark,
+                start=start_date,
+                end=end_date
+            )
 
             return JsonResponse({"message": "Project Created Successfully!"})
 
@@ -1964,51 +1952,49 @@ def get_task_details(request):
         return JsonResponse({"error": "Task ID is required"}, status=400)
 
     try:
-        # Fetch task details
-        task_query = """
-            SELECT id, title, projects, scope, date1, time, comments, list, category, task_status
-            FROM tracker_project 
-            WHERE id = %s
-        """
-        with connection.cursor() as cursor:
-            cursor.execute(task_query, [task_id])
-            row = cursor.fetchone()
+        # Fetch task details using ORM
+        task_obj = TrackerTasks.objects.filter(id=task_id).values(
+            "id", "title", "projects", "scope", "date1", "time", "comments", "list", "category", "task_status"
+        ).first()
 
-        if not row:
+        if not task_obj:
             return JsonResponse({"error": "Task not found"}, status=404)
 
-        columns = ["id", "title", "projects", "scope", "date1", "time", "comments", "list", "category", "task_status"]
-        task = dict(zip(columns, row))
+        task = {
+            "id": task_obj["id"],
+            "title": task_obj["title"],
+            "projects": task_obj["projects"],
+            "scope": task_obj["scope"],
+            "date1": str(task_obj["date1"]) if task_obj["date1"] else None,
+            "time": task_obj["time"],
+            "comments": task_obj["comments"],
+            "list": task_obj["list"],
+            "category": task_obj["category"],
+            "task_status": task_obj["task_status"]
+        }
 
-        # Fetch dropdown values dynamically
+        # Fetch dropdown values dynamically using ORM
         dropdown_data = {}
 
         # Fetch department lists
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT DISTINCT list FROM tracker_project")
-            dropdown_data["list"] = [row[0] for row in cursor.fetchall() if row[0]]
+        dropdown_data["list"] = list(TrackerTasks.objects.values_list("list", flat=True).distinct())
+        dropdown_data["list"] = [val for val in dropdown_data["list"] if val]
 
         # Fetch projects based on list
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT DISTINCT list, projects FROM tracker_project")
-            dropdown_data["projects"] = [{"list": row[0], "name": row[1]} for row in cursor.fetchall() if row[0] and row[1]]
+        proj_distinct = TrackerTasks.objects.values("list", "projects").distinct()
+        dropdown_data["projects"] = [{"list": row["list"], "name": row["projects"]} for row in proj_distinct if row["list"] and row["projects"]]
 
         # Fetch scopes based on projects
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT DISTINCT projects, scope FROM tracker_project")
-            dropdown_data["scope"] = [{"project": row[0], "name": row[1]} for row in cursor.fetchall() if row[0] and row[1]]
+        scope_distinct = TrackerTasks.objects.values("projects", "scope").distinct()
+        dropdown_data["scope"] = [{"project": row["projects"], "name": row["scope"]} for row in scope_distinct if row["projects"] and row["scope"]]
 
         # Fetch tasks based on scopes
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT DISTINCT scope, title FROM tracker_project")
-            dropdown_data["titles"] = [{"scope": row[0], "name": row[1]} for row in cursor.fetchall() if row[0] and row[1]]
+        titles_distinct = TrackerTasks.objects.values("scope", "title").distinct()
+        dropdown_data["titles"] = [{"scope": row["scope"], "name": row["title"]} for row in titles_distinct if row["scope"] and row["title"]]
 
         # Fetch categories based on tasks
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT DISTINCT title, category FROM tracker_project")
-            dropdown_data["category"] = [{"task": row[0], "name": row[1]} for row in cursor.fetchall() if row[0] and row[1]]
-
-        print("Dropdown Data (Backend):", json.dumps(dropdown_data, indent=4))  # Debug print
+        category_distinct = TrackerTasks.objects.values("title", "category").distinct()
+        dropdown_data["category"] = [{"task": row["title"], "name": row["category"]} for row in category_distinct if row["title"] and row["category"]]
 
         return JsonResponse({"task": task, "dropdowns": dropdown_data}, status=200)
 
@@ -2100,10 +2086,9 @@ def delete_task(request):
         return JsonResponse({'error': 'task_id parameter is required'}, status=400)
 
     try:
-        query = "DELETE FROM tracker_project WHERE id = %s"
-        with connection.cursor() as cursor:
-            cursor.execute(query, [task_id])
-
+        deleted_count, _ = TrackerTasks.objects.filter(id=task_id).delete()
+        if deleted_count == 0:
+            return JsonResponse({'error': 'Task not found'}, status=404)
         return JsonResponse({'message': 'Task deleted successfully'}, status=200)
 
     except Exception as e:
