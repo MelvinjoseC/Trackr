@@ -1,4 +1,7 @@
 import openpyxl
+import logging
+logger = logging.getLogger("tracker.views")
+
 
 def get_session_user(request):
     user_id = request.session.get("user_id")
@@ -24,7 +27,10 @@ def api_success(message_or_data, status=200):
 def api_error(message, status=400):
     return JsonResponse({"success": False, "error": message}, status=status)
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-from django.http import HttpResponse
+
+from django.http import HttpResponse, JsonResponse
+from django.db import connection, transaction
+
 # --- Styled Excel Export for Project Report ---
 def export_project_report_excel(request):
 
@@ -430,14 +436,9 @@ def export_project_report_excel(request):
 import calendar
 from datetime import datetime
 from django.shortcuts import render
-from django.db import connection
 import base64
-from .models import EmployeeDetails
 import json
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import ProjectTacker
-from django.db import connection, transaction
 import matplotlib
 
 matplotlib.use("Agg")  # Set the backend to avoid GUI errors
@@ -446,10 +447,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import io
 import base64
-from django.http import JsonResponse
 
 
-from django.http import JsonResponse
 from .models import EmployeeDetails  # Import the EmployeeDetails model
 import json
 
@@ -752,7 +751,7 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
         employee = EmployeeDetails.objects.filter(employee_id=user_id).first()
         designation = employee.designation if employee else None
     except Exception as e:
-        print(f"Error fetching designation: {e}")
+        logger.error(f"Error fetching designation: {{e}}")
 
     # Parse the selected date or use the current date
     try:
@@ -763,7 +762,7 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
         )
     except ValueError:
         selected_date = datetime.now().date()
-        print("Invalid date format provided. Defaulting to today's date.")
+        logger.info("Invalid date format provided. Defaulting to today's date.")
 
     # Fetch task data for the selected date
     monthly_calendar_data = []
@@ -794,7 +793,7 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
                 "team": t.team,
             })
     except Exception as e:
-        print(f"Error fetching monthly calendar data: {e}")
+        logger.error(f"Error fetching monthly calendar data: {{e}}")
 
     return {
         "designation": designation,
@@ -815,7 +814,6 @@ def execute_query(query, params=None):
             return None
 
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
 from django.utils.dateparse import parse_date
 from tracker.models import TrackerTasks
 import json
@@ -875,7 +873,6 @@ def create_task(request):
 
 
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
 from django.utils.dateparse import parse_date
 from tracker.models import TrackerTasks
 import json
@@ -913,7 +910,6 @@ def edit_task(request):
 
 
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
 from tracker.models import TrackerTasks  # Use correct import if your model is elsewhere
 
 @csrf_exempt
@@ -956,11 +952,9 @@ def get_task_by_title_project_scope(request):
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
 from datetime import datetime, timedelta
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import TrackerTasks
 
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime, timedelta
 from .models import TrackerTasks
@@ -1025,7 +1019,6 @@ def get_hoursheet_data(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from .models import TrackerTasks  # or your actual model
@@ -1053,7 +1046,6 @@ def delete_timesheet_row(request):
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
 from datetime import datetime
-from django.http import JsonResponse
 from .models import TrackerTasks
 
 def get_filter_data(request):
@@ -1099,7 +1091,6 @@ def get_filter_data(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
 from datetime import datetime
 from .models import TrackerTasks
 import json
@@ -1167,7 +1158,6 @@ def submit_timesheet(request):
         traceback.print_exc()  # Debugging line
         return JsonResponse({"error": str(e)}, status=500)
 
-from django.http import JsonResponse
 from django.db.models import Count, F
 from .models import LeaveApplication, Attendance
 
@@ -1231,7 +1221,6 @@ def generate_pie_chart(request):
 
 
 from django.shortcuts import render, redirect
-from django.db import connection
 import base64
 from .models import ProjectTacker
 
@@ -1299,7 +1288,6 @@ def project_tracker(request):
 
 
 import json
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import ProjectTacker, TrackerTasks
 
@@ -1434,8 +1422,6 @@ def check_task_status(request):
 
 import base64
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
-from django.db import connection
 
 
 def attendance_calendar(request):
@@ -1482,8 +1468,6 @@ def attendance_calendar(request):
     })
 
 
-from django.http import JsonResponse
-from django.db import connection
 
 def get_times_by_date(request):
     if request.method == 'GET':
@@ -1539,8 +1523,6 @@ def get_all_times_by_month(request):
 
 
 
-from django.http import JsonResponse
-from django.db import connection
 
 def get_tasks_by_date(request):
     date1 = request.GET.get('date1')
@@ -1565,8 +1547,6 @@ def get_tasks_by_date(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 from django.shortcuts import render
-from django.http import JsonResponse
-from django.db import connection
 from datetime import datetime
 
 def create_project_view(request):
@@ -1596,13 +1576,12 @@ def create_project_view(request):
             return JsonResponse({"message": "Project Created Successfully!"})
 
         except Exception as e:
-            print("Database Error:", e)  # Log the error for debugging
+            logger.error(f"Database Error: {e}")  # Log the error for debugging
             return JsonResponse({"error": "Something went wrong. Please try again later."}, status=500)
 
     return render(request, "project_tracker.html")  # Load the form page
 
 from django.shortcuts import render
-from django.http import JsonResponse
 from django.db import models
 from datetime import datetime
 from django.core.files.storage import default_storage
@@ -1688,7 +1667,6 @@ def mainleavepage_view(request):
 
 
 from django.shortcuts import render
-from django.http import JsonResponse
 from datetime import datetime
 from .models import LeaveApplication  # Assuming the model is in the same app
 
@@ -1743,7 +1721,6 @@ def apply_leave_view(request):
 
 
 from django.shortcuts import render
-from django.http import JsonResponse
 from datetime import datetime
 from .models import Holiday  # Import the existing Holiday model
 
@@ -1776,7 +1753,6 @@ def get_holidays(request):
 
 
 
-from django.http import JsonResponse
 from .models import LeaveApplication, Attendance
 
 
@@ -1842,7 +1818,6 @@ def leave_application_view(request):
 
 
 
-from django.http import JsonResponse
 from .models import EmployeeDetails, LeaveApplication  # Import the models
 
 
@@ -1872,14 +1847,13 @@ def leave_approvals_view(request):
 
 
 
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import LeaveApplication  # Import the LeaveApplication model
 import json
 
 @csrf_exempt  # Temporarily bypass CSRF for debugging (Remove in production)
 def update_leave_status(request):
-    print("🔍 CSRF Token Received:", request.META.get("HTTP_X_CSRFTOKEN"))  # Debugging
+    logger.info("🔍 CSRF Token Received:", request.META.get("HTTP_X_CSRFTOKEN"))  # Debugging
 
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request method. Only POST is allowed."}, status=405)
@@ -1940,8 +1914,6 @@ def check_admin_status(request):
 
 
 import json
-from django.http import JsonResponse
-from django.db import connection
 
 def get_task_details(request):
     task_id = request.GET.get("task_id")
@@ -2002,7 +1974,6 @@ def get_task_details(request):
 
 
 import json
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from .models import TrackerTasks
@@ -2092,7 +2063,6 @@ def delete_task(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-from django.http import JsonResponse
 from datetime import datetime
 from .models import LeaveApplication  # Import the LeaveApplication model
 
@@ -2131,7 +2101,6 @@ def delete_leave_application_view(request, leave_id):
 
 
 
-from django.http import JsonResponse
 from datetime import datetime
 from .models import LeaveApplication  # Import the LeaveApplication model
 
@@ -2183,7 +2152,6 @@ def edit_leave_application_view(request, leave_id):
 
 
 
-from django.http import JsonResponse
 from datetime import datetime, timedelta
 from .models import Attendance, Holiday  # Import the Attendance and Holiday models
 
@@ -2267,7 +2235,7 @@ def attendance_view(request):
             )
             attendance.save()
 
-            print("✅ Attendance successfully added!")  # ✅ Debugging log
+            logger.info("✅ Attendance successfully added!")  # ✅ Debugging log
 
             return JsonResponse({
                 "message": "Attendance added successfully!",
@@ -2283,7 +2251,6 @@ def attendance_view(request):
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
 
-from django.http import JsonResponse
 from datetime import datetime, timedelta
 from .models import Attendance  # Import the Attendance model
 
@@ -2358,7 +2325,6 @@ def get_attendance(request):
     return JsonResponse({}, status=200)  # ✅ Return empty JSON instead of an error
 
 
-from django.http import JsonResponse
 from datetime import datetime, timedelta
 from .models import Attendance  # Import the Attendance model
 
@@ -2434,7 +2400,6 @@ def edit_attendance_view(request):
     return JsonResponse({"error": "Invalid request method"}, status=405)  # ✅ Status 200 prevents error page
 
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
 from datetime import datetime
 from .models import Attendance  # Import the Attendance model
 
@@ -2477,7 +2442,6 @@ def delete_attendance_view(request):
 
 
 
-from django.http import JsonResponse
 from datetime import datetime, timedelta
 from .models import Attendance, Holiday, LeaveApplication  # Assuming you have the Attendance, Holiday, and LeaveApplication models
 
@@ -2578,7 +2542,6 @@ def get_monthly_weekly_attendance(request):
     })
 
 
-from django.http import JsonResponse
 from .models import Attendance  # Import the Attendance model
 
 
@@ -2621,7 +2584,6 @@ def get_compensated_worktime(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 
-from django.http import JsonResponse
 from .models import Attendance  # Import the Attendance model
 import json
 
@@ -2660,7 +2622,6 @@ def request_comp_leave(request):
         return JsonResponse({"error": f"Failed to update attendance. Error: {str(e)}"}, status=500)
 
 
-from django.http import JsonResponse
 from .models import Attendance, EmployeeDetails  # Import the models
 import json
 
@@ -2700,7 +2661,6 @@ def get_pending_comp_leave_requests(request):
     except Exception as e:
         return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
 
-from django.http import JsonResponse
 from django.db import transaction
 from .models import Attendance, EmployeeDetails  # Import the models
 import json
@@ -2801,7 +2761,6 @@ def monthly_attendance_view(request):
 
     return render(request, "project_tracker.html", {'attendance_data': attendance_data_list})
 
-from django.http import JsonResponse
 from .models import EmployeeDetails  # Import the EmployeeDetails model
 
 def get_employee_names(request):
@@ -2814,7 +2773,6 @@ def get_employee_names(request):
     return JsonResponse({'employees': employee_data})
 
 
-from django.http import JsonResponse
 from django.db.models import Sum
 from .models import Attendance  # Import the Attendance model
 
@@ -2847,7 +2805,6 @@ def get_user_worktime(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-from django.http import JsonResponse
 from .models import Attendance
 from django.views.decorators.http import require_GET
 
@@ -2875,7 +2832,6 @@ def get_attendance_details(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-from django.http import JsonResponse
 from .models import TrackerTasks  # Import the TrackerTasks model
 
 def monthly_project_analysis(request):
@@ -2908,7 +2864,6 @@ def monthly_project_analysis(request):
 
 
 
-from django.http import JsonResponse
 from .models import TrackerTasks  # Import the TrackerTasks model
 
 def get_project_categories(request):
@@ -2937,7 +2892,6 @@ def get_project_categories(request):
 
 
 
-from django.http import JsonResponse
 from .models import TrackerTasks
 from datetime import datetime, timedelta
 
@@ -2954,7 +2908,6 @@ def get_week_date_range(week_offset):
     week_end = week_start + timedelta(days=6)
 
     return week_start.date(), week_end.date()
-from django.http import JsonResponse
 from .models import TrackerTasks
 from datetime import datetime, timedelta
 
@@ -3053,7 +3006,6 @@ def get_project_datas(request):
     })
 
 
-from django.http import JsonResponse
 from .models import TrackerTasks
 from datetime import datetime
 
@@ -3095,7 +3047,6 @@ def get_task_details_for_sidebar(request):
 from django.shortcuts import render
 from .models import TrackerTasks, EmployeeDetails  # Your model import
 import base64
-from django.db import connection
 
 # Assuming user_data is a global variable
 
@@ -3161,7 +3112,6 @@ def team_dashboard(request):
         },
     )
 
-from django.http import JsonResponse
 from .models import TrackerTasks
 from django.db.models import Sum
 
@@ -3234,7 +3184,6 @@ def get_project_data(request, project):
     })
 
 
-from django.http import JsonResponse
 from .models import TrackerTasks
 
 def get_task_data(request, project):
@@ -3263,8 +3212,7 @@ def get_task_data(request, project):
 
 
 
-# from django.http import JsonResponse
-# from .models import TrackerTasks
+# # from .models import TrackerTasks
 # from django.db.models import Sum
 
 # def get_team_chart_datas(request):
@@ -3327,7 +3275,6 @@ def get_project(request, team):
     return JsonResponse({"projects": project_names})
 
 
-from django.http import JsonResponse
 from .models import TrackerTasks
 from django.db.models import Sum
 
@@ -3382,7 +3329,6 @@ def get_task_datas(request, project):  # ✅ Only project now
     })
 
 
-from django.http import JsonResponse
 from .models import TrackerTasks
 
 def get_project_data(request, project):
@@ -3432,7 +3378,6 @@ def get_project_data(request, project):
 
 
 from django.shortcuts import render
-from django.http import JsonResponse
 from .models import TrackerTasks
 
 # Assuming user_data is a global variable
@@ -3450,7 +3395,6 @@ def get_projects_data(request):
     })
 
 from django.shortcuts import render
-from django.http import JsonResponse
 from .models import TrackerTasks
 from .forms import ProjectStatusUpdateForm
 
@@ -3482,14 +3426,12 @@ def update_project_status(request):
 
 
 from django.shortcuts import render
-from django.http import JsonResponse
 from .models import TeamRanking
 import json
 from django.views.decorators.csrf import csrf_exempt
 
 def team_ranking_page(request):
     return render(request, 'project_tracker.html')
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import TeamRanking
 import json
@@ -3539,7 +3481,6 @@ def get_team_member_details(request):
     return JsonResponse(data, safe=False)
 
 
-from django.http import JsonResponse
 from .models import TeamRanking
 
 def get_team_rankings(request):
@@ -3549,7 +3490,6 @@ def get_team_rankings(request):
 
 
 
-from django.http import JsonResponse
 from .models import TrackerTasks
 
 def get_team_names(request):
@@ -3563,7 +3503,6 @@ def get_team_names(request):
 
 
 
-from django.http import JsonResponse
 from django.core.mail import send_mail
 from django.conf import settings
 import json
