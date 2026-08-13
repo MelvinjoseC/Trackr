@@ -433,8 +433,6 @@ import json
 global_user_data = None
 
 def login(request):
-    global global_user_data  # Declare the global variable
-
     if request.method == "POST":
         try:
             data = json.loads(request.body)
@@ -459,14 +457,11 @@ def login(request):
                 user.save(update_fields=['password'])
 
             if is_valid:
-                # Store employee_id and name in a global variable
-                global_user_data = {
-                    "employee_id": user.employee_id,
-                    "name": user.name,
-                }
-
-                # Save user ID in the session for further authentication
+                # Save user info in the session for further authentication
                 request.session["user_id"] = user.employee_id
+                request.session["username"] = user.name
+                request.session["designation"] = user.designation
+                request.session["authentication"] = user.authentication
                 return JsonResponse({"success": True, "redirect_url": "/task_dashboard/"})
             else:
                 return JsonResponse(
