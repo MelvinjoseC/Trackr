@@ -66,6 +66,15 @@ CSRF_TRUSTED_ORIGINS = [
     'https://your-domain.com',
     'https://subdomain.your-domain.com',
 ]
+
+# Security Headers & Cookie configurations for production
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'False').lower() == 'true'
+CSRF_COOKIE_SECURE = os.getenv('CSRF_COOKIE_SECURE', 'False').lower() == 'true'
+SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+
 ROOT_URLCONF = 'task_tracker.urls'
 
 TEMPLATES = [
