@@ -1,4 +1,15 @@
 import openpyxl
+
+def get_session_user(request):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return None
+    return {
+        "employee_id": user_id,
+        "name": request.session.get("username", "Guest"),
+        "designation": request.session.get("designation", "NO DESIGNATION"),
+        "authentication": request.session.get("authentication", "No Role")
+    }
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from django.http import HttpResponse
 # --- Styled Excel Export for Project Report ---
@@ -430,7 +441,6 @@ from .models import EmployeeDetails  # Import the EmployeeDetails model
 import json
 
 # Define a global variable
-global_user_data = None
 
 def login(request):
     if request.method == "POST":
@@ -523,8 +533,7 @@ from django.shortcuts import render
 from .models import EmployeeDetails  # Import the EmployeeDetails model
 import base64
 
-# Assuming global_user_data is set earlier
-global_user_data = None
+# Assuming user_data is set earlier
 
 def task_dashboard(request):
     # Default data from session
@@ -586,12 +595,12 @@ def task_dashboard_api(request):
     employee_details = []
     project_statuses = []  # Default empty list for statuses
 
-    # Retrieve global_user_data (assuming it's stored in session)
-    global_user_data
-    if global_user_data:
-        # Fetch only statuses where sender_name matches global_user_data
+    # Retrieve user_data (assuming it's stored in session)
+    user_data
+    if user_data:
+        # Fetch only statuses where sender_name matches user_data
         project_statuses = list(
-            ProjectTacker.objects.filter(sender_name=global_user_data).values_list(
+            ProjectTacker.objects.filter(sender_name=user_data).values_list(
                 "status", flat=True
             )
         )
@@ -1105,16 +1114,15 @@ from datetime import datetime
 from .models import TrackerTasks
 import json
 
-global_user_data = None  # Assumed already set elsewhere
 
 @csrf_exempt
 def submit_timesheet(request):
     try:
-        global global_user_data
-        if not global_user_data:
+        user_data = get_session_user(request)
+        if not user_data:
             return JsonResponse({"error": "User not logged in."}, status=401)
 
-        username = global_user_data.get("name")
+        username = user_data.get("name")
         data = json.loads(request.body.decode("utf-8"))
 
         for entry in data:
@@ -1174,16 +1182,15 @@ from django.db.models import Count, F
 from .models import LeaveApplication, Attendance
 
 # Global User Data
-global_user_data = None
 
 def generate_pie_chart(request):
-    global global_user_data
+    user_data = get_session_user(request)
 
     # ✅ Ensure user is logged in
-    if not global_user_data:
+    if not user_data:
         return JsonResponse({"error": "User not logged in."}, status=401)
 
-    username = global_user_data.get("name")  # Get username from global user data
+    username = user_data.get("name")  # Get username from global user data
 
     try:
         # ✅ Fetch Leave Data using ORM
@@ -1238,20 +1245,19 @@ from django.db import connection
 import base64
 from .models import ProjectTacker
 
-global_user_data = None  # Global variable for user data
 
 def project_tracker(request):
-    global global_user_data
+    user_data = get_session_user(request)
 
     # Ensure user is logged in
-    if not global_user_data:
+    if not user_data:
         return redirect("login_page")  # Redirect to login if not logged in
 
     # Fetch user details from global data
-    user_id = global_user_data.get("employee_id", None)
-    name = global_user_data.get("name", "Guest")
-    designation = global_user_data.get("designation", None)
-    authentication = global_user_data.get("authentication", None)
+    user_id = user_data.get("employee_id", None)
+    name = user_data.get("name", "Guest")
+    designation = user_data.get("designation", None)
+    authentication = user_data.get("authentication", None)
     image_base64 = None
 
     # If designation or authentication is not found, fetch from DB
@@ -1289,7 +1295,7 @@ def project_tracker(request):
     is_admin_or_md = authentication in ['admin', 'MD']
 
     context = {
-        "user_data": global_user_data,
+        "user_data": user_data,
         "task_list": task_list,
         "name": name,
         "designation": designation,  # <-- Now this is included
@@ -1381,17 +1387,17 @@ from django.core.exceptions import ObjectDoesNotExist
 
 @csrf_exempt
 def check_task_status(request):
-    global global_user_data  # Use global variable
+    user_data = get_session_user(request)  # Use global variable
 
     if request.method == "POST":
         try:
-            # Fetch all records where sender_name matches global_user_data['name']
-            if not global_user_data:
+            # Fetch all records where sender_name matches user_data['name']
+            if not user_data:
                 return JsonResponse(
                     {"status": None, "message": "User not authenticated"}, status=401
                 )
 
-            sender_name = global_user_data.get("name")
+            sender_name = user_data.get("name")
 
             projects = ProjectTacker.objects.filter(sender_name__icontains=sender_name)
 
@@ -1441,20 +1447,19 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.db import connection
 
-global_user_data = None  # Global variable for user data
 
 def attendance_calendar(request):
-    global global_user_data  
+    user_data = get_session_user(request)  
 
     # ✅ Ensure user is logged in
-    if not global_user_data:
+    if not user_data:
         return redirect("login_page")  # Redirect to login if not logged in
 
     # ✅ Fetch user details from global data
-    user_id = global_user_data.get("employee_id", None)
-    name = global_user_data.get("name", "Guest")
-    designation = global_user_data.get("designation", None)  # Try from global data
-    role = global_user_data.get("role", "").lower()  # Role should be 'admin' or 'user'
+    user_id = user_data.get("employee_id", None)
+    name = user_data.get("name", "Guest")
+    designation = user_data.get("designation", None)  # Try from global data
+    role = user_data.get("role", "").lower()  # Role should be 'admin' or 'user'
     image_base64 = None
 
     # ✅ If designation is not found in global data, fetch from DB
@@ -1626,18 +1631,17 @@ from .models import EmployeeDetails, Holiday, LeaveApplication
 import base64
 
 # Global user data (Assuming this holds logged-in user info)
-global_user_data = None  
 
 def mainleavepage_view(request):
-    global global_user_data  
+    user_data = get_session_user(request)  
 
-    if not global_user_data:
+    if not user_data:
         return JsonResponse({"error": "User not logged in."}, status=401)
 
     # ✅ Fetch user details from global data
-    user_id = global_user_data.get("employee_id", None)
-    name = global_user_data.get("name", "Guest")
-    designation = global_user_data.get("designation", None)  # Try from global data
+    user_id = user_data.get("employee_id", None)
+    name = user_data.get("name", "Guest")
+    designation = user_data.get("designation", None)  # Try from global data
     image_base64 = None
 
     # ✅ If designation is not found in global data, fetch from DB
@@ -1709,19 +1713,18 @@ from django.http import JsonResponse
 from datetime import datetime
 from .models import LeaveApplication  # Assuming the model is in the same app
 
-global_user_data = None  # Store the logged-in user's details globally
 
 def apply_leave_view(request):
-    global global_user_data  # Retrieve logged-in user data
+    user_data = get_session_user(request)  # Retrieve logged-in user data
 
     if request.method == "POST":
         try:
-            if not global_user_data:
+            if not user_data:
                 return JsonResponse({"error": "User not logged in."}, status=401)
 
-            # ✅ Get the logged-in user's name from global_user_data
-            current_user_name = global_user_data["name"]
-            current_user_id = global_user_data["employee_id"]
+            # ✅ Get the logged-in user's name from user_data
+            current_user_name = user_data["name"]
+            current_user_id = user_data["employee_id"]
 
             # ✅ Fetch form data (sent from JavaScript)
             start_date = request.POST.get("from_date", "").strip()
@@ -1797,14 +1800,13 @@ def get_holidays(request):
 from django.http import JsonResponse
 from .models import LeaveApplication, Attendance
 
-global_user_data = None
 
 def leave_application_view(request):
-    global global_user_data
-    if not global_user_data:
+    user_data = get_session_user(request)
+    if not user_data:
         return JsonResponse({"error": "User not logged in."}, status=401)
 
-    current_user_name = global_user_data["name"]
+    current_user_name = user_data["name"]
 
     try:
         # ✅ Fetch Leave Counts by Type (Approved) using Django ORM
@@ -1864,16 +1866,15 @@ def leave_application_view(request):
 from django.http import JsonResponse
 from .models import EmployeeDetails, LeaveApplication  # Import the models
 
-global_user_data = None  # Assume this holds the logged-in user's data
 
 def leave_approvals_view(request):
-    global global_user_data
-    if not global_user_data:
+    user_data = get_session_user(request)
+    if not user_data:
         return JsonResponse({"error": "User not logged in."}, status=401)
 
     # Ensure the logged-in user is an admin
     is_admin = EmployeeDetails.objects.filter(
-        name=global_user_data["name"], authentication__iexact="admin"
+        name=user_data["name"], authentication__iexact="admin"
     ).exists()
 
     if not is_admin:
@@ -1937,12 +1938,12 @@ def update_leave_status(request):
 
 
 def check_admin_status(request):
-    global global_user_data
+    user_data = get_session_user(request)
 
-    if not global_user_data:
+    if not user_data:
         return JsonResponse({"error": "User not logged in."}, status=401)
 
-    username = global_user_data.get("name")  # Get logged-in username
+    username = user_data.get("name")  # Get logged-in username
 
     # ✅ Fetch authentication field for the user
     auth_result = EmployeeDetails.objects.filter(name=username).values_list("authentication", flat=True).first()
@@ -2120,15 +2121,15 @@ from datetime import datetime
 from .models import LeaveApplication  # Import the LeaveApplication model
 
 def delete_leave_application_view(request, leave_id):
-    global global_user_data  # Using global variable for user authentication
+    user_data = get_session_user(request)  # Using global variable for user authentication
 
-    if not global_user_data:
+    if not user_data:
         return JsonResponse({"error": "User not logged in."}, status=401)  # Show as popup
 
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request method. Use POST instead."}, status=405)
 
-    current_user_name = global_user_data["name"]  # Get logged-in user's name
+    current_user_name = user_data["name"]  # Get logged-in user's name
 
     try:
         # Fetch the leave application using Django ORM
@@ -2159,18 +2160,17 @@ from datetime import datetime
 from .models import LeaveApplication  # Import the LeaveApplication model
 
 # Global variable to store user data
-global_user_data = None  
 
 def edit_leave_application_view(request, leave_id):
-    global global_user_data  # Use global variable
+    user_data = get_session_user(request)  # Use global variable
 
-    if not global_user_data:  # Check if user data is available
+    if not user_data:  # Check if user data is available
         return JsonResponse({"error": "User not logged in."}, status=401)
 
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request method."}, status=405)
 
-    current_user_name = global_user_data["name"]  # Get logged-in user's name
+    current_user_name = user_data["name"]  # Get logged-in user's name
     data = request.POST
 
     # Convert the provided start_date to a datetime object
@@ -2211,19 +2211,18 @@ from django.http import JsonResponse
 from datetime import datetime, timedelta
 from .models import Attendance, Holiday  # Import the Attendance and Holiday models
 
-global_user_data = None  # Store the logged-in user's details globally
 
 def attendance_view(request):
-    global global_user_data  # Retrieve logged-in user data
+    user_data = get_session_user(request)  # Retrieve logged-in user data
 
     if request.method == "POST":
         try:
-            if not global_user_data:
+            if not user_data:
                 return JsonResponse({"error": "User not logged in."}, status=401)
 
             # ✅ Get the logged-in user's details
-            current_user_name = global_user_data.get("name")
-            current_user_id = global_user_data.get("employee_id")
+            current_user_name = user_data.get("name")
+            current_user_id = user_data.get("employee_id")
 
             if not current_user_id:
                 return JsonResponse({"error": "User ID is missing."}, status=403)
@@ -2312,15 +2311,14 @@ from django.http import JsonResponse
 from datetime import datetime, timedelta
 from .models import Attendance  # Import the Attendance model
 
-global_user_data = None  # Global user data
 
 def get_attendance(request):
-    global global_user_data
+    user_data = get_session_user(request)
 
-    if not global_user_data:
+    if not user_data:
         return JsonResponse({"error": "User not logged in."}, status=401)
 
-    user_id = global_user_data.get("employee_id")
+    user_id = user_data.get("employee_id")
 
     # Fetch attendance for a specific date
     date = request.GET.get("date", "").strip()
@@ -2388,17 +2386,16 @@ from django.http import JsonResponse
 from datetime import datetime, timedelta
 from .models import Attendance  # Import the Attendance model
 
-global_user_data = None  # Global user data
 
 def edit_attendance_view(request):
-    global global_user_data  # Retrieve logged-in user data
+    user_data = get_session_user(request)  # Retrieve logged-in user data
 
     if request.method == "POST":
         try:
-            if not global_user_data:
+            if not user_data:
                 return JsonResponse({"error": "User not logged in."}, status=401)  # ✅ Status 200 prevents redirection
 
-            user_id = global_user_data.get("employee_id")
+            user_id = user_data.get("employee_id")
 
             # ✅ Get form data
             attendance_date = request.POST.get("date", "").strip()
@@ -2465,18 +2462,17 @@ from django.http import JsonResponse
 from datetime import datetime
 from .models import Attendance  # Import the Attendance model
 
-global_user_data = None  # Global user data
 
 @csrf_exempt
 def delete_attendance_view(request):
-    global global_user_data
+    user_data = get_session_user(request)
 
     if request.method == "POST":
         try:
-            if not global_user_data:
+            if not user_data:
                 return JsonResponse({"error": "User not logged in."}, status=401)
 
-            user_id = global_user_data.get("employee_id")
+            user_id = user_data.get("employee_id")
             attendance_date = request.POST.get("date", "").strip()
 
             if not attendance_date:
@@ -2509,14 +2505,13 @@ from django.http import JsonResponse
 from datetime import datetime, timedelta
 from .models import Attendance, Holiday, LeaveApplication  # Assuming you have the Attendance, Holiday, and LeaveApplication models
 
-global_user_data = None  # Global user data
 
 def get_monthly_weekly_attendance(request):
-    global global_user_data
-    if not global_user_data:
+    user_data = get_session_user(request)
+    if not user_data:
         return JsonResponse({"error": "User not logged in."}, status=401)
 
-    user_id = global_user_data.get("employee_id")
+    user_id = user_data.get("employee_id")
 
     # Get today's date
     today = datetime.today()
@@ -2610,16 +2605,15 @@ def get_monthly_weekly_attendance(request):
 from django.http import JsonResponse
 from .models import Attendance  # Import the Attendance model
 
-global_user_data = None  # Global user data
 
 def get_compensated_worktime(request):
     """Fetch compensated worktime records for the logged-in user."""
-    global global_user_data
+    user_data = get_session_user(request)
 
-    if not global_user_data:
+    if not user_data:
         return JsonResponse({"error": "User not logged in."}, status=401)
 
-    username = global_user_data.get("name")  # Get username from global user data
+    username = user_data.get("name")  # Get username from global user data
 
     try:
         # Fetch compensated worktime records using Django ORM
@@ -2655,13 +2649,12 @@ from django.http import JsonResponse
 from .models import Attendance  # Import the Attendance model
 import json
 
-global_user_data = None  # Global user data
 
 def request_comp_leave(request):
     """User submits a request for compensatory leave approval."""
-    global global_user_data
+    user_data = get_session_user(request)
 
-    if not global_user_data:
+    if not user_data:
         return JsonResponse({"error": "User not logged in."}, status=401)
 
     if request.method != "POST":
@@ -2695,16 +2688,15 @@ from django.http import JsonResponse
 from .models import Attendance, EmployeeDetails  # Import the models
 import json
 
-global_user_data = None  # Global user data
 
 def get_pending_comp_leave_requests(request):
     """MD fetches pending compensatory leave requests."""
-    global global_user_data
+    user_data = get_session_user(request)
 
-    if not global_user_data:
+    if not user_data:
         return JsonResponse({"error": "User not logged in."}, status=401)
 
-    username = global_user_data.get("name")
+    username = user_data.get("name")
     is_md = False
 
     # Check if the user is MD using Django ORM
@@ -2737,17 +2729,16 @@ from django.db import transaction
 from .models import Attendance, EmployeeDetails  # Import the models
 import json
 
-global_user_data = None  # Global user data
 
 @csrf_exempt
 def update_comp_leave_status(request):
     """MD approves or rejects a compensatory leave request."""
-    global global_user_data
+    user_data = get_session_user(request)
 
-    if not global_user_data:
+    if not user_data:
         return JsonResponse({"error": "User not logged in."}, status=401)
 
-    username = global_user_data.get("name")
+    username = user_data.get("name")
     is_md = False
 
     try:
@@ -3130,17 +3121,16 @@ from .models import TrackerTasks, EmployeeDetails  # Your model import
 import base64
 from django.db import connection
 
-# Assuming global_user_data is a global variable
-global_user_data = None
+# Assuming user_data is a global variable
 
 def team_dashboard(request):
-    global global_user_data  # Access the global variable for user data
+    user_data = get_session_user(request)  # Access the global variable for user data
 
-    # Default data if global_user_data is not set
-    user_id = global_user_data.get("employee_id", None) if global_user_data else None
-    name = global_user_data.get("name", "Guest") if global_user_data else "Guest"
-    designation = global_user_data.get("designation", None) if global_user_data else None
-    authentication = global_user_data.get("authentication", None) if global_user_data else None
+    # Default data if user_data is not set
+    user_id = user_data.get("employee_id", None) if user_data else None
+    name = user_data.get("name", "Guest") if user_data else "Guest"
+    designation = user_data.get("designation", None) if user_data else None
+    authentication = user_data.get("authentication", None) if user_data else None
     image_base64 = None  # Initialize empty image
 
     # If designation or authentication is not found, fetch from DB
@@ -3469,8 +3459,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .models import TrackerTasks
 
-# Assuming global_user_data is a global variable
-global_user_data = None
+# Assuming user_data is a global variable
 
 def get_projects_data(request):
     # Fetch distinct project names from the TrackerTasks model
@@ -3489,8 +3478,7 @@ from django.http import JsonResponse
 from .models import TrackerTasks
 from .forms import ProjectStatusUpdateForm
 
-# Assuming global_user_data is a global variable
-global_user_data = None
+# Assuming user_data is a global variable
 
 def update_project_status(request):
     if request.method == 'POST':
