@@ -474,8 +474,6 @@ def login(request):
 
     return render(request, "signin.html")
 def report_view_page(request):
-    global global_user_data  # Use the global user data
-
     from .models import TrackerTasks, EmployeeDetails  # Import here to avoid circular import if any
     import base64
 
@@ -483,10 +481,10 @@ def report_view_page(request):
     all_tasks = TrackerTasks.objects.all()
     tasks_data = list(all_tasks.values())
 
-    # Prepare user info for sidebar
-    user_id = global_user_data.get("employee_id", None) if global_user_data else None
-    name = global_user_data.get("name", "Guest") if global_user_data else "Guest"
-    designation = global_user_data.get("designation", "NO DESIGNATION") if global_user_data else "NO DESIGNATION"
+    # Prepare user info for sidebar from session
+    user_id = request.session.get("user_id")
+    name = request.session.get("username", "Guest")
+    designation = request.session.get("designation", "NO DESIGNATION")
     image_base64 = None
 
     if user_id:
@@ -529,12 +527,10 @@ import base64
 global_user_data = None
 
 def task_dashboard(request):
-    global global_user_data  # Assuming you're using a global variable for user data
-
-    # Default data
-    user_id = global_user_data.get("employee_id", None)
-    name = global_user_data.get("name", "Guest")
-    designation = global_user_data.get("designation", "NO DESIGNATION")
+    # Default data from session
+    user_id = request.session.get("user_id")
+    name = request.session.get("username", "Guest")
+    designation = request.session.get("designation", "NO DESIGNATION")
     image_base64 = None
 
     if user_id:
