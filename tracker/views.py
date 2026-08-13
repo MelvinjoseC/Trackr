@@ -1487,20 +1487,15 @@ def get_times_by_date(request):
             return JsonResponse({'error': 'date1 parameter is required'}, status=400)
         
         try:
-            # Fetch rows matching the provided date1
-            select_query = """
-                SELECT id, title, `list`, projects, scope, category, date1, time, comments, assigned, rev, d_no,
-                FROM tracker_project 
-                WHERE date1 = %s
-                ORDER BY id ASC
-            """
-            with connection.cursor() as cursor:
-                cursor.execute(select_query, [date1])
-                rows = cursor.fetchall()
-                columns = [col[0] for col in cursor.description]
-            
-            # Convert the query result to a list of dictionaries
-            timesheet_entries = [dict(zip(columns, row)) for row in rows]
+            # Fetch rows matching the provided date1 using Django ORM
+            timesheet_entries = list(TrackerTasks.objects.filter(date1=date1).values(
+                'id', 'title', 'list', 'projects', 'scope', 'category', 'date1', 'time', 'comments', 'assigned', 'rev', 'd_no'
+            ).order_by('id'))
+
+            # Convert date objects to string for JSON serialization
+            for entry in timesheet_entries:
+                if entry['date1']:
+                    entry['date1'] = str(entry['date1'])
 
             # Return the results as a JSON response
             return JsonResponse({'timesheet_entries': timesheet_entries}, status=200)
@@ -1519,19 +1514,16 @@ def get_all_times_by_month(request):
         return JsonResponse({'error': 'Year and month parameters are required'}, status=400)
 
     try:
-        # Query to get entries for the given year and month
-        query = """
-            SELECT id, title, date1, time, projects, scope ,comments, assigned
-            FROM tracker_project 
-            WHERE YEAR(date1) = %s AND MONTH(date1) = %s
-        """
-        with connection.cursor() as cursor:
-            cursor.execute(query, [year, month])
-            rows = cursor.fetchall()
-            columns = [col[0] for col in cursor.description]
+        # Query to get entries for the given year and month using Django ORM
+        timesheet_entries = list(TrackerTasks.objects.filter(
+            date1__year=int(year),
+            date1__month=int(month)
+        ).values('id', 'title', 'date1', 'time', 'projects', 'scope', 'comments', 'assigned'))
 
-        # Convert query result to a list of dictionaries
-        timesheet_entries = [dict(zip(columns, row)) for row in rows]
+        # Convert date objects to string for JSON serialization
+        for entry in timesheet_entries:
+            if entry['date1']:
+                entry['date1'] = str(entry['date1'])
 
         return JsonResponse({'timesheet_entries': timesheet_entries}, status=200)
 
@@ -1550,17 +1542,16 @@ def get_tasks_by_date(request):
         return JsonResponse({'error': 'date1 parameter is required'}, status=400)
 
     try:
-        query = """
-            SELECT id, title, projects, scope, date1, time, comments, rev, d_no,
-            FROM tracker_project 
-            WHERE date1 = %s
-        """
-        with connection.cursor() as cursor:
-            cursor.execute(query, [date1])
-            rows = cursor.fetchall()
-            columns = [col[0] for col in cursor.description]
+        # Fetch rows matching the provided date1 using Django ORM
+        tasks = list(TrackerTasks.objects.filter(date1=date1).values(
+            'id', 'title', 'projects', 'scope', 'date1', 'time', 'comments', 'rev', 'd_no'
+        ))
 
-        tasks = [dict(zip(columns, row)) for row in rows]
+        # Convert date objects to string for JSON serialization
+        for task in tasks:
+            if task['date1']:
+                task['date1'] = str(task['date1'])
+
         return JsonResponse({'tasks': tasks}, status=200)
 
     except Exception as e:
