@@ -446,18 +446,32 @@ def login(request):
             )
 
         # Use Django ORM to check the credentials in the database
-        user = EmployeeDetails.objects.filter(name=username, password=password).first()
+        user = EmployeeDetails.objects.filter(name=username).first()
 
         if user:
-            # Store employee_id and name in a global variable
-            global_user_data = {
-                "employee_id": user.employee_id,
-                "name": user.name,
-            }
+            from django.contrib.auth.hashers import check_password, make_password
+            is_valid = False
+            if check_password(password, user.password):
+                is_valid = True
+            elif user.password == password:  # Legacy plain text password fallback
+                is_valid = True
+                user.password = make_password(password)
+                user.save(update_fields=['password'])
 
-            # Save user ID in the session for further authentication
-            request.session["user_id"] = user.employee_id
-            return JsonResponse({"success": True, "redirect_url": "/task_dashboard/"})
+            if is_valid:
+                # Store employee_id and name in a global variable
+                global_user_data = {
+                    "employee_id": user.employee_id,
+                    "name": user.name,
+                }
+
+                # Save user ID in the session for further authentication
+                request.session["user_id"] = user.employee_id
+                return JsonResponse({"success": True, "redirect_url": "/task_dashboard/"})
+            else:
+                return JsonResponse(
+                    {"success": False, "message": "Invalid username or password."}
+                )
         else:
             return JsonResponse(
                 {"success": False, "message": "Invalid username or password."}
