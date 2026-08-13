@@ -67,8 +67,6 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 ROOT_URLCONF = 'task_tracker.urls'
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -146,13 +144,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-# settings.py
-import os
-
-# STATIC_URL = '/static/'
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, 'static'),
-# ]
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
