@@ -92,8 +92,6 @@ WSGI_APPLICATION = 'task_tracker.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-from dotenv import load_dotenv
-load_dotenv(BASE_DIR / '.env')
 
 if os.getenv('DB_ENGINE', '').lower() == 'mysql' or 'DB_HOST' in os.environ:
     DATABASES = {
@@ -101,8 +99,8 @@ if os.getenv('DB_ENGINE', '').lower() == 'mysql' or 'DB_HOST' in os.environ:
             'ENGINE': 'django.db.backends.mysql',
             'NAME': os.getenv('DB_NAME', 'tasktracker'),
             'USER': os.getenv('DB_USER', 'root'),
-            'PASSWORD': os.getenv('DB_PASSWORD', 'Fusie@123'),
-            'HOST': os.getenv('DB_HOST', '192.168.0.7'),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
             'PORT': os.getenv('DB_PORT', '3306'),
         }
     }
