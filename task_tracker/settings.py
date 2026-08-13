@@ -171,13 +171,11 @@ LOGOUT_REDIRECT_URL = 'logout'
 LOGIN_REDIRECT_URL = 'task_dashboard'
 
 
-# settings.py
-import os
 # Email configuration for sending emails through SMTP (using Gmail as an example)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'varshithkumar742001@gmail.com'  # Your Gmail address
-EMAIL_HOST_PASSWORD = 'uorz idmi iflj rivz'  # Your Gmail App Password
-DEFAULT_FROM_EMAIL = 'varshithkumar742001@gmail.com'
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
