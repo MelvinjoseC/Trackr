@@ -190,3 +190,41 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
+# Logging Configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': os.getenv('LOG_LEVEL', 'INFO'),
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'tracker': {
+            'handlers': ['console'],
+            'level': os.getenv('TRACKER_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+    },
+}
