@@ -659,16 +659,23 @@ def sign_up(request):
                 }
             )
 
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT authentication FROM employee_details WHERE name = %s AND password = %s",
-                [username, password],
-            )
-            result = cursor.fetchone()
+        user = EmployeeDetails.objects.filter(name=username).first()
+        is_valid = False
+        authentication = None
 
-        if result:
-            designation = result[0]
-            if designation.lower() == "admin":
+        if user:
+            from django.contrib.auth.hashers import check_password, make_password
+            if check_password(password, user.password):
+                is_valid = True
+                authentication = user.authentication
+            elif user.password == password:  # Legacy plain text password fallback
+                is_valid = True
+                authentication = user.authentication
+                user.password = make_password(password)
+                user.save(update_fields=['password'])
+
+        if is_valid and authentication:
+            if authentication.lower() == "admin":
                 return render(
                     request, "employee_form.html"
                 )  # Render the HTML form for admin users
