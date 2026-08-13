@@ -101,3 +101,45 @@ Visit the application at `http://127.0.0.1:8000/`.
     ├── forms.py         # Form Definitions (with dynamic choice binding)
     └── templates/       # HTML Templates
 ```
+
+---
+
+## 🔒 Production Readiness & Security Best Practices
+
+To make the application ready for production environments, the following enhancements have been implemented:
+
+### 1. Secure Authentication & Legacy Password Migration
+- **Hashed Passwords**: New employee passwords are automatically hashed using Django's default PBKDF2 hashing mechanism.
+- **Legacy Compatibility**: A fallback mechanism checks passwords against legacy plain text values and automatically migrates/hashes them upon successful sign-in.
+- **Bulk Migration Command**: To proactively migrate all plain text passwords in the database to secure hashes, run:
+  ```bash
+  python manage.py hash_legacy_passwords
+  ```
+
+### 2. Environment Variables & Secret Management
+We now load critical configurations from a `.env` file instead of hardcoding them in `settings.py`:
+- `SECRET_KEY`: Django cryptographic signing key.
+- `DEBUG`: Controls development debug pages (set to `False` in production).
+- `ALLOWED_HOSTS`: List of domains/IPs allowed to access the app.
+- `DB_ENGINE`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`: Database connection details.
+- `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`: SMTP email credentials for system notifications.
+
+A template `.env.example` file is provided in the project root.
+
+### 3. Static Files Serving (WhiteNoise)
+We serve compressed and cached static files directly via Python using **WhiteNoise**, removing the dependency on external web servers for static files.
+
+To compile static assets for production:
+```bash
+python manage.py collectstatic --noinput
+```
+
+### 4. HTTP Security Headers
+The following security middleware headers have been configured in `settings.py` to prevent typical exploits:
+- `SECURE_BROWSER_XSS_FILTER` (Cross-Site Scripting protection)
+- `SECURE_CONTENT_TYPE_NOSNIFF` (MIME sniffing prevention)
+- `X_FRAME_OPTIONS = 'DENY'` (Clickjacking protection)
+- `SESSION_COOKIE_SECURE` & `CSRF_COOKIE_SECURE` (Transmit session/CSRF cookies over HTTPS only)
+
+### 5. Multi-User Safety (Thread-Safe Sessions)
+We completely eliminated the thread-unsafe global variable `global_user_data` in `views.py` that caused multi-user session bleeding, replacing it with Django's standard session engine (`request.session`).
