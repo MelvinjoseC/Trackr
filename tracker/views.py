@@ -616,11 +616,11 @@ def task_dashboard_api(request):
         task_list = list(TrackerTasks.objects.all().values())
         task_list = convert_bytes_safe(task_list)
 
-            # Fetch all employee details
-            employees = EmployeeDetails.objects.all()
-            employee_columns = [field.name for field in EmployeeDetails._meta.fields]
-            employee_details = [dict(zip(employee_columns, [getattr(emp, field) for field in employee_columns])) for emp in employees]
-            employee_details = convert_bytes_safe(employee_details)
+        # Fetch all employee details
+        employees = EmployeeDetails.objects.all()
+        employee_columns = [field.name for field in EmployeeDetails._meta.fields]
+        employee_details = [dict(zip(employee_columns, [getattr(emp, field) for field in employee_columns])) for emp in employees]
+        employee_details = convert_bytes_safe(employee_details)
 
     except Exception as e:
         return JsonResponse(
