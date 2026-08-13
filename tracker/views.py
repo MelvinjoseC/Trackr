@@ -10,6 +10,19 @@ def get_session_user(request):
         "designation": request.session.get("designation", "NO DESIGNATION"),
         "authentication": request.session.get("authentication", "No Role")
     }
+
+def api_success(message_or_data, status=200):
+    if isinstance(message_or_data, str):
+        return JsonResponse({"success": True, "message": message_or_data}, status=status)
+    # If it's a dict, merge success flag
+    if isinstance(message_or_data, dict):
+        response_data = {"success": True}
+        response_data.update(message_or_data)
+        return JsonResponse(response_data, status=status)
+    return JsonResponse({"success": True, "data": message_or_data}, status=status)
+
+def api_error(message, status=400):
+    return JsonResponse({"success": False, "error": message}, status=status)
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from django.http import HttpResponse
 # --- Styled Excel Export for Project Report ---
@@ -449,9 +462,7 @@ def login(request):
             username = data.get("username")
             password = data.get("password")
         except json.JSONDecodeError:
-            return JsonResponse(
-                {"success": False, "message": "Invalid request format."}
-            )
+            return api_error("Invalid request format.", status=400)
 
         # Use Django ORM to check the credentials in the database
         user = EmployeeDetails.objects.filter(name=username).first()
@@ -472,15 +483,11 @@ def login(request):
                 request.session["username"] = user.name
                 request.session["designation"] = user.designation
                 request.session["authentication"] = user.authentication
-                return JsonResponse({"success": True, "redirect_url": "/task_dashboard/"})
+                return api_success({"redirect_url": "/task_dashboard/"})
             else:
-                return JsonResponse(
-                    {"success": False, "message": "Invalid username or password."}
-                )
+                return api_error("Invalid username or password.", status=401)
         else:
-            return JsonResponse(
-                {"success": False, "message": "Invalid username or password."}
-            )
+            return api_error("Invalid username or password.", status=401)
 
     return render(request, "signin.html")
 def report_view_page(request):
