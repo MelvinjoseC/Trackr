@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: trackr_web
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=False
+      - DB_ENGINE=mysql
+      - DB_NAME=tasktracker
+      - DB_USER=trackr_user
+      - DB_PASSWORD=trackr_password
+      - DB_HOST=db
+      - DB_PORT=3306
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    container_name: trackr_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: tasktracker
+      MYSQL_USER: trackr_user
+      MYSQL_PASSWORD: trackr_password
+      MYSQL_ROOT_PASSWORD: root_secure_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql_data:
