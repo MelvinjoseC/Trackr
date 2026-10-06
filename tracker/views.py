@@ -3140,35 +3140,6 @@ def get_projects(request):
 
 
 
-# ✅ New view: Get project-level data (approved + total worktime)
-def get_project_data(request, project):
-    # Filter only for the selected project
-    tasks = TrackerTasks.objects.filter(projects=project).values(
-        'projects', 'scope', 'category', 'title', 'rev', 'task_benchmark'
-    )
-
-    # For unique approved hours
-    unique_keys = set()
-    approved_hours = 0
-    for task in tasks:
-        key = (task['projects'], task['scope'], task['category'], task['title'], task['rev'])
-        if key not in unique_keys:
-            unique_keys.add(key)
-            approved_hours += float(task['task_benchmark'] or 0)
-
-    # Total worktime for this project
-    total_worktime = TrackerTasks.objects.filter(projects=project).aggregate(
-        total=Sum('time')
-    )['total'] or 0
-
-    return JsonResponse({
-        "projects": [project],
-        "approvedHours": [approved_hours],
-        "totalWorktime": [total_worktime]
-    })
-
-
-from .models import TrackerTasks
 
 def get_task_data(request, project):
     tasks = TrackerTasks.objects.filter(projects=project)
