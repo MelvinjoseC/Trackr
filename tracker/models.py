@@ -16,6 +16,9 @@ class ProjectTacker(models.Model):
     def __str__(self):
         return f"{self.name or 'Unnamed'} ({self.status or 'No Status'})"
 
+# Alias for backwards compatibility and clean spelling
+ProjectTracker = ProjectTacker
+
 class TrackerTasks(models.Model):
     id = models.AutoField(primary_key=True)
     d_no = models.CharField(null=True, blank=True, max_length=50)
@@ -94,6 +97,18 @@ class EmployeeDetails(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.designation} ({self.team_name})"
+
+    @property
+    def is_admin(self):
+        return (self.authentication or '').strip().lower() == 'admin'
+
+    @property
+    def is_md(self):
+        return (self.authentication or '').strip().lower() == 'md'
+
+    @property
+    def is_active(self):
+        return self.status == 'Active'
 
 
 class LeaveApplication(models.Model):
