@@ -10,6 +10,11 @@ class ProjectTacker(models.Model):
 
     class Meta:
         db_table = 'project_tacker'  # Matches the DB table name
+        verbose_name = 'Project Tracker'
+        verbose_name_plural = 'Project Trackers'
+
+    def __str__(self):
+        return f"{self.name or 'Unnamed'} ({self.status or 'No Status'})"
 
 class TrackerTasks(models.Model):
     id = models.AutoField(primary_key=True)
@@ -50,6 +55,11 @@ class TrackerTasks(models.Model):
     
     class Meta:
         db_table = 'tracker_project'  # Custom table name
+        verbose_name = 'Tracker Task'
+        verbose_name_plural = 'Tracker Tasks'
+
+    def __str__(self):
+        return f"[{self.projects or 'No Project'}] {self.title} (Rev: {self.rev or '0'})"
 
 class EmployeeDetails(models.Model):
     employee_id = models.AutoField(primary_key=True)
@@ -73,6 +83,11 @@ class EmployeeDetails(models.Model):
 
     class Meta:
         db_table = 'employee_details'  # Custom table name
+        verbose_name = 'Employee Detail'
+        verbose_name_plural = 'Employee Details'
+
+    def __str__(self):
+        return f"{self.name} - {self.designation} ({self.team_name})"
 
 
 class LeaveApplication(models.Model):
@@ -89,6 +104,9 @@ class LeaveApplication(models.Model):
 
     class Meta:
         db_table = 'tracker_leaveapplication'  # Custom table name
+        verbose_name = 'Leave Application'
+        verbose_name_plural = 'Leave Applications'
+        ordering = ['-created_at']
 
     def __str__(self):
         return f"Leave Application {self.id} - {self.username}"
@@ -112,9 +130,13 @@ class Attendance(models.Model):
     
     class Meta:
         db_table = 'tracker_attendance'  # Custom table name as per the database
+        verbose_name = 'Attendance Record'
+        verbose_name_plural = 'Attendance Records'
+        ordering = ['-date']
 
     def __str__(self):
         return f"Attendance for {self.username} on {self.date}"
+
 class Holiday(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
@@ -122,6 +144,9 @@ class Holiday(models.Model):
 
     class Meta:
         db_table = 'tracker_holiday'
+        verbose_name = 'Holiday'
+        verbose_name_plural = 'Holidays'
+        ordering = ['date']
 
     def __str__(self):
         return f"{self.name} on {self.date}"
@@ -137,6 +162,11 @@ class TeamRanking(models.Model):
     task_ownership = models.IntegerField()
     understanding_task = models.IntegerField()
     quality_of_work = models.IntegerField()
+
+    class Meta:
+        verbose_name = 'Team Ranking'
+        verbose_name_plural = 'Team Rankings'
+        ordering = ['-date']
 
     def __str__(self):
         return f"{self.team_name} - {self.date}"
