@@ -57,6 +57,12 @@ class TrackerTasks(models.Model):
         db_table = 'tracker_project'  # Custom table name
         verbose_name = 'Tracker Task'
         verbose_name_plural = 'Tracker Tasks'
+        indexes = [
+            models.Index(fields=['projects'], name='idx_task_project'),
+            models.Index(fields=['date1'], name='idx_task_date1'),
+            models.Index(fields=['assigned'], name='idx_task_assigned'),
+            models.Index(fields=['team'], name='idx_task_team'),
+        ]
 
     def __str__(self):
         return f"[{self.projects or 'No Project'}] {self.title} (Rev: {self.rev or '0'})"
@@ -133,6 +139,10 @@ class Attendance(models.Model):
         verbose_name = 'Attendance Record'
         verbose_name_plural = 'Attendance Records'
         ordering = ['-date']
+        indexes = [
+            models.Index(fields=['username', 'date'], name='idx_att_user_date'),
+            models.Index(fields=['date'], name='idx_att_date'),
+        ]
 
     def __str__(self):
         return f"Attendance for {self.username} on {self.date}"
