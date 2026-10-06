@@ -1681,14 +1681,14 @@ def apply_leave_view(request):
 
             status = "Pending"  # Default status
 
-            # ✅ Debugging: Print received values
-            print(f"Received Data - Start: {start_date}, End: {end_date}, Type: {leave_type}, Reason: {reason}, Approver: {approver}")
+            # Debugging: Log received values
+            logger.debug(f"Received Data - Start: {start_date}, End: {end_date}, Type: {leave_type}, Reason: {reason}, Approver: {approver}")
 
-            # ✅ Validate required fields
+            # Validate required fields
             if not all([start_date, end_date, leave_type, reason, approver]):
                 return JsonResponse({"error": "All fields are required!"}, status=400)
 
-            # ✅ Create a new leave application using Django ORM
+            # Create a new leave application using Django ORM
             leave_application = LeaveApplication(
                 start_date=start_date,
                 end_date=end_date,
@@ -1699,13 +1699,13 @@ def apply_leave_view(request):
                 status=status
             )
 
-            # ✅ Save the leave application to the database
+            # Save the leave application to the database
             leave_application.save()
 
             return JsonResponse({"message": "Leave request submitted successfully!"})
 
         except Exception as e:
-            print("Error:", e)
+            logger.error(f"Error in apply_leave_view: {e}")
             return JsonResponse({"error": "Something went wrong. Please try again later."}, status=500)
 
 
@@ -1852,19 +1852,19 @@ def update_leave_status(request):
         leave_id = data.get("id")
         new_status = data.get("status")
 
-        print("🔍 Received Data:", data)  # Debugging
+        logger.debug(f"Received leave status update data: {data}")
 
         # Validate input data
         if leave_id is None or new_status is None:
             return JsonResponse({"error": "Missing required fields: 'id' and 'status' are needed."}, status=400)
 
-        # ✅ Update the leave status using the model
+        # Update the leave status using the model
         try:
             leave_application = LeaveApplication.objects.get(id=leave_id)
             leave_application.status = new_status
             leave_application.save()  # Save the updated status to the database
 
-            print(f"✅ Leave ID {leave_id} updated to {new_status}")  # Debugging
+            logger.info(f"Leave ID {leave_id} updated to {new_status}")
             return JsonResponse({"message": f"Leave status successfully updated to {new_status}."})
 
         except LeaveApplication.DoesNotExist:
@@ -1874,7 +1874,7 @@ def update_leave_status(request):
         return JsonResponse({"error": "Invalid JSON data. Ensure the request body is properly formatted."}, status=400)
 
     except Exception as e:
-        print("❌ Unexpected Error:", str(e))  # Debugging
+        logger.error(f"Unexpected error updating leave status: {e}")
         return JsonResponse({"error": f"Internal Server Error: {str(e)}"}, status=500)
 
 
@@ -1887,13 +1887,13 @@ def check_admin_status(request):
 
     username = user_data.get("name")  # Get logged-in username
 
-    # ✅ Fetch authentication field for the user
+    # Fetch authentication field for the user
     auth_result = EmployeeDetails.objects.filter(name=username).values_list("authentication", flat=True).first()
     
-    # ✅ Ensure auth_result is a string and remove spaces
+    # Ensure auth_result is a string and remove spaces
     auth_result = str(auth_result).strip().lower() if auth_result else ""
 
-    print(f"🔍 DEBUG: {username}'s authentication value -> {auth_result}")
+    logger.debug(f"{username} authentication value -> {auth_result}")
 
     # ✅ Check if the user is Admin or MD
     is_admin = auth_result == "admin"
@@ -2033,7 +2033,7 @@ def update_timesheet(request):
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON format"}, status=400)
     except Exception as e:
-        print("Error:", str(e))
+        logger.error(f"Error updating timesheet: {e}")
         return JsonResponse({"error": str(e)}, status=500)
 
 
@@ -2166,29 +2166,24 @@ def attendance_view(request):
             punch_out = request.POST.get("punch_out", "").strip()
             break_time = request.POST.get("break_time", "").strip()
 
-            # ✅ Debugging: Log Received Data
-            print("📢 Received Data:", {
-                "date": attendance_date,
-                "punch_in": punch_in,
-                "punch_out": punch_out,
-                "break_time": break_time,
-            })
+            # Debugging: Log Received Data
+            logger.debug(f"Received attendance data: date={attendance_date}, in={punch_in}, out={punch_out}, break={break_time}")
 
-            # ✅ Validate required fields
+            # Validate required fields
             if not all([attendance_date, punch_in, punch_out, break_time]):
                 return JsonResponse({"error": "All fields are required!"}, status=400)
 
-            # ✅ Convert input values to proper formats
+            # Convert input values to proper formats
             try:
                 attendance_date = datetime.strptime(attendance_date, "%Y-%m-%d").date()
                 punch_in = datetime.strptime(punch_in, "%H:%M:%S").time()
                 punch_out = datetime.strptime(punch_out, "%H:%M:%S").time()
                 break_time = int(break_time)
             except ValueError as e:
-                print("📢 Invalid format error:", str(e))  # ✅ Print to Django logs
+                logger.warning(f"Invalid attendance format: {e}")
                 return JsonResponse({"error": "Invalid date or time format"}, status=400)
 
-            # ✅ Check if the date is a weekend (Saturday or Sunday) or a holiday
+            # Check if the date is a weekend (Saturday or Sunday) or a holiday
             is_weekend_or_holiday = False
             # Check if it's a weekend (Saturday or Sunday)
             if attendance_date.weekday() == 5 or attendance_date.weekday() == 6:  # 5: Saturday, 6: Sunday
@@ -2197,21 +2192,21 @@ def attendance_view(request):
             elif Holiday.objects.filter(date=attendance_date).exists():
                 is_weekend_or_holiday = True
 
-            # ✅ Set the `is_compensated` flag based on weekend or holiday check
+            # Set the `is_compensated` flag based on weekend or holiday check
             is_compensated = 1 if is_weekend_or_holiday else 0
 
-            # ✅ Handle overnight shifts
+            # Handle overnight shifts
             dt_punch_in = datetime.combine(attendance_date, punch_in)
             dt_punch_out = datetime.combine(attendance_date, punch_out)
 
             if dt_punch_out < dt_punch_in:
                 dt_punch_out += timedelta(days=1)
 
-            # ✅ Calculate work duration in hours
+            # Calculate work duration in hours
             work_duration = dt_punch_out - dt_punch_in - timedelta(seconds=break_time)
             work_hours = max(0, work_duration.total_seconds() / 3600.0)  # Convert to hours
 
-            # ✅ Create and save the attendance entry using Django ORM
+            # Create and save the attendance entry using Django ORM
             attendance = Attendance(
                 date=attendance_date,
                 punch_in=punch_in,
@@ -2224,7 +2219,7 @@ def attendance_view(request):
             )
             attendance.save()
 
-            logger.info("✅ Attendance successfully added!")  # ✅ Debugging log
+            logger.info("Attendance successfully added!")
 
             return JsonResponse({
                 "message": "Attendance added successfully!",
@@ -2234,7 +2229,7 @@ def attendance_view(request):
             })
 
         except Exception as e:
-            print("📢 Django Error:", str(e))  # ✅ Log full error in Django console
+            logger.error(f"Error processing attendance: {e}")
             return JsonResponse({"error": f"Something went wrong: {str(e)}"}, status=500)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
@@ -3401,7 +3396,7 @@ def send_notification(request):
             data = json.loads(request.body)
             message = data.get('message', '')
             recipient = data.get('recipient', '')
-            print(recipient)  
+            logger.debug(f"Sending notification to recipient: {recipient}")
             if not message or not recipient:
                 return JsonResponse({"error": "Invalid data"}, status=400)
 
@@ -3415,7 +3410,7 @@ def send_notification(request):
             )
             return JsonResponse({"success": "Notification sent to admin."})
         except Exception as e:
-            print(f"Failed to send email: {e}")
+            logger.error(f"Failed to send email notification to {recipient}: {e}")
             return JsonResponse({"error": f"Failed to send notification: {str(e)}"}, status=500)
     else:
         return JsonResponse({"error": "Invalid request method"}, status=405)
