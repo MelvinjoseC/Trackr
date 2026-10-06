@@ -1,5 +1,6 @@
 import openpyxl
 import logging
+from .decorators import login_required_session, admin_required_session, role_required_session
 logger = logging.getLogger("tracker.views")
 
 
@@ -541,6 +542,7 @@ import base64
 
 # Assuming user_data is set earlier
 
+@login_required_session()
 def task_dashboard(request):
     # Default data from session
     user_id = request.session.get("user_id")
@@ -1214,12 +1216,9 @@ import base64
 from .models import ProjectTacker
 
 
+@login_required_session()
 def project_tracker(request):
     user_data = get_session_user(request)
-
-    # Ensure user is logged in
-    if not user_data:
-        return redirect("login_page")  # Redirect to login if not logged in
 
     # Fetch user details from global data
     user_id = user_data.get("employee_id", None)
@@ -1413,12 +1412,9 @@ import base64
 from django.shortcuts import render, redirect
 
 
+@login_required_session()
 def attendance_calendar(request):
     user_data = get_session_user(request)  
-
-    # ✅ Ensure user is logged in
-    if not user_data:
-        return redirect("login_page")  # Redirect to login if not logged in
 
     # ✅ Fetch user details from global data
     user_id = user_data.get("employee_id", None)
@@ -1579,11 +1575,9 @@ import base64
 
 # Global user data (Assuming this holds logged-in user info)
 
+@login_required_session()
 def mainleavepage_view(request):
     user_data = get_session_user(request)  
-
-    if not user_data:
-        return JsonResponse({"error": "User not logged in."}, status=401)
 
     # ✅ Fetch user details from global data
     user_id = user_data.get("employee_id", None)
@@ -3016,10 +3010,9 @@ from django.shortcuts import render
 from .models import TrackerTasks, EmployeeDetails  # Your model import
 import base64
 
-# Assuming user_data is a global variable
-
+@login_required_session()
 def team_dashboard(request):
-    user_data = get_session_user(request)  # Access the global variable for user data
+    user_data = get_session_user(request)
 
     # Default data if user_data is not set
     user_id = user_data.get("employee_id", None) if user_data else None
