@@ -1,51 +1,55 @@
 # Trackr 📋⏱
 
-Trackr is a comprehensive, production-ready Django web application designed for task management, project tracking, employee attendance, and leave management. It serves as an all-in-one portal for organizations to track productivity, process approvals, calculate comp-off credits, and monitor team performance metrics.
+Trackr is an enterprise-grade Django web application designed for comprehensive task management, project deliverable tracking, employee attendance, and leave management. It serves as an all-in-one productivity portal for engineering organizations to monitor KPIs, process approvals, calculate comp-off credits, and visualize team performance metrics.
 
 ---
 
 ## 🚀 Key Features
 
-*   **🔒 Authentication & Employee Directory**: Robust signup/login with roles (MD, Admins, Employees) and profile picture uploads.
+*   **🔒 Authentication & Role Security**: Session-based authentication with role hierarchies (MD, Admin, Employee) and password hashing with PBKDF2.
 *   **📋 Task & Timesheet Management**:
-    *   Create, edit, delete, and track tasks with status (In Progress, Completed, Paused).
-    *   Log working hours, estimate benchmarks, and submit timesheets.
-*   **🗂 Project Tracking**: Assign distinct scopes, check deliverables, and update project status.
+    *   Create, edit, delete, and track tasks with status tracking (*In Progress*, *Completed*, *Paused*).
+    *   Estimate benchmarks, log working hours, and review timesheets.
+*   **🗂 Project Tracking**: Assign distinct scopes, check deliverables, and update project status with indexed database queries.
 *   **📅 Attendance & Compensatory Leaves (Comp-Off)**:
     *   Record daily punch-in, punch-out, and break times.
     *   Interactive monthly attendance calendar.
-    *   Auto-calculation of compensated worktime with MD approval flows for compensatory leaves.
+    *   Auto-calculation of compensated worktime with multi-tier approval flows for compensatory leaves.
 *   **🏖 Leave & Holiday Management**:
     *   Submit leave applications and monitor approval queues.
-    *   Holiday calendars and team holiday listings.
-*   **🧑‍🤝‍🧑 Team Dashboards & Rankings**:
-    *   Rank teams based on KPIs (Speed of execution, Quality of work, Task ownership).
-    *   Interactive charts and team rankings.
-*   **📊 Reports & Exporting**: Export project summary reports directly to Excel spreadsheet sheets.
-*   **📬 Notifications**: System-wide notifications for task assignments and status updates.
+    *   Annual holiday calendar excluding non-working days.
+*   **🧑‍🤝‍🧑 Team Dashboards & KPI Rankings**:
+    *   Rank teams based on KPIs (Speed of Execution, Quality of Work, Task Ownership).
+    *   Interactive chart analytics and team performance metrics.
+*   **📊 Reports & Exporting**: Export project summary reports and weekly breakdown sheets directly to styled Excel workbooks.
+*   **🩺 System Health Checks**: Automated liveness and database ping check at `/health/` and `/api/health/`.
+*   **🐳 Docker Ready**: Full container support with Dockerfile and Docker Compose.
 
 ---
 
 ## 🛠 Tech Stack
 
-*   **Framework**: [Django](https://www.djangoproject.com/) (Python 3.12+)
+*   **Framework**: [Django 5.0](https://www.djangoproject.com/) (Python 3.11 / 3.12+)
 *   **Databases**: [MySQL](https://www.mysql.com/) (Production) and [SQLite](https://www.sqlite.org/) (Local Development)
-*   **Libraries**:
-    *   `openpyxl` (Excel reporting)
-    *   `python-dotenv` (Environment configuration)
-    *   `celery` & `redis` (Background task queue)
+*   **Static Assets & Serving**: WhiteNoise and Gunicorn
+*   **Data Processing & Reports**: `openpyxl`, `matplotlib`, `pillow`
+*   **Testing & CI/CD**: Django Test Suite, GitHub Actions
 
 ---
 
-## ⚙️ Configuration & Database Setup
+## ⚙️ Configuration & Environment Variables
 
-Trackr is equipped with a **dynamic database fallback system**. By default, if MySQL configuration is not detected in environment variables, the application will automatically fall back to the local SQLite database (`db.sqlite3`), allowing developers to run and test the project instantly.
+Trackr includes a **dynamic database fallback system**. If MySQL configuration is not specified in your `.env` file, the application seamlessly defaults to local SQLite (`db.sqlite3`), enabling zero-friction onboarding.
 
-### Environment variables (`.env`)
-Create a `.env` file in the project root directory:
+Create a `.env` file in the project root:
 
 ```env
-# Database Configuration (Optional - Defaults to SQLite if not provided)
+# General
+SECRET_KEY=your-secure-secret-key-here
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+
+# Database Configuration (Optional - Defaults to SQLite if omitted)
 DB_ENGINE=mysql
 DB_NAME=tasktracker
 DB_USER=root
@@ -60,86 +64,100 @@ EMAIL_HOST_PASSWORD=your_app_password
 
 ---
 
-## 🏃 Getting Started
+## 🏃 Quick Start
 
 ### 1. Prerequisites
-Make sure Python 3.12+ is installed on your machine.
+Make sure Python 3.11+ or 3.12+ is installed.
 
 ### 2. Install Dependencies
 ```bash
 pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
-### 3. Create Database Migrations
-Generate migrations for the tracker app and apply them:
+### 3. Run Migrations
 ```bash
-python manage.py makemigrations tracker
 python manage.py migrate
 ```
 
-### 4. Start Development Server
+### 4. Seed Demo Data (Optional)
+Populate sample users (Admin, Developer), projects, tasks, and holidays:
+```bash
+python manage.py seed_demo_data
+```
+
+### 5. Start Development Server
 ```bash
 python manage.py runserver
 ```
-Visit the application at `http://127.0.0.1:8000/`.
+Visit `http://127.0.0.1:8000/` in your browser.
 
 ---
 
-## 📂 Project Structure
+## 🧪 Running Automated Tests
+
+Run the full automated test suite:
+```bash
+python manage.py test
+```
+
+To run individual test modules:
+```bash
+python manage.py test tracker.tests.test_models
+python manage.py test tracker.tests.test_auth
+python manage.py test tracker.tests.test_tasks
+python manage.py test tracker.tests.test_leaves
+python manage.py test tracker.tests.test_commands
+python manage.py test tracker.tests.test_context_processors
+```
+
+---
+
+## 🐳 Docker Deployment
+
+To build and run Trackr with MySQL using Docker Compose:
+
+```bash
+docker-compose up --build -d
+```
+
+The web service will be available at `http://localhost:8000` with automated database health checking.
+
+---
+
+## 📂 Project Architecture
 
 ```text
-├── manage.py            # Django project entrypoint
-├── db.sqlite3           # SQLite Database (for local dev)
-├── requirements.txt     # Python package requirements
-├── task_tracker/        # Project Configuration
-│   ├── settings.py      # Project Settings (Dotenv integration & DB fallbacks)
-│   └── urls.py          # Root Routing Configuration
-└── tracker/             # Main Application Code
-    ├── models.py        # Database Models
-    ├── views.py         # Application Logic & API Endpoints
-    ├── urls.py          # Tracker app routing
-    ├── forms.py         # Form Definitions (with dynamic choice binding)
-    └── templates/       # HTML Templates
+├── .github/
+│   └── workflows/
+│       └── ci.yml               # Automated CI test pipeline
+├── task_tracker/                # Core Project Configuration
+│   ├── settings.py              # Environment configuration & DB fallbacks
+│   ├── urls.py                  # Root URL configuration with health checks
+│   ├── wsgi.py                  # WSGI entrypoint
+│   └── asgi.py                  # ASGI entrypoint
+├── tracker/                     # Main Application
+│   ├── decorators.py            # Session & role authentication decorators
+│   ├── forms.py                 # ModelForms with custom validations
+│   ├── models.py                # Database models & indexes
+│   ├── views.py                 # Views & API endpoints
+│   ├── urls.py                  # Tracker routing definitions
+│   ├── admin.py                 # Django admin registrations
+│   ├── management/
+│   │   └── commands/
+│   │       ├── hash_legacy_passwords.py  # Password migration tool
+│   │       └── seed_demo_data.py         # Demo data onboarding tool
+│   ├── tests/                   # Automated Test Suite
+│   │   ├── test_models.py
+│   │   ├── test_auth.py
+│   │   ├── test_tasks.py
+│   │   ├── test_leaves.py
+│   │   ├── test_commands.py
+│   │   └── test_context_processors.py
+│   └── templates/               # HTML Templates
+├── static/                      # Static Assets (CSS, JS, Images)
+├── Dockerfile                   # Production Docker image build
+├── docker-compose.yml           # Multi-container orchestration
+├── requirements.txt             # Pinned production dependencies
+└── requirements-dev.txt         # Development & testing dependencies
 ```
-
----
-
-## 🔒 Production Readiness & Security Best Practices
-
-To make the application ready for production environments, the following enhancements have been implemented:
-
-### 1. Secure Authentication & Legacy Password Migration
-- **Hashed Passwords**: New employee passwords are automatically hashed using Django's default PBKDF2 hashing mechanism.
-- **Legacy Compatibility**: A fallback mechanism checks passwords against legacy plain text values and automatically migrates/hashes them upon successful sign-in.
-- **Bulk Migration Command**: To proactively migrate all plain text passwords in the database to secure hashes, run:
-  ```bash
-  python manage.py hash_legacy_passwords
-  ```
-
-### 2. Environment Variables & Secret Management
-We now load critical configurations from a `.env` file instead of hardcoding them in `settings.py`:
-- `SECRET_KEY`: Django cryptographic signing key.
-- `DEBUG`: Controls development debug pages (set to `False` in production).
-- `ALLOWED_HOSTS`: List of domains/IPs allowed to access the app.
-- `DB_ENGINE`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`: Database connection details.
-- `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`: SMTP email credentials for system notifications.
-
-A template `.env.example` file is provided in the project root.
-
-### 3. Static Files Serving (WhiteNoise)
-We serve compressed and cached static files directly via Python using **WhiteNoise**, removing the dependency on external web servers for static files.
-
-To compile static assets for production:
-```bash
-python manage.py collectstatic --noinput
-```
-
-### 4. HTTP Security Headers
-The following security middleware headers have been configured in `settings.py` to prevent typical exploits:
-- `SECURE_BROWSER_XSS_FILTER` (Cross-Site Scripting protection)
-- `SECURE_CONTENT_TYPE_NOSNIFF` (MIME sniffing prevention)
-- `X_FRAME_OPTIONS = 'DENY'` (Clickjacking protection)
-- `SESSION_COOKIE_SECURE` & `CSRF_COOKIE_SECURE` (Transmit session/CSRF cookies over HTTPS only)
-
-### 5. Multi-User Safety (Thread-Safe Sessions)
-We completely eliminated the thread-unsafe global variable `global_user_data` in `views.py` that caused multi-user session bleeding, replacing it with Django's standard session engine (`request.session`).
