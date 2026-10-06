@@ -457,12 +457,19 @@ import json
 
 def login(request):
     if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            username = data.get("username")
-            password = data.get("password")
-        except json.JSONDecodeError:
-            return api_error("Invalid request format.", status=400)
+        is_json = request.content_type == "application/json" or (
+            request.body and request.body.startswith(b"{")
+        )
+        if is_json:
+            try:
+                data = json.loads(request.body)
+                username = data.get("username")
+                password = data.get("password")
+            except json.JSONDecodeError:
+                return api_error("Invalid request format.", status=400)
+        else:
+            username = request.POST.get("username")
+            password = request.POST.get("password")
 
         # Use Django ORM to check the credentials in the database
         user = EmployeeDetails.objects.filter(name=username).first()
@@ -483,11 +490,17 @@ def login(request):
                 request.session["username"] = user.name
                 request.session["designation"] = user.designation
                 request.session["authentication"] = user.authentication
-                return api_success({"redirect_url": "/task_dashboard/"})
+                if is_json:
+                    return api_success({"redirect_url": "/task_dashboard/"})
+                return redirect("task_dashboard")
             else:
-                return api_error("Invalid username or password.", status=401)
+                if is_json:
+                    return api_error("Invalid username or password.", status=401)
+                return render(request, "signin.html", {"error": "Invalid username or password."})
         else:
-            return api_error("Invalid username or password.", status=401)
+            if is_json:
+                return api_error("Invalid username or password.", status=401)
+            return render(request, "signin.html", {"error": "Invalid username or password."})
 
     return render(request, "signin.html")
 def report_view_page(request):
