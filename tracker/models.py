@@ -1,7 +1,6 @@
-from datetime import timezone
 from django.contrib.auth.models import User
 from django.db import models
-from django.shortcuts import render
+from django.utils import timezone
 
 class ProjectTacker(models.Model):
     name = models.CharField(max_length=45, null=True, blank=True)
@@ -76,8 +75,6 @@ class EmployeeDetails(models.Model):
         db_table = 'employee_details'  # Custom table name
 
 
-from django.db import models
-
 class LeaveApplication(models.Model):
     id = models.AutoField(primary_key=True)
     start_date = models.DateField()
@@ -95,8 +92,6 @@ class LeaveApplication(models.Model):
 
     def __str__(self):
         return f"Leave Application {self.id} - {self.username}"
-
-from django.db import models
 
 class Attendance(models.Model):
     # The `id` field is auto-generated as a BIGINT and is the primary key
@@ -120,23 +115,17 @@ class Attendance(models.Model):
 
     def __str__(self):
         return f"Attendance for {self.username} on {self.date}"
-
-
-from django.db import models
-
 class Holiday(models.Model):
-    id = models.AutoField(primary_key=True)  # Explicitly defining the ID field
-    name = models.CharField(max_length=255)  # Name of the holiday
-    date = models.DateField()  # Date of the holiday
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+    date = models.DateField()
 
     class Meta:
-        db_table = 'tracker_holiday'  # Custom table name
+        db_table = 'tracker_holiday'
 
     def __str__(self):
         return f"{self.name} on {self.date}"
 
-from django.db import models
-from django.utils.timezone import now
 
 class TeamRanking(models.Model):
     teamid = models.AutoField(primary_key=True)
