@@ -901,9 +901,6 @@ def edit_task(request):
 
 
 from django.views.decorators.csrf import csrf_exempt
-from tracker.models import TrackerTasks  # Use correct import if your model is elsewhere
-
-@csrf_exempt
 def get_task_by_title_project_scope(request):
     if request.method == "GET":
         title = request.GET.get("title")
@@ -942,15 +939,7 @@ def get_task_by_title_project_scope(request):
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
-from datetime import datetime, timedelta
-from django.views.decorators.csrf import csrf_exempt
-from .models import TrackerTasks
 
-from django.views.decorators.csrf import csrf_exempt
-from datetime import datetime, timedelta
-from .models import TrackerTasks
-
-@csrf_exempt
 def get_hoursheet_data(request):
     try:
         # Parse start_date and end_date from the query params
@@ -3348,7 +3337,6 @@ def add_team_ranking(request):
 
 
 # In your views.py
-@csrf_exempt
 def get_team_member_details(request):
     team_name = request.GET.get('team_name')
     team_member = request.GET.get('team_member')
