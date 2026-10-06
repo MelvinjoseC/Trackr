@@ -3396,3 +3396,24 @@ def send_notification(request):
     else:
         return JsonResponse({"error": "Invalid request method"}, status=405)
 
+
+def health_check(request):
+    """
+    Health check endpoint for container orchestrators and monitoring tools.
+    Verifies application liveness and database connectivity.
+    """
+    db_status = "ok"
+    try:
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+    except Exception as e:
+        logger.error(f"Health check database error: {e}")
+        db_status = "unhealthy"
+
+    status_code = 200 if db_status == "ok" else 503
+    return JsonResponse({
+        "status": "healthy" if db_status == "ok" else "unhealthy",
+        "database": db_status,
+    }, status=status_code)
+
