@@ -2908,22 +2908,6 @@ def get_week_date_range(week_offset):
     week_end = week_start + timedelta(days=6)
 
     return week_start.date(), week_end.date()
-from .models import TrackerTasks
-from datetime import datetime, timedelta
-
-def get_week_date_range(week_offset):
-    """
-    Helper function to get the date range for the given week offset.
-    week_offset: 0 for CW (current week), -1 for W6 (previous week), etc.
-    """
-    today = datetime.today()
-    start_of_week = today - timedelta(days=today.weekday())  # Monday of the current week
-
-    # Calculate the start and end of the target week
-    week_start = start_of_week + timedelta(weeks=week_offset)
-    week_end = week_start + timedelta(days=6)
-
-    return week_start.date(), week_end.date()
 
 def get_project_datas(request):
     department = request.GET.get('department', None)  # Use 'list' here for department
