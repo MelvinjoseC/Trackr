@@ -1838,7 +1838,7 @@ import json
 
 @csrf_exempt  # Temporarily bypass CSRF for debugging (Remove in production)
 def update_leave_status(request):
-    logger.info("🔍 CSRF Token Received:", request.META.get("HTTP_X_CSRFTOKEN"))  # Debugging
+    logger.info("CSRF Token Received: %s", request.META.get("HTTP_X_CSRFTOKEN"))
 
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request method. Only POST is allowed."}, status=405)
