@@ -92,6 +92,7 @@ urlpatterns = [
     path("generate-pie-chart/", views.generate_pie_chart, name="generate_pie_chart"),
 
     # 📦 MISC
+    path("api/health/", views.health_check, name="api_health_check"),
     path("api/check-admin-status/", views.check_admin_status, name="check_admin_status"),
     path(".well-known/appspecific/com.chrome.devtools.json", lambda request: JsonResponse({}, status=204)),
 ]
