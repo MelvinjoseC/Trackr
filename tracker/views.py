@@ -802,17 +802,6 @@ def fetch_task_dashboard_data(user_id, selected_date_str):
     }
 
 
-# Helper function to execute SQL queries
-def execute_query(query, params=None):
-    with connection.cursor() as cursor:
-        cursor.execute(query, params)
-        if query.strip().lower().startswith("select"):
-            # Fetch all rows for SELECT queries
-            return cursor.fetchall()
-        else:
-            # For INSERT, UPDATE, DELETE
-            return None
-
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.dateparse import parse_date
 from tracker.models import TrackerTasks
@@ -3166,62 +3155,6 @@ def get_task_data(request, project):
     })
 
 
-
-# # from .models import TrackerTasks
-# from django.db.models import Sum
-
-# def get_team_chart_datas(request):
-#     # Fetch all tasks from the database
-#     team_data = TrackerTasks.objects.values(
-#         'team',
-#         'projects',
-#         'scope',
-#         'category',
-#         'title',
-#         'rev',
-#         'd_no',  # Include d_no in the values
-#         'task_benchmark'
-#     ).order_by('team')
-
-#     # Dictionary to accumulate approved hours and worktime
-#     approved_hours_dict = {}
-#     total_worktime_dict = {}
-
-#     # Loop through the data to manually filter duplicates for Approved Hours
-#     unique_combinations = set()
-#     for entry in team_data:
-#         # Create a unique key based on the combination of team, project, scope, category, title, rev, and d_no
-#         key = (entry['team'], entry['projects'], entry['scope'], 
-#                entry['category'], entry['title'], entry['rev'], entry['d_no'])
-        
-#         # Check if the combination already exists
-#         if key not in unique_combinations:
-#             unique_combinations.add(key)  # Mark this combination as counted
-            
-#             # Initialize the dictionary if team is not present
-#             if entry['team'] not in approved_hours_dict:
-#                 approved_hours_dict[entry['team']] = 0
-            
-#             # Add the benchmark value (approved hours) for the unique combination
-#             approved_hours_dict[entry['team']] += float(entry['task_benchmark'] or 0)
-    
-#     # Calculate Total Worktime by filtering just the Team
-#     worktime_data = TrackerTasks.objects.values('team').annotate(
-#         total_worktime=Sum('time')
-#     ).order_by('team')
-
-#     # Populate the dictionary with worktime values
-#     for entry in worktime_data:
-#         total_worktime_dict[entry['team']] = entry['total_worktime']
-
-#     # Prepare data for JSON response
-#     data = {
-#         "teams": list(approved_hours_dict.keys()),
-#         "approvedHours": list(approved_hours_dict.values()),
-#         "totalWorktime": [total_worktime_dict.get(team, 0) for team in approved_hours_dict.keys()]
-#     }
-
-#     return JsonResponse(data)
 
 
 def get_project(request, team):
