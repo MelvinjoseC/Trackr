@@ -48,6 +48,27 @@ class ManagementCommandsTests(TestCase):
         self.assertTrue(check_password("secure_pass_456", prehashed_user.password))
         self.assertIn("Migrated 1 legacy passwords", output)
 
+    def test_prune_stale_sessions_command(self):
+        from django.contrib.sessions.models import Session
+        from django.utils import timezone
+        from datetime import timedelta
+
+        # Create an expired session
+        Session.objects.create(
+            session_key="expired123",
+            session_data="data",
+            expire_date=timezone.now() - timedelta(days=2),
+        )
+
+        out = StringIO()
+        call_command("prune_stale_sessions", stdout=out)
+        self.assertIn("Successfully pruned 1 expired session", out.getvalue())
+
+    def test_export_monthly_report_command(self):
+        out = StringIO()
+        call_command("export_monthly_report", year=2026, month=11, format="json", stdout=out)
+        self.assertIn('"projects": []', out.getvalue())
+
     def test_seed_demo_data_command(self):
         out = StringIO()
         call_command("seed_demo_data", stdout=out)
