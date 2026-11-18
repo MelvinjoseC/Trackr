@@ -107,6 +107,11 @@ python manage.py test tracker.tests.test_models
 python manage.py test tracker.tests.test_auth
 python manage.py test tracker.tests.test_tasks
 python manage.py test tracker.tests.test_leaves
+python manage.py test tracker.tests.test_services
+python manage.py test tracker.tests.test_middleware
+python manage.py test tracker.tests.test_date_helpers
+python manage.py test tracker.tests.test_pagination
+python manage.py test tracker.tests.test_signals
 python manage.py test tracker.tests.test_commands
 python manage.py test tracker.tests.test_context_processors
 ```
@@ -130,32 +135,41 @@ The web service will be available at `http://localhost:8000` with automated data
 ```text
 ├── .github/
 │   └── workflows/
-│       └── ci.yml               # Automated CI test pipeline
+│       └── ci.yml               # Automated CI matrix test & lint pipeline
 ├── task_tracker/                # Core Project Configuration
-│   ├── settings.py              # Environment configuration & DB fallbacks
+│   ├── settings.py              # Security headers, env configuration & DB fallbacks
 │   ├── urls.py                  # Root URL configuration with health checks
 │   ├── wsgi.py                  # WSGI entrypoint
 │   └── asgi.py                  # ASGI entrypoint
 ├── tracker/                     # Main Application
 │   ├── decorators.py            # Session & role authentication decorators
-│   ├── forms.py                 # ModelForms with custom validations
-│   ├── models.py                # Database models & indexes
+│   ├── forms.py                 # Cross-field validated forms & filters
+│   ├── managers.py              # Custom QuerySets & model managers
+│   ├── middleware.py            # Latency metrics & centralized error handling
+│   ├── models.py                # Database models, indexes & AuditLog
+│   ├── services/                # Encapsulated Domain Services
+│   │   ├── task_service.py       # Task aggregations & workload metrics
+│   │   ├── leave_service.py      # Leave validation, conflicts & state machine
+│   │   └── attendance_service.py # Net hours & shift computation
+│   ├── signals.py               # Audit trail generation signals
+│   ├── utils/                   # Shared Utilities
+│   │   ├── date_helpers.py      # Business days & boundary calculations
+│   │   └── pagination.py        # Standardized pagination & metadata
 │   ├── views.py                 # Views & API endpoints
 │   ├── urls.py                  # Tracker routing definitions
 │   ├── admin.py                 # Django admin registrations
 │   ├── management/
 │   │   └── commands/
+│   │       ├── export_monthly_report.py  # Workload CSV/JSON exporter
+│   │       ├── prune_stale_sessions.py   # Database session maintenance
 │   │       ├── hash_legacy_passwords.py  # Password migration tool
 │   │       └── seed_demo_data.py         # Demo data onboarding tool
-│   ├── tests/                   # Automated Test Suite
-│   │   ├── test_models.py
-│   │   ├── test_auth.py
-│   │   ├── test_tasks.py
-│   │   ├── test_leaves.py
-│   │   ├── test_commands.py
-│   │   └── test_context_processors.py
+│   ├── tests/                   # Automated Test Suite (60+ tests)
 │   └── templates/               # HTML Templates
 ├── static/                      # Static Assets (CSS, JS, Images)
+├── Makefile                     # Standard developer commands
+├── pyproject.toml               # Ruff, pytest & coverage configuration
+├── .pre-commit-config.yaml      # Pre-commit quality hooks
 ├── Dockerfile                   # Production Docker image build
 ├── docker-compose.yml           # Multi-container orchestration
 ├── requirements.txt             # Pinned production dependencies
