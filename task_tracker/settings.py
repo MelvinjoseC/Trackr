@@ -29,6 +29,15 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-hg(x496btninua9c7ptd+4_3_7
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
+if not DEBUG and SECRET_KEY.startswith('django-insecure-'):
+    import warnings
+    warnings.warn(
+        "CRITICAL: Running in production (DEBUG=False) with default insecure SECRET_KEY! "
+        "Set a strong SECRET_KEY in your .env or environment.",
+        RuntimeWarning,
+        stacklevel=2,
+    )
+
 ALLOWED_HOSTS = [host.strip() for host in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if host.strip()]
 
 
@@ -71,9 +80,17 @@ CSRF_TRUSTED_ORIGINS = [
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
+SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'False').lower() == 'true'
 CSRF_COOKIE_SECURE = os.getenv('CSRF_COOKIE_SECURE', 'False').lower() == 'true'
 SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+SECURE_REFERRER_POLICY = 'same-origin'
+
+# Strict Transport Security (HSTS) when enabled or in production
+if not DEBUG and SECURE_SSL_REDIRECT:
+    SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', 31536000))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 ROOT_URLCONF = 'task_tracker.urls'
 
