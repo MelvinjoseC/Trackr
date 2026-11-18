@@ -7,6 +7,7 @@ from .models import (
     Attendance,
     Holiday,
     TeamRanking,
+    AuditLog,
 )
 
 @admin.register(EmployeeDetails)
@@ -115,3 +116,15 @@ class TeamRankingAdmin(admin.ModelAdmin):
     list_filter = ('team_name', 'date')
     search_fields = ('team_name', 'team_member')
     ordering = ('-date',)
+
+
+@admin.register(AuditLog)
+class AuditLogAdmin(admin.ModelAdmin):
+    list_display = ('id', 'action', 'target_model', 'target_id', 'actor', 'timestamp')
+    list_filter = ('action', 'target_model', 'timestamp')
+    search_fields = ('actor', 'target_id', 'action')
+    date_hierarchy = 'timestamp'
+    readonly_fields = ('action', 'target_model', 'target_id', 'actor', 'details', 'ip_address', 'timestamp')
+    ordering = ('-timestamp',)
+    list_per_page = 25
+

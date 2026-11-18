@@ -202,3 +202,28 @@ class TeamRanking(models.Model):
 
     def __str__(self):
         return f"{self.team_name} - {self.date}"
+
+
+class AuditLog(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    action = models.CharField(max_length=50)
+    target_model = models.CharField(max_length=100)
+    target_id = models.CharField(max_length=100, null=True, blank=True)
+    actor = models.CharField(max_length=100, default='system')
+    details = models.JSONField(default=dict, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    timestamp = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        db_table = 'tracker_auditlog'
+        verbose_name = 'Audit Log'
+        verbose_name_plural = 'Audit Logs'
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['target_model', 'target_id'], name='idx_audit_target'),
+            models.Index(fields=['actor'], name='idx_audit_actor'),
+            models.Index(fields=['timestamp'], name='idx_audit_timestamp'),
+        ]
+
+    def __str__(self):
+        return f"[{self.timestamp:%Y-%m-%d %H:%M}] {self.actor} - {self.action} on {self.target_model}:{self.target_id}"
