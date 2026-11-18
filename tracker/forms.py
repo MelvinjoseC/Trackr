@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from .models import TrackerTasks, EmployeeDetails, LeaveApplication, Attendance
 
 
@@ -93,6 +94,20 @@ class TrackerTaskForm(forms.ModelForm):
             'end': forms.DateInput(attrs={'type': 'date'}),
         }
 
+    def clean_time(self):
+        hours = self.cleaned_data.get('time')
+        if hours is not None and hours < 0:
+            raise ValidationError("Logged time cannot be negative.")
+        return hours
+
+    def clean(self):
+        cleaned = super().clean()
+        start = cleaned.get('start')
+        end = cleaned.get('end')
+        if start and end and end < start:
+            raise ValidationError("Task end date cannot precede start date.")
+        return cleaned
+
 
 class AttendanceRecordForm(forms.ModelForm):
     class Meta:
@@ -103,3 +118,28 @@ class AttendanceRecordForm(forms.ModelForm):
             'punch_in': forms.TimeInput(attrs={'type': 'time'}),
             'punch_out': forms.TimeInput(attrs={'type': 'time'}),
         }
+
+    def clean_break_time(self):
+        break_sec = self.cleaned_data.get('break_time')
+        if break_sec is not None and break_sec < 0:
+            raise ValidationError("Break time cannot be negative.")
+        return break_sec
+
+
+class TaskFilterForm(forms.Form):
+    """
+    Search and filter validation form for tasks dashboard and project queries.
+    """
+    project = forms.CharField(required=False, max_length=100)
+    assigned = forms.CharField(required=False, max_length=100)
+    status = forms.CharField(required=False, max_length=50)
+    start_date = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+
+    def clean(self):
+        cleaned = super().clean()
+        start = cleaned.get('start_date')
+        end = cleaned.get('end_date')
+        if start and end and end < start:
+            raise forms.ValidationError("Filter start date must precede end date.")
+        return cleaned
