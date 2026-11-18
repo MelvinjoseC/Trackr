@@ -61,6 +61,7 @@ AUTHENTICATION_BACKENDS = [
 
 
 MIDDLEWARE = [
+    'tracker.middleware.RequestMetricsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
