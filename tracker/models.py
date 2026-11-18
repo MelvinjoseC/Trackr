@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
+from .managers import TrackerTasksManager, LeaveApplicationManager, AttendanceManager
 
 class ProjectTacker(models.Model):
     name = models.CharField(max_length=45, null=True, blank=True)
@@ -56,6 +57,8 @@ class TrackerTasks(models.Model):
     project_status = models.CharField(max_length=50, null=True, blank=True)
     team = models.CharField(max_length=50, null=True, blank=True)
     
+    objects = TrackerTasksManager()
+
     class Meta:
         db_table = 'tracker_project'  # Custom table name
         verbose_name = 'Tracker Task'
@@ -123,6 +126,8 @@ class LeaveApplication(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=50)
 
+    objects = LeaveApplicationManager()
+
     class Meta:
         db_table = 'tracker_leaveapplication'  # Custom table name
         verbose_name = 'Leave Application'
@@ -149,6 +154,8 @@ class Attendance(models.Model):
     
     username = models.CharField(max_length=45)  # VARCHAR(45) for username
     
+    objects = AttendanceManager()
+
     class Meta:
         db_table = 'tracker_attendance'  # Custom table name as per the database
         verbose_name = 'Attendance Record'
