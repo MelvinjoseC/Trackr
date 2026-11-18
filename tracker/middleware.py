@@ -5,9 +5,11 @@ from __future__ import annotations
 import time
 import logging
 from typing import Callable
-from django.http import HttpRequest, HttpResponse
+from django.conf import settings
+from django.http import HttpRequest, HttpResponse, JsonResponse
 
 logger = logging.getLogger("tracker.middleware.metrics")
+error_logger = logging.getLogger("tracker.middleware.exceptions")
 
 SLOW_REQUEST_THRESHOLD_MS = 500.0
 
@@ -35,3 +37,37 @@ class RequestMetricsMiddleware:
             )
 
         return response
+
+
+class GlobalExceptionMiddleware:
+    """
+    Intercepts unhandled server exceptions, logs structured error context,
+    and formats JSON responses for AJAX/API consumers.
+    """
+    def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]):
+        self.get_response = get_response
+
+    def __call__(self, request: HttpRequest) -> HttpResponse:
+        return self.get_response(request)
+
+    def process_exception(self, request: HttpRequest, exception: Exception) -> HttpResponse | None:
+        error_logger.exception(f"Unhandled exception in {request.method} {request.path}: {exception}")
+
+        is_json_request = (
+            request.headers.get("x-requested-with") == "XMLHttpRequest"
+            or "application/json" in request.headers.get("Accept", "")
+            or request.path.startswith("/api/")
+        )
+
+        if is_json_request:
+            message = str(exception) if settings.DEBUG else "An unexpected internal server error occurred."
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": message,
+                    "code": 500,
+                },
+                status=500,
+            )
+
+        return None  # Let standard Django 500 handler render HTML template
